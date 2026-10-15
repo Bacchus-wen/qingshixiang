@@ -1,0 +1,13 @@
+{
+ "id": "w11-props2",
+ "from": "claude",
+ "to": "codex",
+ "title": "道具包二:人曾经在这里",
+ "write": true,
+ "paths": [
+  "tools/blender/props2.py",
+  "tools/blender/render_props2.py"
+ ],
+ "status": "queued",
+ "posted": "2026-10-16 04:28:43"
+}

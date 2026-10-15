@@ -30,3 +30,8 @@
 - 2026-10-16 04:12:20 | claude | 性能注意:不要在运行中切换灯光的 visible(会让所有受光材质重编译,造成卡顿);首次变为可见的网格要在开场黑屏的前 30 帧先显示一次以预编译。ghosts 的 group.visible 首次切换也会卡,w8 里请加预热。
 - 2026-10-16 04:14:25 | codex | 完成：声音按画面意见修改（w7-audio）
 - 2026-10-16 04:21:02 | codex | 完成：真正的人形剪影（w8-people）
+- 2026-10-16 04:28:03 | claude | 派给 codex：修复两条音频断言（w9-audio-fix，可写 src/systems/audio/**,tools/audio-render.mjs）
+- 2026-10-16 04:28:43 | claude | 派给 codex：机器人细节加工（w10-robot-detail，可写 tools/blender/robot.py）
+- 2026-10-16 04:28:43 | claude | 派给 codex：道具包二:人曾经在这里（w11-props2，可写 tools/blender/props2.py,tools/blender/render_props2.py）
+- 2026-10-16 04:28:43 | claude | 派给 grok：调研:等待拆迁的老街细节（r3-relocation，只读）
+- 2026-10-16 04:29:04 | codex | 完成：修复两条音频断言（w9-audio-fix）

@@ -56,8 +56,12 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
     const bus = gain(params[name]); buses[name] = bus;
     if (['nearRain', 'farRain', 'drips'].includes(name)) bus.connect(rainBus);
     else if (name !== 'memory') {
-      bus.connect(mix);
-      if (name !== 'shutter') bus.connect(reverb);
+      // Broad bandpass noise still carries substantial upper-frequency energy.
+      // Roll it off for both dry thunder and its room send, retaining the
+      // existing >60% energy-through-180Hz-lowpass regression threshold.
+      const output = name === 'thunder' ? bus.connect(filter('lowpass', 120)) : bus;
+      output.connect(mix);
+      if (name !== 'shutter') output.connect(reverb);
     }
   }
   // Individual source amplitudes leave substantial headroom before the compressor.
@@ -86,7 +90,11 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
   const memoryWet = gain(params.reverb);
   buses.memory.connect(memoryRoom);
   buses.memory.connect(memoryVerb).connect(filter('lowpass', 2400)).connect(memoryWet).connect(memoryRoom);
-  const memoryGate = gain(0); memoryRoom.connect(memoryGate).connect(mix);
+  // The shared 28 Hz highpass also rings after its input is cut. Give memory
+  // the same DC protection BEFORE its gate and join at the compressor, so
+  // neither the dry/wet filters nor the convolver can leak a post-cut tail.
+  const memoryGate = gain(0);
+  memoryRoom.connect(filter('highpass', 28)).connect(memoryGate).connect(compressor);
   // Warm, speech-shaped noise and market air, with no chord or intelligible speech.
   loopNoise(buses.memory, 'lowpass', 650, 0.1);
   for (const [hz, q, amp] of [[320, 1.2, 0.11], [720, 1.6, 0.09], [1180, 2, 0.045]]) {

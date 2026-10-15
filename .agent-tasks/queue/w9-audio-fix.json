@@ -1,0 +1,21 @@
+{
+ "id": "w9-audio-fix",
+ "from": "claude",
+ "to": "codex",
+ "title": "修复两条音频断言",
+ "write": true,
+ "paths": [
+  "src/systems/audio/**",
+  "tools/audio-render.mjs"
+ ],
+ "status": "done",
+ "posted": "2026-10-16 04:28:03",
+ "started": "2026-10-16 04:28:05",
+ "seconds": 58.1,
+ "touched": [
+  "src/systems/audio/graph.js"
+ ],
+ "applied": 1,
+ "finished": "2026-10-16 04:29:04",
+ "reason": null
+}

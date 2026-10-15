@@ -9,9 +9,10 @@ import { Film } from '../ui/film.js';
 //   fade    : power gone, beam stutters and dies, shutters fall back late
 //   end     : camera cranes up and away, black, end card
 const ROBOT = new THREE.Vector3(-4.58, 0.14, -13.5);
+// arrival: from puddle height (the lamp in the water) rising to eye height, drifting down the lane
 const ARRIVE = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(0.4, 1.62, 13), new THREE.Vector3(0.9, 1.6, 4), new THREE.Vector3(0.2, 1.55, -4),
-  new THREE.Vector3(-0.6, 1.45, -9), new THREE.Vector3(-1.4, 1.32, -11.6),
+  new THREE.Vector3(0.6, 0.32, 14), new THREE.Vector3(0.8, 0.9, 7), new THREE.Vector3(0.6, 1.45, 0),
+  new THREE.Vector3(0.0, 1.55, -5.5), new THREE.Vector3(-0.8, 1.42, -9.5), new THREE.Vector3(-1.4, 1.32, -11.6),
 ]);
 const ease = (x) => x * x * (3 - 2 * x);
 // where the beam lands: ground, or one of the two facades (x = +-5.05), within 40 m
@@ -59,11 +60,16 @@ export default {
       case 'arrive': {
         this.film.fade(Math.max(0, 1 - this.t / 6));
         m.forceOpen = false;
-        const u = ease(Math.min(1, this.t / 40));
+        const u = ease(Math.min(1, this.t / 42));
         ARRIVE.getPoint(u, this.cam.pos);
-        this.cam.look.lerpVectors(this._v.set(0, 1.4, -24), this._w.set(ROBOT.x, 0.75, ROBOT.z), ease(Math.min(1, Math.max(0, (u - 0.55) / 0.45))));
+        // first look is down at the wet road (the lamp's reflection), then up the lane, then onto the robot
+        const lookUp = ease(Math.min(1, this.t / 9));
+        this._v.set(0.2, 0.0 + lookUp * 1.4, 4 - lookUp * 28);
+        this.cam.look.lerpVectors(this._v, this._w.set(ROBOT.x, 0.75, ROBOT.z), ease(Math.min(1, Math.max(0, (u - 0.6) / 0.4))));
         this.cam.fov = 44;
-        if (this.t > 40 || input.wasPressed('Enter')) this.set('wait');
+        // the one moment the whole street is seen: a scripted first strike mid-way down the lane
+        if (!this.struck && this.t > 21) { this.struck = true; ctx.api.atmo?.strike(); }
+        if (this.t > 42 || input.wasPressed('Enter')) this.set('wait');
         break;
       }
       case 'wait': {

@@ -96,6 +96,17 @@ export default {
             box(0.5, 0.25, sw + 0.3, M.rust, f.frontX + side * 0.95, 2.95, zc, root); // shutter box
             this.shutters.push({ mesh: sh, h: shutterH, lift: 0, hold: 0, center: new THREE.Vector3(f.frontX + side * 1.1, 1.4, zc) });
           }
+          // silhouette detail: parapet, rooftop clutter, balconies on some floors
+          box(depth + 0.1, 0.5, w + 0.02, mat, x, h + 0.25, zc, root);
+          if (r() < 0.55) box(1.4, 1.1, 1.4, M.rust, x + side * (r() - 0.5) * 3, h + 1.05, zc + (r() - 0.5) * (w - 1.6), root); // water tank
+          if (r() < 0.35) { const ax = x + side * (r() - 0.5) * 4; box(0.06, 3 + r() * 3, 0.06, M.rust, ax, h + 2.5, zc, root); box(1.2, 0.04, 0.04, M.rust, ax, h + 3.6, zc, root); }
+          for (let fl = 1; fl * 3.1 + 3.2 < h - 1.5; fl++) {
+            if (r() < 0.3) {
+              const by = 3.2 + (fl - 1) * 3.1 + 0.1, bw = Math.min(w - 1, 2.6), bz = zc + (r() - 0.5) * (w - bw - 0.4);
+              box(0.9, 0.12, bw, M.wallC, f.frontX - side * 0.45, by, bz, root);          // slab
+              box(0.04, 0.95, bw, M.rust, f.frontX - side * 0.88, by + 0.5, bz, root);    // railing
+            }
+          }
           // windows: dark recessed glass rows
           for (let fl = 1; fl * 3.1 + 3.2 < h - 0.8; fl++) {
             const y = 3.2 + (fl - 1) * 3.1 + 1.7;
