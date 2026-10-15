@@ -1,0 +1,9 @@
+{
+ "task_id": "w12-audio-details",
+ "agent": "codex",
+ "cwd": "/Users/wenbin/.local/share/agent-team/work/新游戏--53fa3746--w12-audio-details",
+ "write": true,
+ "task_sha256": "25e17032c7e027f1776ee4f9e7feef17d57c46ca4f9a1455956f08926a917649",
+ "started": "2026-10-16T05:31:53+0800",
+ "status": "running"
+}
