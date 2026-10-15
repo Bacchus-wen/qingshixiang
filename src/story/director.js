@@ -19,12 +19,14 @@ export default {
   name: 'director',
   async init(ctx) {
     this.film = new Film(document.getElementById('ui'));
-    this.phase = ctx.params.get('phase') || 'arrive';
+    this.phase = ctx.params.get('phase') || (ctx.params.get('speed') ? 'arrive' : 'title');
     this.t = 0; this.power = parseFloat(ctx.params.get('power') || '1'); this.endT = 0;
     this.cam = { pos: new THREE.Vector3(), look: new THREE.Vector3(), fov: 42 };
     this.curPos = ARRIVE.getPoint(0); this.curLook = new THREE.Vector3(0, 1.4, -20);
     this._v = new THREE.Vector3(); this._w = new THREE.Vector3();
     ctx.api.director = this;
+    if (this.phase === 'title') this.film.title(true);
+    else this.film.phase(this.phase);
   },
 
   set(phase) { this.phase = phase; this.t = 0; this.film.phase(phase); },
@@ -36,7 +38,16 @@ export default {
     const eyePos = m.origin.lengthSq() > 0 ? m.origin : this._w.set(-4.4, 0.95, -13.5);
 
     switch (this.phase) {
+      case 'title': {
+        // black, rain only (audio starts on this first gesture)
+        m.forceOpen = false;
+        ARRIVE.getPoint(0, this.cam.pos); this.cam.look.set(0, 1.4, -24);
+        this.film.fade(1);
+        if (input.pointer.held || input.wasPressed('Space') || input.wasPressed('Enter')) { this.film.title(false); this.set('arrive'); }
+        break;
+      }
       case 'arrive': {
+        this.film.fade(Math.max(0, 1 - this.t / 6));
         m.forceOpen = false;
         const u = ease(Math.min(1, this.t / 40));
         ARRIVE.getPoint(u, this.cam.pos);

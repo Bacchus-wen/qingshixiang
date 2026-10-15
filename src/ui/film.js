@@ -7,6 +7,7 @@ export class Film {
       <div class="film-edge bottom"><span class="fe-l fe-phase">—</span><span class="fe-power"><i></i></span></div>
       <div class="film-hint"></div>
       <div class="film-black"></div>
+      <div class="film-title"><p>请戴上耳机</p><small>点击画面开始</small></div>
       <div class="film-card"><p>这条街的人都搬走了。</p><p>它记得每一扇门的高度。</p><small>新游戏 · 2026</small></div>`;
     this.el = root;
     this.frameEl = root.querySelector('.fe-frame');
@@ -16,6 +17,7 @@ export class Film {
     this.black = root.querySelector('.film-black');
     this.card = root.querySelector('.film-card');
     this.phaseEl = root.querySelector('.fe-phase');
+    this.titleEl = root.querySelector('.film-title');
     this.n = 0;
     setInterval(() => { this.n = (this.n + 1) % 10000; this.frameEl.textContent = String(this.n).padStart(4, '0'); }, 1000 / 24);
   }
@@ -27,4 +29,5 @@ export class Film {
   }
   fade(v) { this.black.style.opacity = v; }
   endCard() { this.card.classList.add('on'); }
+  title(on) { this.titleEl.classList.toggle('on', on); }
 }

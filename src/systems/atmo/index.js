@@ -71,7 +71,12 @@ export default {
       this.volumes.push(mesh);
       return mesh;
     };
-    ctx.api.atmo = { volume, fogDensity: this.fogDensity, mist: this.mist };
+    // lightning: the only moment the whole street is seen at once; a cold key from above + brighter haze
+    this.bolt = new THREE.DirectionalLight(0xdfe7f2, 0);
+    this.bolt.position.set(-30, 60, -10); this.bolt.target.position.set(0, 0, -15);
+    scene.add(this.bolt, this.bolt.target);
+    this.nextBolt = params.get('bolt') ? parseFloat(params.get('bolt')) : 34; this.boltT = -1;
+    ctx.api.atmo = { volume, fogDensity: this.fogDensity, mist: this.mist, strike: () => { this.nextBolt = 0; } };
 
     if (params.get('novol') !== null) return;
     // shafts under the street lamps (positions published by the street system)
@@ -85,5 +90,17 @@ export default {
   },
   update(dt, t, ctx) {
     this.mist.value = 0.6 + 0.5 * ctx.world.rain;
+    // lightning envelope: 2-3 fast pulses over ~0.5 s, then a long dark tail
+    this.nextBolt -= dt;
+    if (this.nextBolt <= 0 && this.boltT < 0 && !ctx.isShot) { this.boltT = 0; this.pulses = [0, 0.09 + Math.random() * 0.05, 0.26 + Math.random() * 0.12]; }
+    if (this.boltT >= 0) {
+      this.boltT += dt;
+      let v = 0;
+      for (const p of this.pulses) { const x = this.boltT - p; if (x > 0) v = Math.max(v, Math.exp(-x * 18) * (p === 0 ? 1 : 0.7)); }
+      this.bolt.intensity = v * 9;
+      this.fogColor.value.setScalar(0.035 + v * 0.18);
+      ctx.world.lightning = v;
+      if (this.boltT > 1.2) { this.boltT = -1; this.nextBolt = 25 + Math.random() * 30; this.fogColor.value.set(0x08090a); ctx.world.lightning = 0; }
+    }
   },
 };

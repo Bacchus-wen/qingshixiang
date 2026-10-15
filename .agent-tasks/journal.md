@@ -19,3 +19,6 @@
 - 2026-10-16 03:32:08 | codex | 完成：Blender 道具包脚本（w4-props）
 - 2026-10-16 03:41:59 | claude | 派给 codex：光锥里的过去的行人（w5-ghosts，可写 src/systems/ghosts/**,src/main.js）
 - 2026-10-16 03:48:22 | codex | 完成：光锥里的过去的行人（w5-ghosts）
+- 2026-10-16 03:55:01 | claude | 派给 codex：核心代码审查（r2-review，只读）
+- 2026-10-16 03:55:01 | claude | 派给 grok：画面第二意见（r2-visual，只读）
+- 2026-10-16 03:57:25 | codex | 完成：核心代码审查（r2-review）

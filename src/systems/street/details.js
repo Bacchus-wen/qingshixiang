@@ -1,6 +1,27 @@
 import * as THREE from 'three/webgpu';
 import { LANE } from './index.js';
 import { placeProps } from './props.js';
+import { texture, vec3, float, mix } from 'three/tsl';
+import { memoryMask, amberNode } from '../../materials/memory.js';
+
+// Shop fascia signs: dead grey plates now; inside the eye's cone the old names light up in amber.
+const NAMES = ['张记面馆', '光明照相', '修表配钥匙', '和平理发', '永安旅社', '新华书店', '老周中药', '星光茶室', '平安五金', '春来裁缝', '红星电器', '东风粮油'];
+function signMaterial(name) {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 112;
+  const g = c.getContext('2d');
+  g.fillStyle = '#000'; g.fillRect(0, 0, 512, 112);
+  g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = `600 ${name.length > 4 ? 60 : 72}px "PingFang SC","Hiragino Sans GB","Noto Sans SC",sans-serif`;
+  g.fillText(name.split('').join(' '), 256, 60);
+  g.strokeStyle = '#fff'; g.lineWidth = 3; g.strokeRect(10, 10, 492, 92);
+  const tex = new THREE.CanvasTexture(c); tex.anisotropy = 8;
+  const letters = texture(tex).r;
+  const m = new THREE.MeshStandardNodeMaterial({ roughness: 0.55 });
+  m.colorNode = vec3(mix(float(0.09), float(0.16), letters));
+  const mask = memoryMask();
+  m.emissiveNode = amberNode().mul(mask).mul(letters.mul(3.2).add(0.12));
+  return m;
+}
 
 // Street clutter that says "people were here": AC units, pipes, dead signs, sagging cables, poles,
 // a traffic light still cycling, a vending machine, an abandoned car, and the few light sources.
@@ -35,8 +56,17 @@ export async function buildDetails(ctx, root, facades, M, r) {
   const signGeo = new THREE.BoxGeometry(0.18, 1.8, 0.55);
   const pipeGeo = new THREE.CylinderGeometry(0.06, 0.06, 1, 6);
 
+  const signMats = NAMES.map(signMaterial);
+  let signIdx = 0;
   for (const f of facades) {
     const s = f.side;
+    if (f.shop) {
+      const sign = new THREE.Mesh(new THREE.PlaneGeometry(Math.min(f.w - 1, 3.6), 0.62), signMats[signIdx++ % signMats.length]);
+      sign.position.set(f.frontX - s * 0.04, 3.5, f.z);
+      sign.rotation.y = -s * Math.PI / 2;
+      sign.receiveShadow = true;
+      root.add(sign);
+    }
     // AC units on upper floors
     for (let fl = 1; 3.2 + fl * 3.1 < f.h - 1; fl++) {
       if (r() < 0.45) props.push(['ac_unit', f.frontX - s * 0.05, 3.2 + fl * 3.1 - 1.9, f.z + (r() - 0.5) * (f.w - 1), -s * Math.PI / 2]);
