@@ -1,0 +1,5 @@
+html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+#app canvas { display: block; }
+#loading { position: fixed; left: 0; bottom: 0; height: 2px; width: calc(var(--p, 0) * 100%); background: #9aa4ad; transition: opacity .6s; }
+#loading.done { opacity: 0; }
+body.shot #ui { display: none; }

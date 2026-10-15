@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.DS_Store
+reference/*.mp4
+renders/
+*.blend1
+.agent-tasks/*/raw.log
