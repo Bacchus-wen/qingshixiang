@@ -20,7 +20,7 @@ export class Engine {
   }
 
   async init(systems, onProgress = () => {}) {
-    const renderer = new THREE.WebGPURenderer({ antialias: false, powerPreference: 'high-performance' });
+    const renderer = new THREE.WebGPURenderer({ antialias: false, powerPreference: 'high-performance', forceWebGL: this.params.get('webgl') !== null });
     renderer.setPixelRatio(this.shot ? 1 : Math.min(devicePixelRatio, 1.5));
     renderer.setSize(innerWidth, innerHeight);
     renderer.shadowMap.enabled = true;

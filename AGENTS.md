@@ -60,3 +60,5 @@ reference/         参考视频(不进 git)
 - **Blender 只用无界面模式**(`-b`),脚本结束时用 `os._exit(0)` 直接退出,避免退出清理阶段的段错误(会弹系统崩溃对话框)。不要用 kill -9 杀 Blender,先发正常退出请求。
 - 任何你启动的后台进程(Vite、浏览器、Blender)在任务结束前必须关掉;结束前用 `pgrep -fl "Blender|Chromium|vite"` 自查。
 - **Codex / Grok 在沙箱里不要启动 Blender、浏览器、Vite 或任何监听端口的服务**:沙箱会拦截,并让程序崩溃弹窗。写完代码只做静态检查(构建、语法、单元逻辑),画面与 Blender 的实际验收由 Claude 在沙箱外完成。
+- Blender 导出 glb 后运行 `tools/optimize-assets.sh`(去重 + 焊接 + JPEG 重编码)。**不要做顶点量化**(quantize):我们的加载代码会在 CPU 上变换几何体,Int16 坐标会出错。
+- 给 Codex 的参考文件放在 `docs/` 或 `tools/` 下;`.agent-tasks/` 不会出现在它的副本里。

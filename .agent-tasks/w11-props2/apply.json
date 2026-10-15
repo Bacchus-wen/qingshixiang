@@ -1,0 +1,12 @@
+{
+ "state": "applied",
+ "files": [
+  "tools/blender/props2.py",
+  "tools/blender/render_props2.py"
+ ],
+ "created": [
+  "tools/blender/props2.py",
+  "tools/blender/render_props2.py"
+ ],
+ "at": "2026-10-16 04:41:42"
+}

@@ -8,7 +8,15 @@
   "tools/blender/props2.py",
   "tools/blender/render_props2.py"
  ],
- "status": "running",
+ "status": "done",
  "posted": "2026-10-16 04:28:43",
- "started": "2026-10-16 04:35:23"
+ "started": "2026-10-16 04:35:23",
+ "seconds": 376.7,
+ "touched": [
+  "tools/blender/props2.py",
+  "tools/blender/render_props2.py"
+ ],
+ "applied": 2,
+ "finished": "2026-10-16 04:41:42",
+ "reason": null
 }
