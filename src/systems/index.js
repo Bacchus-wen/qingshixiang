@@ -1,4 +1,6 @@
 // Ordered list of systems. Each lives in its own folder; see AGENTS.md for the contract.
 import sandbox from './sandbox/index.js';
+import lookdev from './lookdev/index.js';
 
-export const SYSTEMS = [sandbox];
+// sandbox is only loaded with ?only=sandbox
+export const SYSTEMS = [lookdev, sandbox].filter((s) => s.name !== 'sandbox' || new URLSearchParams(location.search).get('only') === 'sandbox');

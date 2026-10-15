@@ -1,0 +1,13 @@
+{
+ "id": "w1-blender-live",
+ "from": "claude",
+ "to": "codex",
+ "title": "常驻无界面 Blender 工具",
+ "write": true,
+ "paths": [
+  "tools/blender/live/**"
+ ],
+ "status": "running",
+ "posted": "2026-10-16 03:02:08",
+ "started": "2026-10-16 03:02:55"
+}

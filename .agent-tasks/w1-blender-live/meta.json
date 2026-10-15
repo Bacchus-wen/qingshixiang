@@ -1,0 +1,9 @@
+{
+ "task_id": "w1-blender-live",
+ "agent": "codex",
+ "cwd": "/Users/wenbin/.local/share/agent-team/work/新游戏--53fa3746--w1-blender-live",
+ "write": true,
+ "task_sha256": "2f5a73519e05e58f4dcec19fc140f1bf334cbdae2a315ce884f1e1f67b359064",
+ "started": "2026-10-16T03:02:55+0800",
+ "status": "running"
+}

@@ -1,0 +1,14 @@
+{
+ "id": "r0-story",
+ "from": "claude",
+ "to": "codex",
+ "title": "剧情方案与光锥双状态技术风险",
+ "write": false,
+ "paths": [],
+ "status": "done",
+ "posted": "2026-10-16 02:53:01",
+ "started": "2026-10-16 02:53:03",
+ "seconds": 131.7,
+ "finished": "2026-10-16 02:55:17",
+ "reason": null
+}

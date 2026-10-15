@@ -1,15 +1,25 @@
 import * as THREE from 'three/webgpu';
 import {
-  pass, uniform, vec2, vec3, vec4, float, screenUV, time, hash, floor, fract, mix, smoothstep, length, luminance,
-  clamp, max, renderOutput, Fn,
+  pass, depthPass, mrt, output, velocity, uniform, vec2, vec3, vec4, float, screenUV, time, hash, floor, fract, mix,
+  smoothstep, length, luminance, clamp, max, renderOutput, Fn,
 } from 'three/tsl';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
+import { traa } from 'three/addons/tsl/display/TRAANode.js';
 
-// Post pipeline v0: scene -> bloom -> exposure + AgX -> display grade (lifted cold blacks, vignette, grain).
-// SSR, TRAA and the memory-cone composite are added in later phases (see docs/PROGRESS.md).
+// Post pipeline v1:
+//   opaque depth pre-pass (volumes read it for occlusion)
+//   -> scene pass (MRT: color + velocity; volumes are transparent and ray-march inside it)
+//   -> TRAA (also resolves the per-frame jittered volume ray offsets) -> bloom -> exposure + AgX -> display grade
+// Systems register VolumeNodeMaterials with registerVolume(mat) during init; they share `volumeJitter`.
+function halton(i, b) { let r = 0, f = 1; while (i > 0) { f /= b; r += f * (i % b); i = Math.floor(i / b); } return r; }
+const HALTON = Array.from({ length: 32 }, (_, i) => [halton(i + 1, 2), halton(i + 1, 3)]);
+
 export class PostFX {
   constructor(renderer, scene, camera, ctx) {
     this.renderer = renderer; this.scene = scene; this.camera = camera; this.ctx = ctx;
+    this.volumes = [];
+    this.volumeJitter = uniform(new THREE.Vector2());
+    this.frame = 0;
     this.params = {
       exposure: uniform(1.0),
       vignette: uniform(0.5),
@@ -21,16 +31,28 @@ export class PostFX {
     renderer.toneMapping = THREE.AgXToneMapping;
   }
 
+  registerVolume(material) { this.volumes.push(material); }
+
   build() {
     const { renderer, scene, camera, params } = this;
+    const noAA = this.ctx.params.get('pfx')?.includes('notraa');
     const pipeline = new THREE.RenderPipeline(renderer);
     pipeline.outputColorTransform = false;
 
+    const prePass = depthPass(scene, camera);
+    prePass.transparent = false;
+    const preDepth = prePass.getTextureNode('depth');
+    for (const m of this.volumes) m.depthNode = preDepth.sample(screenUV);
+
     const scenePass = pass(scene, camera);
+    scenePass.setMRT(mrt({ output, velocity }));
     const color = scenePass.getTextureNode('output');
-    const bloomPass = bloom(color, params.bloomStrength, params.bloomRadius, params.bloomThreshold);
+    const vel = scenePass.getTextureNode('velocity');
+    const aa = noAA ? color : traa(color, preDepth, vel, camera);
+
+    const bloomPass = bloom(aa, params.bloomStrength, params.bloomRadius, params.bloomThreshold);
     this.bloomPass = bloomPass;
-    const hdr = color.add(bloomPass).mul(params.exposure);
+    const hdr = aa.add(bloomPass).mul(params.exposure);
     const mapped = renderOutput(vec4(hdr.rgb, 1), THREE.AgXToneMapping, THREE.SRGBColorSpace);
 
     const grade = Fn(() => {
@@ -48,7 +70,12 @@ export class PostFX {
     pipeline.outputNode = grade;
     this.pipeline = pipeline;
     this.scenePass = scenePass;
+    this.prePass = prePass;
   }
 
-  render() { this.pipeline.render(); }
+  render() {
+    const h = HALTON[this.frame++ % 32];
+    this.volumeJitter.value.set(h[0], h[1]);
+    this.pipeline.render();
+  }
 }
