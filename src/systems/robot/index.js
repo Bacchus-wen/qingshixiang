@@ -58,12 +58,13 @@ function makeGobo() {
     g.translate(128, 128);
     if (mode === 'line') {
       // surveyor's level: the eye narrows to a single horizontal line (with a faint double from the crack)
-      // a faint wide fill so the doorway reads, then the bright level line
-      g.fillStyle = 'rgba(255,255,255,0.13)'; g.beginPath(); g.ellipse(0, 0, 118, 92, 0, 0, 7); g.fill();
-      const lg = g.createLinearGradient(-128, 0, 128, 0);
-      lg.addColorStop(0, 'rgba(255,255,255,0)'); lg.addColorStop(0.2, '#fff'); lg.addColorStop(0.8, '#fff'); lg.addColorStop(1, 'rgba(255,255,255,0)');
-      g.fillStyle = lg; g.fillRect(-128, -2, 256, 4);
-      g.fillStyle = 'rgba(255,255,255,0.15)'; g.fillRect(-110, 5, 220, 2);
+      // a faint fill around the mark so the jamb reads
+      g.fillStyle = 'rgba(255,255,255,0.07)'; g.beginPath(); g.ellipse(0, 0, 60, 50, 0, 0, 7); g.fill();
+      // a short level mark, only as wide as the jamb and its pencil lines
+      const lg = g.createLinearGradient(-26, 0, 26, 0);
+      lg.addColorStop(0, 'rgba(255,255,255,0)'); lg.addColorStop(0.25, '#fff'); lg.addColorStop(0.75, '#fff'); lg.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = lg; g.fillRect(-26, -2, 52, 4);
+      g.fillStyle = 'rgba(255,255,255,0.12)'; g.fillRect(-20, 5, 40, 2);
       tex.needsUpdate = true;
       return;
     }
@@ -218,7 +219,7 @@ export default {
     this.spot.shadow.autoUpdate = o > 0.005 || this.frames < 30;
     if (this.beamVol) { this.beamVol.material.userData.density.value = 0.35 * o; this.beamVol.visible = o > 0.01 || this.frames < 30; }
     const mode = ctx.memory.goboMode;
-    if (mode !== this._lastMode || (t - this.goboT > 1 / 15 && Math.abs(o - (this._lastGobo ?? -1)) > 0.01)) {
+    if (mode !== this._lastMode || (mode !== 'line' && t - this.goboT > 1 / 15 && Math.abs(o - (this._lastGobo ?? -1)) > 0.01)) {
       this.gobo.draw(o, mode); this.goboT = t; this._lastGobo = o; this._lastMode = mode;
     }
 

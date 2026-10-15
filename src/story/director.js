@@ -74,6 +74,7 @@ export default {
       }
       case 'wait': {
         m.forceOpen = undefined;
+        this.film.fade(0); // also clears a fade left by skipping the arrival
         ARRIVE.getPoint(1, this.cam.pos);
         this.cam.look.set(ROBOT.x, 0.75, ROBOT.z);
         this.cam.fov = 40 - Math.min(4, this.t * 0.15);
@@ -125,9 +126,11 @@ export default {
         this.cam.pos.set(ROBOT.x + 2.2 + u * 3, 1.4 + u * 7, ROBOT.z + 3 + u * 6);
         this.cam.look.set(ROBOT.x, 0.6 + u * 0.4, ROBOT.z - u * 2);
         this.cam.fov = 44;
-        this.film.fade(Math.min(1, Math.max(0, (this.t - 12) / 6)));
-        if (this.t > 19) this.film.endCard();
-        if (this.t > 24 && (input.pointer.held || input.wasPressed('Space'))) location.reload(); // play again
+        // fully black first, a held beat, then the two lines; replay only on a fresh press once offered
+        this.film.fade(Math.min(1, Math.max(0, (this.t - 10) / 6)));
+        if (this.t > 17.5) this.film.endCard();
+        if (this.t > 24) this.film.replayHint();
+        if (this.t > 24 && (input.wasPressed('Pointer') || input.wasPressed('Space'))) location.reload();
         break;
       }
     }

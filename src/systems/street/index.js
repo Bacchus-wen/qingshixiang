@@ -42,7 +42,7 @@ export default {
     };
     // the past, inside the eye's cone: lit windows, lit shops (amber only)
     const mask = memoryMask();
-    M.glass.emissiveNode = amberNode().mul(mask).mul(ctx.params.get('noglow') !== null ? 1 : pastWindowGlow()).mul(2.2);
+    M.glass.emissiveNode = amberNode().mul(mask).mul(ctx.params.get('noglow') !== null ? 1 : pastWindowGlow()).mul(1.15);
     M.void.emissiveNode = amberNode().mul(mask).mul(0.9);
     M.brickSeal = makeSurface('brick_4', { scale: 1.4, tone: 0.75, metal: 0, streaks: 0.4 });
     M.brickSeal.maskNode = mask.lessThan(0.45); // dissolves (with the cone's grain) inside the memory
@@ -128,6 +128,14 @@ export default {
           z -= w;
         }
       }
+    }
+    // the far end of the lane is closed by a block of taller buildings and a skyline of silhouettes, so a
+    // lightning flash never shows an empty grey rectangle of sky
+    for (let k = -3; k <= 3; k++) {
+      const h = 14 + ((k * 7919) % 5 + 5) % 5 * 3.5;
+      box(7.5, h, 6, M.wallC, k * 7.6, h / 2, L.zEnd - 18, root);
+      const t = 22 + ((k * 104729) % 7 + 7) % 7 * 4;
+      box(9, t, 8, M.wallA, k * 9.3 + 4, t / 2, L.zEnd - 45, root);
     }
     await buildDetails(ctx, root, this.facades, M, r);
     if (ctx.params.get('nomerge') === null) mergeStatic(root);

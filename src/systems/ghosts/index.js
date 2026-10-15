@@ -276,7 +276,8 @@ export default {
   update(dt, t, ctx) {
     const m = ctx.memory;
     const enabled = !!m && m.strength > 0 && m.range > 0;
-    this.group.visible = enabled;
+    this._frames = (this._frames ?? 0) + 1;
+    this.group.visible = enabled || this._frames < 30; // pre-compile during the black title (Claude)
     if (!enabled) {
       // Invalidate old visible slots so reopening cannot expose stale matrices.
       this.visible.fill(0);

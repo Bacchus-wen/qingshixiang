@@ -6,7 +6,7 @@ export class Input {
     addEventListener('keydown', (e) => { if (!this.down.has(e.code)) this.pressed.add(e.code); this.down.add(e.code); });
     addEventListener('keyup', (e) => this.down.delete(e.code));
     el.addEventListener('pointermove', (e) => { this.pointer.x = (e.clientX / innerWidth) * 2 - 1; this.pointer.y = -(e.clientY / innerHeight) * 2 + 1; });
-    el.addEventListener('pointerdown', () => { this.pointer.held = true; });
+    el.addEventListener('pointerdown', () => { this.pointer.held = true; this.pressed.add('Pointer'); });
     addEventListener('pointerup', () => { this.pointer.held = false; });
     // losing focus must release everything, or the eye stays open (and drains) while the user is away
     const clear = () => { this.down.clear(); this.pointer.held = false; };

@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { LANE } from './index.js';
 import { placeProps } from './props.js';
-import { texture, vec3, float, mix } from 'three/tsl';
+import { texture, vec3, float, mix, clamp } from 'three/tsl';
 import { memoryMask, amberNode } from '../../materials/memory.js';
 
 // The demolition mark: '拆' sprayed in a circle. In the present it is on every other wall; inside the eye's cone
@@ -21,7 +21,7 @@ function chaiMaterial(seed) {
   const paint = texture(tex).r;
   const m = new THREE.MeshStandardNodeMaterial({ transparent: true, depthWrite: false, roughness: 0.4 });
   m.colorNode = vec3(0.42); // pale spray paint (the real ones are red or white; this world has no red)
-  m.opacityNode = paint.mul(0.8).mul(float(1).sub(memoryMask().mul(1.4).min(1)));
+  m.opacityNode = paint.mul(0.8).mul(float(1).sub(clamp(memoryMask().mul(1.4), 0, 1)));
   return m;
 }
 
@@ -51,7 +51,7 @@ export function noticeMaterial(lines, seed = 0) {
   const m = new THREE.MeshStandardNodeMaterial({ transparent: true, depthWrite: false, roughness: 0.75 });
   const lum = t.r.mul(0.3).add(t.g.mul(0.59)).add(t.b.mul(0.11));
   m.colorNode = vec3(lum.mul(0.55));
-  m.opacityNode = t.a.mul(float(1).sub(memoryMask().mul(1.5).min(1)));
+  m.opacityNode = t.a.mul(float(1).sub(clamp(memoryMask().mul(1.5), 0, 1)));
   return m;
 }
 

@@ -1,7 +1,5 @@
 import * as THREE from 'three/webgpu';
-import {
-  texture, vec3, float, mix, uniform, positionWorld, normalView, positionViewDirection, abs, dot, pow, lights, smoothstep,
-} from 'three/tsl';
+import { texture, vec3, float, mix, uniform, positionWorld, normalView, positionViewDirection, abs, dot, pow, lights, smoothstep, clamp } from 'three/tsl';
 import { memoryMask, memoryMaskCPU, amberNode } from '../materials/memory.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
@@ -12,10 +10,11 @@ import { NOTICES, noticeMaterial } from '../systems/street/details.js';
 // Hold the beam on it and the robot takes over: its eye narrows to a level line, the child appears against the
 // frame and grows one mark at a time, year by year, until the marks stop.
 const DOOR = { x: 5.0, z: -14.2, w: 0.96, h: 2.12 };
+const FLOOR = 0.14; // sidewalk / doorstep level: marks and the child share this base
 const MARKS = [
-  { y: 0.98, label: '小宁 五岁' }, { y: 1.06, label: '六岁' }, { y: 1.13, label: '七岁' }, { y: 1.21, label: '八岁' },
-  { y: 1.28, label: '九岁' }, { y: 1.36, label: '十岁' }, { y: 1.41, label: '十一岁' },
-];
+  { h: 1.10, label: '小宁 五岁' }, { h: 1.17, label: '六岁' }, { h: 1.24, label: '七岁' }, { h: 1.30, label: '八岁' },
+  { h: 1.36, label: '九岁' }, { h: 1.42, label: '十岁' }, { h: 1.48, label: '十一岁' },
+].map((m) => ({ ...m, y: FLOOR + m.h }));
 
 function marksTexture(count) {
   const c = document.createElement('canvas'); c.width = 256; c.height = 1024;
@@ -23,12 +22,12 @@ function marksTexture(count) {
   const draw = (n) => {
     g.fillStyle = '#000'; g.fillRect(0, 0, 256, 1024);
     g.strokeStyle = '#fff'; g.fillStyle = '#fff'; g.lineWidth = 7; g.lineCap = 'round';
-    g.font = '600 30px "PingFang SC","Hiragino Sans GB",sans-serif';
+    g.font = '600 24px "PingFang SC","Hiragino Sans GB",sans-serif';
     MARKS.slice(0, n).forEach((m, i) => {
       const y = 1024 - (m.y / 2.12) * 1024;
-      g.globalAlpha = i === n - 1 ? 1 : 0.75;
+      g.globalAlpha = i === n - 1 ? 1 : 0.28;
       g.beginPath(); g.moveTo(14, y); g.lineTo(118, y + (i % 2 ? 3 : -2)); g.stroke();
-      g.fillText(m.label, 124, y + 10);
+      g.fillText(m.label, i % 2 ? 150 : 122, y + 8); // alternate columns: the marks are only 6-7 cm apart
     });
     g.globalAlpha = 1; tex.needsUpdate = true;
   };
@@ -42,9 +41,9 @@ function rimMaterial(extraMask) {
   const m = new THREE.MeshStandardNodeMaterial();
   m.lightsNode = lights([]);
   m.colorNode = vec3(0);
-  const rim = pow(float(1).sub(abs(dot(normalView, positionViewDirection))), 2.5);
+  const rim = pow(float(1).sub(abs(dot(normalView, positionViewDirection))), 3.5);
   const mask = memoryMask(positionWorld).mul(extraMask);
-  m.emissiveNode = amberNode().mul(rim.mul(2.2).add(0.08)).mul(mask);
+  m.emissiveNode = amberNode().mul(rim.mul(1.8)).mul(mask); // outline only: no body fill
   m.maskNode = mask.greaterThan(0.08);
   return m;
 }
@@ -116,7 +115,7 @@ export default {
       this.child = childFigure(childMat); this.childBaseH = 0.98;
     }
     // back against the marked jamb, facing the street
-    this.child.position.set(x - 0.17, 0.2, z - hw - 0.05);
+    this.child.position.set(x - 0.05, FLOOR, z - hw + 0.16);
     this.child.rotation.y = -Math.PI / 2; // glTF front (+Z) -> faces the street (-X)
     g.add(this.child);
     // now: '已验收。此户已腾空。' pasted on the door, and the house number in chalk; neither exists in the memory
@@ -127,13 +126,15 @@ export default {
     const ng = nc.getContext('2d'); ng.fillStyle = '#000'; ng.fillRect(0, 0, 256, 96);
     ng.fillStyle = '#fff'; ng.font = '600 54px "PingFang SC","Hiragino Sans GB",sans-serif'; ng.fillText('青石-17', 14, 66);
     const nm = new THREE.MeshStandardNodeMaterial({ transparent: true, depthWrite: false });
-    nm.colorNode = vec3(0.5); nm.opacityNode = texture(new THREE.CanvasTexture(nc)).r.mul(0.7).mul(float(1).sub(memoryMask(positionWorld).mul(1.5).min(1)));
+    nm.colorNode = vec3(0.5); nm.opacityNode = texture(new THREE.CanvasTexture(nc)).r.mul(0.7).mul(float(1).sub(clamp(memoryMask(positionWorld).mul(1.5), 0, 1)));
     const num = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.16), nm);
     num.position.set(x - 0.11, 1.85, z + hw + 0.32); num.rotation.y = -Math.PI / 2; num.renderOrder = 4;
     g.add(num);
     // the porch light of the past: off now; in the memory it comes on and lights the doorway warm
-    this.porch = new THREE.PointLight(0xffa45a, 0, 4.5, 2);
-    this.porch.position.set(x - 0.35, DOOR.h + 0.28, z);
+    this.porch = new THREE.SpotLight(0xffa45a, 0, 3.6, 0.62, 0.8, 2);
+    this.porch.position.set(x - 0.3, DOOR.h + 0.26, z);
+    this.porch.target.position.set(x - 0.45, 0, z - 0.1);
+    g.add(this.porch.target);
     g.add(this.porch);
     const bulbMat = new THREE.MeshStandardNodeMaterial({ color: 0x111111, roughness: 0.4 });
     this.porchGlow = uniform(0);
@@ -162,7 +163,7 @@ export default {
       // closed-loop aim: nudge the head until the eye's axis points at the current mark (no guessed constants)
       this.aim ??= { x: 0, y: 0.1 };
       this._want ??= new THREE.Vector3();
-      this._want.set(DOOR.x - 0.12, target.y + 0.03, DOOR.z - DOOR.w / 2 - 0.05).sub(m.origin).normalize();
+      this._want.set(DOOR.x - 0.1, target.y, DOOR.z - DOOR.w / 2 - 0.05).sub(m.origin).normalize();
       const yawErr = Math.atan2(this._want.z, this._want.x) - Math.atan2(m.dir.z, m.dir.x);
       const pitchErr = Math.asin(this._want.y) - Math.asin(m.dir.y);
       this.aim.x += yawErr * dt * 2.2;     // +look.x turns the head toward +z in world (verified by the probe)
@@ -179,14 +180,18 @@ export default {
       this.porch.intensity = 5 * glow * glow; this.porchGlow.value = glow;
       // the child grows with the marks
       this.childVis.value = Math.min(1, Math.max(0, (this.t - 2) / 1.5));
-      this.child.scale.setScalar((target.y - 0.02) / this.childBaseH);
+      this.child.scale.setScalar(target.h / this.childBaseH);
       if (step !== this.shown) { this.shown = step; this.marks.draw(step); ctx.api.audio?.play('click'); }
       const end = 3 + MARKS.length * 2.2 + 2.5;
       if (this.t > end) {
         // the marks stop; the child is gone; the line stays on the last mark a moment, then control returns
-        this.childVis.value = Math.max(0, 1 - (this.t - end) / 1.5);
-        const off = Math.max(0, 1 - (this.t - end) / 3); this.porch.intensity = 5 * off * off; this.porchGlow.value = off;
-        if (this.t > end + 3) { crowd.value = 1; this.state = 'done'; m.lookOverride = undefined; m.forceOpen = undefined; m.goboMode = undefined; }
+        this.childVis.value = Math.max(0, 1 - (this.t - end) / 1.2);
+        // empty doorway, light still on, '十一岁' still there... then the porch light fails like the street lamps
+        const k = this.t - end;
+        const flick = k < 4 ? 1 : k < 5.4 ? (Math.sin(k * 41) * Math.sin(k * 13) > 0.1 ? 1 : 0.08) : 0;
+        this.porch.intensity = 5 * flick; this.porchGlow.value = flick;
+        if (k > 5.6 && k - dt <= 5.6) ctx.api.audio?.play('click');
+        if (this.t > end + 7) { crowd.value = 1; this.state = 'done'; m.lookOverride = undefined; m.forceOpen = undefined; m.goboMode = undefined; }
       }
     }
   },
