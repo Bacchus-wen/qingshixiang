@@ -27,5 +27,9 @@ export const SHOTS = {
     const it = ctx.api.micro?.items.find((i) => i.name === 'photo'); if (!it) return;
     ctx.memory.forceOpen = true; ctx.memory.aimAt = it.center;
     if (it.t < 0 && !it.done && ctx.engine.frame > 240) it.t = 2.9; } },
+  'micro-noodle': { pos: [-4.9, 1.5, -13.2], look: [4, 1.2, -22], fov: 46, setup: (ctx) => {
+    const it = ctx.api.micro?.items.find((i) => i.name === 'noodle'); if (!it) return;
+    ctx.memory.forceOpen = true; ctx.memory.aimAt = it.center;
+    if (it.t < 0 && !it.done && ctx.engine.frame > 240) it.t = 1.5; } },
   'beam-street': { pos: [-4.0, 1.7, -10.5], look: [3, 1.2, -17], fov: 50, setup: (ctx) => { ctx.memory.forceOpen = true; } },
 };

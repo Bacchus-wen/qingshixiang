@@ -59,10 +59,24 @@ export default {
       const flash = new THREE.PointLight(0xfff0dc, 0, 9, 2);
       flash.position.set(shop.x - s * 1.6, 1.6, shop.z);
       scene.add(flash);
-      this.items.push({ name: 'photo', center: new THREE.Vector3(shop.x + s * 0.6, 1.3, shop.z), vis, flash, dwell: 0, t: -1, done: false });
+      this.items.push({ kind: 'photo', name: 'photo', center: new THREE.Vector3(shop.x + s * 0.6, 1.3, shop.z), vis, flash, dwell: 0, t: -1, done: false });
     }
   },
+  // noodle shop: warm steam at the door, lit only by the eye (a small volume restricted to the eye's light)
+  initNoodle(ctx) {
+    const shop = ctx.api.signs?.find((s) => s.name === '张记面馆' && s.side > 0);
+    const spot = ctx.api.robot?.spot;
+    if (!shop || !spot || !ctx.api.atmo) return;
+    const s = shop.side;
+    const vol = ctx.api.atmo.volume(new THREE.Vector3(shop.x + s * 0.4, 1.9, shop.z), new THREE.Vector3(1.8, 3.2, Math.min(3, shop.w - 0.6)), 0, [spot]);
+    vol.visible = true; // keep compiled; density 0 until the memory plays
+    const warm = new THREE.PointLight(0xffa860, 0, 5, 2);
+    warm.position.set(shop.x + s * 1.0, 1.4, shop.z);
+    ctx.scene.add(warm);
+    this.items.push({ kind: 'noodle', name: 'noodle', center: new THREE.Vector3(shop.x + s * 0.6, 1.3, shop.z), vol, warm, dwell: 0, t: -1, done: false });
+  },
   update(dt, time, ctx) {
+    if (!this._noodle) { this._noodle = true; this.initNoodle(ctx); }
     const m = ctx.memory;
     for (const it of this.items) {
       const lit = memoryMaskCPU(it.center, m);
@@ -72,6 +86,14 @@ export default {
         continue;
       }
       it.t += dt;
+      if (it.kind === 'noodle') {
+        // the kitchen comes back: warm light inside, steam rolling out of the door, then it thins away
+        const env = Math.min(1, it.t / 2) * (it.t > 9 ? Math.max(0, 1 - (it.t - 9) / 3) : 1);
+        it.vol.material.userData.density.value = 1.4 * env;
+        it.warm.intensity = 7 * env * lit;
+        if (it.t > 12) { it.t = -1; it.done = true; it.dwell = 0; it.warm.intensity = 0; it.vol.material.userData.density.value = 0; }
+        continue;
+      }
       // fade in the family, two flashes (3.0 s and 5.5 s), hold, fade out
       it.vis.value = Math.min(1, it.t / 1.2) * (it.t > 8 ? Math.max(0, 1 - (it.t - 8) / 1.5) : 1);
       let f = 0;
