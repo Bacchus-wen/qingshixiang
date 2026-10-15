@@ -5,7 +5,10 @@
  "title": "画面第二意见",
  "write": false,
  "paths": [],
- "status": "running",
+ "status": "done",
  "posted": "2026-10-16 03:55:01",
- "started": "2026-10-16 03:55:02"
+ "started": "2026-10-16 03:55:02",
+ "seconds": 418.4,
+ "finished": "2026-10-16 04:02:02",
+ "reason": null
 }

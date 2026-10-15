@@ -3,6 +3,7 @@ import { makeSurface } from '../../materials/surface.js';
 import { syncWet } from '../../materials/wet.js';
 import { memoryMask, memoryMaskCPU, pastWindowGlow, amberNode } from '../../materials/memory.js';
 import { buildDetails } from './details.js';
+import { mergeStatic } from './merge.js';
 
 // The lane: one narrow street running -Z, crossing a wider road at z = CROSS_Z. Everything achromatic.
 // Layout is seeded so every run builds the same street.
@@ -89,6 +90,7 @@ export default {
             const sw = w - 0.9;
             box(0.12, 2.8, sw, M.void, f.frontX + side * 1.3, 1.4, zc, root);
             const sh = box(0.08, shutterH, sw, M.shutter, f.frontX + side * 1.1, 2.8 - shutterH / 2, zc, root);
+            sh.userData.dynamic = true;
             box(0.5, 0.25, sw + 0.3, M.rust, f.frontX + side * 0.95, 2.95, zc, root); // shutter box
             this.shutters.push({ mesh: sh, h: shutterH, lift: 0, hold: 0, center: new THREE.Vector3(f.frontX + side * 1.1, 1.4, zc) });
           }
@@ -107,6 +109,7 @@ export default {
       }
     }
     await buildDetails(ctx, root, this.facades, M, r);
+    if (ctx.params.get('nomerge') === null) mergeStatic(root);
 
     // night sky environment for glossy reflections: faint, cold, almost black
     const envScene = new THREE.Scene();
@@ -115,7 +118,7 @@ export default {
     glow.scale.set(50, 10, 50); glow.position.y = 30; envScene.add(glow);
     const pm = new THREE.PMREMGenerator(ctx.renderer);
     scene.environment = pm.fromScene(envScene, 0.04).texture;
-    scene.environmentIntensity = 0.3;
+    scene.environmentIntensity = 0.42;
   },
   update(dt, t, ctx) {
     syncWet(ctx.world);

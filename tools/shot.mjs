@@ -43,10 +43,11 @@ for (const name of shots) {
     await page.goto(url);
     await page.waitForFunction(() => window.__shotReady === true, null, { timeout: 120000 });
     const backend = await page.evaluate(() => window.__engine?.ctx?.backend);
+    const perf = await page.evaluate(() => window.__perf && { calls: window.__perf.calls, tris: window.__perf.triangles, frameMs: +window.__perf.frameMs.toFixed(1), submitMs: +window.__perf.submitMs.toFixed(1) });
     const file = `${name}${tag ? '-' + tag : ''}.png`;
     const out = path.join(root, 'renders', file);
     await page.screenshot({ path: out });
-    console.log(`OK   ${name} -> renders/${file} (${backend}, ${((Date.now() - t0) / 1000).toFixed(1)}s)`);
+    console.log(`OK   ${name} -> renders/${file} (${backend}, ${((Date.now() - t0) / 1000).toFixed(1)}s) ${perf ? JSON.stringify(perf) : ''}`);
   } catch (e) {
     failed++;
     console.log(`FAIL ${name}: ${e.message.split('\n')[0]}`);

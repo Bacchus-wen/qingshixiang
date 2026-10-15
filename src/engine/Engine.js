@@ -99,8 +99,13 @@ export class Engine {
         try { s.update(dt, this.time, this.ctx); } catch (e) { console.error(`[engine] ${s.name}.update`, e); s._failed = true; }
       }
       this.ctx.input.endFrame();
+      const t0 = performance.now();
       this.postfx.render(dt);
       this.frame++;
+      // perf probe (read by tools): CPU submit time, wall frame interval, draw calls, triangles
+      const now = performance.now();
+      if (this._last) { const p = this.perf ??= { n: 0, frameMs: 0, submitMs: 0 }; p.n++; p.frameMs += (now - this._last - p.frameMs) / Math.min(p.n, 60); p.submitMs += (now - t0 - p.submitMs) / Math.min(p.n, 60); p.calls = this.renderer.info.render.drawCalls; p.triangles = this.renderer.info.render.triangles; window.__perf = p; }
+      this._last = now;
       if (this.shot && this.frame === this.shotFrames) window.__shotReady = true;
     });
   }
