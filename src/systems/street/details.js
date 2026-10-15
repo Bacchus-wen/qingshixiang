@@ -225,6 +225,21 @@ export async function buildDetails(ctx, root, facades, M, r) {
   // soaked flyers and a crate by the shops
   props.push(['umbrella_broken', -1.6, 0, -11.2, 0.7], ['umbrella_open', -(L.halfRoad + L.walk) + 0.6, L.curb, -21.5, 1.2, { rz: 0.35 }],
     ['debris', -(L.halfRoad + 0.6), L.curb, -15.8, 0.4], ['debris', L.halfRoad + 0.7, L.curb, -27, 2.1], ['umbrella_broken', 2.2, 0, -31, 2.6]);
-  await placeProps(root, props);
+  // traces of the people who lived here (Codex props pack 2), placed where they mean something
+  const W = L.halfRoad + L.walk;
+  props.push(
+    ['props2/shoe', -0.45, 0, -16.5, 2.3],                                  // a child's shoe by the abandoned car
+    ['props2/bicycle', -(W - 0.9), L.curb, -20.5, 0.4],
+    ['props2/planters', W - 0.55, L.curb, -15.35, -Math.PI / 2],             // dead plants at the home door
+    ['props2/mailbox', W - 0.06, 1.15, -13.35, -Math.PI / 2],                // stuffed mailbox by the home door
+    ['props2/boxes_moving', W - 0.7, L.curb, -24.5, -Math.PI / 2 + 0.2], ['props2/boxes_moving', -(W - 0.7), L.curb, -6.6, Math.PI / 2 - 0.1],
+    ['props2/chair_stool', -(W - 0.8), L.curb, -17.2, Math.PI / 2 + 0.5],
+    ['props2/laundry', -(W + 0.05), 6.6, -10.2, Math.PI / 2],
+    ['props2/notice_board', -(W - 0.12), L.curb + 0.9, -4.6, Math.PI / 2],
+  );
+  const placed = await placeProps(root, props);
+  // notice board papers carry the relocation texts (and vanish in the past like the other notices)
+  let pi = 0;
+  for (const o of placed) o.traverse((m) => { if (m.isMesh && /paper/i.test(m.name)) { m.material = noticeMaterial(NOTICES[pi % NOTICES.length], pi + 7); m.renderOrder = 4; m.userData.dynamic = true; pi++; } });
   ctx.api.street = { lamp, far, vmLight, car };
 }

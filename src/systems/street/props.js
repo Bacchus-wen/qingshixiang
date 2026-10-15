@@ -29,7 +29,8 @@ function weathered(src) {
 
 export async function loadProp(name) {
   if (!cache.has(name)) {
-    cache.set(name, loader.loadAsync(`/models/props/${name}.glb`).then((g) => {
+    const url = `/models/${name.includes('/') ? name : `props/${name}`}.glb`; // 'props2/shoe' etc.
+    cache.set(name, loader.loadAsync(url).then((g) => {
       const mats = new Map();
       g.scene.traverse((o) => {
         if (!o.isMesh) return;
