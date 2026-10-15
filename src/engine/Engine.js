@@ -11,6 +11,7 @@ export class Engine {
     this.params = new URLSearchParams(location.search);
     this.shot = this.params.get('shot');
     this.shotFrames = parseInt(this.params.get('frames') || '120', 10);
+    this.speed = parseFloat(this.params.get('speed') || '1'); // test-only time scale
     this.only = (this.params.get('only') || '').split(',').filter(Boolean);
     this.skip = (this.params.get('skip') || '').split(',').filter(Boolean);
     this.systems = [];
@@ -65,6 +66,7 @@ export class Engine {
       onProgress((i + 1) / active.length, s.name);
     }
     this.postfx.build();
+    if (this.shot) document.body.classList.add('shot');
     addEventListener('resize', () => this.resize());
     window.__engine = this;
   }
@@ -89,7 +91,7 @@ export class Engine {
     const step = 1 / 60;
     this.renderer.setAnimationLoop(() => {
       this.timer.update();
-      const dt = this.shot ? step : Math.min(this.timer.getDelta(), 0.1);
+      const dt = (this.shot ? step : Math.min(this.timer.getDelta(), 0.1)) * this.speed;
       this.time += dt;
       if (this.shot) this.applyShot();
       for (const s of this.systems) {

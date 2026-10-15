@@ -17,3 +17,5 @@
 - 2026-10-16 03:21:14 | codex | 完成：程序合成音景（w3-audio）
 - 2026-10-16 03:25:14 | claude | 派给 codex：Blender 道具包脚本（w4-props，可写 tools/blender/props.py,tools/blender/render_props.py）
 - 2026-10-16 03:32:08 | codex | 完成：Blender 道具包脚本（w4-props）
+- 2026-10-16 03:41:59 | claude | 派给 codex：光锥里的过去的行人（w5-ghosts，可写 src/systems/ghosts/**,src/main.js）
+- 2026-10-16 03:48:22 | codex | 完成：光锥里的过去的行人（w5-ghosts）

@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { LANE } from './index.js';
+import { placeProps } from './props.js';
 
 // Street clutter that says "people were here": AC units, pipes, dead signs, sagging cables, poles,
 // a traffic light still cycling, a vending machine, an abandoned car, and the few light sources.
@@ -24,7 +25,8 @@ function cable(parent, a, b, sag, mat, r = 0.012) {
   parent.add(m);
 }
 
-export function buildDetails(ctx, root, facades, M, r) {
+export async function buildDetails(ctx, root, facades, M, r) {
+  const props = []; // [name, x, y, z, ry, extra] placed from Blender glbs at the end
   const { scene } = ctx;
   const L = LANE;
   const dark = new THREE.MeshStandardNodeMaterial({ color: 0x0d0d0d, roughness: 0.55, metalness: 0.4 });
@@ -37,7 +39,7 @@ export function buildDetails(ctx, root, facades, M, r) {
     const s = f.side;
     // AC units on upper floors
     for (let fl = 1; 3.2 + fl * 3.1 < f.h - 1; fl++) {
-      if (r() < 0.45) add(root, acGeo, pale, f.frontX - s * 0.2, 3.2 + fl * 3.1 - 1.6, f.z + (r() - 0.5) * (f.w - 1));
+      if (r() < 0.45) props.push(['ac_unit', f.frontX - s * 0.05, 3.2 + fl * 3.1 - 1.9, f.z + (r() - 0.5) * (f.w - 1), -s * Math.PI / 2]);
     }
     // a downpipe at one edge
     if (r() < 0.6) {
@@ -69,22 +71,15 @@ export function buildDetails(ctx, root, facades, M, r) {
     if (fl) cable(root, poles[i], new THREE.Vector3(fl.frontX, Math.min(fl.h - 0.5, 7.5), fl.z), 1.2, wire);
   }
 
-  // abandoned car: door open, sitting at an angle mid-lane (placeholder massing until the Blender model)
+  // abandoned car: door open, flat tyres, left mid-lane at an angle
   const car = new THREE.Group();
-  add(car, new THREE.BoxGeometry(1.75, 0.7, 4.3), pale, 0, 0.55, 0);
-  add(car, new THREE.BoxGeometry(1.55, 0.55, 2.2), M.glass, 0, 1.15, 0.2);
-  for (const [x, z] of [[-0.85, 1.4], [0.85, 1.4], [-0.85, -1.4], [0.85, -1.4]]) {
-    const w = add(car, new THREE.CylinderGeometry(0.33, 0.33, 0.22, 14), dark, x, 0.3, z);
-    w.rotation.z = Math.PI / 2;
-  }
-  const door = add(car, new THREE.BoxGeometry(0.06, 0.6, 1.1), pale, -1.2, 0.75, 0.75, -0.9);
-  door.position.x = -1.25;
   car.position.set(0.9, 0, -18); car.rotation.y = 0.18;
   root.add(car);
+  props.push(['car', 0.9, 0, -18, 0.18 + Math.PI]);
 
   // vending machine: the only thing in the street still powered
   const vmZ = -8.5, vmX = -(L.halfRoad + L.walk) + 0.5;
-  add(root, new THREE.BoxGeometry(0.75, 1.85, 1.05), pale, vmX, L.curb + 0.92, vmZ);
+  props.push(['vending', vmX - 0.05, L.curb, vmZ, Math.PI / 2]);
   const panel = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 1.2), new THREE.MeshBasicNodeMaterial({ color: new THREE.Color(1.6, 1.62, 1.66) }));
   panel.position.set(vmX + 0.38, L.curb + 1.1, vmZ); panel.rotation.y = Math.PI / 2;
   root.add(panel);
@@ -95,14 +90,14 @@ export function buildDetails(ctx, root, facades, M, r) {
   // traffic light at the crossing, still cycling for nobody (its colour is the one exception, kept tiny)
   const tlx = L.halfRoad + 0.6, tlz = L.crossZ + L.crossHalf + 0.6;
   add(root, new THREE.CylinderGeometry(0.07, 0.07, 4.2, 8), dark, tlx, 2.1, tlz);
-  add(root, new THREE.BoxGeometry(0.3, 0.9, 0.3), dark, tlx, 4.4, tlz);
+  props.push(['traffic_light', tlx, 3.95, tlz, 0]);
 
   // the cold failing street lamp: main present-day key light
   const lamp = new THREE.SpotLight(0xe4ebf2, 650, 26, 0.62, 0.7, 2);
   lamp.position.set(L.halfRoad - 0.3, 6.8, -3); lamp.target.position.set(-0.5, 0, -5);
   lamp.castShadow = true; lamp.shadow.mapSize.set(1024, 1024); lamp.shadow.bias = -0.0004;
   root.add(lamp, lamp.target);
-  add(root, new THREE.BoxGeometry(0.7, 0.12, 0.28), dark, L.halfRoad - 0.3, 6.9, -3);
+  props.push(['lamp_head', L.halfRoad - 0.3, 6.78, -3, Math.PI / 2], ['lamp_head', -L.halfRoad + 0.4, 6.38, -34, -Math.PI / 2]);
   // glowing lamp heads: bright enough to bloom and to show up in the wet-road reflections
   const bulb = new THREE.MeshBasicNodeMaterial({ color: new THREE.Color(9, 9.4, 10) });
   add(root, new THREE.BoxGeometry(0.5, 0.03, 0.16), bulb, L.halfRoad - 0.3, 6.83, -3).castShadow = false;
@@ -121,5 +116,10 @@ export function buildDetails(ctx, root, facades, M, r) {
   root.add(win);
 
   scene.add(new THREE.HemisphereLight(0x22262b, 0x050505, 0.16));
+  // things people dropped: an umbrella upside down in the road near the robot, one left open against a shutter,
+  // soaked flyers and a crate by the shops
+  props.push(['umbrella_broken', -1.6, 0, -11.2, 0.7], ['umbrella_open', -(L.halfRoad + L.walk) + 0.6, L.curb, -21.5, 1.2, { rz: 0.35 }],
+    ['debris', -(L.halfRoad + 0.6), L.curb, -15.8, 0.4], ['debris', L.halfRoad + 0.7, L.curb, -27, 2.1], ['umbrella_broken', 2.2, 0, -31, 2.6]);
+  await placeProps(root, props);
   ctx.api.street = { lamp, far, vmLight, car };
 }

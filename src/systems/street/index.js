@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { makeSurface } from '../../materials/surface.js';
 import { syncWet } from '../../materials/wet.js';
+import { memoryMask, memoryMaskCPU, pastWindowGlow, amberNode } from '../../materials/memory.js';
 import { buildDetails } from './details.js';
 
 // The lane: one narrow street running -Z, crossing a wider road at z = CROSS_Z. Everything achromatic.
@@ -38,6 +39,11 @@ export default {
       void: new THREE.MeshStandardNodeMaterial({ color: 0x050505, roughness: 0.9 }),
       glass: new THREE.MeshStandardNodeMaterial({ color: 0x0b0c0d, roughness: 0.08, metalness: 0 }),
     };
+    // the past, inside the eye's cone: lit windows, lit shops (amber only)
+    const mask = memoryMask();
+    M.glass.emissiveNode = amberNode().mul(mask).mul(ctx.params.get('noglow') !== null ? 1 : pastWindowGlow()).mul(2.2);
+    M.void.emissiveNode = amberNode().mul(mask).mul(0.9);
+    if (ctx.params.get('memdbg') !== null) for (const k of ['wallA', 'wallB', 'wallC', 'road', 'walk']) M[k].emissiveNode = amberNode().mul(mask).mul(3);
     const L = LANE;
     const len = L.zStart - L.zEnd;
 
@@ -58,6 +64,7 @@ export default {
     const r = rng(1937);
     const walls = [M.wallA, M.wallB, M.wallC];
     this.facades = [];
+    this.shutters = [];
     const frontX = L.halfRoad + L.walk;
     for (const side of [-1, 1]) {
       for (const [z0, z1] of [[L.zStart + 6, L.crossZ + L.crossHalf], [L.crossZ - L.crossHalf, L.zEnd - 10]]) {
@@ -76,12 +83,14 @@ export default {
           const f = { side, z: zc, w, h, frontX: side * (frontX + inset), shop: r() < 0.8 };
           this.facades.push(f);
           if (f.shop) {
+            // roller shutter hangs from the box at the top; a gap at the bottom shows the dark shop behind
             const open = r();
-            const shutterH = open < 0.25 ? 0.9 : open < 0.55 ? 1.9 : 2.75;
+            const shutterH = open < 0.25 ? 1.9 : open < 0.5 ? 2.45 : 2.8;
             const sw = w - 0.9;
-            box(0.12, 2.8 - shutterH + 0.05, sw, M.void, f.frontX + side * 1.15, shutterH + (2.8 - shutterH) / 2, zc, root);
-            box(0.08, shutterH, sw, M.shutter, f.frontX + side * 1.1, shutterH / 2, zc, root);
+            box(0.12, 2.8, sw, M.void, f.frontX + side * 1.3, 1.4, zc, root);
+            const sh = box(0.08, shutterH, sw, M.shutter, f.frontX + side * 1.1, 2.8 - shutterH / 2, zc, root);
             box(0.5, 0.25, sw + 0.3, M.rust, f.frontX + side * 0.95, 2.95, zc, root); // shutter box
+            this.shutters.push({ mesh: sh, h: shutterH, lift: 0, hold: 0, center: new THREE.Vector3(f.frontX + side * 1.1, 1.4, zc) });
           }
           // windows: dark recessed glass rows
           for (let fl = 1; fl * 3.1 + 3.2 < h - 0.8; fl++) {
@@ -97,7 +106,7 @@ export default {
         }
       }
     }
-    buildDetails(ctx, root, this.facades, M, r);
+    await buildDetails(ctx, root, this.facades, M, r);
 
     // night sky environment for glossy reflections: faint, cold, almost black
     const envScene = new THREE.Scene();
@@ -108,5 +117,18 @@ export default {
     scene.environment = pm.fromScene(envScene, 0.04).texture;
     scene.environmentIntensity = 0.3;
   },
-  update(dt, t, ctx) { syncWet(ctx.world); },
+  update(dt, t, ctx) {
+    syncWet(ctx.world);
+    // shutters rise slowly while the eye holds on them and fall back half a beat after the light leaves
+    for (const s of this.shutters) {
+      const m = memoryMaskCPU(s.center, ctx.memory);
+      s.hold = m > 0.35 ? s.hold + dt : Math.max(0, s.hold - dt * 0.6);
+      const target = s.hold > 0.6 ? 0.85 : 0;
+      const k = target > s.lift ? 0.25 : (s.hold > 0 ? 0 : 0.5);
+      s.lift += Math.sign(target - s.lift) * Math.min(Math.abs(target - s.lift), k * dt);
+      const h = s.h * (1 - s.lift);
+      s.mesh.scale.y = Math.max(0.02, 1 - s.lift);
+      s.mesh.position.y = 2.8 - h / 2;
+    }
+  },
 };

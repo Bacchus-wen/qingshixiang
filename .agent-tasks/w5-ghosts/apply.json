@@ -1,0 +1,13 @@
+{
+ "state": "applied",
+ "files": [
+  "src/main.js",
+  "src/systems/ghosts/index.js",
+  "src/systems/ghosts/verify.mjs"
+ ],
+ "created": [
+  "src/systems/ghosts/index.js",
+  "src/systems/ghosts/verify.mjs"
+ ],
+ "at": "2026-10-16 03:48:22"
+}

@@ -3,3 +3,22 @@ html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
 #loading { position: fixed; left: 0; bottom: 0; height: 2px; width: calc(var(--p, 0) * 100%); background: #9aa4ad; transition: opacity .6s; }
 #loading.done { opacity: 0; }
 body.shot #ui { display: none; }
+
+/* film-edge UI: the only interface */
+#ui { position: fixed; inset: 0; pointer-events: none; font-family: "SF Mono", Menlo, ui-monospace, monospace; color: #cfc9bf; }
+.film-edge { position: absolute; left: 28px; right: 28px; display: flex; justify-content: space-between; align-items: center;
+  font-size: 10px; letter-spacing: 0.32em; opacity: 0.38; }
+.film-edge.top { top: 18px; } .film-edge.bottom { bottom: 18px; }
+.film-edge b { font-weight: 400; }
+.fe-power { width: 180px; height: 1px; background: rgba(207, 201, 191, 0.15); opacity: 0; transition: opacity 2s; }
+.fe-power.on { opacity: 1; }
+.fe-power i { display: block; height: 100%; background: #c9854a; width: 100%; }
+.film-hint { position: absolute; left: 50%; bottom: 14%; transform: translateX(-50%); font-size: 12px; letter-spacing: 0.9em;
+  opacity: 0; transition: opacity 3s; font-family: "Songti SC", "Noto Serif SC", serif; }
+.film-hint.on { opacity: 0.45; }
+.film-black { position: absolute; inset: 0; background: #000; opacity: 0; }
+.film-card { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;
+  font-family: "Songti SC", "Noto Serif SC", serif; font-size: 15px; letter-spacing: 0.4em; line-height: 2.6;
+  opacity: 0; transition: opacity 4s; }
+.film-card.on { opacity: 0.8; }
+.film-card small { margin-top: 3em; font-family: "SF Mono", Menlo, monospace; font-size: 9px; letter-spacing: 0.5em; opacity: 0.5; }

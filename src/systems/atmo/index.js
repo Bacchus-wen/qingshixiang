@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
 import {
   vec3, Fn, texture3D, screenCoordinate, uniform, fract, interleavedGradientNoise, time, fog, color,
-  exponentialHeightFogFactor, smoothstep, float, abs, lights,
+  exponentialHeightFogFactor, smoothstep, float, abs, lights, cameraPosition, distance,
 } from 'three/tsl';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 
@@ -46,11 +46,13 @@ export default {
       m.scatteringNode = Fn(({ positionRay }) => {
         const drift = vec3(time.mul(0.22), time.mul(-0.04), time.mul(0.11));
         const n = (s) => texture3D(tex, positionRay.add(drift).mul(s).mod(1), 0).r.add(0.5);
-        const ground = smoothstep(9.0, 0.0, positionRay.y).mul(0.7).add(0.3);
+        const ground = float(1).sub(smoothstep(0.0, 9.0, positionRay.y)).mul(0.7).add(0.3);
         // soft falloff toward the box faces so no box edge is ever visible
         const q = abs(positionRay.sub(center)).div(half);
-        const edge = smoothstep(1.0, 0.55, q.x).mul(smoothstep(1.0, 0.55, q.z)).mul(smoothstep(1.0, 0.7, q.y));
-        return d.mul(this.mist).mul(n(0.07).mul(n(0.021))).mul(ground).mul(edge);
+        const edge = float(1).sub(smoothstep(0.55, 1.0, q.x)).mul(float(1).sub(smoothstep(0.55, 1.0, q.z))).mul(float(1).sub(smoothstep(0.7, 1.0, q.y)));
+        // fade out right around the camera so walking through a shaft never washes the frame
+        const near = smoothstep(0.8, 4.5, distance(positionRay, cameraPosition));
+        return d.mul(this.mist).mul(n(0.07).mul(n(0.021))).mul(ground).mul(edge).mul(near);
       });
       m.userData.density = d;
       return m;
@@ -77,7 +79,7 @@ export default {
     if (st) {
       for (const l of [st.lamp, st.far]) {
         const p = l.position.clone(); p.y = 3.8; p.x = (p.x + l.target.position.x) / 2; p.z = (p.z + l.target.position.z) / 2;
-        volume(p, new THREE.Vector3(12, 8.5, 12), 0.07, [l]);
+        volume(p, new THREE.Vector3(12, 8.5, 12), 0.03, [l]);
       }
     }
   },

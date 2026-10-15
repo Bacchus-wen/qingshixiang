@@ -1,0 +1,23 @@
+{
+ "id": "w5-ghosts",
+ "from": "claude",
+ "to": "codex",
+ "title": "光锥里的过去的行人",
+ "write": true,
+ "paths": [
+  "src/systems/ghosts/**",
+  "src/main.js"
+ ],
+ "status": "done",
+ "posted": "2026-10-16 03:41:59",
+ "started": "2026-10-16 03:42:02",
+ "seconds": 379.7,
+ "touched": [
+  "src/main.js",
+  "src/systems/ghosts/index.js",
+  "src/systems/ghosts/verify.mjs"
+ ],
+ "applied": 3,
+ "finished": "2026-10-16 03:48:22",
+ "reason": null
+}

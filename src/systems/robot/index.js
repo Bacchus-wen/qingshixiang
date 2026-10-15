@@ -2,6 +2,7 @@ import * as THREE from 'three/webgpu';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { robotMaterial, eyeGlow, eyeColor } from './materials.js';
 import { LANE } from '../street/index.js';
+import { syncMemory } from '../../materials/memory.js';
 
 // The broken surveyor robot and its one working eye.
 // Eye state: closed -> (hold) opening -> open; release -> closing. The first attempt always fails (flicker, shut).
@@ -27,7 +28,7 @@ function makeGobo() {
     g.strokeStyle = 'rgba(0,0,0,0.75)'; g.lineWidth = 2.2;
     g.beginPath(); g.moveTo(-90, -30); g.lineTo(-20, 5); g.lineTo(15, -12); g.lineTo(100, 40); g.stroke();
     g.lineWidth = 1.2; g.beginPath(); g.moveTo(-20, 5); g.lineTo(-35, 80); g.moveTo(15, -12); g.lineTo(30, -95); g.stroke();
-    g.fillStyle = 'rgba(0,0,0,0.35)'; g.beginPath(); g.ellipse(45, 50, 30, 18, 0.5, 0, 7); g.fill();
+    g.fillStyle = 'rgba(0,0,0,0.12)'; g.beginPath(); g.ellipse(45, 50, 18, 11, 0.5, 0, 7); g.fill();
     g.restore();
     tex.needsUpdate = true;
   };
@@ -59,7 +60,7 @@ export default {
 
     // the eye light: the only coloured light in the world
     this.gobo = makeGobo(); this.gobo.draw(0);
-    const spot = this.spot = new THREE.SpotLight(eyeColor.value.clone(), 0, 45, 0.3, 0.35, 1.4);
+    const spot = this.spot = new THREE.SpotLight(eyeColor.value.clone(), 0, 45, 0.3, 0.65, 1.4);
     spot.map = this.gobo.tex;
     spot.castShadow = true; spot.shadow.mapSize.set(1024, 1024); spot.shadow.camera.near = 0.2; spot.shadow.bias = -0.0005;
     scene.add(spot, spot.target);
@@ -70,7 +71,8 @@ export default {
     this.look = new THREE.Vector2(0, 0); this.lookCur = new THREE.Vector2(0, 0);
     this._q = new THREE.Quaternion(); this._e = new THREE.Euler(); this._v = new THREE.Vector3(); this._d = new THREE.Vector3();
     this.goboT = 0;
-    ctx.api.robot = { root, eye: this.eye, spot, setOpenTarget: (v) => { this.target = v; }, get open() { return this.open; } };
+    const sys = this;
+    ctx.api.robot = { root, eye: this.eye, spot, setOpenTarget: (v) => { sys.target = v; }, get open() { return sys.open; }, get attempts() { return sys.attempts; } };
   },
 
   update(dt, t, ctx) {
@@ -104,12 +106,13 @@ export default {
     eyeGlow.value = o;
 
     // ---- head: stiff, delayed look toward the pointer, only once the eye is awake
-    this.look.set(input.pointer.x * 0.5, input.pointer.y * 0.25);
-    if (ctx.memory.lookOverride) this.look.copy(ctx.memory.lookOverride);
+    this.look.set(input.pointer.x * 0.55, input.pointer.y * 0.55);
+    if (ctx.memory.lookOverride) this.look.set(ctx.memory.lookOverride.x, ctx.memory.lookOverride.y);
     const k = Math.min(1, dt * (0.6 + this.open * 1.4));
     this.lookCur.lerp(this.look.clone().multiplyScalar(0.25 + this.open * 0.75), k);
     const jitter = this.open > 0.05 ? Math.sin(t * 31) * 0.004 * this.open : 0;
-    this._e.set(-this.lookCur.y * 0.9 + jitter, -this.lookCur.x * 1.1, 0);
+    // waking lifts the drooped head toward level; the pointer then pitches it further up/down
+    this._e.set(-this.lookCur.y * 0.9 - this.open * 0.32 + jitter, -this.lookCur.x * 1.1, 0);
     this.head.quaternion.copy(this.headRest).multiply(this._q.setFromEuler(this._e));
 
     // ---- eye light follows the eye's forward axis
@@ -127,5 +130,6 @@ export default {
     const m = ctx.memory;
     m.origin.copy(this._v); m.dir.copy(this._d);
     m.angle = this.spot.angle; m.range = 40; m.strength = o; m.power = Math.max(0, 1 - this.attempts * 0.08);
+    syncMemory(m);
   },
 };
