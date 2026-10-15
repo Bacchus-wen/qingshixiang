@@ -107,6 +107,7 @@ export default {
           this.cam.fov = 50 - push * 12;
         }
         const frag = ctx.api.fragment;
+        this.lookTime = (this.lookTime ?? 0) + dt; // gates the door memory (fragment.js) so it is not the first thing seen
         // nudge: one faint line until the pointer moves
         if (this.t > 4 && !this.moved) this.film.hint('移动鼠标 · 慢慢看');
         if (!this.moved && (Math.abs(input.pointer.x) > 0.15 || Math.abs(input.pointer.y) > 0.15)) { this.moved = true; this.film.hint(''); }

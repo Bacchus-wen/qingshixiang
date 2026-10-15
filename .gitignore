@@ -5,3 +5,4 @@ reference/*.mp4
 renders/
 *.blend1
 .agent-tasks/*/raw.log
+docs/*.wav

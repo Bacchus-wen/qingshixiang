@@ -152,7 +152,9 @@ export default {
     const lit = memoryMaskCPU(this.center, m);
     if (this.state === 'idle') {
       this.dwell = lit > 0.45 ? this.dwell + dt : Math.max(0, this.dwell - dt * 0.5);
-      if (this.dwell > 2.5 && m.strength > 0.5) { this.state = 'playing'; this.t = 0; ctx.api.audio?.play('servo'); }
+      // only after the street has been looked at for a while (or when the director forces the return to the door)
+      const ready = !ctx.api.director || (ctx.api.director.lookTime ?? 0) > 35 || ctx.isShot;
+      if (ready && this.dwell > 2.5 && m.strength > 0.5) { this.state = 'playing'; this.t = 0; ctx.api.audio?.play('servo'); }
       return;
     }
     if (this.state === 'done' && this.crowdBack !== undefined && this.crowdBack < 1) {
