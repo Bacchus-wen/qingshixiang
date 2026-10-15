@@ -202,7 +202,15 @@ export default {
 
     // ---- head: stiff, delayed look toward the pointer, only once the eye is awake
     this.look.set(input.pointer.x * 0.55, input.pointer.y * 0.55);
-    if (ctx.memory.lookOverride) this.look.set(ctx.memory.lookOverride.x, ctx.memory.lookOverride.y);
+    // aimAt: closed-loop gaze toward a world point (shots, small memories); lookOverride: direct values
+    if (ctx.memory.aimAt && this._d.lengthSq() > 0) {
+      this._aim ??= new THREE.Vector2(0, 0.1);
+      const want = this._v.copy(ctx.memory.aimAt).sub(ctx.memory.origin).normalize();
+      this._aim.x += (Math.atan2(want.z, want.x) - Math.atan2(this._d.z, this._d.x)) * dt * 2.2;
+      this._aim.y += (Math.asin(want.y) - Math.asin(this._d.y)) * dt * 2.2;
+      this._aim.clampScalar(-0.9, 0.9);
+      this.look.copy(this._aim);
+    } else if (ctx.memory.lookOverride) this.look.set(ctx.memory.lookOverride.x, ctx.memory.lookOverride.y);
     const k = Math.min(1, dt * (0.6 + this.open * 1.4));
     this.lookCur.lerp(this.look.multiplyScalar(0.25 + this.open * 0.75), k);
     const jitter = this.open > 0.05 ? Math.sin(t * 31) * 0.004 * this.open : 0;

@@ -1,4 +1,5 @@
 import { DEFAULTS, clamp, random, mixState, createStorm, createMemoryGate, createLampContact } from './control.js';
+import { createDetails } from './details.js';
 
 // The same native Web Audio graph is used in realtime and OfflineAudioContext.
 // Audio time owns scheduling: deterministic shot frame time must not accelerate it.
@@ -52,7 +53,7 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
   const rainBus = gain(), rainFilter = filter('lowpass', 12000);
   rainBus.connect(rainFilter); rainFilter.connect(mix); rainFilter.connect(reverb);
   const buses = {};
-  for (const name of Object.keys(DEFAULTS).filter(k => k !== 'master' && k !== 'reverb')) {
+  for (const name of Object.keys(DEFAULTS).filter(k => !['master', 'reverb', 'dog', 'radio', 'alley'].includes(k))) {
     const bus = gain(params[name]); buses[name] = bus;
     if (['nearRain', 'farRain', 'drips'].includes(name)) bus.connect(rainBus);
     else if (name !== 'memory') {
@@ -64,6 +65,7 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
       if (name !== 'shutter') output.connect(reverb);
     }
   }
+  const details = createDetails(ac, { mix, rain: rainFilter, params, seed, onEvent });
   // Individual source amplitudes leave substantial headroom before the compressor.
   function loopNoise(bus, type, hz, amplitude, q = 0.7) {
     const s = ac.createBufferSource(); s.buffer = noise; s.loop = true;
@@ -213,7 +215,7 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
     else param.setTargetAtTime(value, at, tau);
     lastTargets.set(param, value);
   }
-  function update(at, world = {}, memory = {}, lampIntensity) {
+  function update(at, world = {}, memory = {}, lampIntensity, camera) {
     if (disposed) return;
     const state = mixState(world, memory);
     target(master.gain, muted ? 0 : clamp(params.master), at, 0.04);
@@ -222,6 +224,7 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
     for (const [name, bus] of Object.entries(buses)) target(bus.gain, clamp(params[name]), at);
     target(rainBus.gain, state.rain, at, 0.24);
     target(rainFilter.frequency, state.cutoff, at, 0.3);
+    details.update(at, memory, camera);
     setMemory(memoryEnvelope(at, state.memory), at);
     const contact = lampContact(at, lampIntensity);
     target(lampGate.gain, contact.level, at, 0.008);
@@ -266,6 +269,7 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
     dispose() {
       if (disposed) return;
       disposed = true;
+      details.dispose();
       for (const s of sources) { s.onended = null; try { s.stop(); } catch { /* already stopped */ } }
       for (const n of nodes) n.disconnect();
       sources.clear(); nodes.clear();

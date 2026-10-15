@@ -1,0 +1,18 @@
+{
+ "state": "applied",
+ "files": [
+  "src/systems/audio/control.js",
+  "src/systems/audio/details-control.js",
+  "src/systems/audio/details.js",
+  "src/systems/audio/graph.js",
+  "src/systems/audio/index.js",
+  "src/systems/audio/offline.js",
+  "src/systems/audio/verify.mjs",
+  "tools/audio-render.mjs"
+ ],
+ "created": [
+  "src/systems/audio/details-control.js",
+  "src/systems/audio/details.js"
+ ],
+ "at": "2026-10-16 05:36:22"
+}

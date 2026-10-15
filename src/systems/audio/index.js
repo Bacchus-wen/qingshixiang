@@ -23,7 +23,7 @@ export default {
           this.ac = new AudioContextClass({ latencyHint: 'interactive' });
           this.graph = createSoundscape(this.ac, { levels: this.levels, muted: this.muted });
           this.levels = this.graph.params;
-          this.graph.update(this.ac.currentTime, ctx.world, ctx.memory, ctx.api.street?.lamp?.intensity);
+          this.graph.update(this.ac.currentTime, ctx.world, ctx.memory, ctx.api.street?.lamp?.intensity, ctx.camera);
           this.lastError = null;
         }
         // Keep the listeners: mobile interrupted contexts can resume on a later gesture.
@@ -53,7 +53,7 @@ export default {
     }
   },
   update(dt, t, ctx) {
-    if (this.ac?.state === 'running') this.graph.update(this.ac.currentTime, ctx.world, ctx.memory, ctx.api.street?.lamp?.intensity);
+    if (this.ac?.state === 'running') this.graph.update(this.ac.currentTime, ctx.world, ctx.memory, ctx.api.street?.lamp?.intensity, ctx.camera);
   },
   dispose() {
     this.disposed = true;

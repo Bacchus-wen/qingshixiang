@@ -8,7 +8,21 @@
   "src/systems/audio/**",
   "tools/audio-render.mjs"
  ],
- "status": "running",
+ "status": "done",
  "posted": "2026-10-16 05:31:52",
- "started": "2026-10-16 05:31:53"
+ "started": "2026-10-16 05:31:53",
+ "seconds": 266.4,
+ "touched": [
+  "src/systems/audio/control.js",
+  "src/systems/audio/details-control.js",
+  "src/systems/audio/details.js",
+  "src/systems/audio/graph.js",
+  "src/systems/audio/index.js",
+  "src/systems/audio/offline.js",
+  "src/systems/audio/verify.mjs",
+  "tools/audio-render.mjs"
+ ],
+ "applied": 8,
+ "finished": "2026-10-16 05:36:22",
+ "reason": null
 }

@@ -2,9 +2,10 @@
 import sandbox from './sandbox/index.js';
 import director from '../story/director.js';
 import fragment from '../story/fragment.js';
+import micro from '../story/micro.js';
 import lookdev from './lookdev/index.js';
 import rain from './rain/index.js';
 import audio from './audio/index.js';
 
 // sandbox is only loaded with ?only=sandbox
-export const SYSTEMS = [lookdev, rain, audio, sandbox, fragment, director].filter((s) => s.name !== 'sandbox' || new URLSearchParams(location.search).get('only') === 'sandbox');
+export const SYSTEMS = [lookdev, rain, audio, sandbox, fragment, micro, director].filter((s) => s.name !== 'sandbox' || new URLSearchParams(location.search).get('only') === 'sandbox');

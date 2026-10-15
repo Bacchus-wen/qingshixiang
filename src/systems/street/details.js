@@ -56,7 +56,8 @@ export function noticeMaterial(lines, seed = 0) {
 }
 
 // Shop fascia signs: dead grey plates now; inside the eye's cone the old names light up in amber.
-const NAMES = ['张记面馆', '光明照相', '修表配钥匙', '和平理发', '永安旅社', '新华书店', '老周中药', '星光茶室', '平安五金', '春来裁缝', '红星电器', '东风粮油'];
+const NAMES = ['张记面馆', '光明照相', '修表配钥匙', '和平理发', '永安旅社', '新华书店', '老周中药', '星光茶室', '平安五金', '春来裁缝',
+  '红星电器', '东风粮油', '向阳副食', '大众浴池', '兴隆饭店', '光华眼镜', '老街修车', '明月糕点', '好运烟酒', '春光文具'];
 function signMaterial(name) {
   const c = document.createElement('canvas'); c.width = 512; c.height = 112;
   const g = c.getContext('2d');
@@ -107,12 +108,20 @@ export async function buildDetails(ctx, root, facades, M, r) {
   const signGeo = new THREE.BoxGeometry(0.18, 1.8, 0.55);
   const pipeGeo = new THREE.CylinderGeometry(0.06, 0.06, 1, 6);
 
-  const signMats = NAMES.map(signMaterial);
+  // every shop gets its own name; the two shops straight across from the robot are the ones with small
+  // memories (story/micro.js): the photo studio and the noodle shop
+  const shops = facades.filter((f) => f.shop);
+  const across = shops.filter((f) => f.side > 0).sort((a, b) => Math.abs(a.z + 13.5) - Math.abs(b.z + 13.5));
+  const fixed = new Map([[across[0], '光明照相'], [across[1], '张记面馆']]);
+  const pool = NAMES.filter((n) => ![...fixed.values()].includes(n));
+  let poolIdx = 0;
+  for (const f of shops) f.signName = fixed.get(f) ?? pool[poolIdx++ % pool.length];
+  const signMatCache = new Map();
+  const signMatFor = (name) => { if (!signMatCache.has(name)) signMatCache.set(name, signMaterial(name)); return signMatCache.get(name); };
   const chaiMats = [0, 1, 2].map(chaiMaterial);
   const noticeMats = NOTICES.map((n, i) => noticeMaterial(n, i));
   let noticeN = 0;
   let chaiN = 0;
-  let signIdx = 0;
   for (const f of facades) {
     const s = f.side;
     if (r() < 0.55) {
@@ -135,11 +144,12 @@ export async function buildDetails(ctx, root, facades, M, r) {
       root.add(nm);
     }
     if (f.shop) {
-      const sign = new THREE.Mesh(new THREE.PlaneGeometry(Math.min(f.w - 1, 3.6), 0.62), signMats[signIdx++ % signMats.length]);
+      const sign = new THREE.Mesh(new THREE.PlaneGeometry(Math.min(f.w - 1, 3.6), 0.62), signMatFor(f.signName));
       sign.position.set(f.frontX - s * 0.04, 3.5, f.z);
       sign.rotation.y = -s * Math.PI / 2;
       sign.receiveShadow = true;
       root.add(sign);
+      (ctx.api.signs ??= []).push({ name: f.signName, side: s, x: f.frontX, z: f.z, w: f.w });
     }
     // AC units on upper floors
     for (let fl = 1; 3.2 + fl * 3.1 < f.h - 1; fl++) {

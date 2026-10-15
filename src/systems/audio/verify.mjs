@@ -94,3 +94,62 @@ const delays = Array.from({ length: 24 }, (_, seed) => createStorm(random(seed *
 assert(delays.every(d => d >= 2 && d <= 6));
 assert(Math.max(...delays) - Math.min(...delays) > 2, 'thunder delay must vary across seeds');
 console.log('PASS review-r2 controls: 2.5s reveal, fast cut at 30–240Hz, reentry, lamp sync, 2–6s thunder');
+
+const { createDogClock, createRadioListener, RADIO_POSITION, alleyPresence } = await import('./details-control.js');
+const { PerspectiveCamera, Vector3, Group } = await import('three/webgpu');
+for (const fps of [30, 60, 144]) {
+  const calls = [], clock = createDogClock(random(1927));
+  for (let frame = 0; frame < 900 * fps; frame++) {
+    const call = clock(frame / fps);
+    if (call) calls.push(call);
+  }
+  assert(calls.length >= 10);
+  assert(calls[0].at >= 40 && calls[0].at <= 90);
+  const intervals = calls.slice(1).map((c, i) => c.at - calls[i].at);
+  assert(intervals.every(dt => dt >= 40 && dt <= 90), 'dog groups must stay 40–90s apart');
+  assert(Math.max(...intervals) - Math.min(...intervals) > 10);
+  assert(calls.every(c => [1, 2].includes(c.count) && c.spacing >= 0.55 && c.spacing <= 0.9));
+  assert(calls.some(c => c.count === 1) && calls.some(c => c.count === 2));
+}
+const pausedDog = createDogClock(random(91));
+assert.equal(pausedDog(0), null);
+assert.equal(pausedDog(600), null, 'a background gap must not trigger a catch-up bark');
+for (let i = 1; i < 39 * 60; i++) assert.equal(pausedDog(600 + i / 60), null);
+const dogSequence = () => {
+  const clock = createDogClock(random(81));
+  return Array.from({ length: 6000 }, (_, i) => clock(i / 10)).filter(Boolean);
+};
+assert.deepEqual(dogSequence(), dogSequence());
+
+const camera = new PerspectiveCamera();
+camera.position.set(0, RADIO_POSITION.y, RADIO_POSITION.z);
+camera.lookAt(0, RADIO_POSITION.y, RADIO_POSITION.z - 1);
+const radioListener = createRadioListener();
+const darkRadio = radioListener(camera);
+assert(darkRadio.pan < -0.99, 'shop is left when facing down the street');
+const origin = camera.position.clone();
+const cone = { origin, dir: new Vector3().copy(RADIO_POSITION).sub(origin).normalize(), angle: 0.35, range: 40, strength: 1 };
+const litRadio = radioListener(camera, cone);
+assert.equal(litRadio.lit, 1);
+assert(litRadio.gain > darkRadio.gain * 2 && litRadio.cutoff > darkRadio.cutoff * 2);
+assert.equal(radioListener(camera, { ...cone, dir: cone.dir.clone().negate() }).gain, darkRadio.gain,
+  'global memory strength alone must not brighten the radio');
+assert.equal(radioListener(camera, { ...cone, range: 2 }).lit, 0, 'range matters as well as direction');
+assert.equal(radioListener(camera, { ...cone, strength: 0 }).lit, 0);
+camera.lookAt(0, RADIO_POSITION.y, RADIO_POSITION.z + 1);
+assert(radioListener(camera).pan > 0.99, 'turning around swaps stereo sides');
+camera.position.z = 8;
+assert(radioListener(camera).gain < darkRadio.gain * 0.1, 'distance must attenuate the shop');
+camera.position.copy(RADIO_POSITION);
+assert.equal(radioListener(camera).pan, 0, 'coincident listener must not divide by zero');
+assert(Object.values(radioListener()).every(Number.isFinite), 'missing camera/cone stays finite');
+
+const parent = new Group(); parent.rotation.y = Math.PI;
+const child = new PerspectiveCamera(); child.position.set(0, RADIO_POSITION.y, 24); parent.add(child);
+assert(radioListener(child).pan > 0.99, 'camera parent transforms must affect stereo');
+assert.equal(alleyPresence(0), 1);
+assert(alleyPresence(0.1) > alleyPresence(0.2));
+assert.equal(alleyPresence(0.35), 0);
+assert.equal(alleyPresence(1), 0);
+assert.equal(alleyPresence(NaN), 1);
+console.log('PASS street detail controls: dog cadence/count/resume, radio local cone/range/position/stereo, present-only alley');
