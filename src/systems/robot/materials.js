@@ -66,7 +66,7 @@ export function robotMaterial(name) {
   } else if (n.includes('chest_core')) {
     // status light: a very slow, faint breath. Never coloured, never bright.
     m.colorNode = vec3(0.02);
-    m.emissiveNode = vec3(mx_noise_float(vec3(time.mul(0.12), 3, 0)).mul(0.5).add(0.5).mul(0.35).add(0.05));
+    m.emissiveNode = vec3(mx_noise_float(vec3(time.mul(0.12), 3, 0)).mul(0.5).add(0.5).mul(0.1).add(0.012));
   } else if (n.includes('eye_dead')) {
     m.colorNode = vec3(0.01); m.roughnessNode = float(0.1);
   } else if (n.includes('rubber') || n.includes('cable')) {

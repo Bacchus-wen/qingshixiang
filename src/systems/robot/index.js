@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { robotMaterial, eyeGlow, eyeColor } from './materials.js';
 import { LANE } from '../street/index.js';
 import { syncMemory } from '../../materials/memory.js';
@@ -92,12 +93,39 @@ export default {
     const { scene } = ctx;
     const gltf = await new GLTFLoader().loadAsync('/models/robot.glb');
     const root = this.root = gltf.scene;
+    const matCache = new Map(); // one material instance per glb material name (lets static parts merge)
     root.traverse((o) => {
       if (o.isMesh) {
-        o.material = robotMaterial(o.material.name || '');
+        const key = o.material.name || '';
+        if (!matCache.has(key)) matCache.set(key, robotMaterial(key));
+        o.material = matCache.get(key);
         o.castShadow = true; o.receiveShadow = true;
       }
     });
+    // everything that never moves (body, limbs, cables) collapses into one mesh per material; the head subtree
+    // (eye, iris blades) stays separate because it animates
+    {
+      const head = root.getObjectByName('head');
+      const inHead = (o) => { for (let p = o; p; p = p.parent) if (p === head) return true; return false; };
+      root.updateMatrixWorld(true);
+      const inv = root.matrixWorld.clone().invert();
+      const groups = new Map(); const remove = [];
+      root.traverse((o) => {
+        if (!o.isMesh || inHead(o)) return;
+        const g = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone());
+        for (const k of Object.keys(g.attributes)) if (!['position', 'normal'].includes(k)) g.deleteAttribute(k);
+        g.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld));
+        if (!groups.has(o.material)) groups.set(o.material, []);
+        groups.get(o.material).push(g); remove.push(o);
+      });
+      for (const o of remove) o.removeFromParent();
+      for (const [mat, gs] of groups) {
+        const merged = mergeGeometries(gs, false);
+        if (!merged) continue;
+        const mm = new THREE.Mesh(merged, mat); mm.castShadow = mm.receiveShadow = true;
+        root.add(mm);
+      }
+    }
     root.position.copy(ROBOT_POS);
     root.rotation.y = Math.PI / 2; // glTF front (+Z) faces the road (+X)
     scene.add(root);
