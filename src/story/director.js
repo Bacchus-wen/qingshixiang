@@ -107,6 +107,11 @@ export default {
           this.cam.fov = 50 - push * 12;
         }
         const frag = ctx.api.fragment;
+        // nudge: one faint line until the pointer moves
+        if (this.t > 4 && !this.moved) this.film.hint('移动鼠标 · 慢慢看');
+        if (!this.moved && (Math.abs(input.pointer.x) > 0.15 || Math.abs(input.pointer.y) > 0.15)) { this.moved = true; this.film.hint(''); }
+        // however it was used, the eye goes back to the door before it runs out (its resting gaze is the door)
+        if (frag?.state === 'idle' && this.power < 0.35) { this.returning = Math.min(1, (this.returning ?? 0) + dt * 0.25); m.lookOverride = { x: 0, y: 0 }; }
         // after the door memory the eye has nothing left: power runs out within ~14 s
         if (frag?.state === 'done') this.power = Math.max(0, this.power - dt / 14);
         else if (robot && robot.open > 0.2 && frag?.state !== 'playing') this.power = Math.max(0, this.power - dt / 150);

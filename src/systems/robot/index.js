@@ -148,6 +148,12 @@ export default {
     spot.map = this.gobo.tex;
     spot.castShadow = true; spot.shadow.mapSize.setScalar(ctx.quality === 'low' ? 512 : 1024); spot.shadow.camera.near = 0.2; spot.shadow.bias = -0.0005;
     scene.add(spot, spot.target);
+    // a faint cold rim from behind and above (the street's ambient bounce): reads the shell, scratches and oil
+    // in the dark. Constant intensity: lights are never toggled at runtime (recompiles everything).
+    const rim = new THREE.SpotLight(0xc8d2dc, 6, 4, 0.5, 0.9, 2);
+    rim.position.copy(ROBOT_POS).add(new THREE.Vector3(-0.6, 1.9, 0.9));
+    rim.target.position.copy(ROBOT_POS).add(new THREE.Vector3(0.2, 0.8, 0));
+    scene.add(rim, rim.target);
     this.beamVol = ctx.api.atmo?.volume(new THREE.Vector3(0.3, 3, -14), new THREE.Vector3(11, 6, 18), 0.0, [spot]);
 
     // state
