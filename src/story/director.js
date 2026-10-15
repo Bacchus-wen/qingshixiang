@@ -121,6 +121,7 @@ export default {
         this.cam.fov = 44;
         this.film.fade(Math.min(1, Math.max(0, (this.t - 12) / 6)));
         if (this.t > 19) this.film.endCard();
+        if (this.t > 24 && (input.pointer.held || input.wasPressed('Space'))) location.reload(); // play again
         break;
       }
     }

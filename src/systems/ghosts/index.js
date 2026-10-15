@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { floor, positionWorld, sin, lights, vec3, pow, float, abs, dot, normalView, positionViewDirection, smoothstep, distance, cameraPosition } from 'three/tsl';
+import { floor, positionWorld, sin, lights, vec3, pow, float, abs, dot, normalView, positionViewDirection, smoothstep, distance, cameraPosition, uniform } from 'three/tsl';
 import { memoryMask, memoryMaskCPU, amberNode } from '../../materials/memory.js';
 import { loadPeople } from './people.js';
 
@@ -78,6 +78,9 @@ function pose(p, t) {
   p.bob = p.waiting ? Math.sin(t * 0.8 + p.phase) * 0.002 : (1 - Math.cos(gait * 2)) * 0.006;
 }
 
+// 1 = the street's crowd is visible in memories; the door fragment fades it to 0 so the child is alone (Claude)
+export const crowd = uniform(1);
+
 function material() {
   const m = new THREE.MeshStandardNodeMaterial({
     roughness: 1, metalness: 0, transparent: false, depthWrite: true,
@@ -93,7 +96,7 @@ function material() {
     .add(bayer2(floor(x.div(2)), floor(y.div(2)))).add(0.5).div(16);
   const scan = sin(positionWorld.y.mul(115)).mul(0.055).add(0.945);
   // memories keep their distance: figures dissolve within a few metres of the camera (crude up close)
-  const mask = memoryMask(positionWorld).mul(smoothstep(3.5, 6.5, distance(positionWorld, cameraPosition)));
+  const mask = memoryMask(positionWorld).mul(crowd).mul(smoothstep(3.5, 6.5, distance(positionWorld, cameraPosition)));
   m.maskNode = mask.mul(scan).greaterThan(threshold);
   // silhouettes: unlit, near-black body with a thin amber rim, so they stand *in* the light rather than glow
   m.lightsNode = lights([]);

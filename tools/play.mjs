@@ -45,6 +45,14 @@ try {
   await page.mouse.move(1100, 300, { steps: 20 }); await wait(4); await snap('look-right');
   await page.mouse.move(250, 260, { steps: 20 }); await wait(5); await snap('look-left-up');
   await page.mouse.move(700, 420, { steps: 20 }); await wait(4); await snap(`look-${await phase()}`);
+  // rest the gaze: the robot's resting gaze falls on the door -> the memory fragment plays, then the end
+  await page.mouse.move(640, 360, { steps: 20 });
+  await wait(7); await snap(`fragment-start-${await phase()}`);
+  await wait(9); await snap('fragment-mid');
+  await wait(9); await snap('fragment-late');
+  await wait(14); await snap(`after-fragment-${await phase()}`);
+  await wait(10); await snap(`fade-${await phase()}`);
+  await wait(16); await snap(`end-${await phase()}`);
   console.log('phase now:', await phase());
   if (errors.length) console.log('ERRORS:\n' + errors.slice(0, 10).join('\n'));
 } finally {

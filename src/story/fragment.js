@@ -5,6 +5,7 @@ import {
 import { memoryMask, memoryMaskCPU, amberNode } from '../materials/memory.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
+import { crowd } from '../systems/ghosts/index.js';
 
 // The one memory with a story: the door across the street, its frame scored with a child's heights.
 // Hold the beam on it and the robot takes over: its eye narrows to a level line, the child appears against the
@@ -159,6 +160,9 @@ export default {
       m.goboMode = this.t > 1.5 ? 'line' : undefined;
       // the porch light warms up first, then the child steps in and grows with the marks
       const glow = Math.min(1, this.t / 2.5);
+      // the street empties around the door: only the child stays
+      const endT = 3 + MARKS.length * 2.2 + 2.5;
+      crowd.value = this.t < endT ? Math.max(0, 1 - this.t / 2) : Math.min(1, (this.t - endT) / 3);
       this.porch.intensity = 5 * glow * glow; this.porchGlow.value = glow;
       // the child grows with the marks
       this.childVis.value = Math.min(1, Math.max(0, (this.t - 2) / 1.5));
@@ -169,7 +173,7 @@ export default {
         // the marks stop; the child is gone; the line stays on the last mark a moment, then control returns
         this.childVis.value = Math.max(0, 1 - (this.t - end) / 1.5);
         const off = Math.max(0, 1 - (this.t - end) / 3); this.porch.intensity = 5 * off * off; this.porchGlow.value = off;
-        if (this.t > end + 3) { this.state = 'done'; m.lookOverride = undefined; m.forceOpen = undefined; m.goboMode = undefined; }
+        if (this.t > end + 3) { crowd.value = 1; this.state = 'done'; m.lookOverride = undefined; m.forceOpen = undefined; m.goboMode = undefined; }
       }
     }
   },
