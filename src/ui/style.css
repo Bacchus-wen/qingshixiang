@@ -27,4 +27,5 @@ body.shot #ui { display: none; }
 .film-title { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;
   font-family: "Songti SC", "Noto Serif SC", serif; font-size: 14px; letter-spacing: 0.6em; opacity: 0; transition: opacity 2.5s; z-index: 2; }
 .film-title.on { opacity: 0.7; }
+.film-title h1 { font-weight: 400; font-size: 26px; letter-spacing: 0.9em; margin: 0 0 3.2em 0.9em; opacity: 0.9; }
 .film-title small { margin-top: 2.4em; font-family: "SF Mono", Menlo, monospace; font-size: 9px; letter-spacing: 0.5em; opacity: 0.55; }

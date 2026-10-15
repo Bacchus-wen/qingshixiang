@@ -7,7 +7,7 @@ export class Film {
       <div class="film-edge bottom"><span class="fe-l fe-phase">—</span><span class="fe-power"><i></i></span></div>
       <div class="film-hint"></div>
       <div class="film-black"></div>
-      <div class="film-title"><p>请戴上耳机</p><small>点击画面开始</small></div>
+      <div class="film-title"><h1>青 石 巷</h1><p>请戴上耳机</p><small>点击画面开始</small></div>
       <div class="film-card"><p>刻度停在十一岁。</p><p>灯灭了,门还是那么高。</p><small class="film-replay">点击画面重看</small></div>`;
     this.el = root;
     this.frameEl = root.querySelector('.fe-frame');
