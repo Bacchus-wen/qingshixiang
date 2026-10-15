@@ -4,6 +4,27 @@ import { placeProps } from './props.js';
 import { texture, vec3, float, mix } from 'three/tsl';
 import { memoryMask, amberNode } from '../../materials/memory.js';
 
+// The demolition mark: '拆' sprayed in a circle. In the present it is on every other wall; inside the eye's cone
+// (the past, before the notices) the paint is simply not there yet.
+function chaiMaterial(seed) {
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const g = c.getContext('2d');
+  g.fillStyle = '#000'; g.fillRect(0, 0, 256, 256);
+  g.strokeStyle = '#fff'; g.fillStyle = '#fff';
+  g.lineWidth = 15; g.lineCap = 'round';
+  g.beginPath(); g.ellipse(128, 128, 104 + (seed % 3) * 4, 98, (seed % 5) * 0.1, 0.25, Math.PI * 2 - 0.1); g.stroke();
+  g.font = '700 150px "PingFang SC","Hiragino Sans GB","Noto Sans SC",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText('拆', 130, 136);
+  // drips running down from the paint
+  for (let i = 0; i < 6; i++) { const x = 60 + ((seed * 37 + i * 29) % 140); g.fillRect(x, 150 + (i % 3) * 10, 4, 40 + ((seed + i * 13) % 50)); }
+  const tex = new THREE.CanvasTexture(c);
+  const paint = texture(tex).r;
+  const m = new THREE.MeshStandardNodeMaterial({ transparent: true, depthWrite: false, roughness: 0.4 });
+  m.colorNode = vec3(0.42); // pale spray paint (the real ones are red or white; this world has no red)
+  m.opacityNode = paint.mul(0.8).mul(float(1).sub(memoryMask().mul(1.4).min(1)));
+  return m;
+}
+
 // Shop fascia signs: dead grey plates now; inside the eye's cone the old names light up in amber.
 const NAMES = ['张记面馆', '光明照相', '修表配钥匙', '和平理发', '永安旅社', '新华书店', '老周中药', '星光茶室', '平安五金', '春来裁缝', '红星电器', '东风粮油'];
 function signMaterial(name) {
@@ -57,9 +78,21 @@ export async function buildDetails(ctx, root, facades, M, r) {
   const pipeGeo = new THREE.CylinderGeometry(0.06, 0.06, 1, 6);
 
   const signMats = NAMES.map(signMaterial);
+  const chaiMats = [0, 1, 2].map(chaiMaterial);
+  let chaiN = 0;
   let signIdx = 0;
   for (const f of facades) {
     const s = f.side;
+    if (r() < 0.55) {
+      // demolition mark on the wall (or the shutter), at chest-to-head height
+      const ch = new THREE.Mesh(new THREE.PlaneGeometry(1.25, 1.25), chaiMats[chaiN++ % 3]);
+      const onShutter = f.shop && r() < 0.5;
+      ch.position.set(f.frontX + s * (onShutter ? 1.03 : -0.02), onShutter ? 1.6 : 4.4 + r() * 0.8, f.z + (r() - 0.5) * Math.max(0, f.w - 2));
+      ch.rotation.y = -s * Math.PI / 2; ch.rotation.z = (r() - 0.5) * 0.15;
+      ch.renderOrder = 4; ch.userData.dynamic = true; // keep out of the static merge (transparent, own material)
+      root.add(ch);
+      (ctx.api.chai ??= []).push(ch);
+    }
     if (f.shop) {
       const sign = new THREE.Mesh(new THREE.PlaneGeometry(Math.min(f.w - 1, 3.6), 0.62), signMats[signIdx++ % signMats.length]);
       sign.position.set(f.frontX - s * 0.04, 3.5, f.z);

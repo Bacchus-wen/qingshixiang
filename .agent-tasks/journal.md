@@ -35,3 +35,4 @@
 - 2026-10-16 04:28:43 | claude | 派给 codex：道具包二:人曾经在这里（w11-props2，可写 tools/blender/props2.py,tools/blender/render_props2.py）
 - 2026-10-16 04:28:43 | claude | 派给 grok：调研:等待拆迁的老街细节（r3-relocation，只读）
 - 2026-10-16 04:29:04 | codex | 完成：修复两条音频断言（w9-audio-fix）
+- 2026-10-16 04:33:38 | grok | 完成：调研:等待拆迁的老街细节（r3-relocation）

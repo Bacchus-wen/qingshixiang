@@ -98,8 +98,8 @@ export default {
       this.boltT += dt;
       let v = 0;
       for (const p of this.pulses) { const x = this.boltT - p; if (x > 0) v = Math.max(v, Math.exp(-x * 18) * (p === 0 ? 1 : 0.7)); }
-      this.bolt.intensity = v * 9;
-      this.fogColor.value.setScalar(0.035 + v * 0.3);
+      this.bolt.intensity = v * 6.5;
+      this.fogColor.value.setScalar(0.035 + v * 0.14);
       ctx.world.lightning = v;
       if (this.boltT > 1.2) { this.boltT = -1; this.nextBolt = 25 + Math.random() * 30; this.fogColor.value.set(0x08090a); ctx.world.lightning = 0; }
     }
