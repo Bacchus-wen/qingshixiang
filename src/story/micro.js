@@ -61,6 +61,7 @@ export default {
       scene.add(flash);
       this.items.push({ kind: 'photo', name: 'photo', center: new THREE.Vector3(shop.x + s * 0.6, 1.3, shop.z), vis, flash, dwell: 0, t: -1, done: false });
     }
+    this.initNoodle(ctx); // robot and atmo are initialised before this system
   },
   // noodle shop: warm steam at the door, lit only by the eye (a small volume restricted to the eye's light)
   initNoodle(ctx) {
@@ -69,17 +70,18 @@ export default {
     if (!shop || !spot || !ctx.api.atmo) return;
     const s = shop.side;
     const vol = ctx.api.atmo.volume(new THREE.Vector3(shop.x + s * 0.4, 1.9, shop.z), new THREE.Vector3(1.8, 3.2, Math.min(3, shop.w - 0.6)), 0, [spot]);
-    vol.visible = true; // keep compiled; density 0 until the memory plays
+    vol.visible = true; // visible for the first frames (compiled behind the title), hidden while idle
     const warm = new THREE.PointLight(0xffa860, 0, 5, 2);
     warm.position.set(shop.x + s * 1.0, 1.4, shop.z);
     ctx.scene.add(warm);
     this.items.push({ kind: 'noodle', name: 'noodle', center: new THREE.Vector3(shop.x + s * 0.6, 1.3, shop.z), vol, warm, dwell: 0, t: -1, done: false });
   },
   update(dt, time, ctx) {
-    if (!this._noodle) { this._noodle = true; this.initNoodle(ctx); }
+    this.frames = (this.frames ?? 0) + 1;
     const m = ctx.memory;
     for (const it of this.items) {
       const lit = memoryMaskCPU(it.center, m);
+      if (it.vol) it.vol.visible = it.t >= 0 || this.frames < 30;
       if (it.t < 0) {
         it.dwell = lit > 0.4 ? it.dwell + dt : Math.max(0, it.dwell - dt);
         if (it.dwell > 1.5 && !it.done) it.t = 0;

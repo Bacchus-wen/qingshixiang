@@ -1,0 +1,23 @@
+静态审查完成；未改文件、联网或运行项目，性能与画面问题未经实测。
+
+**致命**：未发现。
+
+**重要**
+
+1. [micro.js:79](/Users/wenbin/Games/新游戏/src/story/micro.js:79)：面馆体积在首次 `update` 创建，但 `PostFX.build()` 已在此前执行；[PostFX.js:62](/Users/wenbin/Games/新游戏/src/engine/PostFX.js:62) 只给当时登记的体积绑定 `depthNode`。新增蒸汽因此缺少场景深度遮挡，可能穿墙显示。**改法**：将 `initNoodle(ctx)` 移到 `micro.init`；此时 robot、atmo 已初始化。或者让 `registerVolume` 为后加入材质立即绑定深度。
+
+2. [Engine.js:137](/Users/wenbin/Games/新游戏/src/engine/Engine.js:137)：到目标帧只设置 `__shotReady`，动画仍继续；截图工具随后读取性能再截图，实际捕获帧随执行速度变化。另外，面馆蒸汽使用 [atmo/index.js:47](/Users/wenbin/Games/新游戏/src/systems/atmo/index.js:47) 的 TSL `time`，其本地实现按真实时间推进，不受固定 `dt` 控制。**改法**：目标帧渲染后停止循环；截图时将所有着色器时间统一绑定到固定模拟时钟。
+
+**可优化**
+
+- [Engine.js:95](/Users/wenbin/Games/新游戏/src/engine/Engine.js:95)：只根据墙钟帧间隔降分辨率。30Hz 显示或浏览器限帧时，即使 GPU 很空闲，也会逐级降到 0.6。建议结合渲染耗时判断，并在失焦、后台或恢复后重置采样。
+- [micro.js:72](/Users/wenbin/Games/新游戏/src/story/micro.js:72)：蒸汽始终可见，密度归零仍执行体积步进和采样，包括播放结束后。建议完成实际管线预热后隐藏闲置体积，播放时恢复；暖灯继续保留在场景中，仅改强度。
+
+**其余核查**
+
+- fragment 正常结束会清理 `lookOverride/forceOpen/goboMode`，人群随后恢复。
+- `aimAt/openCap` 当前只由截图预设设置；工具每张图新建页面，未发现跨图残留。
+- 新灯均在首次主画面渲染前加入，未发现播放时切换灯光可见性。
+- 自适应分辨率只降不升，不会往返抖动；截图路径已明确绕过。
+- 新增路灯、售货机和梦中随机闪烁均绕过截图；门廊闪烁按模拟时间计算。
+- 本地 three 实现返回末帧 GPU 耗时，当前 `gputime` 用法成立。猫的新位置、光圈与核心前移仍需 Claude 视觉验收。

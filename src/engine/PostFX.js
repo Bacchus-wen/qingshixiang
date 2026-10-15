@@ -41,7 +41,8 @@ export class PostFX {
     renderer.toneMapping = THREE.AgXToneMapping;
   }
 
-  registerVolume(material) { this.volumes.push(material); }
+  // volumes added after build() (e.g. by a system's late init) still get the occluder depth
+  registerVolume(material) { this.volumes.push(material); if (this.preDepth) material.depthNode = this.preDepth.sample(screenUV); }
 
   build() {
     const { renderer, scene, camera, params } = this;
@@ -59,6 +60,7 @@ export class PostFX {
     const prePass = depthPass(scene, preCam);
     prePass.transparent = false;
     const preDepth = prePass.getTextureNode('depth');
+    this.preDepth = preDepth;
     for (const m of this.volumes) m.depthNode = preDepth.sample(screenUV);
 
     const scenePass = pass(scene, camera);

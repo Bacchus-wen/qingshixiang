@@ -5,5 +5,7 @@
  "write": false,
  "task_sha256": "1683e4c07753a5a764bbfac8b64b629c409d2046abbfabd9267ab303860dbb9b",
  "started": "2026-10-16T05:54:44+0800",
- "status": "running"
+ "status": "done",
+ "returncode": 0,
+ "seconds": 118.2
 }

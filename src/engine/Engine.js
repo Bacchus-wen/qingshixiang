@@ -92,7 +92,9 @@ export class Engine {
     const p = this.perf;
     if (!p || p.n < 120 || this.params.get('dpr')) return;
     this._slowSince ??= null;
-    if (p.frameMs > 20.5) {
+    // slow = long frames AND a long render call (a 30 Hz display alone is not slow: render returns quickly there)
+    if (document.hidden) { this._slowSince = null; return; }
+    if (p.frameMs > 20.5 && p.submitMs > 9) {
       this._slowSince ??= now;
       if (now - this._slowSince > 2000 && this.pixelRatio > 0.6) {
         this.pixelRatio = Math.max(0.6, +(this.pixelRatio - 0.15).toFixed(2));
@@ -134,7 +136,7 @@ export class Engine {
       if (this.params.get('gputime') !== null && this.frame % 10 === 0) {
         this.renderer.resolveTimestampsAsync('render').then((ms) => { if (ms) { const p = this.perf; p.gpuMs = p.gpuMs ? p.gpuMs * 0.8 + ms * 0.2 : ms; } }).catch(() => {});
       }
-      if (this.shot && this.frame === this.shotFrames) window.__shotReady = true;
+      if (this.shot && this.frame === this.shotFrames) { window.__shotReady = true; this.renderer.setAnimationLoop(null); } // freeze: the capture is exactly this frame
     });
   }
 }
