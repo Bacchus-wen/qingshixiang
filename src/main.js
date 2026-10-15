@@ -13,6 +13,11 @@ const list = scene === 'lookdev' ? SYSTEMS : [street, atmo, robot, ghosts, ...SY
 
 const loading = document.getElementById('loading');
 const engine = new Engine(document.getElementById('app'));
-await engine.init(list, (p) => { loading.style.setProperty('--p', p); });
-loading.classList.add('done');
-engine.start();
+try {
+  await engine.init(list, (p) => { loading.style.setProperty('--p', p); });
+  loading.classList.add('done');
+  engine.start();
+} catch (e) {
+  console.error(e);
+  document.getElementById('ui').innerHTML = '<div class="film-title on"><p>这个浏览器无法运行 WebGPU 或 WebGL2</p><small>请用最新的 Chrome、Edge 或 Safari 打开</small></div>';
+}

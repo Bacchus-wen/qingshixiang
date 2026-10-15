@@ -18,5 +18,13 @@ export class Input {
   wasPressed(code) { return this.pressed.has(code); }
   // "hold" = Space or primary pointer button (the eye-opening gesture)
   get hold() { return this.pointer.held || this.down.has('Space'); }
+  // arrow keys steer the same virtual pointer (keyboard-only play)
+  updateKeys(dt) {
+    const k = dt * 0.9;
+    if (this.down.has('ArrowLeft')) this.pointer.x = Math.max(-1, this.pointer.x - k);
+    if (this.down.has('ArrowRight')) this.pointer.x = Math.min(1, this.pointer.x + k);
+    if (this.down.has('ArrowUp')) this.pointer.y = Math.min(1, this.pointer.y + k);
+    if (this.down.has('ArrowDown')) this.pointer.y = Math.max(-1, this.pointer.y - k);
+  }
   endFrame() { this.pressed.clear(); }
 }

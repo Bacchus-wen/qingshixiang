@@ -116,6 +116,7 @@ export class Engine {
       const dt = (this.shot ? step : Math.min(this.timer.getDelta(), 0.1)) * this.speed;
       this.time += dt;
       if (this.shot) this.applyShot();
+      this.ctx.input.updateKeys(dt);
       for (const s of this.systems) {
         if (s._failed || !s.update) continue;
         try { s.update(dt, this.time, this.ctx); } catch (e) { console.error(`[engine] ${s.name}.update`, e); s._failed = true; }
