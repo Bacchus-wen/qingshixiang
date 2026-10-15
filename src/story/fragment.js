@@ -6,6 +6,7 @@ import { memoryMask, memoryMaskCPU, amberNode } from '../materials/memory.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 import { crowd } from '../systems/ghosts/index.js';
+import { NOTICES, noticeMaterial } from '../systems/street/details.js';
 
 // The one memory with a story: the door across the street, its frame scored with a child's heights.
 // Hold the beam on it and the robot takes over: its eye narrows to a level line, the child appears against the
@@ -118,6 +119,18 @@ export default {
     this.child.position.set(x - 0.17, 0.2, z - hw - 0.05);
     this.child.rotation.y = -Math.PI / 2; // glTF front (+Z) -> faces the street (-X)
     g.add(this.child);
+    // now: '已验收。此户已腾空。' pasted on the door, and the house number in chalk; neither exists in the memory
+    const notice = new THREE.Mesh(new THREE.PlaneGeometry(0.36, 0.5), noticeMaterial(NOTICES[2], 4));
+    notice.position.set(x + 0.025, 1.5, z + 0.1); notice.rotation.y = -Math.PI / 2; notice.rotation.z = 0.04; notice.renderOrder = 4;
+    g.add(notice);
+    const nc = document.createElement('canvas'); nc.width = 256; nc.height = 96;
+    const ng = nc.getContext('2d'); ng.fillStyle = '#000'; ng.fillRect(0, 0, 256, 96);
+    ng.fillStyle = '#fff'; ng.font = '600 54px "PingFang SC","Hiragino Sans GB",sans-serif'; ng.fillText('青石-17', 14, 66);
+    const nm = new THREE.MeshStandardNodeMaterial({ transparent: true, depthWrite: false });
+    nm.colorNode = vec3(0.5); nm.opacityNode = texture(new THREE.CanvasTexture(nc)).r.mul(0.7).mul(float(1).sub(memoryMask(positionWorld).mul(1.5).min(1)));
+    const num = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.16), nm);
+    num.position.set(x - 0.11, 1.85, z + hw + 0.32); num.rotation.y = -Math.PI / 2; num.renderOrder = 4;
+    g.add(num);
     // the porch light of the past: off now; in the memory it comes on and lights the doorway warm
     this.porch = new THREE.PointLight(0xffa45a, 0, 4.5, 2);
     this.porch.position.set(x - 0.35, DOOR.h + 0.28, z);

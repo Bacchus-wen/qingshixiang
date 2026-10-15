@@ -25,6 +25,36 @@ function chaiMaterial(seed) {
   return m;
 }
 
+// Relocation notices (texts from docs/research-relocation-grok.md, place names fictional). They are pasted on
+// walls and shutters now; inside the cone (the past) they have not been put up yet.
+export const NOTICES = [
+  ['青石巷房屋征收决定公告', '范围:青石巷双号、槐树街1至17号。', '签约:三月一日至二十日下午五时。', '请按期签约并腾空。'],
+  ['腾 空 通 知', '十五日内搬离物品,交回钥匙。', '水电气销户后不得自行接回。', '编号:青石-17'],
+  ['已 验 收', '此户已腾空。', '闲人免进。'],
+  ['公 告', '自本公告贴出之日起,', '青石巷暂停新办营业、装修', '和改作他用。'],
+  ['水表、电表已拆回,管线封堵。', '结算请携编号至巷口登记处。'],
+];
+export function noticeMaterial(lines, seed = 0) {
+  const c = document.createElement('canvas'); c.width = 256; c.height = 360;
+  const g = c.getContext('2d');
+  g.fillStyle = '#d8d4cc'; g.fillRect(0, 0, 256, 360);
+  // rain-soaked: darker blotches and a torn corner
+  for (let i = 0; i < 9; i++) { g.fillStyle = `rgba(60,60,60,${0.06 + ((seed * 7 + i * 13) % 10) / 80})`; g.beginPath(); g.ellipse((seed * 31 + i * 57) % 256, (seed * 17 + i * 91) % 360, 30 + i * 4, 18 + i * 3, i, 0, 7); g.fill(); }
+  g.fillStyle = '#222'; g.textAlign = 'center';
+  g.font = '600 24px "PingFang SC","Songti SC","Noto Sans SC",serif'; g.fillText(lines[0], 128, 54);
+  g.font = '16px "PingFang SC","Songti SC","Noto Sans SC",serif';
+  lines.slice(1).forEach((l, i) => g.fillText(l, 128, 104 + i * 34));
+  g.globalCompositeOperation = 'destination-out';
+  g.beginPath(); g.moveTo(256, 360); g.lineTo(256 - 50 - (seed % 3) * 15, 360); g.lineTo(256, 360 - 70); g.fill();
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+  const t = texture(tex);
+  const m = new THREE.MeshStandardNodeMaterial({ transparent: true, depthWrite: false, roughness: 0.75 });
+  const lum = t.r.mul(0.3).add(t.g.mul(0.59)).add(t.b.mul(0.11));
+  m.colorNode = vec3(lum.mul(0.55));
+  m.opacityNode = t.a.mul(float(1).sub(memoryMask().mul(1.5).min(1)));
+  return m;
+}
+
 // Shop fascia signs: dead grey plates now; inside the eye's cone the old names light up in amber.
 const NAMES = ['张记面馆', '光明照相', '修表配钥匙', '和平理发', '永安旅社', '新华书店', '老周中药', '星光茶室', '平安五金', '春来裁缝', '红星电器', '东风粮油'];
 function signMaterial(name) {
@@ -79,6 +109,8 @@ export async function buildDetails(ctx, root, facades, M, r) {
 
   const signMats = NAMES.map(signMaterial);
   const chaiMats = [0, 1, 2].map(chaiMaterial);
+  const noticeMats = NOTICES.map((n, i) => noticeMaterial(n, i));
+  let noticeN = 0;
   let chaiN = 0;
   let signIdx = 0;
   for (const f of facades) {
@@ -87,11 +119,20 @@ export async function buildDetails(ctx, root, facades, M, r) {
       // demolition mark on the wall (or the shutter), at chest-to-head height
       const ch = new THREE.Mesh(new THREE.PlaneGeometry(1.25, 1.25), chaiMats[chaiN++ % 3]);
       const onShutter = f.shop && r() < 0.5;
-      ch.position.set(f.frontX + s * (onShutter ? 1.03 : -0.02), onShutter ? 1.6 : 4.4 + r() * 0.8, f.z + (r() - 0.5) * Math.max(0, f.w - 2));
+      ch.position.set(f.frontX + s * (onShutter ? 0.96 : -0.02), onShutter ? 1.6 : 4.4 + r() * 0.8, f.z + (r() - 0.5) * Math.max(0, f.w - 2));
       ch.rotation.y = -s * Math.PI / 2; ch.rotation.z = (r() - 0.5) * 0.15;
       ch.renderOrder = 4; ch.userData.dynamic = true; // keep out of the static merge (transparent, own material)
       root.add(ch);
       (ctx.api.chai ??= []).push(ch);
+    }
+    if (r() < 0.6) {
+      // a notice or two pasted at eye height (on the shutter if there is one)
+      const nm = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.59), noticeMats[noticeN++ % noticeMats.length]);
+      const onShutter = f.shop;
+      nm.position.set(f.frontX + s * (onShutter ? 0.97 : -0.02), 1.55 + r() * 0.2, f.z + (r() - 0.5) * Math.max(0, f.w - 1.6));
+      nm.rotation.y = -s * Math.PI / 2; nm.rotation.z = (r() - 0.5) * 0.08;
+      nm.renderOrder = 4; nm.userData.dynamic = true;
+      root.add(nm);
     }
     if (f.shop) {
       const sign = new THREE.Mesh(new THREE.PlaneGeometry(Math.min(f.w - 1, 3.6), 0.62), signMats[signIdx++ % signMats.length]);

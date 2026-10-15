@@ -44,6 +44,8 @@ export default {
     const mask = memoryMask();
     M.glass.emissiveNode = amberNode().mul(mask).mul(ctx.params.get('noglow') !== null ? 1 : pastWindowGlow()).mul(2.2);
     M.void.emissiveNode = amberNode().mul(mask).mul(0.9);
+    M.brickSeal = makeSurface('brick_4', { scale: 1.4, tone: 0.75, metal: 0, streaks: 0.4 });
+    M.brickSeal.maskNode = mask.lessThan(0.45); // dissolves (with the cone's grain) inside the memory
     if (ctx.params.get('memdbg') !== null) for (const k of ['wallA', 'wallB', 'wallC', 'road', 'walk']) M[k].emissiveNode = amberNode().mul(mask).mul(3);
     const L = LANE;
     const len = L.zStart - L.zEnd;
@@ -91,10 +93,16 @@ export default {
             const shutterH = open < 0.25 ? 1.9 : open < 0.5 ? 2.45 : 2.8;
             const sw = w - 0.9;
             box(0.12, 2.8, sw, M.void, f.frontX + side * 1.3, 1.4, zc, root);
-            const sh = box(0.08, shutterH, sw, M.shutter, f.frontX + side * 1.1, 2.8 - shutterH / 2, zc, root);
-            sh.userData.dynamic = true;
+            if (r() < 0.3) {
+              // sealed with fresh brick (a gap left at the top); in the past the brick is not there
+              const bk = box(0.24, 2.55, sw, M.brickSeal, f.frontX + side * 1.12, 1.275, zc, root);
+              bk.userData.dynamic = true;
+            } else {
+              const sh = box(0.08, shutterH, sw, M.shutter, f.frontX + side * 1.1, 2.8 - shutterH / 2, zc, root);
+              sh.userData.dynamic = true;
+              this.shutters.push({ mesh: sh, h: shutterH, lift: 0, hold: 0, center: new THREE.Vector3(f.frontX + side * 1.1, 1.4, zc) });
+            }
             box(0.5, 0.25, sw + 0.3, M.rust, f.frontX + side * 0.95, 2.95, zc, root); // shutter box
-            this.shutters.push({ mesh: sh, h: shutterH, lift: 0, hold: 0, center: new THREE.Vector3(f.frontX + side * 1.1, 1.4, zc) });
           }
           // silhouette detail: parapet, rooftop clutter, balconies on some floors
           box(depth + 0.1, 0.5, w + 0.02, mat, x, h + 0.25, zc, root);
