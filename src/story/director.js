@@ -91,7 +91,18 @@ export default {
         this.cam.pos.set(ROBOT.x - 0.55, 1.45, ROBOT.z + 0.45).addScaledVector(m.dir, -0.15);
         this.cam.look.copy(eyePos).addScaledVector(m.dir, 8);
         this.cam.fov = 50;
-        if (robot && robot.open > 0.2) this.power = Math.max(0, this.power - dt / 150);
+        // the door memory gets its own slow push-in toward the doorway, then eases back
+        const fr = ctx.api.fragment;
+        if (fr && fr.state === 'playing') {
+          const push = ease(Math.min(1, fr.t / 6)) * (fr.t > 19 ? Math.max(0, 1 - (fr.t - 19) / 4) : 1);
+          this.cam.pos.lerp(this._v.set(1.2, 1.3, -14.0), push * 0.7);
+          this.cam.look.lerp(this._w.set(5.0, 1.15, -14.6), push);
+          this.cam.fov = 50 - push * 12;
+        }
+        const frag = ctx.api.fragment;
+        // after the door memory the eye has nothing left: power runs out within ~14 s
+        if (frag?.state === 'done') this.power = Math.max(0, this.power - dt / 14);
+        else if (robot && robot.open > 0.2 && frag?.state !== 'playing') this.power = Math.max(0, this.power - dt / 150);
         m.power = this.power;
         if (this.power <= 0.0) this.set('fade');
         break;

@@ -1,0 +1,14 @@
+{
+ "state": "applied",
+ "files": [
+  "src/systems/ghosts/index.js",
+  "src/systems/ghosts/people.js",
+  "src/systems/ghosts/verify.mjs",
+  "tools/blender/people.py"
+ ],
+ "created": [
+  "src/systems/ghosts/people.js",
+  "tools/blender/people.py"
+ ],
+ "at": "2026-10-16 04:21:02"
+}

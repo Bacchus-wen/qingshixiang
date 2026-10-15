@@ -1,6 +1,6 @@
 // Pure control/scheduler checks. Real DSP is checked by tools/audio-render.mjs.
 import assert from 'node:assert/strict';
-import { mixState, createStorm, random, measure } from './control.js';
+import { mixState, createStorm, random, measure, createMemoryGate, createLampContact } from './control.js';
 
 const dry = mixState({ rain: 0 }, { strength: 0 });
 assert.equal(dry.rain, 0, 'zero rainfall must silence all rain buses');
@@ -61,3 +61,36 @@ try {
     else delete globalThis[key];
   }
 }
+
+// Review-r2 controls, without a browser or audio device. Native DSP assertions
+// (including post-reverb silence within 50 ms) live in tools/audio-render.mjs.
+for (const fps of [30, 60, 144, 240]) {
+  const gate = createMemoryGate();
+  assert.equal(gate(0, 1), 0, 'even an initially open eye must fade in');
+  assert.equal(gate(1.25, 1), 0.5);
+  assert.equal(gate(2.5, 1), 1, 'memory reaches full strength in 2.5 seconds');
+  assert.equal(gate(2.5 + 1 / fps, 1 - 0.9 / fps), 0, `fast fall must cut at ${fps} Hz`);
+  assert.equal(gate(3, 0.4), 0);
+  assert.equal(gate(4, 0.4), 0, 'residual visual strength must not reopen the room');
+  // Small positive per-frame steps must eventually reopen, even at 240 Hz.
+  for (let i = 1; i <= fps; i++) gate(4 + i / fps, 0.4 + 0.1 * i / fps);
+  assert(gate(7.6, 0.5) > 0.49, 'a slow return must reopen the memory layer');
+  assert.equal(gate(8, NaN), 0);
+}
+const dim = createMemoryGate();
+dim(0, 1); dim(2.5, 1);
+assert.equal(dim(3.5, 0.9), 0.9, 'gentle attenuation still follows strength');
+const contact = createLampContact();
+assert.equal(contact(0, 650).crackle, 0, 'first lamp sample is not a flicker');
+assert.equal(contact(0.016, 640).crackle, 0, 'minor light drift is silent');
+assert(contact(0.032, 64).crackle > 0.8);
+assert.equal(contact(0.048, 64).crackle, 0, 'held dim lamp does not repeat');
+assert.equal(contact(0.064, 650).crackle, 0, 'recovery is not a failing contact');
+assert(contact(0.112, 0).crackle > 0.9);
+assert.deepEqual(contact(1, undefined), { level: 0, crackle: 0 });
+assert.equal(contact(2, 650).crackle, 0, 'missing street API can recover safely');
+assert.equal(contact(12, 0).crackle, 0, 'background time gap is not a measured jump');
+const delays = Array.from({ length: 24 }, (_, seed) => createStorm(random(seed * 817))(0, 1).at);
+assert(delays.every(d => d >= 2 && d <= 6));
+assert(Math.max(...delays) - Math.min(...delays) > 2, 'thunder delay must vary across seeds');
+console.log('PASS review-r2 controls: 2.5s reveal, fast cut at 30–240Hz, reentry, lamp sync, 2–6s thunder');

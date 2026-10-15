@@ -1,8 +1,8 @@
-import { DEFAULTS, clamp, random, mixState, createStorm } from './control.js';
+import { DEFAULTS, clamp, random, mixState, createStorm, createMemoryGate, createLampContact } from './control.js';
 
 // The same native Web Audio graph is used in realtime and OfflineAudioContext.
 // Audio time owns scheduling: deterministic shot frame time must not accelerate it.
-export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed } = {}) {
+export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed, onEvent } = {}) {
   const rng = random(seed), noiseRng = random(seed ^ 0xa16b);
   const params = { ...DEFAULTS };
   for (const key of Object.keys(params)) if (key in levels) params[key] = clamp(levels[key], 0, 1, params[key]);
@@ -55,7 +55,10 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
   for (const name of Object.keys(DEFAULTS).filter(k => k !== 'master' && k !== 'reverb')) {
     const bus = gain(params[name]); buses[name] = bus;
     if (['nearRain', 'farRain', 'drips'].includes(name)) bus.connect(rainBus);
-    else { bus.connect(mix); bus.connect(reverb); }
+    else if (name !== 'memory') {
+      bus.connect(mix);
+      if (name !== 'shutter') bus.connect(reverb);
+    }
   }
   // Individual source amplitudes leave substantial headroom before the compressor.
   function loopNoise(bus, type, hz, amplitude, q = 0.7) {
@@ -64,36 +67,32 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
     s.connect(f).connect(level).connect(bus);
     source(s, start); return { s, f, level };
   }
-  function tone(bus, hz, amplitude, type = 'sine') {
-    const s = ac.createOscillator(); s.type = type; s.frequency.value = hz;
-    const level = gain(amplitude); s.connect(level).connect(bus); source(s, start);
-    return { s, level };
-  }
   function lfo(param, hz, amplitude, phaseDelay = 0) {
     const s = ac.createOscillator(); s.frequency.value = hz;
     const level = gain(amplitude); s.connect(level).connect(param); source(s, start + phaseDelay);
   }
-  loopNoise(buses.nearRain, 'highpass', 2600, 0.1);
-  loopNoise(buses.farRain, 'lowpass', 850, 0.37);
-  const wind = loopNoise(buses.wind, 'bandpass', 420, 0.17, 2.2);
-  lfo(wind.f.frequency, 0.041, 230); lfo(wind.level.gain, 0.069, 0.08);
-  const windAir = loopNoise(buses.wind, 'lowpass', 270, 0.1);
-  lfo(windAir.level.gain, 0.027, 0.05);
-  const lampGate = gain(); lampGate.connect(buses.lamp);
-  for (const [hz, amp] of [[50, 0.045], [100, 0.026], [150, 0.012], [60, 0.009], [120, 0.008]]) tone(lampGate, hz, amp);
+  // Near rain is only discrete drops on one dull sheet-metal surface.
+  // The distant bed stays broad and diffuse; no sustained pitched present layer.
+  loopNoise(buses.farRain, 'lowpass', 1000, 0.23);
+  const wind = loopNoise(buses.wind, 'lowpass', 270, 0.1);
+  lfo(wind.level.gain, 0.027, 0.05); // optional broadband air, disabled by default
+  const lampGate = gain(0); lampGate.connect(buses.lamp);
+  loopNoise(lampGate, 'highpass', 1800, 0.035);
 
-  const memoryGate = gain(0); memoryGate.connect(buses.memory);
-  // Diffuse vowels and slow, detuned suspended voicings; no language or melody.
-  for (const [hz, q, amp] of [[320, 2.5, 0.085], [720, 4, 0.07], [1180, 5, 0.035]]) {
-    const voice = loopNoise(memoryGate, 'bandpass', hz, amp, q);
+  // Memory has its own reverb BEFORE the final gate. Cutting only the source
+  // would leave the old room audible through the shared 2.8-second alley tail.
+  const memoryRoom = gain();
+  const memoryVerb = keep(ac.createConvolver()); memoryVerb.buffer = reverb.buffer;
+  const memoryWet = gain(params.reverb);
+  buses.memory.connect(memoryRoom);
+  buses.memory.connect(memoryVerb).connect(filter('lowpass', 2400)).connect(memoryWet).connect(memoryRoom);
+  const memoryGate = gain(0); memoryRoom.connect(memoryGate).connect(mix);
+  // Warm, speech-shaped noise and market air, with no chord or intelligible speech.
+  loopNoise(buses.memory, 'lowpass', 650, 0.1);
+  for (const [hz, q, amp] of [[320, 1.2, 0.11], [720, 1.6, 0.09], [1180, 2, 0.045]]) {
+    const voice = loopNoise(buses.memory, 'bandpass', hz, amp, q);
     lfo(voice.f.frequency, 0.037 + hz / 90000, hz * 0.12);
-    lfo(voice.level.gain, 0.13 + hz / 19000, amp * 0.35);
-  }
-  for (const [i, hz] of [130.81, 174.61, 196, 261.63].entries()) {
-    const voice = tone(memoryGate, hz, 0.018);
-    voice.s.detune.value = i % 2 ? 5 : -5;
-    lfo(voice.s.detune, 0.019 + i * 0.006, 3);
-    lfo(voice.level.gain, 0.023 + i * 0.007, 0.009);
+    lfo(voice.level.gain, 0.13 + hz / 19000, amp * 0.55);
   }
 
   // A bounded voice owns and releases every transient node after it ends.
@@ -138,25 +137,21 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
   }
   function transient(name, at, level = 1, options = {}) {
     if (level <= 0) return;
+    onEvent?.({ name, at, level });
     const pan = options.pan ?? (rng() * 1.6 - 0.8);
     if (name === 'grain') {
-      const v = voice(buses.nearRain, at, 0.035 + rng() * 0.035, 0.025 * level, pan, 0.002);
-      if (v) { v.add('noise', 4000 + rng() * 4500, 2300, 0.8); v.finish(); }
+      const v = voice(buses.nearRain, at, 0.055, (0.16 + rng() * 0.1) * level, -0.25 + rng() * 0.12, 0.0015);
+      if (v) { v.add('noise', 2600, 2600, 1.1); v.finish(); }
     } else if (name === 'drip') {
-      const hz = 850 + rng() * 1500;
-      const v = voice(buses.drips, at, 0.16 + rng() * 0.12, 0.12 * level, pan, 0.003);
+      const hz = 650 + rng() * 350;
+      const v = voice(buses.drips, at, 0.16 + rng() * 0.12, 0.075 * level, pan, 0.003);
       if (v) { v.add('sine', hz * 0.55, hz); v.add('noise', 3000, 1400, 2); v.finish(); }
     } else if (name === 'crackle') {
-      const v = voice(buses.lamp, at, 0.025 + rng() * 0.06, 0.14 * level, 0.35, 0.001);
+      const v = voice(buses.lamp, at, 0.025 + rng() * 0.06, 0.24 * level, 0.35, 0.001);
       if (v) { v.add('noise', 3600, 700, 0.6); v.finish(); }
-      lampGate.gain.setValueAtTime(0.08, at);
-      lampGate.gain.setTargetAtTime(1, at + 0.06, 0.08);
-    } else if (name === 'gust') {
-      const v = voice(buses.wind, at, 3.4, 0.15 * level, pan, 0.9);
-      if (v) { v.add('noise', 620, 190, 7); v.finish(); }
     } else if (name === 'thunder') {
       const v = voice(buses.thunder, at, 4.8, 0.8 * level, pan * 0.5, 0.42);
-      if (v) { v.add('noise', 95, 40, 0.55); v.add('noise', 210, 65, 0.8); v.finish(); }
+      if (v) { v.add('noise', 72, 36, 0.65); v.add('noise', 150, 48, 0.7); v.finish(); }
     } else if (name === 'servo') {
       const duration = clamp(options.duration, 0.2, 3, 1.2);
       const v = voice(buses.servo, at, duration, 0.075 * level, pan, 0.04);
@@ -171,6 +166,12 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
         v.env.gain.setTargetAtTime(0.00001, at + duration * 0.85, duration * 0.04);
         v.finish();
       }
+    } else if (name === 'shutter') {
+      // One dry double-impact camera mechanism, finished before the motor starts.
+      for (const [delay, amp, hz] of [[0, 0.24, 2100], [0.027, 0.13, 1100]]) {
+        const v = voice(buses.shutter, at + delay, 0.028, amp * level, pan, 0.001);
+        if (v) { v.add('noise', hz, hz * 0.6, 0.8); v.finish(); }
+      }
     } else if (name === 'click') {
       const v = voice(buses.click, at, 0.055, 0.18 * level, pan, 0.001);
       if (v) { v.add('noise', 2400, 700, 1); v.add('sine', 1450, 360); v.finish(); }
@@ -182,8 +183,21 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
   }
 
   const storm = createStorm(rng);
-  const next = { grain: start + 0.1, drip: start + 0.45, crackle: start + 1.8, gust: start + 5 };
-  const intervals = { grain: [0.035, 0.13], drip: [0.8, 2.9], crackle: [2.5, 7], gust: [9, 22] };
+  const memoryEnvelope = createMemoryGate(), lampContact = createLampContact();
+  const next = { grain: start + 0.1, drip: start + 3 + rng() * 4 };
+  const intervals = { grain: [0.06, 0.19], drip: [3.5, 9] };
+  let memoryRamp = { from: 0, to: 0, at: start, end: start };
+  function setMemory(value, at) {
+    if (value === memoryRamp.to) return;
+    const r = memoryRamp;
+    const held = r.from + (r.to - r.from) * clamp((at - r.at) / Math.max(0.00001, r.end - r.at));
+    const p = memoryGate.gain;
+    if (p.cancelAndHoldAtTime) p.cancelAndHoldAtTime(at);
+    else { p.cancelScheduledValues(at); p.linearRampToValueAtTime(held, at); }
+    p.setValueAtTime(held, at);
+    p.linearRampToValueAtTime(value, at + 0.01); // 10 ms anti-click cut, including the room tail
+    memoryRamp = { from: held, to: value, at, end: at + 0.01 };
+  }
   const lastTargets = new WeakMap();
   function target(param, value, at, tau = 0.35) {
     if (lastTargets.get(param) === value) return;
@@ -191,15 +205,19 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
     else param.setTargetAtTime(value, at, tau);
     lastTargets.set(param, value);
   }
-  function update(at, world = {}, memory = {}) {
+  function update(at, world = {}, memory = {}, lampIntensity) {
     if (disposed) return;
     const state = mixState(world, memory);
     target(master.gain, muted ? 0 : clamp(params.master), at, 0.04);
     target(wet.gain, clamp(params.reverb), at);
+    target(memoryWet.gain, clamp(params.reverb), at);
     for (const [name, bus] of Object.entries(buses)) target(bus.gain, clamp(params[name]), at);
     target(rainBus.gain, state.rain, at, 0.24);
     target(rainFilter.frequency, state.cutoff, at, 0.3);
-    target(memoryGate.gain, state.memory, at, 1.2);
+    setMemory(memoryEnvelope(at, state.memory), at);
+    const contact = lampContact(at, lampIntensity);
+    target(lampGate.gain, contact.level, at, 0.008);
+    if (contact.crackle) transient('crackle', at, contact.crackle);
     const thunder = storm(at, world.lightning);
     if (thunder) transient('thunder', thunder.at, 0.55 + thunder.level * 0.45);
     for (const name of Object.keys(next)) {
@@ -212,19 +230,30 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
       }
     }
   }
+  // Existing robot callers issue whine + servo in the same frame. Group those
+  // calls under one shutter, also accepting an explicit play('shutter') first.
+  let openingAt = -Infinity;
+  function cue(name, at, options = {}) {
+    if (disposed || !['shutter', 'servo', 'click', 'whine'].includes(name)) return false;
+    const level = clamp(options.gain, 0, 1, 1);
+    if (level === 0) return true;
+    if (name === 'shutter') openingAt = at;
+    if (name === 'servo' || name === 'whine') {
+      if (at < openingAt || at - openingAt > 0.25) {
+        openingAt = at;
+        transient('shutter', at, level, options);
+      }
+      at = Math.max(at, openingAt + (name === 'servo' ? 0.09 : 0.16));
+    }
+    transient(name, at, level, options);
+    return true;
+  }
   return {
     params,
     update,
-    play(name, options = {}) {
-      if (disposed || !['servo', 'click', 'whine'].includes(name)) return false;
-      transient(name, ac.currentTime + 0.005, clamp(options.gain, 0, 1, 1), options);
-      return true;
-    },
-    // Used by the offline score as well as future timeline-driven interactions.
-    schedule(name, at, options = {}) {
-      if (!['servo', 'click', 'whine'].includes(name) || disposed) return false;
-      transient(name, Math.max(start, at), clamp(options.gain, 0, 1, 1), options); return true;
-    },
+    play(name, options = {}) { return cue(name, ac.currentTime + 0.005, options); },
+    // Offline scores should schedule cues in request order, as realtime callers do.
+    schedule(name, at, options = {}) { return cue(name, Math.max(start, at), options); },
     setMuted(value) { muted = !!value; },
     dispose() {
       if (disposed) return;

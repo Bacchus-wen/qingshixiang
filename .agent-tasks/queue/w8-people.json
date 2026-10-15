@@ -8,6 +8,17 @@
   "tools/blender/people.py",
   "src/systems/ghosts/**"
  ],
- "status": "queued",
- "posted": "2026-10-16 04:05:18"
+ "status": "done",
+ "posted": "2026-10-16 04:05:18",
+ "started": "2026-10-16 04:14:26",
+ "seconds": 394.6,
+ "touched": [
+  "src/systems/ghosts/index.js",
+  "src/systems/ghosts/people.js",
+  "src/systems/ghosts/verify.mjs",
+  "tools/blender/people.py"
+ ],
+ "applied": 4,
+ "finished": "2026-10-16 04:21:02",
+ "reason": null
 }

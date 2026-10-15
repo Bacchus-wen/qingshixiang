@@ -82,6 +82,8 @@ export default {
           box(depth, h - 3.2, w - 0.06, mat, x, 3.2 + (h - 3.2) / 2, zc, root);
           box(depth - 1.2, 3.2, w - 0.06, mat, x + side * 0.6, 1.6, zc, root);
           const f = { side, z: zc, w, h, frontX: side * (frontX + inset), shop: r() < 0.8 };
+          // the home across the street from the robot: a plain door, no shop (see story/fragment.js)
+          if (side > 0 && z0 > -42 && zc - w / 2 < -14.2 && zc + w / 2 > -14.2) { f.shop = false; f.home = true; }
           this.facades.push(f);
           if (f.shop) {
             // roller shutter hangs from the box at the top; a gap at the bottom shows the dark shop behind

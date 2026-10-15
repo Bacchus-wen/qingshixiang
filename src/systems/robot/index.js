@@ -50,11 +50,22 @@ function makeGobo() {
     }
     g.closePath();
   };
-  const draw = (open) => {
+  const draw = (open, mode) => {
     const g = c.getContext('2d');
     g.setTransform(1, 0, 0, 1, 0, 0);
     g.fillStyle = '#000'; g.fillRect(0, 0, 256, 256);
     g.translate(128, 128);
+    if (mode === 'line') {
+      // surveyor's level: the eye narrows to a single horizontal line (with a faint double from the crack)
+      // a faint wide fill so the doorway reads, then the bright level line
+      g.fillStyle = 'rgba(255,255,255,0.13)'; g.beginPath(); g.ellipse(0, 0, 118, 92, 0, 0, 7); g.fill();
+      const lg = g.createLinearGradient(-128, 0, 128, 0);
+      lg.addColorStop(0, 'rgba(255,255,255,0)'); lg.addColorStop(0.2, '#fff'); lg.addColorStop(0.8, '#fff'); lg.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = lg; g.fillRect(-128, -2, 256, 4);
+      g.fillStyle = 'rgba(255,255,255,0.15)'; g.fillRect(-110, 5, 220, 2);
+      tex.needsUpdate = true;
+      return;
+    }
     const r = 18 + 106 * open;
     // faint double image (internal reflection in the cracked lens), offset and dim
     g.save(); g.translate(9, -6); aperture(g, r * 0.96, open); g.clip();
@@ -178,7 +189,10 @@ export default {
     this.frames = (this.frames ?? 0) + 1;
     this.spot.shadow.autoUpdate = o > 0.005 || this.frames < 30;
     if (this.beamVol) { this.beamVol.material.userData.density.value = 0.35 * o; this.beamVol.visible = o > 0.01 || this.frames < 30; }
-    if (t - this.goboT > 1 / 15 && Math.abs(o - (this._lastGobo ?? -1)) > 0.01) { this.gobo.draw(o); this.goboT = t; this._lastGobo = o; }
+    const mode = ctx.memory.goboMode;
+    if (mode !== this._lastMode || (t - this.goboT > 1 / 15 && Math.abs(o - (this._lastGobo ?? -1)) > 0.01)) {
+      this.gobo.draw(o, mode); this.goboT = t; this._lastGobo = o; this._lastMode = mode;
+    }
 
     // ---- publish the memory cone
     const m = ctx.memory;

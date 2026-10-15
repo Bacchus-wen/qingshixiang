@@ -1,10 +1,12 @@
 import * as THREE from 'three/webgpu';
 import { floor, positionWorld, sin, lights, vec3, pow, float, abs, dot, normalView, positionViewDirection, smoothstep, distance, cameraPosition } from 'three/tsl';
 import { memoryMask, memoryMaskCPU, amberNode } from '../../materials/memory.js';
+import { loadPeople } from './people.js';
 
 // Metres, matching street/LANE. Keep this system independent of street's init/assets.
 const WALK_X = 4.2, CURB = 0.14, CROSS_Z = -42, CROSS_HALF = 4.5;
-const COUNT = 48, TAU = Math.PI * 2;
+const TAU = Math.PI * 2;
+const X_AXIS = new THREE.Vector3(1, 0, 0);
 const UP = new THREE.Vector3(0, 1, 0);
 const wrap = (n, span) => ((n % span) + span) % span;
 
@@ -103,8 +105,15 @@ function material() {
 
 export default {
   name: 'ghosts',
+  loadPeople,
   async init(ctx) {
     this.people = makePeople();
+    const count = this.people.length;
+    // The two parent/child pairs come after the 48 other walkers. Derive capacity
+    // from population so these last four slots are actually rendered.
+    this.rigs = null;
+    try { this.rigs = await this.loadPeople(); }
+    catch (error) { console.warn('[ghosts] people.glb unavailable; using procedural people.', error.message); }
     this.group = new THREE.Group(); this.group.name = 'ghosts';
     this.material = material();
     this.meshes = [];
@@ -119,14 +128,26 @@ export default {
       this.meshes.push(mesh); this.group.add(mesh);
       return mesh;
     };
-    this.heads = batch('heads', new THREE.SphereGeometry(1, 8, 6), COUNT);
-    this.bodies = batch('bodies', new THREE.CylinderGeometry(0.14, 0.11, 0.36, 7), COUNT);
-    this.limbs = batch('limbs', new THREE.CylinderGeometry(0.85, 1, 1, 5), COUNT * 6);
     const umbrellas = this.people.filter(p => p.umbrella);
     umbrellas.forEach((p, i) => { p.umbrellaIndex = i; });
-    // Shallow faceted dome: recognisable umbrella silhouette, no ribs or textures.
-    this.canopies = batch('umbrellas', new THREE.SphereGeometry(1, 10, 4, 0, TAU, 0, Math.PI / 2), umbrellas.length);
-    this.shafts = batch('shafts', new THREE.CylinderGeometry(1, 1, 1, 5), umbrellas.length);
+    if (this.rigs) {
+      this.people.forEach((p, i) => {
+        p.modelType = p.child ? 2 : p.umbrella ? 0 : p.partner >= 0 ? 1
+          : p.waiting ? 6 : [1, 3, 4, 5, 7][i % 5];
+      });
+      this.rigs.forEach((rig, type) => {
+        for (const part of rig.parts) part.mesh = batch(`person-${type}-${part.name}`, part.geometry, count);
+      });
+      this.rootMatrix = new THREE.Matrix4(); this.localMatrix = new THREE.Matrix4();
+      this.inverseRoot = new THREE.Matrix4(); this.jointRotation = new THREE.Quaternion();
+      this.jointScale = new THREE.Vector3(); this.target = new THREE.Vector3();
+    } else {
+      this.heads = batch('heads', new THREE.SphereGeometry(1, 8, 6), count);
+      this.bodies = batch('bodies', new THREE.CylinderGeometry(0.14, 0.11, 0.36, 7), count);
+      this.limbs = batch('limbs', new THREE.CylinderGeometry(0.85, 1, 1, 5), count * 6);
+      this.canopies = batch('umbrellas', new THREE.SphereGeometry(1, 10, 4, 0, TAU, 0, Math.PI / 2), umbrellas.length);
+      this.shafts = batch('shafts', new THREE.CylinderGeometry(1, 1, 1, 5), umbrellas.length);
+    }
     this.matrix = new THREE.Matrix4(); this.rotation = new THREE.Quaternion();
     this.scale = new THREE.Vector3(); this.point = new THREE.Vector3(); this.delta = new THREE.Vector3();
     this.a = new THREE.Vector3(); this.b = new THREE.Vector3(); this.c = new THREE.Vector3();
@@ -134,12 +155,15 @@ export default {
     // Nonsingular near-zero transform, below the street, avoids undefined normal transforms.
     this.hidden = new THREE.Matrix4().makeScale(1e-6, 1e-6, 1e-6).setPosition(0, -10000, 0);
     this.broad = { origin: new THREE.Vector3(), dir: new THREE.Vector3(), strength: 1, angle: 0, range: 0 };
-    this.visible = new Uint8Array(COUNT);
-    for (let i = 0; i < COUNT; i++) this.hidePerson(this.people[i], i);
+    this.visible = new Uint8Array(count);
+    // Initialize every type's unused slots too; default identity matrices must never leak.
+    for (const mesh of this.meshes) {
+      for (let i = 0; i < mesh.instanceMatrix.count; i++) mesh.setMatrixAt(i, this.hidden);
+    }
     ctx.scene.add(this.group);
     ctx.api.ghosts = {
-      count: COUNT, visibleCount: 0, umbrellaCount: umbrellas.length,
-      waitingCount: this.people.filter(p => p.waiting).length, childCount: 2,
+      count, source: this.rigs ? 'glb' : 'procedural', visibleCount: 0, umbrellaCount: umbrellas.length,
+      waitingCount: this.people.filter(p => p.waiting).length, childCount: this.people.filter(p => p.child).length,
     };
     this.update(0, 0, ctx);
   },
@@ -165,6 +189,7 @@ export default {
     mesh.setMatrixAt(index, this.matrix.compose(this.point, this.rotation, this.scale));
   },
   drawPerson(p, index) {
+    if (this.rigs) return this.drawModel(p, index);
     const h = p.height, w = p.width, base = index * 6;
     this.part(this.heads, index, this.pointAt(p, 0, 0.91, 0, this.a), h * 0.083 * w, h * 0.095, h * 0.085, p.yaw);
     this.part(this.bodies, index, this.pointAt(p, 0, 0.65, 0, this.a), h * w, h, h * 0.73, p.yaw);
@@ -195,7 +220,49 @@ export default {
       this.segment(this.shafts, p.umbrellaIndex, this.a, this.b, 0.009);
     }
   },
+  drawModel(p, index) {
+    const h = p.height, rig = this.rigs[p.modelType];
+    this.point.copy(p.position); this.point.y += p.bob * h;
+    this.rotation.setFromAxisAngle(UP, p.yaw);
+    this.scale.set(h * p.width, h, h);
+    this.rootMatrix.compose(this.point, this.rotation, this.scale);
+    this.inverseRoot.copy(this.rootMatrix).invert();
+    const partner = this.people[p.partner];
+    const holdingSide = partner ? Math.sign((partner.position.x - p.position.x) * Math.cos(p.yaw)) : 0;
+    for (const part of rig.parts) {
+      const side = part.joint.endsWith('_l') ? -1 : 1;
+      const holding = part.joint.startsWith('arm') && side === holdingSide;
+      if (holding && part.hideWhenHolding) {
+        part.mesh.setMatrixAt(index, this.hidden);
+        continue;
+      }
+      this.jointScale.set(1, 1, 1);
+      this.jointRotation.identity();
+      if (holding) {
+        // Solve the authored hand centre onto the same world-space grip for both
+        // people, including their different heights, body widths, bob and yaw.
+        this.target.copy(p.position).add(partner.position).multiplyScalar(.5);
+        this.target.y += Math.min(h, partner.height) * .64;
+        this.target.applyMatrix4(this.inverseRoot).sub(part.pivot);
+        const length = this.target.length();
+        this.delta.copy(part.hand).normalize();
+        this.jointRotation.setFromUnitVectors(this.delta, this.target.divideScalar(Math.max(length, 1e-6)));
+        this.jointScale.setScalar(length / part.hand.length());
+      } else if (part.joint !== 'body') {
+        // Legs and opposite arms alternate; posed carrying/phone arms have zero swing.
+        const direction = part.joint.startsWith('leg') ? -1 : 1;
+        this.jointRotation.setFromAxisAngle(X_AXIS, p.stride * side * direction * part.swing);
+      }
+      this.localMatrix.compose(part.pivot, this.jointRotation, this.jointScale);
+      part.mesh.setMatrixAt(index, this.matrix.multiplyMatrices(this.rootMatrix, this.localMatrix));
+      part.mesh.count = Math.max(part.mesh.count, index + 1);
+    }
+  },
   hidePerson(p, i) {
+    if (this.rigs) {
+      for (const part of this.rigs[p.modelType].parts) part.mesh.setMatrixAt(i, this.hidden);
+      return;
+    }
     this.heads.setMatrixAt(i, this.hidden); this.bodies.setMatrixAt(i, this.hidden);
     for (let j = 0; j < 6; j++) this.limbs.setMatrixAt(i * 6 + j, this.hidden);
     if (p.umbrella) {
@@ -210,7 +277,7 @@ export default {
     if (!enabled) {
       // Invalidate old visible slots so reopening cannot expose stale matrices.
       this.visible.fill(0);
-      for (let i = 0; i < COUNT; i++) this.hidePerson(this.people[i], i);
+      for (let i = 0; i < this.people.length; i++) this.hidePerson(this.people[i], i);
       for (const mesh of this.meshes) { mesh.count = 0; mesh.instanceMatrix.needsUpdate = true; }
       ctx.api.ghosts.visibleCount = 0;
       return;
@@ -219,9 +286,12 @@ export default {
     for (const p of this.people) pose(p, t);
     this.broad.origin.copy(m.origin); this.broad.dir.copy(m.dir);
     let last = -1, lastUmbrella = -1, visibleCount = 0;
-    for (let i = 0; i < COUNT; i++) {
+    if (this.rigs) for (const mesh of this.meshes) mesh.count = 0;
+    for (let i = 0; i < this.people.length; i++) {
       const p = this.people[i];
-      const radius = p.umbrella ? 1.65 : 1.35;
+      const radius = this.rigs
+        ? Math.max(1.35, (this.rigs[p.modelType].radius + .3) * p.height * Math.max(1, p.width))
+        : p.umbrella ? 1.65 : 1.35;
       this.center.copy(p.position); this.center.y += p.height * 0.58;
       const distance = this.center.distanceTo(m.origin);
       // Expand for the whole silhouette AND noisy shader edges. Never test only the feet.
@@ -238,9 +308,11 @@ export default {
     }
     // Preserve slot identity for three's previous-instance matrices / TRAA velocity.
     // Shrink trailing slots; hidden interior slots stay collapsed, never compacted/reassigned.
-    this.heads.count = this.bodies.count = last + 1;
-    this.limbs.count = (last + 1) * 6;
-    this.canopies.count = this.shafts.count = lastUmbrella + 1;
+    if (!this.rigs) {
+      this.heads.count = this.bodies.count = last + 1;
+      this.limbs.count = (last + 1) * 6;
+      this.canopies.count = this.shafts.count = lastUmbrella + 1;
+    }
     for (const mesh of this.meshes) mesh.instanceMatrix.needsUpdate = true;
     ctx.api.ghosts.visibleCount = visibleCount;
   },
