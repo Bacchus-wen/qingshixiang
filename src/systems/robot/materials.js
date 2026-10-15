@@ -53,11 +53,13 @@ export function robotMaterial(name) {
     m.roughnessNode = wetRough(0.32);
     m.metalnessNode = float(1);
   } else if (n.includes('lens')) {
-    // the lens itself is a light source when awake: amber glow behind cracked glass
+    // smoked glass: mostly see-through so the iris and the core behind it read; a faint glow of its own
+    m.transparent = true; m.depthWrite = false;
+    m.opacityNode = float(0.35);
     m.colorNode = vec3(0.01);
     m.roughnessNode = float(0.05);
     m.metalnessNode = float(0);
-    m.emissiveNode = color(eyeColor).mul(eyeGlow.mul(eyeGlow).mul(3.5).add(0.015));
+    m.emissiveNode = color(eyeColor).mul(eyeGlow.mul(eyeGlow).mul(0.6).add(0.01));
   } else if (n.includes('eye_core')) {
     m.colorNode = vec3(0.02);
     // dim ember when closed, bright when open; slow breathing so it reads as "not quite dead"

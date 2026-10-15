@@ -140,7 +140,16 @@ export default {
     this.eye = find('eye');
     this.headRest = this.head.quaternion.clone();
     this.iris = [];
-    for (let i = 0; i < 8; i++) { const p = find(`iris_${i}`); if (p) this.iris.push({ node: p, rest: p.quaternion.clone() }); }
+    // the glowing core was hidden behind the barrel's front cap: bring it just in front of the cap, behind the lens
+    const core = find('eye_core'); if (core) core.position.z += 0.012;
+    // the iris sits in front of the lens (visible petals over a smoked-glass lens, the core glowing through)
+    for (let i = 0; i < 8; i++) {
+      const p = find(`iris_${i}`);
+      if (!p) continue;
+      p.position.z += 0.013;
+      p.traverse((b) => { if (b.isMesh) b.scale.multiply(new THREE.Vector3(1.25, 1, 1.35)); });
+      this.iris.push({ node: p, rest: p.quaternion.clone() });
+    }
 
     // the eye light: the only coloured light in the world
     this.gobo = makeGobo(); this.gobo.draw(0);
@@ -190,7 +199,7 @@ export default {
     const flicker = this.failT > 0 && t - this.failT < 0.6 ? (Math.random() < 0.5 ? 0.6 : 0.0) : 1;
     const pw = ctx.memory.power ?? 1;
     const weak = pw < 0.2 ? (Math.random() < (0.2 - pw) * 2.5 ? 0.35 : 1) : 1;
-    const o = this.open * flicker * weak * Math.min(1, 0.4 + pw * 3);
+    const o = Math.min(ctx.memory.openCap ?? 1, this.open * flicker * weak * Math.min(1, 0.4 + pw * 3));
 
     // ---- iris blades swing out of the aperture as it opens (blade 5 is bent and lags)
     for (let i = 0; i < this.iris.length; i++) {
