@@ -63,6 +63,16 @@ export default {
       }
     }
 
+    // road markings: worn paint (pale, rough), barely there in the rain
+    const paint = new THREE.MeshStandardNodeMaterial({ color: 0x5d5d5b, roughness: 0.55, polygonOffset: true, polygonOffsetFactor: -2 });
+    for (let z = L.zStart - 2; z > L.zEnd + 2; z -= 6) {
+      if (Math.abs(z - L.crossZ) < L.crossHalf + 1) continue;
+      if (Math.random && ((z * 7919) % 5 === 0)) continue; // a few dashes are gone
+      box(0.12, 0.004, 2.4, paint, 0, 0.002, z, root).castShadow = false;
+    }
+    for (let k = -6; k <= 6; k++) box(0.45, 0.004, 3.2, paint, k * 0.9, 0.003, L.crossZ + L.crossHalf + 2.2, root).castShadow = false;
+    const grate = new THREE.MeshStandardNodeMaterial({ color: 0x0c0c0c, roughness: 0.4, metalness: 0.8 });
+    for (let z = 10; z > L.zEnd; z -= 11) for (const sd of [-1, 1]) box(0.35, 0.01, 0.8, grate, sd * (L.halfRoad - 0.25), 0.004, z + sd * 2.5, root).castShadow = false;
     // facades
     const r = rng(1937);
     const walls = [M.wallA, M.wallB, M.wallC];
@@ -123,6 +133,10 @@ export default {
               if (r() < 0.12) continue;
               const wz = zc - w / 2 + (k + 0.5) * (w / nWin);
               box(0.06, 1.3, 1.1, M.glass, f.frontX - side * 0.03, y, wz, root);
+              // sill, lintel and side frames so windows read as openings, not stickers
+              box(0.16, 0.07, 1.3, M.wallC, f.frontX - side * 0.08, y - 0.7, wz, root);
+              box(0.08, 0.1, 1.24, mat, f.frontX - side * 0.04, y + 0.7, wz, root);
+              for (const e of [-1, 1]) box(0.08, 1.3, 0.06, M.rust, f.frontX - side * 0.04, y, wz + e * 0.58, root);
             }
           }
           z -= w;
