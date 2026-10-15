@@ -85,10 +85,11 @@ export default {
       this.euler = new THREE.Euler(0, 0, 0, 'YXZ');
       this.q = new THREE.Quaternion();
       this.origin = new THREE.Vector3(-4.58, 0.14, -13.5);
-      // +X is the robot's facing direction; its right foot is on its -Z side.
+      // +X is the robot's facing direction. The cat sleeps on its +Z side, against the wall by the torn
+      // shoulder's cables (dry, out of the puddle, and in view of the waiting camera) (Claude)
       ctx.api.robot?.root?.getWorldPosition(this.origin);
-      this.origin.x += 0.45;
-      this.origin.z -= 0.52;
+      this.origin.x += 0.12;
+      this.origin.z += 0.62;
       this.origin.y = 0.14;
       root.position.copy(this.origin);
       this.debug = ctx.params?.get('cat');
