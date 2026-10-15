@@ -1,0 +1,22 @@
+{
+ "state": "applied",
+ "files": [
+  "tools/blender/live/.gitignore",
+  "tools/blender/live/README.md",
+  "tools/blender/live/VALIDATION.md",
+  "tools/blender/live/blender_live.py",
+  "tools/blender/live/server.py",
+  "tools/blender/live/smoke_test.py",
+  "tools/blender/live/test_server.py"
+ ],
+ "created": [
+  "tools/blender/live/.gitignore",
+  "tools/blender/live/README.md",
+  "tools/blender/live/VALIDATION.md",
+  "tools/blender/live/blender_live.py",
+  "tools/blender/live/server.py",
+  "tools/blender/live/smoke_test.py",
+  "tools/blender/live/test_server.py"
+ ],
+ "at": "2026-10-16 03:08:54"
+}

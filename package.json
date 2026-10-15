@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "gsap": "^3.13.0",
+    "stats-gl": "^4.2.3",
     "three": "0.186.1"
   },
   "devDependencies": {

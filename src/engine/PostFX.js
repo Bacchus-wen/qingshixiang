@@ -1,10 +1,12 @@
 import * as THREE from 'three/webgpu';
 import {
-  pass, depthPass, mrt, output, velocity, uniform, vec2, vec3, vec4, float, screenUV, time, hash, floor, fract, mix,
+  pass, depthPass, mrt, output, velocity, normalView, metalness, roughness, packNormalToRGB, unpackRGBToNormal, sample,
+  normalWorld, materialReference, uniform, vec2, vec3, vec4, float, screenUV, time, hash, floor, fract, mix,
   smoothstep, length, luminance, clamp, max, renderOutput, Fn,
 } from 'three/tsl';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 import { traa } from 'three/addons/tsl/display/TRAANode.js';
+import { ssr } from 'three/addons/tsl/display/SSRNode.js';
 
 // Post pipeline v1:
 //   opaque depth pre-pass (volumes read it for occlusion)
@@ -26,6 +28,7 @@ export class PostFX {
       grain: uniform(0.035),
       saturation: uniform(0.85),
       lift: uniform(new THREE.Vector3(0.004, 0.006, 0.009)),
+      ssrIntensity: uniform(1.0),
       bloomStrength: 0.25, bloomRadius: 0.5, bloomThreshold: 0.9,
     };
     renderer.toneMapping = THREE.AgXToneMapping;
@@ -35,7 +38,8 @@ export class PostFX {
 
   build() {
     const { renderer, scene, camera, params } = this;
-    const noAA = this.ctx.params.get('pfx')?.includes('notraa');
+    const dbg = (this.ctx.params.get('pfx') || '').split(',');
+    const noAA = dbg.includes('notraa');
     const pipeline = new THREE.RenderPipeline(renderer);
     pipeline.outputColorTransform = false;
 
@@ -45,10 +49,48 @@ export class PostFX {
     for (const m of this.volumes) m.depthNode = preDepth.sample(screenUV);
 
     const scenePass = pass(scene, camera);
-    scenePass.setMRT(mrt({ output, velocity }));
+    // G-buffer attachments carry alpha = "opaque"; transparent draws (rain, fog, beams) blend with alpha 0 and keep
+    // the opaque values underneath, so SSR and TRAA never see a raindrop's normal or roughness.
+    const opaqueW = float(1).sub(materialReference('transparent', 'float'));
+    const gbuf = mrt({
+      output,
+      normal: vec4(packNormalToRGB(normalView), opaqueW),
+      // b = how up-facing the shaded surface is (world space), so SSR can be limited to the ground plane
+      metalrough: vec4(metalness, roughness, smoothstep(0.55, 0.9, normalWorld.y), opaqueW),
+      velocity: vec4(velocity, 0, opaqueW),
+    });
+    const keep = new THREE.BlendMode(THREE.NormalBlending);
+    for (const k of ['normal', 'metalrough', 'velocity']) gbuf.setBlendMode(k, keep);
+    scenePass.setMRT(gbuf);
+    scenePass.getTexture('normal').type = THREE.UnsignedByteType;
+    scenePass.getTexture('metalrough').type = THREE.UnsignedByteType;
     const color = scenePass.getTextureNode('output');
+    const depth = scenePass.getTextureNode('depth');
     const vel = scenePass.getTextureNode('velocity');
-    const aa = noAA ? color : traa(color, preDepth, vel, camera);
+    const nTex = scenePass.getTextureNode('normal');
+    const mr = scenePass.getTextureNode('metalrough');
+
+    // SSR only on smooth, up-facing (wet ground, puddles) surfaces; walls and rough surfaces use the environment.
+    let lit = color;
+    if (!dbg.includes('nossr')) {
+      const refl = float(1).sub(smoothstep(0.04, 0.45, mr.g)).mul(mr.b);
+      const ssrPass = ssr(color, depth, sample((u) => unpackRGBToNormal(nTex.sample(u))), {
+        metalnessNode: refl, roughnessNode: mr.g, reflectNonMetals: true, camera,
+      });
+      ssrPass.resolutionScale = 0.5;
+      ssrPass.quality.value = 0.5;
+      ssrPass.maxDistance.value = 60;
+      ssrPass.thickness.value = 0.15;
+      ssrPass.blurQuality = 2;
+      this.ssrPass = ssrPass;
+      // gate SSR ourselves: only up-facing, glossy pixels receive reflections (walls/shutters never smear)
+      lit = color.add(ssrPass.rgb.mul(refl).mul(params.ssrIntensity));
+      if (dbg.includes('ssronly')) lit = ssrPass.rgb.mul(4);
+      if (dbg.includes('refl')) lit = vec3(refl);
+      if (dbg.includes('nrm')) lit = nTex.rgb;
+      if (dbg.includes('mr')) lit = vec3(mr.r, mr.g, 0);
+    }
+    const aa = noAA ? lit : traa(lit, depth, vel, camera);
 
     const bloomPass = bloom(aa, params.bloomStrength, params.bloomRadius, params.bloomThreshold);
     this.bloomPass = bloomPass;
@@ -67,7 +109,9 @@ export class PostFX {
       return vec4(max(c, vec3(0)), 1);
     })();
 
-    pipeline.outputNode = grade;
+    // debug views (?pfx=refl|nrm|mr|ssronly) bypass bloom/tonemap so values read raw
+    const rawDbg = ['refl', 'nrm', 'mr', 'ssronly'].some((k) => dbg.includes(k));
+    pipeline.outputNode = rawDbg ? vec4(lit.rgb, 1) : grade;
     this.pipeline = pipeline;
     this.scenePass = scenePass;
     this.prePass = prePass;

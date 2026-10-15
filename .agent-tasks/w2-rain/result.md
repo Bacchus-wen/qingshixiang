@@ -1,0 +1,7 @@
+已实现 GPU 雨丝、三层雨幕、落地涟漪和记忆光锥琥珀染色，并注册 rain、设置 lookdev 的 ctx.memory。
+
+粒子数：GPU 默认 6 万、低画质 2 万；WebGL2 降级为 6000/2400。构建及离线 WGSL/GLSL、CPU 模拟检查通过。
+
+截图未生成：指定命令被沙箱 `listen EPERM` 阻止，Chrome 也无法启动，因此画面、浏览器控制台及帧率尚未验收。预期路径为 `renders/lookdev-low.png`。
+
+已知限制：固定降雨范围，仅检测 y=0 地面。

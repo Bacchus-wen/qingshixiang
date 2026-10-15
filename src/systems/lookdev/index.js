@@ -73,6 +73,12 @@ export default {
     this.eye.target.position.set(4, 1.2, -10);
     this.eye.castShadow = true; this.eye.shadow.mapSize.set(1024, 1024); this.eye.shadow.camera.near = 0.3;
     scene.add(this.eye, this.eye.target);
+    // Shared projection contract for rain and memory-aware materials.
+    ctx.memory.origin.copy(this.eye.position);
+    ctx.memory.dir.subVectors(this.eye.target.position, this.eye.position).normalize();
+    ctx.memory.angle = this.eye.angle;
+    ctx.memory.range = this.eye.distance;
+    ctx.memory.strength = 1;
 
     // volumetric fog box covering the street
     const tex = noise3D(THREE);

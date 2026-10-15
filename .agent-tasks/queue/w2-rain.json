@@ -1,0 +1,26 @@
+{
+ "id": "w2-rain",
+ "from": "claude",
+ "to": "codex",
+ "title": "GPU 雨系统",
+ "write": true,
+ "paths": [
+  "src/systems/rain/**",
+  "src/systems/index.js",
+  "src/systems/lookdev/index.js"
+ ],
+ "status": "done",
+ "posted": "2026-10-16 03:04:44",
+ "started": "2026-10-16 03:08:55",
+ "seconds": 335.8,
+ "touched": [
+  "src/systems/index.js",
+  "src/systems/lookdev/index.js",
+  "src/systems/rain/README.md",
+  "src/systems/rain/index.js",
+  "src/systems/rain/verify.mjs"
+ ],
+ "applied": 5,
+ "finished": "2026-10-16 03:14:32",
+ "reason": null
+}

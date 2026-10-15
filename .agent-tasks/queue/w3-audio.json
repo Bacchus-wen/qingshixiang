@@ -1,0 +1,29 @@
+{
+ "id": "w3-audio",
+ "from": "claude",
+ "to": "codex",
+ "title": "程序合成音景",
+ "write": true,
+ "paths": [
+  "src/systems/audio/**",
+  "src/systems/index.js",
+  "tools/audio-render.mjs"
+ ],
+ "status": "done",
+ "posted": "2026-10-16 03:04:44",
+ "started": "2026-10-16 03:14:33",
+ "seconds": 400.7,
+ "touched": [
+  "src/systems/audio/README.md",
+  "src/systems/audio/control.js",
+  "src/systems/audio/graph.js",
+  "src/systems/audio/index.js",
+  "src/systems/audio/offline.js",
+  "src/systems/audio/verify.mjs",
+  "src/systems/index.js",
+  "tools/audio-render.mjs"
+ ],
+ "applied": 8,
+ "finished": "2026-10-16 03:21:14",
+ "reason": null
+}

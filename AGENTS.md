@@ -54,3 +54,9 @@ reference/         参考视频(不进 git)
 - Codex 只通过本机 team-sync 调用。**不要使用 ChatGPT 的任何功能**:ChatGPT 网页/App、Codex Cloud 云端任务、ChatGPT 连接器与同步、OpenAI 图像生成。防止项目信息同步或泄露。
 - 氛围是最重要的,故事可以薄;方向自由,不限雨夜废城。主动搜索并使用一切合适的免费技术和开源工具;共享工具放 `~/Tools`(见 `~/Tools/README.md`)。
 - 技术现成能力清单见 `docs/tech-inventory.md`,参考实现见 `~/Tools/refs/three-r186-examples/`。
+
+## 进程安全(2026-10-16 03:20,用户反馈 Chrome 和 Blender 弹出崩溃)
+- **绝不启动用户自己的 Google Chrome**(Playwright 不要用 `channel: 'chrome'`)。截图一律用 `tools/shot.mjs`,它用 Playwright 自带的 Chromium(`channel: 'chromium'`)。
+- **Blender 只用无界面模式**(`-b`),脚本结束时用 `os._exit(0)` 直接退出,避免退出清理阶段的段错误(会弹系统崩溃对话框)。不要用 kill -9 杀 Blender,先发正常退出请求。
+- 任何你启动的后台进程(Vite、浏览器、Blender)在任务结束前必须关掉;结束前用 `pgrep -fl "Blender|Chromium|vite"` 自查。
+- **Codex / Grok 在沙箱里不要启动 Blender、浏览器、Vite 或任何监听端口的服务**:沙箱会拦截,并让程序崩溃弹窗。写完代码只做静态检查(构建、语法、单元逻辑),画面与 Blender 的实际验收由 Claude 在沙箱外完成。

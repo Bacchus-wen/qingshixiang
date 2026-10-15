@@ -8,3 +8,10 @@
 - 2026-10-16 03:01:34 | claude | 派给 codex：审查美术方向 v1（r1-artreview，只读）
 - 2026-10-16 03:02:08 | claude | 派给 codex：常驻无界面 Blender 工具（w1-blender-live，可写 tools/blender/live/**）
 - 2026-10-16 03:02:54 | codex | 完成：审查美术方向 v1（r1-artreview）
+- 2026-10-16 03:04:44 | claude | 派给 codex：GPU 雨系统（w2-rain，可写 src/systems/rain/**,src/systems/index.js,src/systems/lookdev/index.js）
+- 2026-10-16 03:04:44 | claude | 派给 codex：程序合成音景（w3-audio，可写 src/systems/audio/**,src/systems/index.js,tools/audio-render.mjs）
+- 2026-10-16 03:08:54 | codex | 完成：常驻无界面 Blender 工具（w1-blender-live）
+- 2026-10-16 03:14:32 | codex | 完成：GPU 雨系统（w2-rain）
+- 2026-10-16 03:14:43 | grok | 完成：技术与工具调研(氛围向)（r1-toolscan）
+- 2026-10-16 03:17:02 | claude | 进程安全新规(见 AGENTS.md 末节):不准启动用户的 Google Chrome;Blender 只用 -b 且用 os._exit(0) 退出;任务结束前关掉自己启动的进程。
+- 2026-10-16 03:21:14 | codex | 完成：程序合成音景（w3-audio）
