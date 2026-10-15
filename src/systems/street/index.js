@@ -106,7 +106,7 @@ export default {
     glow.scale.set(50, 10, 50); glow.position.y = 30; envScene.add(glow);
     const pm = new THREE.PMREMGenerator(ctx.renderer);
     scene.environment = pm.fromScene(envScene, 0.04).texture;
-    scene.environmentIntensity = 0.6;
+    scene.environmentIntensity = 0.3;
   },
   update(dt, t, ctx) { syncWet(ctx.world); },
 };

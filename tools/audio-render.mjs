@@ -9,7 +9,7 @@ const bundle = await build({
 });
 let browser;
 try {
-  browser = await chromium.launch({ channel: 'chrome', headless: true });
+  browser = await chromium.launch({ channel: 'chromium', headless: true });
   const page = await browser.newPage();
   const errors = [];
   page.on('console', (m) => { console.log(m.text()); if (m.type() === 'error') errors.push(m.text()); });

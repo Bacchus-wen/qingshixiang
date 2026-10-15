@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
 import {
   vec3, Fn, texture3D, screenCoordinate, uniform, fract, interleavedGradientNoise, time, fog, color,
-  exponentialHeightFogFactor, smoothstep, float, abs,
+  exponentialHeightFogFactor, smoothstep, float, abs, lights,
 } from 'three/tsl';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 
@@ -57,8 +57,10 @@ export default {
     };
 
     this.volumes = [];
-    const volume = (center, size, density = 0.6) => {
+    // onlyLights: the volume scatters just these lights (a beam volume must not glow with every street lamp)
+    const volume = (center, size, density = 0.6, onlyLights = null) => {
       const m = makeMat(density, uniform(center.clone()), uniform(size.clone().multiplyScalar(0.5)));
+      if (onlyLights) m.lightsNode = lights(onlyLights);
       const mesh = new THREE.Mesh(new THREE.BoxGeometry(size.x, size.y, size.z), m);
       mesh.position.copy(center);
       mesh.renderOrder = 10;
@@ -75,7 +77,7 @@ export default {
     if (st) {
       for (const l of [st.lamp, st.far]) {
         const p = l.position.clone(); p.y = 3.8; p.x = (p.x + l.target.position.x) / 2; p.z = (p.z + l.target.position.z) / 2;
-        volume(p, new THREE.Vector3(12, 8.5, 12), 0.5);
+        volume(p, new THREE.Vector3(12, 8.5, 12), 0.07, [l]);
       }
     }
   },

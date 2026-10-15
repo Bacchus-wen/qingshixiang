@@ -27,6 +27,8 @@ export class PostFX {
       vignette: uniform(0.5),
       grain: uniform(0.035),
       saturation: uniform(0.85),
+      contrast: uniform(0.38),
+      blackPoint: uniform(0.018),
       lift: uniform(new THREE.Vector3(0.004, 0.006, 0.009)),
       ssrIntensity: uniform(1.0),
       bloomStrength: 0.25, bloomRadius: 0.5, bloomThreshold: 0.9,
@@ -100,6 +102,9 @@ export class PostFX {
     const grade = Fn(() => {
       const c = clamp(mapped.rgb, 0, 1).toVar();
       c.assign(mix(vec3(luminance(c)), c, params.saturation));
+      // print-like curve: deeper blacks, gentle shoulder
+      c.assign(max(c.sub(params.blackPoint), vec3(0)).div(float(1).sub(params.blackPoint)));
+      c.assign(mix(c, c.mul(c).mul(float(3).sub(c.mul(2))), params.contrast));
       c.addAssign(params.lift.mul(float(1).sub(c)));
       const d = length(screenUV.sub(0.5).mul(vec2(1, 0.8)));
       c.mulAssign(float(1).sub(smoothstep(0.25, 0.85, d).mul(params.vignette)));

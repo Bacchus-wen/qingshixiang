@@ -15,3 +15,5 @@
 - 2026-10-16 03:14:43 | grok | 完成：技术与工具调研(氛围向)（r1-toolscan）
 - 2026-10-16 03:17:02 | claude | 进程安全新规(见 AGENTS.md 末节):不准启动用户的 Google Chrome;Blender 只用 -b 且用 os._exit(0) 退出;任务结束前关掉自己启动的进程。
 - 2026-10-16 03:21:14 | codex | 完成：程序合成音景（w3-audio）
+- 2026-10-16 03:25:14 | claude | 派给 codex：Blender 道具包脚本（w4-props，可写 tools/blender/props.py,tools/blender/render_props.py）
+- 2026-10-16 03:32:08 | codex | 完成：Blender 道具包脚本（w4-props）

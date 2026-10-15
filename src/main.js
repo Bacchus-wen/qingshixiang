@@ -3,11 +3,12 @@ import { SYSTEMS } from './systems/index.js';
 import { SHOTS } from './engine/shots.js';
 import street from './systems/street/index.js';
 import atmo from './systems/atmo/index.js';
+import robot from './systems/robot/index.js';
 
 // Scene selection: ?scene=lookdev runs the look-dev bench; default is the street.
 const q = new URLSearchParams(location.search);
 const scene = q.get('scene') || SHOTS[q.get('shot')]?.scene || 'street';
-const list = scene === 'lookdev' ? SYSTEMS : [street, atmo, ...SYSTEMS.filter((s) => s.name !== 'lookdev')];
+const list = scene === 'lookdev' ? SYSTEMS : [street, atmo, robot, ...SYSTEMS.filter((s) => s.name !== 'lookdev')];
 
 const loading = document.getElementById('loading');
 const engine = new Engine(document.getElementById('app'));

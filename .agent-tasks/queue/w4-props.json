@@ -1,0 +1,22 @@
+{
+ "id": "w4-props",
+ "from": "claude",
+ "to": "codex",
+ "title": "Blender 道具包脚本",
+ "write": true,
+ "paths": [
+  "tools/blender/props.py",
+  "tools/blender/render_props.py"
+ ],
+ "status": "done",
+ "posted": "2026-10-16 03:25:14",
+ "started": "2026-10-16 03:25:14",
+ "seconds": 412.4,
+ "touched": [
+  "tools/blender/props.py",
+  "tools/blender/render_props.py"
+ ],
+ "applied": 2,
+ "finished": "2026-10-16 03:32:08",
+ "reason": null
+}

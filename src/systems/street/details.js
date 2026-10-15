@@ -98,7 +98,7 @@ export function buildDetails(ctx, root, facades, M, r) {
   add(root, new THREE.BoxGeometry(0.3, 0.9, 0.3), dark, tlx, 4.4, tlz);
 
   // the cold failing street lamp: main present-day key light
-  const lamp = new THREE.SpotLight(0xe4ebf2, 900, 32, 0.9, 0.55, 2);
+  const lamp = new THREE.SpotLight(0xe4ebf2, 650, 26, 0.62, 0.7, 2);
   lamp.position.set(L.halfRoad - 0.3, 6.8, -3); lamp.target.position.set(-0.5, 0, -5);
   lamp.castShadow = true; lamp.shadow.mapSize.set(1024, 1024); lamp.shadow.bias = -0.0004;
   root.add(lamp, lamp.target);
@@ -110,7 +110,7 @@ export function buildDetails(ctx, root, facades, M, r) {
   ctx.api.streetBulb = bulb;
   add(root, poleGeo, M.rust, L.halfRoad + 0.35, 4.5, -3);
   // a far lamp down the lane, dimmer, so depth reads in silhouettes
-  const far = new THREE.SpotLight(0xd6dde6, 600, 34, 0.95, 0.6, 2);
+  const far = new THREE.SpotLight(0xd6dde6, 450, 26, 0.66, 0.7, 2);
   far.position.set(-L.halfRoad + 0.4, 6.5, -34); far.target.position.set(0.5, 0, -36);
   far.castShadow = true; far.shadow.mapSize.set(512, 512);
   root.add(far, far.target);
@@ -120,6 +120,6 @@ export function buildDetails(ctx, root, facades, M, r) {
   win.position.set(wf.frontX - 0.04, wf.h - 2.4, wf.z); win.rotation.y = -Math.PI / 2 * wf.side;
   root.add(win);
 
-  scene.add(new THREE.HemisphereLight(0x2a2e34, 0x060606, 0.6));
+  scene.add(new THREE.HemisphereLight(0x22262b, 0x050505, 0.16));
   ctx.api.street = { lamp, far, vmLight, car };
 }
