@@ -151,6 +151,19 @@ export default {
   },
   update(dt, t, ctx) {
     syncWet(ctx.world);
+    // the near lamp fails now and then (the audio crackles on these drops); the vending panel flickers rarely
+    const st = ctx.api.street;
+    if (st && !ctx.isShot) { // shots stay deterministic
+      this.lampT = (this.lampT ?? 6) - dt;
+      if (this.lampT < 0) { this.lampFail = 0.25 + Math.random() * 0.9; this.lampT = 7 + Math.random() * 14; }
+      let k = 1;
+      if (this.lampFail > 0) { this.lampFail -= dt; k = Math.sin(t * 57) * Math.sin(t * 23) > 0 ? 0.12 : 0.85; }
+      st.lamp.intensity = 650 * k;
+      this.vmT = (this.vmT ?? 11) - dt;
+      if (this.vmT < 0) { this.vmFail = 0.15 + Math.random() * 0.2; this.vmT = 15 + Math.random() * 20; }
+      const vk = (this.vmFail ?? 0) > 0 ? ((this.vmFail -= dt), 0.3) : 1;
+      st.vmLight.intensity = 14 * vk;
+    }
     // shutters rise slowly while the eye holds on them and fall back half a beat after the light leaves
     for (const s of this.shutters) {
       const m = memoryMaskCPU(s.center, ctx.memory);

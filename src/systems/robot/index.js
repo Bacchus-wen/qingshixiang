@@ -198,7 +198,12 @@ export default {
       this._q.setFromAxisAngle(AXIS_Z, -o * lag * 0.95);
       this.iris[i].node.quaternion.copy(this.iris[i].rest).multiply(this._q);
     }
-    eyeGlow.value = o;
+    // asleep, it dreams: a faint flicker in the lens every few seconds (a hint that it can wake)
+    this.dreamT = (this.dreamT ?? 5) - dt;
+    if (this.dreamT < 0 && !ctx.isShot) { this.dream = 0.35; this.dreamT = 6 + Math.random() * 6; }
+    this.dream = Math.max(0, (this.dream ?? 0) - dt);
+    const dreamGlow = this.open < 0.02 && this.dream > 0 ? 0.18 * Math.sin((0.35 - this.dream) / 0.35 * Math.PI) : 0;
+    eyeGlow.value = Math.max(o, dreamGlow);
 
     // ---- head: stiff, delayed look toward the pointer, only once the eye is awake
     this.look.set(input.pointer.x * 0.55, input.pointer.y * 0.55);

@@ -1,0 +1,15 @@
+{
+ "id": "w13-cat",
+ "from": "claude",
+ "to": "codex",
+ "title": "一只猫",
+ "write": true,
+ "paths": [
+  "tools/blender/cat.py",
+  "src/systems/cat/**",
+  "src/main.js"
+ ],
+ "status": "running",
+ "posted": "2026-10-16 05:38:53",
+ "started": "2026-10-16 05:38:56"
+}
