@@ -24,7 +24,7 @@ try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
-  page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+  page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') errors.push(`[${m.type()}] ${m.text()}`.slice(0, 400)); });
   await page.goto(`http://localhost:${server.httpServer.address().port}/?speed=${speed}${query ? '&' + query : ''}`);
   await page.waitForFunction(() => document.getElementById('loading')?.classList.contains('done'), null, { timeout: 120000 });
   const wait = (s) => page.waitForTimeout((s / speed) * 1000);

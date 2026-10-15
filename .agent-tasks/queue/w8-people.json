@@ -1,0 +1,13 @@
+{
+ "id": "w8-people",
+ "from": "claude",
+ "to": "codex",
+ "title": "真正的人形剪影",
+ "write": true,
+ "paths": [
+  "tools/blender/people.py",
+  "src/systems/ghosts/**"
+ ],
+ "status": "queued",
+ "posted": "2026-10-16 04:05:18"
+}

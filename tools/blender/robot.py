@@ -190,6 +190,9 @@ def build_body(root):
     for side in (-1, 1):
         obj_from(lambda: bpy.ops.mesh.primitive_cylinder_add(vertices=10, radius=0.012, depth=0.2), f'abdomen_piston_{side}', M['joint'], torso,
                  loc=(side * 0.1, 0.0, 0.13), rot=(0, side * 0.12, 0))
+    # a chest plate torn loose, hanging from one hinge over the stomach
+    hinge = empty('panel_hinge', torso, loc=(0.06, -0.115, 0.27), rot=(math.radians(-150), math.radians(12), math.radians(8)))
+    taper_box('panel_hanging', (0.13, 0.012, 0.16), (1.0, 1.0), M['shell'], hinge, loc=(0, 0, 0.08), bev=0.005)
     # exposed ribs and spine behind the broken chest plate
     obj_from(lambda: bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=0.03, depth=0.46), 'spine', M['frame'], torso, loc=(0, 0.03, 0.25))
     for k in range(5):

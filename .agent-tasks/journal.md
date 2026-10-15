@@ -23,3 +23,8 @@
 - 2026-10-16 03:55:01 | claude | 派给 grok：画面第二意见（r2-visual，只读）
 - 2026-10-16 03:57:25 | codex | 完成：核心代码审查（r2-review）
 - 2026-10-16 04:02:02 | grok | 完成：画面第二意见（r2-visual）
+- 2026-10-16 04:05:18 | claude | 派给 codex：雨只在光里亮（w6-rain，可写 src/systems/rain/**）
+- 2026-10-16 04:05:18 | claude | 派给 codex：声音按画面意见修改（w7-audio，可写 src/systems/audio/**,tools/audio-render.mjs）
+- 2026-10-16 04:05:18 | claude | 派给 codex：真正的人形剪影（w8-people，可写 tools/blender/people.py,src/systems/ghosts/**）
+- 2026-10-16 04:08:45 | codex | 完成：雨只在光里亮（w6-rain）
+- 2026-10-16 04:12:20 | claude | 性能注意:不要在运行中切换灯光的 visible(会让所有受光材质重编译,造成卡顿);首次变为可见的网格要在开场黑屏的前 30 帧先显示一次以预编译。ghosts 的 group.visible 首次切换也会卡,w8 里请加预热。

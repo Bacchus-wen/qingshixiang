@@ -1,0 +1,14 @@
+{
+ "id": "w7-audio",
+ "from": "claude",
+ "to": "codex",
+ "title": "声音按画面意见修改",
+ "write": true,
+ "paths": [
+  "src/systems/audio/**",
+  "tools/audio-render.mjs"
+ ],
+ "status": "running",
+ "posted": "2026-10-16 04:05:18",
+ "started": "2026-10-16 04:08:46"
+}

@@ -38,7 +38,7 @@ function context(gpu, low) {
     THREE, scene: new THREE.Scene(), camera: new THREE.PerspectiveCamera(),
     renderer: { backend: { isWebGPUBackend: gpu }, computeAsync: async () => {} },
     params: new URLSearchParams(low ? 'q=low' : ''),
-    world: { rain: 1, wind: new THREE.Vector2(0.4, -0.15) },
+    world: { rain: 1, lightning: 0, wind: new THREE.Vector2(0.4, -0.15) },
     memory: { origin: new THREE.Vector3(-4, 1.45, 1.6), dir: new THREE.Vector3(8, -0.25, -11.6).normalize(), angle: 0.32, range: 40, strength: 1 },
     api: {},
   };
@@ -51,6 +51,29 @@ try {
     assert.equal(ctx.api.rain.particleCount, gpu ? (low ? 20000 : 60000) : (low ? 2400 : 6000));
     assert.equal(rain.meshes.length, 5);
     assert(rain.meshes.every(m => m.material.transparent && !m.material.depthWrite));
+    assert(rain.lights.every(light => light.intensity.value === 0));
+    // Real SpotLights, including a transformed parent and changing target.
+    const parent = new THREE.Group(); parent.position.set(2, 0, -3);
+    const lamp = new THREE.SpotLight(0xe4ebf2, 650, 26, 0.62, 0.7, 2);
+    lamp.position.set(3, 6.8, -3); lamp.target.position.set(-0.5, 0, -5);
+    parent.add(lamp, lamp.target); ctx.scene.add(parent);
+    ctx.api.street = { lamp };
+    ctx.world.lightning = 0.75; ctx.camera.position.set(1, 2, 3); rain.sync(ctx);
+    const light = rain.lights[0];
+    assert(light.position.value.equals(new THREE.Vector3(5, 6.8, -6)));
+    assert(light.direction.value.distanceTo(lamp.target.position.clone().sub(lamp.position).normalize()) < 1e-12);
+    assert.equal(light.outer.value, Math.cos(lamp.angle));
+    assert.equal(light.inner.value, Math.cos(lamp.angle * (1 - lamp.penumbra)));
+    assert.equal(light.range.value, 26); assert.equal(light.intensity.value, 650);
+    assert(light.color.value.equals(lamp.color));
+    assert(rain.u.camera.value.equals(ctx.camera.position)); assert.equal(rain.u.lightning.value, 0.75);
+    lamp.intensity = 90; lamp.target.position.x += 2; lamp.penumbra = 0; lamp.distance = 0;
+    rain.sync(ctx); assert.equal(light.intensity.value, 90); assert.equal(light.range.value, 1e6);
+    assert(light.inner.value > light.outer.value); // No equal-edge smoothstep.
+    assert(light.direction.value.distanceTo(lamp.target.position.clone().sub(lamp.position).normalize()) < 1e-12);
+    lamp.visible = false; rain.sync(ctx); assert.equal(light.intensity.value, 0);
+    delete ctx.api.street; parent.removeFromParent();
+    ctx.world.lightning = 0; ctx.camera.position.set(0, 0, 0); rain.sync(ctx);
     if (gpu) {
       const b = new WGSLNodeBuilder(null, renderer); b.compute = rain.compute; b.build();
       assert.match(b.computeShader, /@compute/);
@@ -61,11 +84,18 @@ try {
       const p = rain.cpuDrops.array, h = rain.cpuImpacts.array;
       p.set([0, 0.01, 0, 12], 0);
       rain.update(1 / 60, 1 / 60, ctx);
-      assert(Math.abs(h[0] - 0.4 * (0.01 / 12)) < 1e-6);
-      assert(Math.abs(h[2] + 0.15 * (0.01 / 12)) < 1e-6);
+      assert(Math.abs(h[0] - 0.4 * (0.01 / 14.4)) < 1e-6);
+      assert(Math.abs(h[2] + 0.15 * (0.01 / 14.4)) < 1e-6);
       assert(Math.abs(h[1] - 0.018) < 1e-6);
       assert(h[3] > 0 && h[3] < 1 / 60);
       assert(p[1] > 15 && p[1] < 16);
+      assert(Math.abs(p[0] - h[0]) > 1 && Math.abs(p[2] - h[2]) > 1, 'next fall must change column');
+      for (const [z, scale] of [[0, 1.2], [14, 0.9], [30, 0.6]]) {
+        ctx.camera.position.set(0, 0, z); p.set([0, 0.5, 0, 12], 0);
+        rain.update(1 / 60, 1 / 60, ctx);
+        assert(Math.abs(p[1] - (0.5 - 12 * scale / 60)) < 1e-6, 'near/middle/far fall speed');
+      }
+      ctx.camera.position.set(0, 0, 0);
       for (let frame = 1; frame <= 120; frame++) rain.update(1 / 60, frame / 60, ctx);
       assert(p.every(Number.isFinite)); assert(h.every(Number.isFinite));
       for (let i = 0; i < rain.count; i++) {

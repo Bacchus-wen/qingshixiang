@@ -7,6 +7,7 @@ import {
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 import { traa } from 'three/addons/tsl/display/TRAANode.js';
 import { ssr } from 'three/addons/tsl/display/SSRNode.js';
+import { dof } from 'three/addons/tsl/display/DepthOfFieldNode.js';
 
 // Post pipeline v1:
 //   opaque depth pre-pass (volumes read it for occlusion)
@@ -31,6 +32,8 @@ export class PostFX {
       blackPoint: uniform(0.018),
       lift: uniform(new THREE.Vector3(0.004, 0.006, 0.009)),
       ssrIntensity: uniform(1.0),
+      // depth of field, driven by the director (bokeh 0 = off)
+      focus: uniform(10), focalRange: uniform(6), bokeh: uniform(0),
       bloomStrength: 0.25, bloomRadius: 0.5, bloomThreshold: 0.9,
     };
     renderer.toneMapping = THREE.AgXToneMapping;
@@ -92,7 +95,8 @@ export class PostFX {
       if (dbg.includes('nrm')) lit = nTex.rgb;
       if (dbg.includes('mr')) lit = vec3(mr.r, mr.g, 0);
     }
-    const aa = noAA ? lit : traa(lit, depth, vel, camera);
+    const aa0 = noAA ? lit : traa(lit, depth, vel, camera);
+    const aa = dbg.includes('nodof') ? aa0 : dof(aa0, scenePass.getViewZNode(), params.focus, params.focalRange, params.bokeh);
 
     const bloomPass = bloom(aa, params.bloomStrength, params.bloomRadius, params.bloomThreshold);
     this.bloomPass = bloomPass;

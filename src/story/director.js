@@ -14,6 +14,14 @@ const ARRIVE = new THREE.CatmullRomCurve3([
   new THREE.Vector3(-0.6, 1.45, -9), new THREE.Vector3(-1.4, 1.32, -11.6),
 ]);
 const ease = (x) => x * x * (3 - 2 * x);
+// where the beam lands: ground, or one of the two facades (x = +-5.05), within 40 m
+function beamHit(o, d, out) {
+  let t = 40;
+  if (d.y < -1e-3) t = Math.min(t, -o.y / d.y);
+  if (d.x > 1e-3) t = Math.min(t, (5.05 - o.x) / d.x);
+  if (d.x < -1e-3) t = Math.min(t, (-5.05 - o.x) / d.x);
+  return out.copy(o).addScaledVector(d, Math.max(0.5, t));
+}
 
 export default {
   name: 'director',
@@ -23,7 +31,8 @@ export default {
     this.t = 0; this.power = parseFloat(ctx.params.get('power') || '1'); this.endT = 0;
     this.cam = { pos: new THREE.Vector3(), look: new THREE.Vector3(), fov: 42 };
     this.curPos = ARRIVE.getPoint(0); this.curLook = new THREE.Vector3(0, 1.4, -20);
-    this._v = new THREE.Vector3(); this._w = new THREE.Vector3();
+    this._v = new THREE.Vector3(); this._w = new THREE.Vector3(); this._hit = new THREE.Vector3(); this._f = new THREE.Vector3();
+    this.focus = 10; this.bokeh = 0;
     ctx.api.director = this;
     if (this.phase === 'title') this.film.title(true);
     else this.film.phase(this.phase);
@@ -105,6 +114,19 @@ export default {
       }
     }
     this.film.power(this.power, this.phase === 'look' || this.phase === 'fade');
+
+    // focus: on the eye while it opens, then pulled slowly to whatever the beam touches first
+    let focusT = 12, bokehT = 0;
+    if (this.phase === 'waking') { focusT = this.curPos.distanceTo(eyePos); bokehT = 2.2; }
+    else if (this.phase === 'look' || this.phase === 'fade') {
+      beamHit(m.origin, m.dir, this._hit);
+      ctx.camera.getWorldDirection(this._f);
+      focusT = Math.max(0.5, this._hit.sub(ctx.camera.position).dot(this._f)); bokehT = 1.6;
+    } else if (this.phase === 'wait') { focusT = this.curPos.distanceTo(this._w.set(ROBOT.x, 0.75, ROBOT.z)); bokehT = 1.0; }
+    this.focus += (focusT - this.focus) * Math.min(1, dt * 0.9);
+    this.bokeh += (bokehT - this.bokeh) * Math.min(1, dt * 0.8);
+    const pp = ctx.postfx.params;
+    pp.focus.value = this.focus; pp.bokeh.value = this.bokeh; pp.focalRange.value = Math.max(1.5, this.focus * 0.35);
 
     // smooth camera with a little handheld drift
     const k = this.phase === 'waking' ? 3 : 1.6;
