@@ -155,6 +155,9 @@ export default {
       if (this.dwell > 2.5 && m.strength > 0.5) { this.state = 'playing'; this.t = 0; ctx.api.audio?.play('servo'); }
       return;
     }
+    if (this.state === 'done' && this.crowdBack !== undefined && this.crowdBack < 1) {
+      this.crowdBack = Math.min(1, this.crowdBack + dt / 4); crowd.value = this.crowdBack; // people drift back slowly
+    }
     if (this.state === 'playing') {
       this.t += dt;
       // the robot takes over: aim the eye at the current mark (look values tuned for the over-shoulder framing)
@@ -176,7 +179,7 @@ export default {
       const glow = Math.min(1, this.t / 2.5);
       // the street empties around the door: only the child stays
       const endT = 3 + MARKS.length * 2.2 + 2.5;
-      crowd.value = this.t < endT ? Math.max(0, 1 - this.t / 2) : Math.min(1, (this.t - endT) / 3);
+      crowd.value = Math.max(0, 1 - this.t / 2); // the street stays empty through the doorway's last beat
       this.porch.intensity = 5 * glow * glow; this.porchGlow.value = glow;
       // the child grows with the marks
       this.childVis.value = Math.min(1, Math.max(0, (this.t - 2) / 1.5));
@@ -191,7 +194,7 @@ export default {
         const flick = k < 4 ? 1 : k < 5.4 ? (Math.sin(k * 41) * Math.sin(k * 13) > 0.1 ? 1 : 0.08) : 0;
         this.porch.intensity = 5 * flick; this.porchGlow.value = flick;
         if (k > 5.6 && k - dt <= 5.6) ctx.api.audio?.play('click');
-        if (this.t > end + 7) { crowd.value = 1; this.state = 'done'; m.lookOverride = undefined; m.forceOpen = undefined; m.goboMode = undefined; }
+        if (this.t > end + 7) { this.state = 'done'; this.crowdBack = 0; m.lookOverride = undefined; m.forceOpen = undefined; m.goboMode = undefined; }
       }
     }
   },
