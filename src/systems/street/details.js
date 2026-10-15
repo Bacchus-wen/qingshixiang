@@ -126,6 +126,7 @@ export async function buildDetails(ctx, root, facades, M, r) {
   const lamp = new THREE.SpotLight(0xe4ebf2, 650, 26, 0.62, 0.7, 2);
   lamp.position.set(L.halfRoad - 0.3, 6.8, -3); lamp.target.position.set(-0.5, 0, -5);
   lamp.castShadow = true; lamp.shadow.mapSize.set(1024, 1024); lamp.shadow.bias = -0.0004;
+  lamp.shadow.autoUpdate = false; lamp.shadow.needsUpdate = true; // the street does not move
   root.add(lamp, lamp.target);
   props.push(['lamp_head', L.halfRoad - 0.3, 6.78, -3, Math.PI / 2], ['lamp_head', -L.halfRoad + 0.4, 6.38, -34, -Math.PI / 2]);
   // glowing lamp heads: bright enough to bloom and to show up in the wet-road reflections
@@ -137,7 +138,7 @@ export async function buildDetails(ctx, root, facades, M, r) {
   // a far lamp down the lane, dimmer, so depth reads in silhouettes
   const far = new THREE.SpotLight(0xd6dde6, 450, 26, 0.66, 0.7, 2);
   far.position.set(-L.halfRoad + 0.4, 6.5, -34); far.target.position.set(0.5, 0, -36);
-  far.castShadow = true; far.shadow.mapSize.set(512, 512);
+  far.castShadow = false;
   root.add(far, far.target);
   // one lit window, high up, that never goes out
   const win = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.2), new THREE.MeshBasicNodeMaterial({ color: new THREE.Color(0.9, 0.88, 0.84) }));

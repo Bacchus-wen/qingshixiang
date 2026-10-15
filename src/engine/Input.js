@@ -8,6 +8,11 @@ export class Input {
     el.addEventListener('pointermove', (e) => { this.pointer.x = (e.clientX / innerWidth) * 2 - 1; this.pointer.y = -(e.clientY / innerHeight) * 2 + 1; });
     el.addEventListener('pointerdown', () => { this.pointer.held = true; });
     addEventListener('pointerup', () => { this.pointer.held = false; });
+    // losing focus must release everything, or the eye stays open (and drains) while the user is away
+    const clear = () => { this.down.clear(); this.pointer.held = false; };
+    addEventListener('blur', clear);
+    addEventListener('pointercancel', clear);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) clear(); });
   }
   isDown(code) { return this.down.has(code); }
   wasPressed(code) { return this.pressed.has(code); }

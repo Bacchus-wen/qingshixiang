@@ -38,8 +38,9 @@ export function makeSurface(id, opts = {}) {
   const P = positionWorld.div(scale);
   const uv = select(useY, P.xz, select(useX, P.zy, P.xy));
   // tangent frame per dominant axis (world space)
-  const T = select(useY, vec3(1, 0, 0), select(useX, vec3(0, 0, n.x.sign().negate()), vec3(n.z.sign(), 0, 0)));
-  const B = select(useY, vec3(0, 0, n.y.sign().negate()), vec3(0, 1, 0));
+  // tangent frame = the directions the box-mapped UV actually increases along (no per-face mirroring)
+  const T = select(useY, vec3(1, 0, 0), select(useX, vec3(0, 0, 1), vec3(1, 0, 0)));
+  const B = select(useY, vec3(0, 0, 1), vec3(0, 1, 0));
 
   // compress texture contrast toward its mid-grey: CC0 albedos read blotchy once desaturated and wet-darkened
   const alb = mix(float(0.42), texture(tAlb, uv).r, 0.4).mul(tone);

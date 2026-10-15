@@ -7,6 +7,7 @@ import { syncMemory } from '../../materials/memory.js';
 // The broken surveyor robot and its one working eye.
 // Eye state: closed -> (hold) opening -> open; release -> closing. The first attempt always fails (flicker, shut).
 // Publishes ctx.memory (origin, dir, angle, range, strength) every frame for every "past/present" consumer.
+const AXIS_Z = new THREE.Vector3(0, 0, 1);
 const ROBOT_POS = new THREE.Vector3(-(LANE.halfRoad + LANE.walk) + 0.42, LANE.curb, -13.5);
 
 // Gobo: a low-frequency mask projected by the eye (cracked lens + 8-blade aperture), not a picture.
@@ -72,7 +73,7 @@ export default {
     this._q = new THREE.Quaternion(); this._e = new THREE.Euler(); this._v = new THREE.Vector3(); this._d = new THREE.Vector3();
     this.goboT = 0;
     const sys = this;
-    ctx.api.robot = { root, eye: this.eye, spot, setOpenTarget: (v) => { sys.target = v; }, get open() { return sys.open; }, get attempts() { return sys.attempts; } };
+    ctx.api.robot = { root, eye: this.eye, spot, setOpenTarget: (v) => { sys.target = v; }, get open() { return sys.open; }, get attempts() { return sys.attempts; }, get failed() { return sys.failed; } };
   },
 
   update(dt, t, ctx) {
@@ -81,26 +82,31 @@ export default {
     const holding = forced ?? input.hold;
 
     // ---- eye state: first attempt fails with a flicker, later attempts open slowly while held
-    if (holding && this.holdT === 0) this.attempts++;
+    // an attempt counts once the hold is deliberate (taps don't use up the scripted failure)
+    const prevHold = this.holdT;
     this.holdT = holding ? this.holdT + dt : 0;
+    if (prevHold < 0.25 && this.holdT >= 0.25) this.attempts++;
     if (forced !== undefined) this.target = forced ? 1 : 0;
-    else if (this.attempts <= 1 && holding) {
-      this.target = this.holdT < 0.9 ? 0.25 : 0;
-      if (this.holdT > 0.9 && this.failT < 0) { this.failT = t; ctx.api.audio?.play('click'); }
-    } else this.target = holding ? 1 : 0;
-    if (holding && this.holdT > 0 && this.holdT < dt * 1.5 && this.attempts > 1) { ctx.api.audio?.play('whine'); ctx.api.audio?.play('servo'); }
+    else if (this.attempts <= 1 && holding && this.holdT >= 0.25) {
+      this.target = this.holdT < 1.1 ? 0.25 : 0;
+      if (this.holdT > 1.1 && this.failT < 0) { this.failT = t; ctx.api.audio?.play('click'); }
+    } else this.target = holding && this.attempts > 1 ? 1 : 0;
+    this.failed = this.failT > 0;
+    if (prevHold < 0.25 && this.holdT >= 0.25 && this.attempts > 1) { ctx.api.audio?.play('whine'); ctx.api.audio?.play('servo'); }
 
     // opening is slow and stuttering (servo slips), closing is quicker
     const speed = this.target > this.open ? 0.32 : 0.9;
     const slip = this.target > this.open && Math.sin(t * 9.0) > 0.85 ? 0.15 : 1;
     this.open += Math.sign(this.target - this.open) * Math.min(Math.abs(this.target - this.open), speed * slip * dt);
     const flicker = this.failT > 0 && t - this.failT < 0.6 ? (Math.random() < 0.5 ? 0.6 : 0.0) : 1;
-    const o = this.open * flicker;
+    const pw = ctx.memory.power ?? 1;
+    const weak = pw < 0.2 ? (Math.random() < (0.2 - pw) * 2.5 ? 0.35 : 1) : 1;
+    const o = this.open * flicker * weak * Math.min(1, 0.4 + pw * 3);
 
     // ---- iris blades swing out of the aperture as it opens (blade 5 is bent and lags)
     for (let i = 0; i < this.iris.length; i++) {
       const lag = i === 5 ? 0.55 : 1;
-      this._q.setFromAxisAngle(new THREE.Vector3(0, 0, 1), -o * lag * 0.95);
+      this._q.setFromAxisAngle(AXIS_Z, -o * lag * 0.95);
       this.iris[i].node.quaternion.copy(this.iris[i].rest).multiply(this._q);
     }
     eyeGlow.value = o;
@@ -109,7 +115,7 @@ export default {
     this.look.set(input.pointer.x * 0.55, input.pointer.y * 0.55);
     if (ctx.memory.lookOverride) this.look.set(ctx.memory.lookOverride.x, ctx.memory.lookOverride.y);
     const k = Math.min(1, dt * (0.6 + this.open * 1.4));
-    this.lookCur.lerp(this.look.clone().multiplyScalar(0.25 + this.open * 0.75), k);
+    this.lookCur.lerp(this.look.multiplyScalar(0.25 + this.open * 0.75), k);
     const jitter = this.open > 0.05 ? Math.sin(t * 31) * 0.004 * this.open : 0;
     // waking lifts the drooped head toward level; the pointer then pitches it further up/down
     this._e.set(-this.lookCur.y * 0.9 - this.open * 0.32 + jitter, -this.lookCur.x * 1.1, 0);
@@ -123,13 +129,14 @@ export default {
     this.spot.target.position.copy(this._v).addScaledVector(this._d, 10);
     this.spot.intensity = 260 * o * o;
     this.spot.angle = 0.12 + 0.24 * o;
-    if (this.beamVol) this.beamVol.material.userData.density.value = 0.35 * o;
+    if (this.beamVol) { this.beamVol.material.userData.density.value = 0.35 * o; this.beamVol.visible = o > 0.01; }
+    this.spot.visible = o > 0.005; // no shadow map render while the eye is shut
     if (t - this.goboT > 1 / 15 && Math.abs(o - (this._lastGobo ?? -1)) > 0.01) { this.gobo.draw(o); this.goboT = t; this._lastGobo = o; }
 
     // ---- publish the memory cone
     const m = ctx.memory;
     m.origin.copy(this._v); m.dir.copy(this._d);
-    m.angle = this.spot.angle; m.range = 40; m.strength = o; m.power = Math.max(0, 1 - this.attempts * 0.08);
+    m.angle = this.spot.angle; m.range = 40; m.strength = o;
     syncMemory(m);
   },
 };

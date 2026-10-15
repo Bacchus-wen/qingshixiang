@@ -29,7 +29,8 @@ export default {
     else this.film.phase(this.phase);
   },
 
-  set(phase) { this.phase = phase; this.t = 0; this.film.phase(phase); },
+  // cut = jump the camera instead of easing (a hard cut to the eye reads stronger than a slide)
+  set(phase, cut = false) { this.phase = phase; this.t = 0; this.cut = cut; this.film.phase(phase); },
 
   update(dt, time, ctx) {
     if (ctx.isShot) return;
@@ -40,7 +41,7 @@ export default {
     switch (this.phase) {
       case 'title': {
         // black, rain only (audio starts on this first gesture)
-        m.forceOpen = false;
+        m.forceOpen = false; this.power = 1; m.power = 1; this.film.endCardOff?.();
         ARRIVE.getPoint(0, this.cam.pos); this.cam.look.set(0, 1.4, -24);
         this.film.fade(1);
         if (input.pointer.held || input.wasPressed('Space') || input.wasPressed('Enter')) { this.film.title(false); this.set('arrive'); }
@@ -61,14 +62,15 @@ export default {
         ARRIVE.getPoint(1, this.cam.pos);
         this.cam.look.set(ROBOT.x, 0.75, ROBOT.z);
         this.cam.fov = 40 - Math.min(4, this.t * 0.15);
-        if (this.t > 4) this.film.hint('按住');
-        if (robot && robot.open > 0.08 && robot.attempts > 1) { this.film.hint(''); this.set('waking'); }
+        if (this.t > 4) this.film.hint(robot?.failed && !input.hold ? '再按住' : robot?.failed ? '' : '按住');
+        if (robot && robot.open > 0.08 && robot.attempts > 1) { this.film.hint(''); this.set('waking', true); }
         break;
       }
       case 'waking': {
         // close on the eye while it opens: camera slightly in front and to the side of the lens
-        this._v.copy(m.dir).multiplyScalar(0.55).add(eyePos);
-        this.cam.pos.copy(this._v).add(this._w.set(0.12, 0.08, 0.38));
+        // three-quarter front view of the lens: in front of the eye, a little to the side and above
+        this._v.copy(m.dir).multiplyScalar(0.5).add(eyePos);
+        this.cam.pos.copy(this._v).add(this._w.set(0, 0.06, 0.22));
         this.cam.look.copy(eyePos);
         this.cam.fov = 28;
         if (robot && robot.open > 0.85) this.set('look');
@@ -81,7 +83,7 @@ export default {
         this.cam.look.copy(eyePos).addScaledVector(m.dir, 8);
         this.cam.fov = 50;
         if (robot && robot.open > 0.2) this.power = Math.max(0, this.power - dt / 150);
-        m.powerOverride = this.power;
+        m.power = this.power;
         if (this.power <= 0.0) this.set('fade');
         break;
       }
@@ -106,6 +108,7 @@ export default {
 
     // smooth camera with a little handheld drift
     const k = this.phase === 'waking' ? 3 : 1.6;
+    if (this.cut) { this.curPos.copy(this.cam.pos); this.curLook.copy(this.cam.look); this.cut = false; }
     this.curPos.lerp(this.cam.pos, Math.min(1, dt * k));
     this.curLook.lerp(this.cam.look, Math.min(1, dt * k * 1.2));
     const cam = ctx.camera;

@@ -122,9 +122,10 @@ export default {
     // shutters rise slowly while the eye holds on them and fall back half a beat after the light leaves
     for (const s of this.shutters) {
       const m = memoryMaskCPU(s.center, ctx.memory);
-      s.hold = m > 0.35 ? s.hold + dt : Math.max(0, s.hold - dt * 0.6);
+      // lit for 0.6 s -> rise; once the light leaves, stay up for a 0.8 s grace, then fall (half a beat late)
+      if (m > 0.35) { s.hold = Math.min(s.hold + dt, 1); s.grace = 0.8; } else { s.grace = Math.max(0, (s.grace ?? 0) - dt); if (s.grace === 0) s.hold = 0; }
       const target = s.hold > 0.6 ? 0.85 : 0;
-      const k = target > s.lift ? 0.25 : (s.hold > 0 ? 0 : 0.5);
+      const k = target > s.lift ? 0.25 : (s.grace > 0 ? 0 : 0.5);
       s.lift += Math.sign(target - s.lift) * Math.min(Math.abs(target - s.lift), k * dt);
       const h = s.h * (1 - s.lift);
       s.mesh.scale.y = Math.max(0.02, 1 - s.lift);

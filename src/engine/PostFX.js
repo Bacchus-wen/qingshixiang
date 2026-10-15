@@ -77,7 +77,7 @@ export class PostFX {
     if (!dbg.includes('nossr')) {
       const refl = float(1).sub(smoothstep(0.04, 0.45, mr.g)).mul(mr.b);
       const ssrPass = ssr(color, depth, sample((u) => unpackRGBToNormal(nTex.sample(u))), {
-        metalnessNode: refl, roughnessNode: mr.g, reflectNonMetals: true, camera,
+        metalnessNode: refl, roughnessNode: mr.g, reflectNonMetals: false, camera, // refl acts as metalness: zero-refl pixels early-out
       });
       ssrPass.resolutionScale = 0.5;
       ssrPass.quality.value = 0.5;
