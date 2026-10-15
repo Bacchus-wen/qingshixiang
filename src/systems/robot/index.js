@@ -122,7 +122,7 @@ export default {
       for (const [mat, gs] of groups) {
         const merged = mergeGeometries(gs, false);
         if (!merged) continue;
-        const mm = new THREE.Mesh(merged, mat); mm.castShadow = mm.receiveShadow = true;
+        const mm = new THREE.Mesh(merged, mat); mm.castShadow = mm.receiveShadow = true; mm.layers.enable(1);
         root.add(mm);
       }
     }
@@ -145,7 +145,7 @@ export default {
     this.gobo = makeGobo(); this.gobo.draw(0);
     const spot = this.spot = new THREE.SpotLight(eyeColor.value.clone(), 0, 45, 0.3, 0.65, 1.4);
     spot.map = this.gobo.tex;
-    spot.castShadow = true; spot.shadow.mapSize.set(1024, 1024); spot.shadow.camera.near = 0.2; spot.shadow.bias = -0.0005;
+    spot.castShadow = true; spot.shadow.mapSize.setScalar(ctx.quality === 'low' ? 512 : 1024); spot.shadow.camera.near = 0.2; spot.shadow.bias = -0.0005;
     scene.add(spot, spot.target);
     this.beamVol = ctx.api.atmo?.volume(new THREE.Vector3(0.3, 3, -14), new THREE.Vector3(11, 6, 18), 0.0, [spot]);
 

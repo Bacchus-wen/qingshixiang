@@ -73,7 +73,7 @@ export default {
     const wood = new THREE.MeshStandardNodeMaterial({ color: 0x1b1a19, roughness: 0.6 });
     const doorMat = new THREE.MeshStandardNodeMaterial({ color: 0x0a0a0a, roughness: 0.45 });
     const g = this.group = new THREE.Group();
-    const box = (w, h, d, mat, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); o.position.set(x, y, z); o.castShadow = o.receiveShadow = true; g.add(o); return o; };
+    const box = (w, h, d, mat, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); o.position.set(x, y, z); o.castShadow = o.receiveShadow = true; o.layers.enable(1); g.add(o); return o; };
     const x = DOOR.x, z = DOOR.z, hw = DOOR.w / 2;
     box(0.14, DOOR.h + 0.1, 0.1, wood, x - 0.05, (DOOR.h + 0.1) / 2, z - hw - 0.05);     // jamb (marked)
     box(0.14, DOOR.h + 0.1, 0.1, wood, x - 0.05, (DOOR.h + 0.1) / 2, z + hw + 0.05);     // jamb

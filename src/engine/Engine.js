@@ -20,14 +20,18 @@ export class Engine {
   }
 
   async init(systems, onProgress = () => {}) {
-    const renderer = new THREE.WebGPURenderer({ antialias: false, powerPreference: 'high-performance', forceWebGL: this.params.get('webgl') !== null });
-    renderer.setPixelRatio(this.shot ? 1 : Math.min(devicePixelRatio, 1.5));
+    const renderer = new THREE.WebGPURenderer({ antialias: false, powerPreference: 'high-performance', forceWebGL: this.params.get('webgl') !== null, trackTimestamp: this.params.get('gputime') !== null });
+    // internal resolution: 1x (TRAA cleans edges); lowered automatically if frames run long (see adaptResolution)
+    this.pixelRatio = this.shot ? 1 : Math.min(devicePixelRatio, parseFloat(this.params.get('dpr') || '1'));
+    renderer.setPixelRatio(this.pixelRatio);
     renderer.setSize(innerWidth, innerHeight);
     renderer.shadowMap.enabled = true;
     this.container.appendChild(renderer.domElement);
     await renderer.init();
     const backend = renderer.backend.isWebGPUBackend ? 'webgpu' : 'webgl2';
     if (backend !== 'webgpu') console.warn('[engine] WebGPU unavailable, running on WebGL2 fallback');
+    // quality: ?q=low|high; WebGL2 defaults to low (no SSR/DOF, fewer volume steps, smaller shadows)
+    const quality = this.params.get('q') || (backend === 'webgpu' ? 'high' : 'low');
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.05, 600);
@@ -38,7 +42,7 @@ export class Engine {
     this.timer = new THREE.Timer();
 
     this.ctx = {
-      THREE, renderer, scene, camera, engine: this, backend,
+      THREE, renderer, scene, camera, engine: this, backend, quality,
       params: this.params,
       isShot: !!this.shot,
       input: new Input(renderer.domElement),
@@ -65,6 +69,7 @@ export class Engine {
       this.systems.push(s);
       onProgress((i + 1) / active.length, s.name);
     }
+    if (this.params.get('flatmat') !== null) scene.overrideMaterial = new THREE.MeshStandardNodeMaterial({ color: 0x777777, roughness: 0.5 }); // perf test only
     this.postfx.build();
     if (this.shot) document.body.classList.add('shot');
     addEventListener('resize', () => this.resize());
@@ -79,6 +84,23 @@ export class Engine {
     this.camera.updateProjectionMatrix();
     this.camera.lookAt(...v.look);
     v.setup?.(this.ctx, this.time);
+  }
+
+  // dynamic resolution: if the average frame stays over ~20 ms for 2 s, render at a smaller internal size.
+  // Steps down only (no oscillation); each step is a one-off render-target reallocation.
+  adaptResolution(now) {
+    const p = this.perf;
+    if (!p || p.n < 120 || this.params.get('dpr')) return;
+    this._slowSince ??= null;
+    if (p.frameMs > 20.5) {
+      this._slowSince ??= now;
+      if (now - this._slowSince > 2000 && this.pixelRatio > 0.6) {
+        this.pixelRatio = Math.max(0.6, +(this.pixelRatio - 0.15).toFixed(2));
+        this.renderer.setPixelRatio(this.pixelRatio);
+        console.log(`[engine] slow frames (${p.frameMs.toFixed(1)} ms): internal resolution -> ${this.pixelRatio}x`);
+        this._slowSince = null; p.n = 0;
+      }
+    } else this._slowSince = null;
   }
 
   resize() {
@@ -106,6 +128,11 @@ export class Engine {
       const now = performance.now();
       if (this._last) { const p = this.perf ??= { n: 0, frameMs: 0, submitMs: 0 }; p.n++; p.frameMs += (now - this._last - p.frameMs) / Math.min(p.n, 60); p.submitMs += (now - t0 - p.submitMs) / Math.min(p.n, 60); p.calls = this.renderer.info.render.drawCalls; p.triangles = this.renderer.info.render.triangles; window.__perf = p; }
       this._last = now;
+      if (!this.shot) this.adaptResolution(now);
+      // GPU time per frame (WebGPU timestamp queries, ?gputime): resolved asynchronously every 10 frames
+      if (this.params.get('gputime') !== null && this.frame % 10 === 0) {
+        this.renderer.resolveTimestampsAsync('render').then((ms) => { if (ms) { const p = this.perf; p.gpuMs = p.gpuMs ? p.gpuMs * 0.8 + ms * 0.2 : ms; } }).catch(() => {});
+      }
       if (this.shot && this.frame === this.shotFrames) window.__shotReady = true;
     });
   }

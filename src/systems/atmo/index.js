@@ -33,7 +33,7 @@ export default {
     const tex = noise3D();
     const jit = postfx.volumeJitter;
     this.mist = uniform(1.0); // scales every volume's density (rain makes it thicker)
-    const steps = params.get('q') === 'low' ? 8 : 18;
+    const steps = ctx.quality === 'low' ? 8 : 16;
 
     // density: drifting noise, thicker near the ground
     const makeMat = (density, center, half) => {

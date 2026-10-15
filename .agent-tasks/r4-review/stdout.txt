@@ -1,0 +1,26 @@
+已完成静态审查；未改文件、联网或运行项目。以下卡顿风险未经实测。
+
+**致命**：未发现可确认的必现崩溃。
+
+**重要**
+
+1. [fragment.js:171](/Users/wenbin/Games/新游戏/src/story/fragment.js:171)：片段持续写入 `forceOpen=true`，失焦只清输入，无法暂停片段；窗口仍可见时剧情继续，可能错过整段。松手后接管符合注释意图，但失焦应暂停片段计时；中断出口统一清理三个覆盖字段及 crowd。
+
+2. [director.js:130](/Users/wenbin/Games/新游戏/src/story/director.js:130)：重玩检测 `pointer.held`，一直按着看结尾会在24秒自动刷新；结束卡19秒出现，前5秒点击又无效。改为卡片可交互后检测一次新的按下，并提示重玩。
+
+3. [director.js:72](/Users/wenbin/Games/新游戏/src/story/director.js:72)：抵达前6秒按 Enter 跳过，黑幕仍保留上一帧 opacity，wait/waking/look 均不清除。进入 wait 时显式 `fade(0)`。
+
+4. [robot/index.js:219](/Users/wenbin/Games/新游戏/src/systems/robot/index.js:219)：预热只覆盖光束，遗漏幽灵实例材质。[ghosts/index.js:279](/Users/wenbin/Games/新游戏/src/systems/ghosts/index.js:279) 在闭眼时隐藏整个组，因此首次开眼才进入编译。加载阶段临时启用代表实例，预编译实际深度/MRT 管线，再恢复状态。
+
+5. [fragment.js:182](/Users/wenbin/Games/新游戏/src/story/fragment.js:182)：孩子脚底位于 y=0.2，却按 `(刻度−0.02)/模型高` 缩放；脚底原点模型的头顶比刻度高约18厘米。统一世界高度基准，缩放时减去脚底高度并处理包围盒最小值。
+
+6. [PostFX.js:101](/Users/wenbin/Games/新游戏/src/engine/PostFX.js:101)：bokeh=0并非关闭景深。本地 `DepthOfFieldNode.js:277–346` 仍执行七次绘制，标题、抵达均承担成本。增加真正的执行旁路，并在加载阶段预热景深分支。
+
+7. [PostFX.js:53](/Users/wenbin/Games/新游戏/src/engine/PostFX.js:53)：WebGL2低档虽关闭 SSR/DOF，仍使用默认半浮点 pass、TRAA、Bloom；缺少浮点颜色附件能力仍可能失败。按扩展能力选择普通颜色单通道回退，不能只降低画质。
+
+**可优化**
+
+- [details.js:124](/Users/wenbin/Games/新游戏/src/systems/street/details.js:124)、134：拆字和通知逐面绘制且全部排除合批；按材质、街段实例化。卷帘上的贴纸还应跟随卷帘，否则离光后门未落完，贴纸先悬空出现。
+- [robot/index.js:221](/Users/wenbin/Games/新游戏/src/systems/robot/index.js:221)：line 图案不依赖开度，却仍随开度重绘；仅模式切换时更新。刻度纹理已按级数变化更新，主要向量也已复用，未见明显新增每帧分配热点。
+
+正常路径片段只进入一次 done，并清理三个覆盖字段；播放期间电量冻结，未发现自然耗尽导致中断。重玩整页刷新也不会继承旧状态。

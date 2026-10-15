@@ -15,6 +15,7 @@ const frames = opt('frames', '120');
 const [w, h] = opt('size', '1280x720').split('x').map(Number);
 const extra = opt('query', '');
 const tag = opt('tag', '');
+const uncap = args.includes('--uncap') ? (args.splice(args.indexOf('--uncap'), 1), true) : false; // no vsync: frameMs = real throughput
 const shots = args.length ? args : ['sandbox'];
 
 mkdirSync(path.join(root, 'renders'), { recursive: true });
@@ -26,7 +27,7 @@ const port = server.httpServer.address().port;
 // Playwright's own Chromium is a separate app bundle, so a failure here can't touch the user's browser.
 const browser = await chromium.launch({
   headless: true, channel: 'chromium', // Playwright's full Chromium build (new headless), real Metal GPU
-  args: ['--enable-unsafe-webgpu', '--enable-features=Vulkan,WebGPU', '--ignore-gpu-blocklist'],
+  args: ['--enable-unsafe-webgpu', '--enable-features=Vulkan,WebGPU', '--ignore-gpu-blocklist', ...(uncap ? ['--disable-gpu-vsync', '--disable-frame-rate-limit'] : [])],
 });
 let failed = 0;
 const cleanup = async () => { try { await browser.close(); } catch {} try { await server.close(); } catch {} };
@@ -43,7 +44,7 @@ for (const name of shots) {
     await page.goto(url);
     await page.waitForFunction(() => window.__shotReady === true, null, { timeout: 120000 });
     const backend = await page.evaluate(() => window.__engine?.ctx?.backend);
-    const perf = await page.evaluate(() => window.__perf && { calls: window.__perf.calls, tris: window.__perf.triangles, frameMs: +window.__perf.frameMs.toFixed(1), submitMs: +window.__perf.submitMs.toFixed(1) });
+    const perf = await page.evaluate(() => window.__perf && { calls: window.__perf.calls, tris: window.__perf.triangles, frameMs: +window.__perf.frameMs.toFixed(1), submitMs: +window.__perf.submitMs.toFixed(1), gpuMs: window.__perf.gpuMs && +window.__perf.gpuMs.toFixed(2) });
     const file = `${name}${tag ? '-' + tag : ''}.png`;
     const out = path.join(root, 'renders', file);
     await page.screenshot({ path: out });

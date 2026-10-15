@@ -30,6 +30,7 @@ export function mergeStatic(root) {
     if (!merged) { console.warn('[merge] failed for', mat.name); continue; }
     const m = new THREE.Mesh(merged, mat);
     m.castShadow = e.cast; m.receiveShadow = true; m.name = `merged_${mat.name || n}`;
+    m.layers.enable(1); // occluder layer: volumes stop at these surfaces (PostFX OCCLUDER_LAYER)
     root.add(m); n++;
   }
   console.log(`[street] merged ${remove.length} meshes into ${n}`);

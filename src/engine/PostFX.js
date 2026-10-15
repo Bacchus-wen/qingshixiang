@@ -17,6 +17,8 @@ import { dof } from 'three/addons/tsl/display/DepthOfFieldNode.js';
 function halton(i, b) { let r = 0, f = 1; while (i > 0) { f /= b; r += f * (i % b); i = Math.floor(i / b); } return r; }
 const HALTON = Array.from({ length: 32 }, (_, i) => [halton(i + 1, 2), halton(i + 1, 3)]);
 
+export const OCCLUDER_LAYER = 1;
+
 export class PostFX {
   constructor(renderer, scene, camera, ctx) {
     this.renderer = renderer; this.scene = scene; this.camera = camera; this.ctx = ctx;
@@ -45,10 +47,16 @@ export class PostFX {
     const { renderer, scene, camera, params } = this;
     const dbg = (this.ctx.params.get('pfx') || '').split(',');
     const noAA = dbg.includes('notraa');
+    const low = this.ctx.quality === 'low';
+    if (low) dbg.push('nossr', 'nodof');
     const pipeline = new THREE.RenderPipeline(renderer);
     pipeline.outputColorTransform = false;
 
-    const prePass = depthPass(scene, camera);
+    // occluder-only depth pre-pass for the volumes: a camera that sees layer 1 (merged street, robot, door) only,
+    // instead of re-drawing every small object a second time (the frame was CPU/draw-call bound)
+    const preCam = this.preCam = camera.clone();
+    preCam.layers.set(OCCLUDER_LAYER);
+    const prePass = depthPass(scene, preCam);
     prePass.transparent = false;
     const preDepth = prePass.getTextureNode('depth');
     for (const m of this.volumes) m.depthNode = preDepth.sample(screenUV);
@@ -127,6 +135,8 @@ export class PostFX {
   }
 
   render() {
+    const c = this.camera, p = this.preCam;
+    if (p) { p.position.copy(c.position); p.quaternion.copy(c.quaternion); p.fov = c.fov; p.aspect = c.aspect; p.near = c.near; p.far = c.far; p.updateProjectionMatrix(); p.updateMatrixWorld(); }
     const h = HALTON[this.frame++ % 32];
     this.volumeJitter.value.set(h[0], h[1]);
     this.pipeline.render();
