@@ -101,8 +101,8 @@ function material() {
   // silhouettes: unlit, near-black body with a thin amber rim, so they stand *in* the light rather than glow
   m.lightsNode = lights([]);
   m.colorNode = vec3(0);
-  const rim = pow(float(1).sub(abs(dot(normalView, positionViewDirection))), 3.0);
-  m.emissiveNode = amberNode().mul(rim.mul(1.6).add(0.06)).mul(mask).mul(scan);
+  const rim = pow(float(1).sub(abs(dot(normalView, positionViewDirection))), 5.0);
+  m.emissiveNode = amberNode().mul(rim.mul(2.2)).mul(mask).mul(scan); // dark silhouette, thin amber edge only
   return m;
 }
 

@@ -41,8 +41,14 @@ for (const name of shots) {
   const url = `http://localhost:${port}/?shot=${name}&frames=${frames}${extra ? '&' + extra : ''}`;
   const t0 = Date.now();
   try {
-    await page.goto(url);
-    await page.waitForFunction(() => window.__shotReady === true, null, { timeout: 120000 });
+    // one retry: a cold GPU process occasionally stalls the very first shot of a batch
+    for (let attempt = 0; ; attempt++) {
+      try {
+        await page.goto(url);
+        await page.waitForFunction(() => window.__shotReady === true, null, { timeout: 120000 });
+        break;
+      } catch (e) { if (attempt >= 1) throw e; console.log(`     retry ${name} (${e.message.split('\n')[0]})`); }
+    }
     const backend = await page.evaluate(() => window.__engine?.ctx?.backend);
     const perf = await page.evaluate(() => window.__perf && { calls: window.__perf.calls, tris: window.__perf.triangles, frameMs: +window.__perf.frameMs.toFixed(1), submitMs: +window.__perf.submitMs.toFixed(1), gpuMs: window.__perf.gpuMs && +window.__perf.gpuMs.toFixed(2) });
     const file = `${name}${tag ? '-' + tag : ''}.png`;

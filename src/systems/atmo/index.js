@@ -28,7 +28,9 @@ export default {
     this.fogHeight = uniform(5.5);
     this.fogColor = uniform(new THREE.Color(0x08090a));
     scene.fogNode = fog(this.fogColor, exponentialHeightFogFactor(this.fogDensity, this.fogHeight));
-    scene.backgroundNode = this.fogColor.mul(0.6);
+    // the sky stays dark even in a flash (a lit sky between the rooftops read as a flat grey rectangle)
+    this.skyColor = uniform(new THREE.Color(0x050506));
+    scene.backgroundNode = this.skyColor;
 
     const tex = noise3D();
     const jit = postfx.volumeJitter;
@@ -98,8 +100,8 @@ export default {
       this.boltT += dt;
       let v = 0;
       for (const p of this.pulses) { const x = this.boltT - p; if (x > 0) v = Math.max(v, Math.exp(-x * 18) * (p === 0 ? 1 : 0.7)); }
-      this.bolt.intensity = v * 6.5;
-      this.fogColor.value.setScalar(0.035 + v * 0.14);
+      this.bolt.intensity = v * 2.2;
+      this.fogColor.value.setScalar(0.035 + v * 0.022);
       ctx.world.lightning = v;
       if (this.boltT > 1.2) { this.boltT = -1; this.nextBolt = 25 + Math.random() * 30; this.fogColor.value.set(0x08090a); ctx.world.lightning = 0; }
     }

@@ -103,7 +103,7 @@ export async function buildDetails(ctx, root, facades, M, r) {
   const { scene } = ctx;
   const L = LANE;
   const dark = new THREE.MeshStandardNodeMaterial({ color: 0x0d0d0d, roughness: 0.55, metalness: 0.4 });
-  const pale = new THREE.MeshStandardNodeMaterial({ color: 0x8a8a88, roughness: 0.45 });
+  const pale = new THREE.MeshStandardNodeMaterial({ color: 0x4e4e4c, roughness: 0.5 }); // dead signs: dirty, never paper-white in the beam
   const acGeo = new THREE.BoxGeometry(0.35, 0.55, 0.8);
   const signGeo = new THREE.BoxGeometry(0.18, 1.8, 0.55);
   const pipeGeo = new THREE.CylinderGeometry(0.06, 0.06, 1, 6);

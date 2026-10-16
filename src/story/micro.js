@@ -12,9 +12,9 @@ function rimMaterial(vis) {
   const m = new THREE.MeshStandardNodeMaterial();
   m.lightsNode = lights([]);
   m.colorNode = vec3(0);
-  const rim = pow(float(1).sub(abs(dot(normalView, positionViewDirection))), 3.0);
+  const rim = pow(float(1).sub(abs(dot(normalView, positionViewDirection))), 5.0);
   const mask = memoryMask(positionWorld).mul(vis);
-  m.emissiveNode = amberNode().mul(rim.mul(1.6).add(0.03)).mul(mask);
+  m.emissiveNode = amberNode().mul(rim.mul(2.2)).mul(mask);
   m.maskNode = mask.greaterThan(0.08);
   return m;
 }

@@ -239,7 +239,10 @@ export default {
     this.spot.position.copy(this._v).addScaledVector(this._d, 0.03);
     this.spot.target.position.copy(this._v).addScaledVector(this._d, 10);
     this.spot.intensity = 260 * o * o;
-    this.spot.angle = 0.12 + 0.24 * o;
+    // the surveyor's level mark is a tight beam (thin and short on the jamb), but the past it reveals keeps the
+    // full cone: light and memory are separate here
+    const coneAngle = 0.12 + 0.24 * o;
+    this.spot.angle = ctx.memory.goboMode === 'line' ? 0.05 + 0.03 * o : coneAngle;
     // never toggle the light's visibility (changing the light set recompiles every lit material = a visible hitch);
     // just stop re-rendering its shadow map while the eye is shut. The beam volume is kept visible for the first
     // frames (hidden by the black title) so its pipeline is compiled before the eye ever opens.
@@ -254,7 +257,7 @@ export default {
     // ---- publish the memory cone
     const m = ctx.memory;
     m.origin.copy(this._v); m.dir.copy(this._d);
-    m.angle = this.spot.angle; m.range = 40; m.strength = o;
+    m.angle = coneAngle; m.range = 40; m.strength = o;
     syncMemory(m);
   },
 };

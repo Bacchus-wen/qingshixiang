@@ -101,10 +101,13 @@ export default {
         // the door memory gets its own slow push-in toward the doorway, then eases back
         const fr = ctx.api.fragment;
         if (fr && fr.state === 'playing') {
-          const push = ease(Math.min(1, fr.t / 6)) * (fr.t > 19 ? Math.max(0, 1 - (fr.t - 19) / 4) : 1);
+          const push = ease(Math.min(1, fr.t / 6));
           this.cam.pos.lerp(this._v.set(1.2, 1.3, -14.0), push * 0.7);
           this.cam.look.lerp(this._w.set(5.0, 1.15, -14.6), push);
           this.cam.fov = 50 - push * 12;
+          // the empty beat: come close enough to read the last mark ('十一岁') on the jamb
+          const beat = ease(Math.min(1, Math.max(0, (fr.t - fr.endT) / 3)));
+          if (beat > 0) { this.cam.pos.lerp(this._v.set(3.3, 1.55, -14.45), beat); this.cam.look.lerp(this._w.set(4.95, 1.6, -14.75), beat); this.cam.fov -= beat * 8; }
         }
         const frag = ctx.api.fragment;
         this.lookTime = (this.lookTime ?? 0) + dt; // gates the door memory (fragment.js) so it is not the first thing seen

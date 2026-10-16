@@ -12,7 +12,7 @@ import { NOTICES, noticeMaterial } from '../systems/street/details.js';
 const DOOR = { x: 5.0, z: -14.2, w: 0.96, h: 2.12 };
 const FLOOR = 0.14; // sidewalk / doorstep level: marks and the child share this base
 const MARKS = [
-  { h: 1.10, label: '小宁 五岁' }, { h: 1.17, label: '六岁' }, { h: 1.24, label: '七岁' }, { h: 1.30, label: '八岁' },
+  { h: 1.10, label: '五岁' }, { h: 1.17, label: '六岁' }, { h: 1.24, label: '七岁' }, { h: 1.30, label: '八岁' },
   { h: 1.36, label: '九岁' }, { h: 1.42, label: '十岁' }, { h: 1.48, label: '十一岁' },
 ].map((m) => ({ ...m, y: FLOOR + m.h }));
 
@@ -23,6 +23,10 @@ function marksTexture(count) {
     g.fillStyle = '#000'; g.fillRect(0, 0, 256, 1024);
     g.strokeStyle = '#fff'; g.fillStyle = '#fff'; g.lineWidth = 7; g.lineCap = 'round';
     g.font = '600 24px "PingFang SC","Hiragino Sans GB",sans-serif';
+    if (n > 0) { // the name, written once up the jamb in the same hand
+      g.save(); g.globalAlpha = 0.5; g.translate(30, 1024 - (1.78 / 2.12) * 1024); g.font = '600 26px "PingFang SC","Hiragino Sans GB",sans-serif';
+      for (const [k, ch] of [...'小宁'].entries()) g.fillText(ch, 0, k * 30); g.restore();
+    }
     MARKS.slice(0, n).forEach((m, i) => {
       const y = 1024 - (m.y / 2.12) * 1024;
       g.globalAlpha = i === n - 1 ? 1 : 0.28;
@@ -41,9 +45,9 @@ function rimMaterial(extraMask) {
   const m = new THREE.MeshStandardNodeMaterial();
   m.lightsNode = lights([]);
   m.colorNode = vec3(0);
-  const rim = pow(float(1).sub(abs(dot(normalView, positionViewDirection))), 3.5);
+  const rim = pow(float(1).sub(abs(dot(normalView, positionViewDirection))), 6.0);
   const mask = memoryMask(positionWorld).mul(extraMask);
-  m.emissiveNode = amberNode().mul(rim.mul(1.8)).mul(mask); // outline only: no body fill
+  m.emissiveNode = amberNode().mul(rim.mul(2.4)).mul(mask); // a thin outline only: the body stays black
   m.maskNode = mask.greaterThan(0.08);
   return m;
 }
@@ -188,6 +192,7 @@ export default {
       this.child.scale.setScalar(target.h / this.childBaseH);
       if (step !== this.shown) { this.shown = step; this.marks.draw(step); ctx.api.audio?.play('click'); }
       const end = 3 + MARKS.length * 2.2 + 2.5;
+      this.endT = end;
       if (this.t > end) {
         // the marks stop; the child is gone; the line stays on the last mark a moment, then control returns
         this.childVis.value = Math.max(0, 1 - (this.t - end) / 1.2);

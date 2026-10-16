@@ -118,9 +118,11 @@ export default {
       const cutoff = float(1).sub(d2.div(light.range.mul(light.range)).pow(2)).clamp().pow(2);
       return angular.mul(cutoff).mul(light.intensity).div(d2.max(0.25)).mul(0.08).clamp();
     })();
-    const shade = (p) => {
+    // flash: thin streaks catch the lightning; big curtain planes and ground rings barely do (else they read as
+    // lit squares on walls and water in the flash) (Claude, after Grok r5)
+    const shade = (p, flash = 0.6) => {
       const lit = this.lights.map(light => light.color.mul(spot(p, light)));
-      return vec3(0.65, 0.72, 0.8).mul(float(0.05).add(u.lightning.mul(0.95)))
+      return vec3(0.65, 0.72, 0.8).mul(float(0.05).add(u.lightning.mul(flash)))
         .add(lit[0].add(lit[1]).mul(0.95))
         .add(amber.mul(cone(p)).mul(0.95)).min(vec3(1));
     };
@@ -169,7 +171,7 @@ export default {
     const age = impact.w.div(hitRandom.mul(0.5).add(0.22)).clamp();
     const radius = age.mul(sizeRandom.mul(0.15).add(0.04)).add(0.012);
     rings.positionNode = impact.xyz.add(vec3(positionGeometry.x, 0, positionGeometry.y).mul(radius.mul(2)));
-    rings.colorNode = varying(shade(impact.xyz).mul(0.8), 'rainHitLight');
+    rings.colorNode = varying(shade(impact.xyz, 0.12).mul(0.8), 'rainHitLight');
     const circle = uv().sub(0.5).length().mul(2);
     rings.opacityNode = float(1).sub(smoothstep(0.035, 0.12, circle.sub(0.8).abs()))
       .mul(float(1).sub(varying(age, 'rainHitAge'))).mul(u.rain).mul(0.38);
@@ -190,7 +192,7 @@ export default {
       const trail = smoothstep(0.65, 0.95, fract(uv().y.mul(12).add(u.time.mul(2.2 - i * 0.35)).add(rnd)));
       const edge = smoothstep(0, 0.12, uv().x).mul(float(1).sub(smoothstep(0.88, 1, uv().x)))
         .mul(smoothstep(0, 0.08, uv().y)).mul(float(1).sub(smoothstep(0.7, 1, uv().y)));
-      curtain.colorNode = shade(world);
+      curtain.colorNode = shade(world, 0.08);
       curtain.opacityNode = line.mul(trail).mul(edge).mul(u.rain).mul(0.13);
       add(new THREE.PlaneGeometry(1, 1), curtain, `rain-curtain-${i}`);
     }
