@@ -69,7 +69,7 @@ export function createRecordings(ac, { params, rain, mix, reverb, seed, onEvent,
       if (loadBuffer) buffer = await loadBuffer(name, ac, abort.signal);
       else {
         if (!/^https?:$/.test(globalThis.location?.protocol || '') || !globalThis.fetch) return;
-        const response = await fetch(`/audio/rec/${name}.mp3`, { signal: abort.signal });
+        const response = await fetch(`${import.meta.env?.BASE_URL ?? '/'}audio/rec/${name}.mp3`, { signal: abort.signal });
         if (!response.ok) return;
         buffer = await ac.decodeAudioData(await response.arrayBuffer());
       }

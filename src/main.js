@@ -1,4 +1,9 @@
+import { DefaultLoadingManager } from 'three/webgpu';
 import { Engine } from './engine/Engine.js';
+
+// served from a sub-path (GitHub Pages: /<repo>/): root-absolute asset URLs ('/models/...') get the base prefix
+const BASE = import.meta.env.BASE_URL;
+if (BASE !== '/') DefaultLoadingManager.setURLModifier((u) => (u.startsWith('/') && !u.startsWith('//') && !u.startsWith(BASE) ? BASE + u.slice(1) : u)); // (loaders resolve twice: idempotent)
 import { SYSTEMS } from './systems/index.js';
 import { SHOTS } from './engine/shots.js';
 import street from './systems/street/index.js';
