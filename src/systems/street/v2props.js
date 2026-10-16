@@ -27,7 +27,7 @@ export async function placeV2Props(ctx, root) {
     ['stools', -(W - 0.5), c, -24.4, 0.3],
     ['bins', W - 0.65, c, -31.5, -Math.PI / 2],
     ['stove', W - 0.5, c, -18.2, 1.1],
-    ['meterbox', -(W - 0.18), 1.5, -12.6, 0],
+    ['meterbox', -(W - 0.18), 1.5, -8.0, 0], // (not next to the robot: it filled the over-the-shoulder view)
     ['bins', -(W - 0.6), c, -35.0, Math.PI / 2 + 0.2],
     ['stools', W - 0.5, c, -24.0, -0.4],
     // batch 2

@@ -1,49 +1,17 @@
 import * as THREE from 'three/webgpu';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import {
-  floor, positionWorld, lights, vec3, pow, float, abs, dot,
-  normalView, positionViewDirection, smoothstep, distance, cameraPosition,
-} from 'three/tsl';
-import { memoryMask, memoryMaskCPU, amberNode } from '../../materials/memory.js';
+import { attribute, uv, float, smoothstep } from 'three/tsl';
 import { crowd } from '../ghosts/index.js';
+import { lifeState, syncLife, lifeMask, inMemory, silhouette, coverage, streetTint } from '../ghosts/life.js';
 
-const MIN_Z = -66, MAX_Z = 12, LENGTH = MAX_Z - MIN_Z, COUNT = 6;
+const MIN_Z = -40, MAX_Z = -6, COUNT = 4;
 const UP = new THREE.Vector3(0, 1, 0);
 const wrap = (n, span) => ((n % span) + span) % span;
-
-// Equal speeds within a lane guarantee a 26 m headway indefinitely, including
-// across the wrap. Absolute time makes skipped updates and shot seeks identical.
 export function poseCar(car, t) {
   car.travel = car.offset + t * car.speed;
-  const along = wrap(car.travel, LENGTH);
-  car.position.set(car.direction > 0 ? 1.6 : -1.6, 0,
-    car.direction > 0 ? MIN_Z + along : MAX_Z - along);
-}
-
-function material(glow = 0) {
-  const m = new THREE.MeshStandardNodeMaterial({
-    roughness: 1, metalness: 0, transparent: false, depthWrite: true,
-    depthTest: true, blending: THREE.NoBlending, side: THREE.DoubleSide,
-  });
-  // Same world-locked 4x4 ordered coverage as the crowd: no blending or
-  // frame-dependent noise, and a nonzero threshold so a closed eye draws nothing.
-  const cell = floor(positionWorld.mul(64));
-  const x = cell.x.add(cell.z.mul(3)), y = cell.y.add(cell.z.mul(2));
-  const parity = v => v.sub(floor(v.div(2)).mul(2));
-  const bayer2 = (a, b) => parity(a.add(b)).mul(2).add(parity(b));
-  const threshold = bayer2(x, y).mul(4)
-    .add(bayer2(floor(x.div(2)), floor(y.div(2)))).add(0.5).div(16);
-  const nearFade = smoothstep(0.8, 4, distance(positionWorld, cameraPosition));
-  const endFade = smoothstep(MIN_Z, MIN_Z + 4, positionWorld.z)
-    .mul(float(1).sub(smoothstep(MAX_Z - 4, MAX_Z, positionWorld.z)));
-  const mask = memoryMask(positionWorld).mul(crowd).mul(nearFade).mul(endFade);
-  m.maskNode = mask.greaterThan(threshold);
-  m.lightsNode = lights([]);
-  m.colorNode = vec3(0);
-  const rim = pow(float(1).sub(abs(dot(normalView, positionViewDirection))), 5);
-  m.emissiveNode = amberNode().mul(glow || rim.mul(0.18)).mul(mask);
-  return m;
+  car.position.set(car.direction > 0 ? 1.65 : -1.65, 0,
+    car.speed === 0 ? car.offset : MAX_Z - wrap(car.travel, MAX_Z - MIN_Z));
 }
 
 // Exported for headless geometry checks. The GLB is centred around its OPEN door,
@@ -137,102 +105,138 @@ async function loadCar() {
   }
 }
 
-function lampPair(z, y, width, height) {
-  const left = new THREE.PlaneGeometry(width, height).translate(-0.60, y, z);
-  const right = new THREE.PlaneGeometry(width, height).translate(0.60, y, z);
-  const geometry = mergeGeometries([left, right], false);
-  left.dispose(); right.dispose();
-  return geometry;
+function lampsGeometry() {
+  const pieces = [];
+  for (const [z, tint, w, h] of [[2.077, [1, .82, .5], .28, .12], [-2.072, [1, .12, .05], .25, .10]]) {
+    for (const x of [-.60, .60]) {
+      const g = new THREE.PlaneGeometry(w, h).translate(x, .75, z);
+      g.setAttribute('lampTint', new THREE.Float32BufferAttribute(Array.from({ length: 4 }, () => tint).flat(), 3));
+      g.setAttribute('lampPower', new THREE.Float32BufferAttribute(new Float32Array(4).fill(z > 0 ? 6 : 3), 1));
+      pieces.push(g);
+    }
+  }
+  const geometry = mergeGeometries(pieces, false); pieces.forEach(g => g.dispose()); return geometry;
+}
+function mergeBody(parts) {
+  const pieces = parts.filter(p => !p.wheel).map(p => p.geometry.clone().translate(p.pivot.x, p.pivot.y, p.pivot.z));
+  const geometry = mergeGeometries(pieces, false); pieces.forEach(g => g.dispose()); return geometry;
 }
 
 export default {
   name: 'traffic',
+  loadCar,
   async init(ctx) {
-    this.parts = await loadCar();
-    this.materials = [material(), material(0.24), material(0.045)];
-    // Small emissive surfaces only. No new lights or shadow casters.
-    this.parts.push(
-      { name: 'headlights', geometry: lampPair(2.077, 0.75, 0.24, 0.10), pivot: new THREE.Vector3(), material: 1 },
-      { name: 'taillights', geometry: lampPair(-2.072, 0.73, 0.20, 0.07), pivot: new THREE.Vector3(), material: 2 },
-    );
-    this.group = new THREE.Group(); this.group.name = 'traffic';
-    this.hidden = new THREE.Matrix4().makeScale(1e-6, 1e-6, 1e-6).setPosition(0, -10000, 0);
+    const source = await this.loadCar();
+    this.life = lifeState();
+    const presence = attribute('lifePresence');
+    const bodyMaterial = silhouette(this.life, attribute('lifeTint', 'vec3'), .75);
+    bodyMaterial.maskNode = coverage(lifeMask(this.life).mul(presence));
+    const lampMaterial = new THREE.MeshBasicNodeMaterial({ side: THREE.DoubleSide });
+    lampMaterial.colorNode = attribute('lampTint', 'vec3').mul(attribute('lampPower'));
+    lampMaterial.maskNode = coverage(lifeMask(this.life).mul(presence));
+    const poolMaterial = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false, depthTest: true, blending: THREE.AdditiveBlending });
+    poolMaterial.forceSinglePass = true;
+    const falloff = float(1).sub(smoothstep(.05, 1, uv().sub(.5).mul(2).length())).pow(2);
+    poolMaterial.colorNode = attribute('poolTint', 'vec3').mul(.9);
+    // Both source and receiver must be remembered, or an off-cone car could
+    // illuminate the present. Flood/debug are shared by both tests.
+    poolMaterial.opacityNode = falloff.mul(lifeMask(this.life)).mul(lifeMask(this.life, attribute('lampAnchor', 'vec3'))).mul(presence);
+    this.materials = [bodyMaterial, lampMaterial, poolMaterial];
+    const wheel = source.find(p => p.name === 'wheel_fr');
+    this.wheelPivots = source.filter(p => p.wheel).map(p => p.pivot.clone());
+    this.parts = [
+      { name: 'body', geometry: mergeBody(source), multiplier: 1, material: 0 },
+      { name: 'wheels', geometry: wheel.geometry.clone(), multiplier: 4, material: 0 },
+      { name: 'lamps', geometry: lampsGeometry(), multiplier: 1, material: 1 },
+      { name: 'wet-road-pools', geometry: new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2), multiplier: 2, material: 2 },
+    ];
+    source.forEach(p => p.geometry.dispose());
     this.cars = Array.from({ length: COUNT }, (_, i) => ({
-      direction: i < 3 ? -1 : 1, speed: i < 3 ? 5.2 : 6.4,
-      offset: (i % 3) * 26 + (i < 3 ? 5 : 14), position: new THREE.Vector3(), travel: 0,
+      // Parked on the right, away from the present-day wreck at z=-18;
+      // two departing cars move down the clear opposite lane, 17 m apart.
+      direction: i < 2 ? 1 : -1, speed: i < 2 ? 0 : 1.35,
+      offset: i < 2 ? [-9.5, -31][i] : (i-2)*17 + 6,
+      position: new THREE.Vector3(), travel: 0,
     }));
-    this.visible = new Uint8Array(COUNT);
-    this.frames = 0;
-    this.rootMatrix = new THREE.Matrix4(); this.localMatrix = new THREE.Matrix4();
-    this.matrix = new THREE.Matrix4(); this.rotation = new THREE.Quaternion();
-    this.scale = new THREE.Vector3(1, 1, 1); this.center = new THREE.Vector3();
+    this.group = new THREE.Group(); this.group.name = 'traffic';
+    this.hidden = new THREE.Matrix4().makeScale(1e-6,1e-6,1e-6).setPosition(0,-10000,0);
+    this.matrix = new THREE.Matrix4(); this.rootMatrix = new THREE.Matrix4(); this.localMatrix = new THREE.Matrix4();
+    this.wheelFlip = new THREE.Matrix4().makeRotationY(Math.PI);
+    this.rotation = new THREE.Quaternion(); this.scale = new THREE.Vector3(1,1,1);
+    this.center = new THREE.Vector3(); this.anchor = new THREE.Vector3(); this.tint = new THREE.Color();
     this.broad = { origin: new THREE.Vector3(), dir: new THREE.Vector3(), strength: 1, angle: 0, range: 0 };
+    this.visible = new Uint8Array(COUNT);
     for (const part of this.parts) {
-      part.mesh = new THREE.InstancedMesh(part.geometry, this.materials[part.material || 0], COUNT);
+      const capacity = COUNT * part.multiplier;
+      part.geometry.setAttribute('lifePresence', new THREE.InstancedBufferAttribute(new Float32Array(capacity),1));
+      if (part.material === 0) part.geometry.setAttribute('lifeTint', new THREE.InstancedBufferAttribute(new Float32Array(capacity*3),3));
+      if (part.material === 2) {
+        part.geometry.setAttribute('poolTint', new THREE.InstancedBufferAttribute(new Float32Array(capacity*3),3));
+        part.geometry.setAttribute('lampAnchor', new THREE.InstancedBufferAttribute(new Float32Array(capacity*3),3));
+      }
+      part.mesh = new THREE.InstancedMesh(part.geometry, this.materials[part.material], capacity);
       part.mesh.name = `traffic-${part.name}`;
+      part.mesh.frustumCulled = false;
       part.mesh.castShadow = part.mesh.receiveShadow = false;
-      part.mesh.frustumCulled = false; // CPU cone broad phase owns moving-instance culling.
       part.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-      for (let i = 0; i < COUNT; i++) part.mesh.setMatrixAt(i, this.hidden);
+      for (let i=0; i<capacity; i++) part.mesh.setMatrixAt(i,this.hidden);
       this.group.add(part.mesh);
     }
     ctx.scene.add(this.group);
-    ctx.api.traffic = { count: COUNT, visibleCount: 0, source: 'glb' };
-    // Seed actual nonzero instance counts before the first render. Keeping only
-    // Group.visible=true with count=0 would skip the intended shader warm-up.
-    this.update(0, 0, ctx);
-    this.frames = 0;
+    ctx.api.traffic = { count: COUNT, visibleCount: 0, source: 'glb', sceneDraws: 4 };
+    this.frames = 0; this.update(0,0,ctx); this.frames = 0;
   },
-  update(dt, t, ctx) {
+  update(dt,t,ctx) {
     const warmup = this.frames++ < 30;
-    const m = ctx.memory;
-    const enabled = !!m && m.strength > 0 && m.range > 0 && crowd.value > 0;
+    const enabled = syncLife(this.life,ctx,crowd.value);
     this.group.visible = warmup || enabled;
-    if (enabled) {
-      this.broad.origin.copy(m.origin); this.broad.dir.copy(m.dir);
-    }
-    let last = -1, visibleCount = 0, dirty = false;
-    for (let i = 0; i < COUNT; i++) {
-      const car = this.cars[i];
-      poseCar(car, t);
-      let visible = warmup;
-      if (!visible && enabled) {
-        this.center.copy(car.position); this.center.y += 0.75;
-        const d = this.center.distanceTo(m.origin), radius = 2.6;
-        // Include the whole car, wheel rotation and memoryMask's noisy edge.
-        this.broad.angle = Math.min(Math.PI,
-          Math.acos(Math.max(-1, Math.cos(m.angle) - 0.10))
-          + Math.asin(Math.min(1, radius / Math.max(d, 0.001))));
-        this.broad.range = m.range + radius + 0.5;
-        visible = d <= radius || memoryMaskCPU(this.center, this.broad) > 0;
-      }
-      if (visible) {
-        this.rotation.setFromAxisAngle(UP, car.direction > 0 ? 0 : Math.PI);
-        this.rootMatrix.compose(car.position, this.rotation, this.scale);
-        for (const part of this.parts) {
-          if (part.wheel) this.localMatrix.makeRotationX(wrap(car.travel / 0.33, Math.PI * 2));
-          else this.localMatrix.identity();
-          this.localMatrix.setPosition(part.pivot);
-          part.mesh.setMatrixAt(i, this.matrix.multiplyMatrices(this.rootMatrix, this.localMatrix));
+    let last = -1, visibleCount = 0;
+    for (let i=0; i<COUNT; i++) {
+      const car = this.cars[i]; poseCar(car,t);
+      this.center.copy(car.position); this.center.y = .75;
+      // Bounds cover the body AND the 6 m headlight reflection in front.
+      const visible = warmup || (enabled && inMemory(this.center,9,ctx,this.life,this.broad));
+      this.rotation.setFromAxisAngle(UP,car.direction > 0 ? 0 : Math.PI);
+      this.rootMatrix.compose(car.position,this.rotation,this.scale);
+      streetTint(ctx,car.position,this.tint);
+      // Dissolve at the route boundaries before wrapping; never teleport a lit
+      // car/reflection across the remembered street. Debug shows every slot.
+      const presence = this.life.debug.value || !car.speed ? 1
+        : THREE.MathUtils.smoothstep(car.position.z, MIN_Z, MIN_Z+2)
+          * (1-THREE.MathUtils.smoothstep(car.position.z, MAX_Z-2, MAX_Z));
+      for (const part of this.parts) for (let j=0; j<part.multiplier; j++) {
+        const slot=i*part.multiplier+j;
+        part.geometry.attributes.lifePresence.setX(slot,presence);
+        if (!visible) { part.mesh.setMatrixAt(slot,this.hidden); continue; }
+        this.localMatrix.identity();
+        if (part.name === 'wheels') {
+          this.localMatrix.makeRotationX(car.speed ? car.travel/.33 : 0);
+          if (this.wheelPivots[j].x < 0) this.localMatrix.multiply(this.wheelFlip);
+          this.localMatrix.setPosition(this.wheelPivots[j]);
+        } else if (part.material === 2) {
+          const front = j === 0;
+          this.localMatrix.makeScale(front ? 2.1 : 1.5,1,front ? 6 : 2.2).setPosition(0,.025,front ? 4.8 : -2.9);
+          part.geometry.attributes.poolTint.setXYZ(slot,1,front ? .82 : .12,front ? .5 : .05);
+          this.anchor.set(0,.75,front ? 2.077 : -2.072).applyMatrix4(this.rootMatrix);
+          part.geometry.attributes.lampAnchor.setXYZ(slot,this.anchor.x,this.anchor.y,this.anchor.z);
         }
-        last = i; visibleCount++; dirty = true;
-      } else if (this.visible[i]) {
-        // One invalidation on exit, then no matrix writes while outside the cone.
-        for (const part of this.parts) part.mesh.setMatrixAt(i, this.hidden);
-        dirty = true;
+        part.mesh.setMatrixAt(slot,this.matrix.multiplyMatrices(this.rootMatrix,this.localMatrix));
+        if (part.material === 0) part.geometry.attributes.lifeTint.setXYZ(slot,this.tint.r,this.tint.g,this.tint.b);
       }
       this.visible[i] = visible ? 1 : 0;
+      if (visible) { last=i; visibleCount++; }
     }
     for (const part of this.parts) {
-      part.mesh.count = last + 1; // Stable slot identity for temporal history.
-      if (dirty) part.mesh.instanceMatrix.needsUpdate = true;
+      part.mesh.count = (last+1)*part.multiplier;
+      part.mesh.instanceMatrix.needsUpdate = true;
+      for (const name of ['lifeTint','poolTint','lampAnchor','lifePresence']) if (part.geometry.attributes[name]) part.geometry.attributes[name].needsUpdate = true;
     }
-    ctx.api.traffic.visibleCount = visibleCount;
+    ctx.api.traffic.visibleCount=visibleCount;
   },
   dispose(ctx) {
     this.group?.removeFromParent();
-    for (const part of this.parts || []) { part.mesh?.dispose(); part.geometry.dispose(); }
-    for (const m of this.materials || []) m.dispose();
+    for (const part of this.parts || []) { part.mesh.dispose(); part.geometry.dispose(); }
+    for (const material of this.materials || []) material.dispose();
     if (ctx?.api) delete ctx.api.traffic;
   },
 };

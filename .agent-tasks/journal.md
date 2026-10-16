@@ -81,3 +81,10 @@
 - 2026-10-16 16:07:51 | claude | 派给 codex：地面升级:cybercity 沥青/方砖/井盖+我们的湿润层（w20-ground，可写 src/materials/**,assets/textures/cc/ground/**,CREDITS.md）
 - 2026-10-16 16:08:09 | claude | 派给 grok：第二版中期画面评审（r13-midreview，只读）
 - 2026-10-16 16:14:22 | grok | 完成：第二版中期画面评审（r13-midreview）
+- 2026-10-16 16:45:17 | codex | 未完成（timeout）：地面升级:cybercity 沥青/方砖/井盖+我们的湿润层（w20-ground）｜任务没完成，它的半成品改动没有带回项目，副本保留在 /Users/wenbin/.local/share/agent-team/work/新游戏--53fa3746--w20-ground
+- 2026-10-16 17:50:48 | claude | 派给 codex：记忆里的人和车(彩色霓虹边光、车灯)（w21-memory-life，可写 src/systems/ghosts/**,src/systems/traffic/**）
+- 2026-10-16 17:53:51 | claude | 派给 codex：霓虹加层次:灯箱、吊牌、缺笔画（w22-neon-depth，可写 src/systems/neon/**,assets/textures/neon/**）
+- 2026-10-16 17:53:51 | claude | 派给 grok：雨丝吃到霓虹颜色（w23-rain-color，可写 src/systems/rain/**）
+- 2026-10-16 18:05:52 | codex | 未完成（timeout）：记忆里的人和车(彩色霓虹边光、车灯)（w21-memory-life）｜任务没完成，它的半成品改动没有带回项目，副本保留在 /Users/wenbin/.local/share/agent-team/work/新游戏--53fa3746--w21-memory-life
+- 2026-10-16 18:08:59 | grok | 未完成（timeout）：雨丝吃到霓虹颜色（w23-rain-color）
+- 2026-10-16 18:14:46 | codex | 完成：霓虹加层次:灯箱、吊牌、缺笔画（w22-neon-depth）

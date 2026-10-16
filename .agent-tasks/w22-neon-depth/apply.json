@@ -1,0 +1,13 @@
+{
+ "state": "applied",
+ "files": [
+  "src/systems/neon/atlas.js",
+  "src/systems/neon/geometry.js",
+  "src/systems/neon/index.js",
+  "src/systems/neon/layout.js",
+  "src/systems/neon/materials.js",
+  "src/systems/neon/neon.test.mjs"
+ ],
+ "created": [],
+ "at": "2026-10-16 18:14:46"
+}
