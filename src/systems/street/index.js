@@ -3,6 +3,7 @@ import { makeSurface } from '../../materials/surface.js';
 import { syncWet } from '../../materials/wet.js';
 import { memoryMask, memoryMaskCPU, pastWindowGlow, amberNode } from '../../materials/memory.js';
 import { buildDetails } from './details.js';
+import { setupPassingCar } from './passing.js';
 import { mergeStatic } from './merge.js';
 
 // The lane: one narrow street running -Z, crossing a wider road at z = CROSS_Z. Everything achromatic.
@@ -152,6 +153,7 @@ export default {
       box(9, t, 8, M.wallA, k * 9.3 + 4, t / 2, L.zEnd - 45, root);
     }
     await buildDetails(ctx, root, this.facades, M, r);
+    this.passing = await setupPassingCar(ctx, root); // marks itself dynamic: never merged
     if (ctx.params.get('nomerge') === null) mergeStatic(root);
 
     // night sky environment for glossy reflections: faint, cold, almost black
@@ -165,6 +167,7 @@ export default {
   },
   update(dt, t, ctx) {
     syncWet(ctx.world);
+    this.passing?.(dt);
     // the near lamp fails now and then (the audio crackles on these drops); the vending panel flickers rarely
     const st = ctx.api.street;
     if (st && !ctx.isShot) { // shots stay deterministic
