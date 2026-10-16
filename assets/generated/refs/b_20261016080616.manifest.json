@@ -1,0 +1,137 @@
+{
+  "batch_id": "b_20261016080616",
+  "tasks": 8,
+  "submitted": 8,
+  "failed": 0,
+  "total_images": 8,
+  "items": [
+    {
+      "index": 1,
+      "prompt": "单个物体的产品参考图,三分之四俯视角,完整入画不裁切,纯浅灰色无缝背景,柔和均匀的影棚光,无文字水印。写实照片质感,真实比例。物体:被遗弃多年的1990年代中国国产老轿车(类似桑塔纳),车漆褪成灰白,一侧车门敞开,轮胎瘪了,车顶落满树叶和污渍,挡风玻璃有裂纹",
+      "id": "img_43247",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43247/dc12ab92-fdb0-433b-b349-4dacbc28421f.jpg?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T08%3A05%3A10Z%2F3600%2F%2F8c8b1b4b73ddf213e5652c20f7207879f0810541817a64afae763e00a7d78d06"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/refs/img_43247/ai_generate_43247_1.png"
+      ]
+    },
+    {
+      "index": 2,
+      "prompt": "单个物体的产品参考图,三分之四俯视角,完整入画不裁切,纯浅灰色无缝背景,柔和均匀的影棚光,无文字水印。写实照片质感,真实比例。物体:叠在一起的三个旧塑料啤酒周转箱,一个红色两个黄色,里面插着空的绿色啤酒瓶",
+      "id": "img_43248",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43248/0de5fa3f-5ca4-4975-b6be-0b0d2c758a3b.jpg?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T08%3A05%3A10Z%2F3600%2F%2Fc8f20d4e0311bd337b99c1f0c09bfe0ade56dbfcb670c51789fcac1350e3fe9f"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/refs/img_43248/ai_generate_43248_1.png"
+      ]
+    },
+    {
+      "index": 3,
+      "prompt": "单个物体的产品参考图,三分之四俯视角,完整入画不裁切,纯浅灰色无缝背景,柔和均匀的影棚光,无文字水印。写实照片质感,真实比例。物体:一辆中国老式二八黑色自行车,链条生锈,后座绑着一块木板,车把上挂着菜篮",
+      "id": "img_43249",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43249/6a691423-a74c-464a-affb-eb7f2aeb9736.jpg?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T08%3A05%3A10Z%2F3600%2F%2Fa0f5c4fc8e3b49e6a854ed53de1077a12ffbd9761a779a93e08b243f0a2ef49d"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/refs/img_43249/ai_generate_43249_1.png"
+      ]
+    },
+    {
+      "index": 4,
+      "prompt": "单个物体的产品参考图,三分之四俯视角,完整入画不裁切,纯浅灰色无缝背景,柔和均匀的影棚光,无文字水印。写实照片质感,真实比例。物体:几个破旧的泡沫箱和搪瓷脸盆改成的花盆,种着葱和枯萎的植物,放在一起",
+      "id": "img_43250",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43250/172e7a22-200f-494e-8f96-fea8412c60cc.jpg?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T08%3A05%3A10Z%2F3600%2F%2F127a96a004c315658184960cba42dbd75d0d1410b45d28d607221dc6442a550b"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/refs/img_43250/ai_generate_43250_1.png"
+      ]
+    },
+    {
+      "index": 5,
+      "prompt": "单个物体的产品参考图,三分之四俯视角,完整入画不裁切,纯浅灰色无缝背景,柔和均匀的影棚光,无文字水印。写实照片质感,真实比例。物体:一堆压扁的旧纸箱和一捆用塑料绳捆好的废纸板,被雨打湿",
+      "id": "img_43253",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43253/a203aa4f-5411-42ed-97a1-c2392602d3a9.jpg?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T08%3A06%3A06Z%2F3600%2F%2F82f85227f373e0026aa1587b99932b60b063ebf852adf4648727d36f0813fe0f"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/refs/img_43253/ai_generate_43253_1.png"
+      ]
+    },
+    {
+      "index": 6,
+      "prompt": "单个物体的产品参考图,三分之四俯视角,完整入画不裁切,纯浅灰色无缝背景,柔和均匀的影棚光,无文字水印。写实照片质感,真实比例。物体:老街店门口的落地式长方形灯箱招牌,白色塑料面板上写着红色的凉茶二字,外框是铁的有锈,底下有轮子",
+      "id": "img_43254",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43254/98659252-b3e7-44c1-abe3-057c7c81f4cb.jpg?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T08%3A05%3A36Z%2F3600%2F%2F12c666ba7709e86e471bb3a556e43cf2565fc2ed311d84a553b7cfc0d60a84df"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/refs/img_43254/ai_generate_43254_1.png"
+      ]
+    },
+    {
+      "index": 7,
+      "prompt": "单个物体的产品参考图,三分之四俯视角,完整入画不裁切,纯浅灰色无缝背景,柔和均匀的影棚光,无文字水印。写实照片质感,真实比例。物体:老式窗式空调外机,灰白色铁皮外壳,有锈迹和黑色水渍,风扇格栅,底部有铁支架",
+      "id": "img_43255",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43255/711ad60e-ff79-462f-a884-1a469111011f.jpg?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T08%3A06%3A15Z%2F3600%2F%2F38515bbbeaf8a4557d33b48d9303b643775acc7b7f5f5e55b012c010349da747"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/refs/img_43255/ai_generate_43255_1.png"
+      ]
+    },
+    {
+      "index": 8,
+      "prompt": "单个物体的产品参考图,三分之四俯视角,完整入画不裁切,纯浅灰色无缝背景,柔和均匀的影棚光,无文字水印。写实照片质感,真实比例。物体:小店门口的老式桶装水饮水机,旁边堆着三个空的蓝色水桶",
+      "id": "img_43256",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43256/babf6de9-1ee0-462c-9616-f7e6638f5e42.jpg?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T08%3A06%3A02Z%2F3600%2F%2F4b3d04a9083ef0412a9d171e75a806755db05d910b6a0c640078eeea9cef3d69"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/refs/img_43256/ai_generate_43256_1.png"
+      ]
+    }
+  ],
+  "plan": {
+    "kind": "image",
+    "model": "seedream",
+    "version": "seedream-5-0",
+    "count": 8,
+    "quota": {
+      "limit": 300,
+      "used": 8,
+      "remaining": 292,
+      "unit": "张",
+      "after": 16
+    },
+    "running": {
+      "limit": 20,
+      "current": 0
+    },
+    "allowed": true,
+    "blockers": [],
+    "cost": {
+      "amount": 1.76,
+      "currency": "CNY",
+      "priced": true,
+      "estimated": true,
+      "note": null
+    },
+    "request": {
+      "batch": true,
+      "tasks": 8,
+      "total_images": 8,
+      "local_uploads": []
+    }
+  }
+}
