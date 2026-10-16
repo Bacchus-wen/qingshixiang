@@ -145,6 +145,32 @@ drop(lambda o: o.name.startswith(('shell_shld_cap_accent_L', 'shell_thgh_accent_
                                     # panels lost over the years: the knee drums, chest plates and a calf shell show what is under them
                                     'shell_batt_door_main', 'shell_shin_front_main_L', 'shell_uarm_biceps_main_R', 'shell_head_crown_accent')))
 
+# ---------- what shows through the missing panels: spine, hoses, a fan, and the cut cables at the left elbow ----------
+def prim(kind, name, parent, loc, rot=(0, 0, 0), scale=(1, 1, 1), mat_name='joint_metal', **kw):
+    if kind == 'cyl': bpy.ops.mesh.primitive_cylinder_add(vertices=kw.get('v', 12), radius=1, depth=1)
+    elif kind == 'torus': bpy.ops.mesh.primitive_torus_add(major_radius=1, minor_radius=kw.get('minor', 0.12), major_segments=24, minor_segments=8)
+    else: bpy.ops.mesh.primitive_cube_add(size=1)
+    o = bpy.context.active_object; o.name = name
+    o.parent = empties[parent]; o.matrix_parent_inverse = Matrix.Identity(4)
+    o.location = Vector(loc); o.rotation_euler = Euler([R(a) for a in rot], 'XYZ'); o.scale = Vector(scale)
+    o['mat'] = mat_name
+    return o
+# spine and ribs behind the open battery door / chest (mm, body frame)
+prim('cyl', 'inner_spine', 'body', (0, 30, 180), scale=(22, 22, 330), mat_name='frame_dark')
+for i, z in enumerate((90, 150, 210, 270)):
+    prim('torus', f'inner_rib_{i}', 'body', (0, 30, z), scale=(70, 55, 60), mat_name='frame_dark', minor=0.08)
+prim('torus', 'inner_fan_ring', 'body', (0, -40, 230), rot=(90, 0, 0), scale=(48, 48, 48), mat_name='joint_metal', minor=0.1)
+for i in range(7):
+    prim('cube', f'inner_fan_blade_{i}', 'body', (0, -38, 230), rot=(90, i * 360 / 7, 18), scale=(6, 1.5, 40), mat_name='joint_metal')
+for i, (x, z) in enumerate(((-40, 120), (35, 140), (-15, 300), (25, 260))):
+    prim('cyl', f'inner_hose_{i}', 'body', (x, -10, z), rot=(10 + i * 7, -12 + i * 9, 0), scale=(8, 8, 160), mat_name='hose', v=8)
+# left elbow stump: a short sleeve and five cut cables hanging out of it
+prim('cyl', 'stump_sleeve', 'L_elbow', (0, 0, -40), scale=(34, 34, 50), mat_name='frame_dark')
+for i in range(5):
+    a = i * 72
+    prim('cyl', f'stump_cable_{i}', 'L_elbow', (12 * math.cos(R(a)), 12 * math.sin(R(a)), -85 - i * 9), rot=(8 * math.cos(R(a)), 8 * math.sin(R(a)), 0),
+         scale=(3.2, 3.2, 70 + i * 18), mat_name='cable_live' if i < 2 else 'cable', v=6)
+
 # ---------- materials by suffix (our runtime's robotMaterial keys) ----------
 def mat(name):
     m = bpy.data.materials.get(name) or bpy.data.materials.new(name)
@@ -152,7 +178,7 @@ def mat(name):
 MAP = [('_glass', 'eye_dead'), ('_brass', 'frame_brass'), ('_knuckle', 'joint_metal'), ('_sub', 'shell_dark'), ('_accent', 'shell_accent'), ('_main', 'shell_ceramic')]
 for o in scene.objects:
     if o.type != 'MESH': continue
-    key = next((v for k, v in MAP if k in o.name), 'shell_ceramic')
+    key = o.get('mat') or next((v for k, v in MAP if k in o.name), 'shell_ceramic')
     o.data.materials.clear(); o.data.materials.append(mat(key))
 
 # ---------- decimate dense parts ----------

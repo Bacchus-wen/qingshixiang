@@ -55,6 +55,16 @@ export function robotMaterial(name) {
     m.colorNode = vec3(grime(float(0.07)));
     m.roughnessNode = wetRough(0.5);
     m.metalnessNode = float(0.1);
+  } else if (n.includes('frame_dark')) {
+    // the inner skeleton seen through lost panels: dark oily steel
+    m.colorNode = vec3(grime(float(0.06))); m.roughnessNode = wetRough(0.4); m.metalnessNode = float(0.9);
+  } else if (n.includes('hose')) {
+    // coolant hoses: faded teal rubber, the only cold colour on the body
+    m.colorNode = grime(vec3(0.03, 0.12, 0.12)); m.roughnessNode = wetRough(0.55); m.metalnessNode = float(0);
+  } else if (n.includes('cable_live')) {
+    // two of the cut cables at the elbow still carry a little current
+    m.colorNode = vec3(0.02);
+    m.emissiveNode = color(eyeColor).mul(mx_noise_float(vec3(time.mul(3.1), 5, 0)).mul(0.5).add(0.5).pow(3).mul(2.2).add(0.05));
   } else if (n.includes('brass')) {
     // aged brass rings at the joints: the one warm metal on the body, dulled by years of rain
     m.colorNode = grime(vec3(0.36, 0.25, 0.12));
