@@ -223,7 +223,7 @@ export default {
     scene.environment = pm.fromScene(envScene, 0.04).texture;
     scene.environmentIntensity = 0.35;
     // moonlight through the rain clouds: one weak, cold, shadowless key from high behind the robot's wall
-    const moon = new THREE.DirectionalLight(0x8ea3c8, 0.22);
+    const moon = new THREE.DirectionalLight(0x8ea3c8, 0.35);
     moon.position.set(-20, 30, 10); scene.add(moon, moon.target);
   },
   update(dt, t, ctx) {

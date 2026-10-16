@@ -299,7 +299,7 @@ export default {
       this.gobo.draw(o, mode, fq); this.goboT = t; this._lastGobo = o; this._lastMode = mode; this._lastFlood = fq;
     }
 
-    if (this.signKey) this.signKey.intensity = 6 * (ctx.world.mains ?? 1);
+    if (this.signKey) this.signKey.intensity = 3.5 * (ctx.world.mains ?? 1);
     // ---- publish the memory cone
     const m = ctx.memory;
     m.origin.copy(this._v); m.dir.copy(this._d);

@@ -37,6 +37,19 @@ export function occupyWindows(windows) {
       attr.needsUpdate = true;
     }
   }
+  // v3 (review): a street "not yet empty" -- ~8% more holdouts, mostly warm lamps, a few cold TV glows (y = 2)
+  let k = 0;
+  for (const w of windows) {
+    k++;
+    if (chosen.has(w)) continue;
+    const h = Math.sin(k * 12.9898 + w.z * 78.233) * 43758.5453, u = h - Math.floor(h);
+    if (u > 0.085) continue;
+    chosen.add(w);
+    const attr = w.mesh.geometry.getAttribute('ccRoom');
+    const v = u < 0.022 ? 2 : 1;
+    for (let i = 0; i < attr.count; i++) attr.setY(i, v);
+    attr.needsUpdate = true;
+  }
   return [...chosen].map(w => ({ side: w.side, z: w.z, y: w.y }));
 }
 

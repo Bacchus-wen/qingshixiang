@@ -12,8 +12,11 @@ const ROBOT = new THREE.Vector3(-4.58, 0.14, -13.5);
 // arrival: from puddle height (the lamp in the water) rising to eye height, drifting down the lane
 const ARRIVE = new THREE.CatmullRomCurve3([
   new THREE.Vector3(0.6, 0.32, 14), new THREE.Vector3(0.8, 0.9, 7), new THREE.Vector3(0.6, 1.45, 0),
-  new THREE.Vector3(0.0, 1.55, -5.5), new THREE.Vector3(-0.8, 1.42, -9.5), new THREE.Vector3(-1.4, 1.32, -11.6),
+  new THREE.Vector3(0.0, 1.55, -5.5), new THREE.Vector3(-1.2, 1.05, -8.6), new THREE.Vector3(-2.6, 0.55, -10.6),
 ]);
+// v3 (review, after targets/robot.jpg): low, close, three-quarter from the street side; the robot on the left third,
+// the wet lane receding down the right two thirds
+const WAIT_LOOK = new THREE.Vector3(-6.1, 0.95, -21.6);
 const ease = (x) => x * x * (3 - 2 * x);
 // where the beam lands: ground, or one of the two facades (x = +-5.05), within 40 m
 function beamHit(o, d, out) {
@@ -66,8 +69,8 @@ export default {
         // first look is down at the wet road (the lamp's reflection), then up the lane, then onto the robot
         const lookUp = ease(Math.min(1, this.t / 9));
         this._v.set(0.2, 0.0 + lookUp * 1.4, 4 - lookUp * 28);
-        this.cam.look.lerpVectors(this._v, this._w.set(ROBOT.x, 0.75, ROBOT.z), ease(Math.min(1, Math.max(0, (u - 0.6) / 0.4))));
-        this.cam.fov = 44;
+        this.cam.look.lerpVectors(this._v, WAIT_LOOK, ease(Math.min(1, Math.max(0, (u - 0.6) / 0.4))));
+        this.cam.fov = 44 - 4 * ease(Math.min(1, Math.max(0, (u - 0.6) / 0.4)));
         // the one moment the whole street is seen: a scripted first strike mid-way down the lane
         if (!this.struck && this.t > 21) { this.struck = true; ctx.api.atmo?.strike(); }
         if (this.t > 42 || input.wasPressed('Enter')) this.set('wait');
@@ -77,7 +80,7 @@ export default {
         m.forceOpen = undefined;
         this.film.fade(0); // also clears a fade left by skipping the arrival
         ARRIVE.getPoint(1, this.cam.pos);
-        this.cam.look.set(ROBOT.x, 0.75, ROBOT.z);
+        this.cam.look.copy(WAIT_LOOK);
         this.cam.fov = 40 - Math.min(4, this.t * 0.15);
         if (this.t > 4) this.film.hint(robot?.failed && !input.hold ? '再按住' : robot?.failed ? '' : '按住');
         if (robot && robot.open > 0.08 && robot.attempts > 1) { this.film.hint(''); this.set('waking', true); }
@@ -99,10 +102,12 @@ export default {
         // beam leaving the lens across the frame. The camera rides the gaze direction, so it drifts with the head.
         this._w.set(m.dir.z, 0, -m.dir.x).normalize(); // screen-left of the gaze, on the street side
         // high over the shoulder: the lamp-lit helmet top stays just under the frame, the beam rises out of it
-        this.cam.pos.copy(eyePos).addScaledVector(m.dir, -0.95).addScaledVector(this._w, -0.4);
-        this.cam.pos.y = eyePos.y + 0.7;
-        this.cam.look.copy(eyePos).addScaledVector(m.dir, 9);
-        this.cam.fov = 46;
+        // v3 (review, after targets/memory.jpg): almost at eye height, just behind and beside the helmet, which stays
+        // in the left foreground as a dark wet silhouette; the beam leaves the frame towards the lower right
+        this.cam.pos.copy(eyePos).addScaledVector(m.dir, -0.62).addScaledVector(this._w, -0.36);
+        this.cam.pos.y = eyePos.y + 0.12;
+        this.cam.look.copy(eyePos).addScaledVector(m.dir, 9).addScaledVector(this._w, 0.9);
+        this.cam.fov = 50;
         // the door memory gets its own slow push-in toward the doorway, then eases back
         const fr = ctx.api.fragment;
         if (fr && fr.state === 'playing') {

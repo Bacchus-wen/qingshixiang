@@ -46,7 +46,7 @@ export function createMaterials(atlas, mode) {
   const radius = length(uv().sub(0.5).mul(2));
   const falloff = float(1).sub(smoothstep(0.05, 1, radius)).pow(2);
   const spill = mix(tint, paper.mul(LIGHTBOX_RATIO), style.x);
-  ground.colorNode = mix(faded.mul(power).mul(0.22), spill.mul(0.55), groundPast);
+  ground.colorNode = mix(faded.mul(power).mul(0.04).mul(mains), spill.mul(0.16), groundPast); // v3: real lights make the pools now
   ground.opacityNode = falloff;
   ground.forceSinglePass = true;
   return { face, housing, ground };

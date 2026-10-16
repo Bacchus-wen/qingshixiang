@@ -75,7 +75,7 @@ POSE = {
     'head': (20, 0, -12),
     'L_shoulder': (-8, 8, 0), 'L_elbow': (0, 0, 0),
     'R_shoulder': (-38, -10, 0), 'R_elbow': (-62, 0, 0), 'R_wrist': (20, 0, 10),
-    'L_hip': (-78, 6, 4), 'L_knee': (22, 0, 0), 'L_ankle': (-20, 0, 0),
+    'L_hip': (-86, 6, 6), 'L_knee': (6, 0, 0), 'L_ankle': (-30, 0, 0),
     'R_hip': (-112, -4, -6), 'R_knee': (104, 0, 0), 'R_ankle': (-10, 0, 0),
 }
 for side in ('L', 'R'):
@@ -213,7 +213,9 @@ new_head.name = 'head'
 # ground the robot (lowest point on z=0) and push its back against the old robot's wall line
 bpy.context.view_layer.update()
 meshes = [o for o in scene.objects if o.type == 'MESH' and not under(o, 'eye') and o.name != 'eye']
-lo = min((o.matrix_world @ Vector(c)).z for o in meshes for c in o.bound_box)
+# sit ON the ground: the pelvis (and the straight left leg's heel) rest on it, not the lowest bounding point
+pelvis = [o for o in meshes if 'pelvis' in o.name]
+lo = min((o.matrix_world @ Vector(c)).z for o in (pelvis or meshes) for c in o.bound_box) + 0.012
 back = max((o.matrix_world @ Vector(c)).y for o in meshes for c in o.bound_box)
 root.location.z -= lo
 root.location.y += (old_back - back)

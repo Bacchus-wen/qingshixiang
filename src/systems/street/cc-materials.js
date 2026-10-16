@@ -2,9 +2,7 @@
 // No license supplied upstream; internal company demonstration only (see CREDITS.md).
 import * as THREE from 'three/webgpu';
 import {
-  attribute, uv, texture, positionWorld, cameraPosition, normalWorldGeometry,
-  vec2, vec3, float, floor, fract, mod, mix, min, max, abs, dot, cross,
-  normalize, smoothstep, step, sin, select, transformNormalToView,
+  abs, attribute, cameraPosition, cross, dot, float, floor, fract, max, min, mix, mod, normalWorldGeometry, normalize, positionWorld, select, sin, smoothstep, step, texture, time, transformNormalToView, uv, vec2, vec3,
 } from 'three/tsl';
 import { mains, memoryMask } from '../../materials/memory.js';
 import { neonLightAt } from '../../materials/neonlight.js';
@@ -104,7 +102,11 @@ export function createWindowMaterial(tex, params) {
   const mullion = smoothstep(float(0.018).sub(aa), float(0.018).add(aa), abs(p.x.sub(0.5)));
   const glass = opening.mul(mullion);
   const room = interiorRoom(tex.interior_atlas);
-  const now = vec3(0.48, 0.64, 0.88).mul(a.y).mul(0.16).mul(mains);
+  // present: holdout windows -- warm 2700K lamps (y = 1) or a cold flickering TV (y = 2); trip with the mains
+  const tv = a.y.greaterThan(1.5);
+  const flick = sin(time.mul(7.3).add(positionWorld.z.mul(3.1))).mul(sin(time.mul(2.1).add(positionWorld.x))).mul(0.25).add(0.75);
+  const now = mix(vec3(1.0, 0.68, 0.38).mul(0.9), vec3(0.45, 0.62, 1.0).mul(flick).mul(0.7), tv.select(float(1), float(0)))
+    .mul(a.y.min(1)).mul(mains);
   const past = vec3(1.0, 0.73, 0.44).mul(a.w).mul(1.8);
   const illumination = mix(now, past, mask);
   // Reflective cold glass remains dark in the present; no material clone per window.
