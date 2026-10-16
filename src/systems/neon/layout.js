@@ -101,7 +101,7 @@ export function planSigns(facades, signs = []) {
   // Spatially stratified survivors: 4 per side, one per depth band. Never brighten a story home.
   for (const side of [-1, 1]) {
     const candidates = out.filter((s) => s.side === side && s.kind === 'blade' && !s.upper && !facades[s.facade].home).sort((a, b) => b.z - a.z);
-    const n = Math.min(4, candidates.length);
+    const n = Math.min(6, candidates.length); // v3: a few more holdouts so the present reads
     for (let k = 0; k < n; k++) candidates[Math.floor((k + 0.5) * candidates.length / n)].alive = 1;
   }
   return out;
