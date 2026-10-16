@@ -2,13 +2,14 @@ import * as THREE from 'three/webgpu';
 import {
   pass, depthPass, mrt, output, velocity, normalView, metalness, roughness, packNormalToRGB, unpackRGBToNormal, sample,
   normalWorld, materialReference, uniform, vec2, vec3, vec4, float, screenUV, time, hash, floor, fract, mix,
-  smoothstep, length, luminance, clamp, max, min, renderOutput, Fn, agxToneMapping,
+  smoothstep, length, luminance, clamp, max, min, renderOutput, Fn, agxToneMapping, exp,
 } from 'three/tsl';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 import { traa } from 'three/addons/tsl/display/TRAANode.js';
 import { ssr } from 'three/addons/tsl/display/SSRNode.js';
 import { dof } from 'three/addons/tsl/display/DepthOfFieldNode.js';
 import { ao } from 'three/addons/tsl/display/GTAONode.js';
+import { gaussianBlur } from 'three/addons/tsl/display/GaussianBlurNode.js';
 
 // Post pipeline v1:
 //   opaque depth pre-pass (volumes read it for occlusion)
@@ -35,7 +36,7 @@ export class PostFX {
       blackPoint: uniform(0.02),
       lift: uniform(new THREE.Vector3(0.004, 0.006, 0.009)),
       // film: amber halation hugging warm highlights, gate weave (sub-pixel frame drift), density flicker
-      halation: uniform(0.55), aoStrength: uniform(0.85), weave: uniform(new THREE.Vector2()), flicker: uniform(0),
+      halation: uniform(0.55), aoStrength: uniform(0.85), scatter: uniform(0.16), streak: uniform(0.08), weave: uniform(new THREE.Vector2()), flicker: uniform(0),
       ssrIntensity: uniform(1.0),
       // depth of field, driven by the director (bokeh 0 = off)
       focus: uniform(10), focalRange: uniform(6), bokeh: uniform(0),
@@ -134,7 +135,19 @@ export class PostFX {
     const bmax = max(bl.r, max(bl.g, bl.b));
     const chroma = smoothstep(0.04, 0.3, bmax.sub(min(bl.r, min(bl.g, bl.b))).div(bmax.add(1e-4)));
     const halo = bl.mul(vec3(1.0, 0.42, 0.16)).mul(chroma).mul(params.halation);
-    const hdr = frameCol.rgb.add(bl).add(halo).mul(params.exposure).mul(params.flicker.add(1));
+    // v3 (after cybercity, Grok r15b): the lit picture scattered into the rainy air -- a quarter-resolution blur mixed
+    // in by distance (neon and windows bleed into the haze), and a faint horizontal streak on the hottest cores
+    let air = frameCol.rgb;
+    if (!dbg.includes('noscatter')) {
+      const blur = gaussianBlur(aa, null, 2.5, { resolutionScale: 0.25 }).rgb;
+      const dist = scenePass.getViewZNode().negate().max(0);
+      const amt = float(1).sub(exp(dist.mul(-0.006))).mul(params.scatter);
+      air = mix(frameCol.rgb, blur, amt).add(blur.mul(0.03));
+      const hot = max(aa.rgb.sub(vec3(2.0)), vec3(0));
+      const streak = gaussianBlur(hot, vec2(1, 0), 14, { resolutionScale: 0.25 }).rgb;
+      air = air.add(streak.mul(vec3(0.55, 0.65, 1.0)).mul(params.streak));
+    }
+    const hdr = air.add(bl).add(halo).mul(params.exposure).mul(params.flicker.add(1));
     // v3 hue-preserving AgX (after cybercity): plain AgX bleaches saturated neon to white too early; blending in a
     // max-channel mapped version keeps the colour, only the hottest cores go white
     const tmFull = agxToneMapping(hdr.rgb, float(1));
