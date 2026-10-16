@@ -191,6 +191,7 @@ export default {
     const enabled = syncLife(this.life,ctx,crowd.value);
     this.group.visible = warmup || enabled;
     let last = -1, visibleCount = 0;
+    (this.camPos ??= new THREE.Vector3()); ctx.camera.getWorldPosition(this.camPos);
     for (let i=0; i<COUNT; i++) {
       const car = this.cars[i]; poseCar(car,t);
       this.center.copy(car.position); this.center.y = .75;
@@ -201,9 +202,11 @@ export default {
       streetTint(ctx,car.position,this.tint);
       // Dissolve at the route boundaries before wrapping; never teleport a lit
       // car/reflection across the remembered street. Debug shows every slot.
-      const presence = this.life.debug.value || !car.speed ? 1
+      // and never through the lens: cars dissolve within ~6 m of the camera (over-the-shoulder shots sit by the kerb)
+      const camD = Math.hypot(car.position.x - this.camPos.x, car.position.z - this.camPos.z);
+      const presence = (this.life.debug.value || !car.speed ? 1
         : THREE.MathUtils.smoothstep(car.position.z, MIN_Z, MIN_Z+2)
-          * (1-THREE.MathUtils.smoothstep(car.position.z, MAX_Z-2, MAX_Z));
+          * (1-THREE.MathUtils.smoothstep(car.position.z, MAX_Z-2, MAX_Z))) * THREE.MathUtils.smoothstep(camD, 4.5, 7);
       for (const part of this.parts) for (let j=0; j<part.multiplier; j++) {
         const slot=i*part.multiplier+j;
         part.geometry.attributes.lifePresence.setX(slot,presence);
