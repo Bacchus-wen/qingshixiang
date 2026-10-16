@@ -21,6 +21,8 @@ export async function placeV2Props(ctx, root) {
   // [name, x, y, z, ry]  (the home door at x≈4.95, z≈-14.7 and the robot's corner stay clear)
   const list = [
     ['tricycle', -(W - 1.0), c, -20.0, Math.PI / 2 + 0.06],
+    ['tricycle', -(W - 0.95), c, 9.6, Math.PI / 2 - 0.12],   // v3: foreground of the opening shot
+    ['stools', -(W - 0.45), c, 7.9, 0.5],
     ['freezer', W - 0.55, c, -22.6, 0],
     ['scooter', LANE.halfRoad - 0.7, 0, -28.5, 0.25],
     ['lpg', W - 0.45, c, -9.2, 0.6],

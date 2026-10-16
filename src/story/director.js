@@ -11,7 +11,8 @@ import { Film } from '../ui/film.js';
 const ROBOT = new THREE.Vector3(-4.58, 0.14, -13.5);
 // arrival: from puddle height (the lamp in the water) rising to eye height, drifting down the lane
 const ARRIVE = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(0.6, 0.32, 14), new THREE.Vector3(0.8, 0.9, 7), new THREE.Vector3(0.6, 1.45, 0),
+  // v3 (review, after targets/present.jpg): low along the left kerb, past a parked tricycle, the lane vanishing right
+  new THREE.Vector3(-2.3, 0.5, 13.5), new THREE.Vector3(-1.6, 0.95, 7), new THREE.Vector3(-0.6, 1.4, 0),
   new THREE.Vector3(0.0, 1.55, -5.5), new THREE.Vector3(-1.2, 1.05, -8.6), new THREE.Vector3(-2.6, 0.55, -10.6),
 ]);
 // v3 (review, after targets/robot.jpg): low, close, three-quarter from the street side; the robot on the left third,
@@ -68,7 +69,7 @@ export default {
         ARRIVE.getPoint(u, this.cam.pos);
         // first look is down at the wet road (the lamp's reflection), then up the lane, then onto the robot
         const lookUp = ease(Math.min(1, this.t / 9));
-        this._v.set(0.2, 0.0 + lookUp * 1.4, 4 - lookUp * 28);
+        this._v.set(0.8 + lookUp * 0.8, 0.1 + lookUp * 2.1, 6 - lookUp * 44);
         this.cam.look.lerpVectors(this._v, WAIT_LOOK, ease(Math.min(1, Math.max(0, (u - 0.6) / 0.4))));
         this.cam.fov = 44 - 4 * ease(Math.min(1, Math.max(0, (u - 0.6) / 0.4)));
         // the one moment the whole street is seen: a scripted first strike mid-way down the lane
