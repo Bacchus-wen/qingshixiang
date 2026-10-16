@@ -44,6 +44,16 @@ export function robotMaterial(name) {
     m.colorNode = vec3(grime(float(0.07)));
     m.roughnessNode = wetRough(0.5);
     m.metalnessNode = float(0.1);
+  } else if (n.includes('brass')) {
+    // aged brass rings at the joints: the one warm metal on the body, dulled by years of rain
+    m.colorNode = grime(vec3(0.36, 0.25, 0.12));
+    m.roughnessNode = wetRough(0.42);
+    m.metalnessNode = float(0.9);
+  } else if (n.includes('accent')) {
+    // worn signal-orange paint (survey livery), chipped through to dark primer
+    m.colorNode = mix(grime(vec3(0.34, 0.1, 0.035)), vec3(0.05), scratches().mul(0.8));
+    m.roughnessNode = wetRough(0.5);
+    m.metalnessNode = float(0);
   } else if (n.includes('frame') || n.includes('iris')) {
     m.colorNode = vec3(grime(float(0.3)));
     m.roughnessNode = wetRough(0.48);

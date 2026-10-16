@@ -70,3 +70,9 @@
 - 2026-10-16 14:17:16 | codex | 完成：加时冲刺代码检查（r9-code）
 - 2026-10-16 14:23:44 | claude | 派给 grok：改完后复看（r10-recheck，只读）
 - 2026-10-16 14:35:39 | grok | 完成：改完后复看（r10-recheck）
+- 2026-10-16 15:00:23 | claude | 派给 grok：找免费高质量模型（r11-assets，只读）
+- 2026-10-16 15:08:34 | claude | 派给 grok：扒参考作品和同类作品的素材来源（r12-scrape，只读）
+- 2026-10-16 15:15:19 | claude | 派给 codex：移植 cybercity 楼体:贴图集墙面+内部映射窗户+店内（w19-buildings，可写 src/systems/street/**,src/materials/**,assets/textures/cc/**,assets/models/cc/**,CREDITS.md）
+- 2026-10-16 15:15:28 | grok | 未完成（timeout）：找免费高质量模型（r11-assets）
+- 2026-10-16 15:26:51 | codex | 未完成（out_of_scope）：移植 cybercity 楼体:贴图集墙面+内部映射窗户+店内（w19-buildings）｜改了声明范围之外的文件：result.md。改动没有带回项目，副本保留在 /Users/wenbin/.local/share/agent-team/work/新游戏--53fa3746--w19-buildings
+- 2026-10-16 15:29:53 | grok | 完成：扒参考作品和同类作品的素材来源（r12-scrape）

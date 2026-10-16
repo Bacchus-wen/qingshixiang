@@ -1,0 +1,41 @@
+{
+ "id": "w19-buildings",
+ "from": "claude",
+ "to": "codex",
+ "title": "移植 cybercity 楼体:贴图集墙面+内部映射窗户+店内",
+ "write": true,
+ "paths": [
+  "src/systems/street/**",
+  "src/materials/**",
+  "assets/textures/cc/**",
+  "assets/models/cc/**",
+  "CREDITS.md"
+ ],
+ "status": "out_of_scope",
+ "posted": "2026-10-16 15:15:19",
+ "started": "2026-10-16 15:15:21",
+ "seconds": 688.5,
+ "touched": [
+  "CREDITS.md",
+  "assets/models/cc/ac_unit.glb",
+  "assets/textures/cc/atlas_albedo.jpg",
+  "assets/textures/cc/atlas_normal.jpg",
+  "assets/textures/cc/interior_atlas.jpg",
+  "assets/textures/cc/shelves.jpg",
+  "assets/textures/cc/shop_ramen.jpg",
+  "assets/textures/cc/shutter.jpg",
+  "result.md",
+  "src/materials/wet.js",
+  "src/systems/street/cc-geometry.js",
+  "src/systems/street/cc-materials.js",
+  "src/systems/street/cc.test.mjs",
+  "src/systems/street/check-shaders.mjs",
+  "src/systems/street/convert-cc.sh",
+  "src/systems/street/details.js",
+  "src/systems/street/index.js",
+  "src/systems/street/merge.js",
+  "src/systems/street/props.js"
+ ],
+ "finished": "2026-10-16 15:26:51",
+ "reason": "改了声明范围之外的文件：result.md。改动没有带回项目，副本保留在 /Users/wenbin/.local/share/agent-team/work/新游戏--53fa3746--w19-buildings"
+}

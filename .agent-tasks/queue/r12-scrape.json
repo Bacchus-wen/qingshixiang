@@ -1,0 +1,14 @@
+{
+ "id": "r12-scrape",
+ "from": "claude",
+ "to": "grok",
+ "title": "扒参考作品和同类作品的素材来源",
+ "write": false,
+ "paths": [],
+ "status": "done",
+ "posted": "2026-10-16 15:08:34",
+ "started": "2026-10-16 15:15:28",
+ "seconds": 864.2,
+ "finished": "2026-10-16 15:29:53",
+ "reason": null
+}

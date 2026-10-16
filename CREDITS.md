@@ -21,6 +21,9 @@
 - 声音:Web Audio 程序合成(Codex 编写)为主,叠加上面列出的现场录音。
 - 招牌、通知、"拆"字、门框刻度:运行时 Canvas 绘制。通知文本基于 Grok 的调研(docs/research-relocation-grok.md)改写,地名虚构。
 
+## 改编使用(第二版,公司内部展示)
+- 机器人外壳:Kestrel K-1 by thtbee_(https://github.com/thtbee/waggles),CC BY-NC 4.0。改动:按关节重新组装为坐姿、去掉左前臂、减面、换材质、装上我们自己的测绘机械眼(tools/blender/kestrel_robot.py)。
+
 ## 代码与库
 - three.js r186(MIT)、GSAP(标准许可)、Vite(MIT)、Playwright(Apache-2.0,仅开发)、stats-gl(MIT,仅开发)。
 - 参考但未复制:xikhar/cybercity(无许可证,只学思路);thtbee/waggles(CC BY-NC 4.0,只学思路,未改编其素材)。

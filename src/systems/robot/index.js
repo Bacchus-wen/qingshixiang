@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { robotMaterial, eyeGlow, eyeColor } from './materials.js';
 import { LANE } from '../street/index.js';
 import { syncMemory } from '../../materials/memory.js';
@@ -93,7 +94,10 @@ export default {
   name: 'robot',
   async init(ctx) {
     const { scene } = ctx;
-    const gltf = await new GLTFLoader().loadAsync('/models/robot.glb');
+    // v2 robot: the kestrel-k1 shells (thtbee_, CC BY-NC 4.0) re-assembled seated and broken (tools/blender/kestrel_robot.py);
+    // ?oldrobot loads the first, script-built one
+    const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+    const gltf = await loader.loadAsync(ctx.params.has('oldrobot') ? '/models/robot.glb' : '/models/robot_k1.glb');
     const root = this.root = gltf.scene;
     const matCache = new Map(); // one material instance per glb material name (lets static parts merge)
     root.traverse((o) => {
@@ -116,6 +120,13 @@ export default {
         if (!o.isMesh || inHead(o)) return;
         const g = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone());
         for (const k of Object.keys(g.attributes)) if (!['position', 'normal'].includes(k)) g.deleteAttribute(k);
+        // meshopt-quantized (int16, normalized) attributes: back to float before transforming and merging
+        for (const k of ['position', 'normal']) {
+          const a = g.attributes[k]; if (!a || a.array instanceof Float32Array) continue;
+          const f = new Float32Array(a.count * a.itemSize);
+          for (let i = 0; i < a.count; i++) for (let c = 0; c < a.itemSize; c++) f[i * a.itemSize + c] = a.getComponent(i, c);
+          g.setAttribute(k, new THREE.BufferAttribute(f, a.itemSize));
+        }
         g.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld));
         if (!groups.has(o.material)) groups.set(o.material, []);
         groups.get(o.material).push(g); remove.push(o);
