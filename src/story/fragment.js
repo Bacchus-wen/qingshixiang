@@ -77,6 +77,8 @@ export default {
     const { scene } = ctx;
     const wood = new THREE.MeshStandardNodeMaterial({ color: 0x1b1a19, roughness: 0.6 });
     const doorMat = new THREE.MeshStandardNodeMaterial({ color: 0x0a0a0a, roughness: 0.45 });
+    // inside the memory the door leaf takes a little amber, so the dark child has something to stand against
+    doorMat.emissiveNode = amberNode().mul(memoryMask(positionWorld)).mul(0.4);
     const g = this.group = new THREE.Group();
     const box = (w, h, d, mat, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); o.position.set(x, y, z); o.castShadow = o.receiveShadow = true; o.layers.enable(1); g.add(o); return o; };
     const x = DOOR.x, z = DOOR.z, hw = DOOR.w / 2;
@@ -123,13 +125,13 @@ export default {
     }
     // back against the marked jamb, facing the street
     // inside the doorway, tight to the marked jamb: the frame crops the near half of the body
-    this.child.position.set(x + 0.04, FLOOR, z - hw + 0.07);
+    this.child.position.set(x - 0.22, FLOOR, z - hw + 0.07); // in front of the door leaf, back to the jamb
     this.child.rotation.y = -Math.PI / 2; // glTF front (+Z) -> faces the street (-X)
     g.add(this.child);
     // now: '已验收。此户已腾空。' pasted on the door, and the house number in chalk; neither exists in the memory
     const notice = new THREE.Mesh(new THREE.PlaneGeometry(0.36, 0.5), noticeMaterial(NOTICES[2], 4));
     notice.position.set(x + 0.025, 1.5, z + 0.1); notice.rotation.y = -Math.PI / 2; notice.rotation.z = 0.04; notice.renderOrder = 4;
-    g.add(notice);
+    g.add(notice); this.notice = notice; // hidden while the memory plays: it would be the brightest thing in the close-up
     const nc = document.createElement('canvas'); nc.width = 256; nc.height = 96;
     const ng = nc.getContext('2d'); ng.fillStyle = '#000'; ng.fillRect(0, 0, 256, 96);
     ng.fillStyle = '#fff'; ng.font = '600 54px "PingFang SC","Hiragino Sans GB",sans-serif'; ng.fillText('青石-17', 14, 66);
@@ -168,6 +170,7 @@ export default {
     if (this.state === 'done' && this.crowdBack !== undefined && this.crowdBack < 1) {
       this.crowdBack = Math.min(1, this.crowdBack + dt / 4); crowd.value = this.crowdBack; // people drift back slowly
     }
+    if (this.notice) this.notice.visible = this.state !== 'playing';
     if (this.state === 'playing') {
       this.t += dt;
       // the robot takes over: aim the eye at the current mark (look values tuned for the over-shoulder framing)
