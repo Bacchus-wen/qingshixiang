@@ -48,3 +48,4 @@
 - 道具参考图:公司素材中台 vmc(Seedream 5.0)生成,assets/generated/refs/。
 - 道具 3D 模型:Tripo v3.1 图生模型(带 PBR 贴图),经 tools/blender/normalize_prop.py 统一尺寸与原点、贴图缩到 1024、meshopt 压缩,assets/models/v2/。
 - 地面贴图:xikhar/cybercity 的 asphalt、sidewalk_tiles、paint_wear、manhole、drain_grate、litter_atlas(无许可证,仅限公司内部展示),assets/textures/cc/ground/。
+- 中式店内与房间贴图(shelves.jpg 小卖部货架、shop_ramen.jpg 面馆后厨、interior_atlas.jpg 16 间老式居民房):公司素材中台 vmc(GPT Image)生成,替换 cybercity 原来带日文的版本。

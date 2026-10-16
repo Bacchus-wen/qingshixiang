@@ -1,0 +1,62 @@
+{
+  "batch_id": "b_20261016103054",
+  "tasks": 3,
+  "submitted": 3,
+  "failed": 3,
+  "total_images": 3,
+  "items": [
+    {
+      "index": 1,
+      "prompt": "正面平视拍摄的中国南方老街小卖部(士多店)店内全景,贴图素材用:整面墙的货架摆满中国零食、方便面、饮料瓶、啤酒、香烟柜台、塑料脸盆和日用杂货,包装上的中文字模糊不可读,没有真实品牌标志。暖色日光灯管照明,略旧略乱,没有人。画面铺满不留边,无透视变形,写实照片。",
+      "id": "img_43359",
+      "status": "failed",
+      "error": "unknown certificate verification error"
+    },
+    {
+      "index": 2,
+      "prompt": "正面平视拍摄的中国南方老街面馆店内,贴图素材用:后墙挂着手写红字的价目表(牛肉面、云吞面、炒河粉等,字迹模糊),不锈钢灶台、大汤锅冒着热气、碗筷架、一台旧电视挂在角落,暖黄灯光,墙面贴着瓷砖有油渍,没有人。画面铺满不留边,无透视变形,写实照片。",
+      "id": "img_43360",
+      "status": "failed",
+      "error": "The socket connection was closed unexpectedly. For more information, pass `verbose: true` in the second argument to fetch()"
+    },
+    {
+      "index": 3,
+      "prompt": "4×4 网格拼图,16 个等大的方格,每格是一张从窗外正面平视拍摄的中国1990年代老式居民楼房间内部照片(夜晚,室内暖色台灯或日光灯):碎花窗帘、老式衣柜、挂历、电风扇、双人床、书桌和台灯、晾着的衣服、老电视机、神龛、堆满纸箱的房间、空房间等,每格内容不同,格子之间有细黑线分隔,没有人,写实照片。",
+      "id": "img_43361",
+      "status": "failed",
+      "error": "unknown certificate verification error"
+    }
+  ],
+  "plan": {
+    "kind": "image",
+    "model": "gpt",
+    "version": "gpt-image-2",
+    "count": 3,
+    "quota": {
+      "limit": 300,
+      "used": 20,
+      "remaining": 280,
+      "unit": "张",
+      "after": 23
+    },
+    "running": {
+      "limit": 20,
+      "current": 1
+    },
+    "allowed": true,
+    "blockers": [],
+    "cost": {
+      "amount": 0.1062,
+      "currency": "USD",
+      "priced": true,
+      "estimated": true,
+      "note": null
+    },
+    "request": {
+      "batch": true,
+      "tasks": 3,
+      "total_images": 3,
+      "local_uploads": []
+    }
+  }
+}
