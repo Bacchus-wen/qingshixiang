@@ -54,7 +54,8 @@ export default {
         m.forceOpen = false; this.power = 1; m.power = 1; this.film.endCardOff?.();
         ARRIVE.getPoint(0, this.cam.pos); this.cam.look.set(0, 1.4, -24);
         this.film.fade(1);
-        if (input.pointer.held || input.wasPressed('Space') || input.wasPressed('Enter')) { this.film.title(false); this.set('arrive'); }
+        // wasPressed('Pointer') latches the click: on a slow first frame (shader compile) press+release can fall between frames
+        if (input.pointer.held || input.wasPressed('Pointer') || input.wasPressed('Space') || input.wasPressed('Enter')) { this.film.title(false); this.set('arrive'); }
         break;
       }
       case 'arrive': {
