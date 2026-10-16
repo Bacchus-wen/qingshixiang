@@ -21,10 +21,11 @@ function marksTexture(count) {
   const g = c.getContext('2d');
   const draw = (n) => {
     g.fillStyle = '#000'; g.fillRect(0, 0, 256, 1024);
-    g.strokeStyle = '#fff'; g.fillStyle = '#fff'; g.lineWidth = 7; g.lineCap = 'round';
-    g.font = '600 24px "PingFang SC","Hiragino Sans GB",sans-serif';
+    // v3 (critique r4): a pencil and a child's handwriting, not HUD type
+    g.strokeStyle = '#fff'; g.fillStyle = '#fff'; g.lineWidth = 4; g.lineCap = 'round';
+    g.font = '400 26px "Kaiti SC","STKaiti","KaiTi","PingFang SC",serif';
     if (n > 0) { // the name, written once up the jamb in the same hand
-      g.save(); g.globalAlpha = 0.5; g.translate(30, 1024 - (1.78 / 2.12) * 1024); g.font = '600 26px "PingFang SC","Hiragino Sans GB",sans-serif';
+      g.save(); g.globalAlpha = 0.5; g.translate(30, 1024 - (1.78 / 2.12) * 1024); g.font = '400 28px "Kaiti SC","STKaiti","KaiTi",serif';
       for (const [k, ch] of [...'小宁'].entries()) g.fillText(ch, 0, k * 30); g.restore();
     }
     MARKS.slice(0, n).forEach((m, i) => {
@@ -96,8 +97,8 @@ export default {
     this.revealed = uniform(0);
     const mm = new THREE.MeshStandardNodeMaterial({ transparent: true, depthWrite: false });
     const ink = texture(this.marks.tex).r;
-    mm.colorNode = vec3(0.4); mm.opacityNode = ink.mul(0.25);
-    mm.emissiveNode = amberNode().mul(ink).mul(memoryMask(positionWorld)).mul(2.6);
+    mm.colorNode = vec3(0.05); mm.opacityNode = ink.mul(0.7); // graphite
+    mm.emissiveNode = amberNode().mul(ink).mul(memoryMask(positionWorld)).mul(1.1);
     const markPlane = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 2.12), mm);
     markPlane.position.set(x - 0.125, 1.06, z - hw - 0.05 - 0.12); markPlane.rotation.y = -Math.PI / 2;
     markPlane.renderOrder = 5;
@@ -108,7 +109,8 @@ export default {
     const childMat = rimMaterial(this.childVis, this.childHead);
     // the child from Codex's people.glb (person_2: child with a school bag); procedural fallback
     try {
-      const gltf = await new GLTFLoader().loadAsync('/models/people.glb');
+      // v3: the same child, subdivided and smoothed in Blender (tools: /tmp child.py; critique r4 "blocky")
+      const gltf = await new GLTFLoader().loadAsync('/models/child_smooth.glb').catch(() => new GLTFLoader().loadAsync('/models/people.glb'));
       const src = gltf.scene.getObjectByName('person_2');
       if (!src) throw new Error('person_2 missing');
       this.child = src.clone(true);

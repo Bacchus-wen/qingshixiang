@@ -14,7 +14,8 @@ const THREE = await import('three/webgpu');
 const { mrt, output, velocity } = await import('three/tsl');
 const { default: ghostsTemplate, crowd, pose, nearFade } = await import('./index.js');
 const { routeLength, population } = await import('./routes.js');
-const { decodeVAT } = await import('./vat.js');
+const { decodeVAT, loadCrowd } = await import('./vat.js');
+const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
 const { default: legacyTemplate } = await import('./legacy.js');
 const { memoryMaskCPU } = await import('../../materials/memory.js');
 const { default: WGSLNodeBuilder } = await import(new URL('node_modules/three/src/renderers/webgpu/nodes/WGSLNodeBuilder.js', root));
@@ -45,12 +46,102 @@ const variants = await Promise.all(manifest.variants.map(async meta => {
   assert(seamStep < maxStep * 1.6, `No loop seam jump: ${meta.outfit}: ${seamStep}/${maxStep}`);
   console.log(`PASS ${meta.outfit}: ${meta.indexCount/3} tris, foot travel ${footMotion.toFixed(3)} m, seam ${seamStep.toFixed(3)} m`);
   assert.throws(() => decodeVAT(meta, buffer.slice(0, buffer.byteLength-4)), /Truncated/);
-  return { meta, buffer };
+  // Shader builders only need texture dimensions, never a GPU context or pixels.
+  const color = new THREE.Texture({ width: 1024, height: 1024 });
+  color.colorSpace = THREE.SRGBColorSpace; color.flipY = false;
+  const normalAlpha = new THREE.Texture({ width: 1024, height: 1024 });
+  normalAlpha.flipY = false;
+  return { meta, buffer, textures: { color, normalAlpha } };
 }));
 const files = await readdir(new URL('assets/models/crowd/', root));
 const totalBytes = (await Promise.all(files.map(f => stat(new URL(`assets/models/crowd/${f}`, root))))).reduce((n,s)=>n+s.size,0);
 assert(totalBytes <= 8_000_000);
 console.log(`PASS asset budget: ${totalBytes} bytes including metadata/credits`);
+
+// Match every saved UV and primitive/material range to the original GLB.
+// Also ensure the animation payload itself has not changed from the previous bake.
+for (const variant of variants) {
+  const { meta, buffer } = variant, data = decodeVAT(meta, buffer);
+  const bytes = await readFile(new URL(meta.source, root));
+  const gltf = await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength), '');
+  for (const part of meta.primitives) {
+    const mesh = gltf.scene.getObjectByName(part.name), sourceUV = mesh.geometry.attributes.uv;
+    assert.equal(meta.materials[part.material].name, mesh.material.name);
+    assert.equal(sourceUV.count, part.vertexCount);
+    for (let v = 0; v < sourceUV.count; v++) for (let k = 0; k < 2; k++) {
+      assert.equal(data.uvs[(part.vertexOffset + v) * 2 + k], sourceUV.getComponent(v, k));
+    }
+  }
+  const corrupt = buffer.slice(0);
+  new Float32Array(corrupt, corrupt.byteLength - 4, 1)[0] = NaN;
+  assert.throws(() => decodeVAT(meta, corrupt), /Nonfinite/);
+  assert.throws(() => decodeVAT({ ...meta, primitives: meta.primitives.slice(1) }, buffer), /primitive/);
+  assert.throws(() => decodeVAT({ ...meta, format: 'v1' }, buffer), /format/);
+}
+console.log('PASS source UVs, material assignment, cutout metadata, corrupt UV/range rejection');
+let textureManifest = null;
+try {
+  textureManifest = JSON.parse(await readFile(new URL('assets/textures/crowd/manifest.json', root), 'utf8'));
+} catch (error) { if (error.code !== 'ENOENT') throw error; }
+if (textureManifest) {
+  for (const output of textureManifest.outputs) {
+    const bytes = await readFile(new URL(`assets/textures/crowd/${output.file}`, root));
+    assert.equal(createHash('sha256').update(bytes).digest('hex'), output.sha256);
+    assert.equal(bytes.length, output.bytes);
+    assert.equal(bytes.readUInt16BE(0), 0xffd8);
+    assert(output.width <= 1024 && output.height <= 1024);
+  }
+  const names = new Set(textureManifest.outputs.map(o => o.file));
+  assert.equal(names.size, 8);
+  for (const { meta } of variants) for (const kind of ['color', 'normalAlpha']) assert(names.has(meta.atlas[kind]));
+  const textureFiles = await readdir(new URL('assets/textures/crowd/', root));
+  const textureTotal = (await Promise.all(textureFiles.map(f => stat(new URL(`assets/textures/crowd/${f}`, root))))).reduce((n, s) => n + s.size, 0);
+  assert(totalBytes + textureTotal - 6_783_516 <= 6_000_000, 'Increment includes metadata/credits');
+  assert(textureManifest.incrementalBytes <= 6_000_000);
+  console.log(`PASS 8 JPG atlases, hashes, <=1024 dimensions, ${textureManifest.incrementalBytes} incremental bytes`);
+} else {
+  assert(!process.argv.includes('--require-textures'), 'Atlas conversion awaiting user approval');
+  console.log('PENDING actual JPEG outputs: conversion requires explicit user approval. Shader checks use metadata-only textures.');
+}
+
+// Exercise the real async loader offline: path binding, colorspace/orientation,
+// partial texture-load cleanup and missing-texture fallback, without image IO.
+const originalFetch = globalThis.fetch, originalLoad = THREE.TextureLoader.prototype.loadAsync;
+let failNormal = false, loadedTextures = [], loaderDisposals = 0;
+try {
+  globalThis.fetch = async url => {
+    assert(String(url).startsWith('/models/crowd/'));
+    const bytes = await readFile(new URL(`assets${url}`, root));
+    return { ok: true, json: async () => JSON.parse(bytes.toString()),
+      arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) };
+  };
+  THREE.TextureLoader.prototype.loadAsync = async function (url) {
+    assert(/^\/textures\/crowd\/[mf]_[a-z]+-(color|normal-alpha)\.jpg$/.test(url));
+    if (failNormal && url.endsWith('-normal-alpha.jpg')) throw new Error('simulated missing JPEG');
+    const tex = new THREE.Texture({ width: 1024, height: 1024 });
+    tex.addEventListener('dispose', () => loaderDisposals++);
+    loadedTextures.push(tex); return tex;
+  };
+  const loaded = await loadCrowd();
+  assert.equal(loadedTextures.length, 8);
+  for (const { textures } of loaded) {
+    assert.equal(textures.color.colorSpace, THREE.SRGBColorSpace);
+    assert.equal(textures.normalAlpha.colorSpace, THREE.NoColorSpace);
+    for (const tex of Object.values(textures)) {
+      assert.equal(tex.flipY, false); assert.equal(tex.generateMipmaps, false);
+      assert.equal(tex.minFilter, THREE.LinearFilter); tex.dispose();
+    }
+  }
+  assert.equal(loaderDisposals, 8);
+  failNormal = true; loadedTextures = [];
+  const partial = await loadCrowd();
+  assert(partial.every(v => !v.textures));
+  assert.equal(loadedTextures.length, 4); assert.equal(loaderDisposals, 12);
+} finally {
+  globalThis.fetch = originalFetch;
+  THREE.TextureLoader.prototype.loadAsync = originalLoad;
+}
+console.log('PASS async atlas paths, linear/sRGB, glTF UV orientation, no-mipmap filtering, partial-load disposal');
 
 const shops = [-1,1].flatMap(side => [-11,-27,-54,-67].map(z => ({side,z,shop:true,frontX:side*5.2})));
 const anchored = population(shops).filter(p => p.waiting);
@@ -71,6 +162,7 @@ assert.equal(ctx.api.ghosts.source, 'cybercity-vat');
 assert.equal(ghosts.people.length, 44);
 assert.equal(ctx.api.ghosts.umbrellaCount, 33);
 assert.equal(ghosts.meshes.length, 4);
+assert(ghosts.meshes.every(m => m.material.isMeshStandardNodeMaterial && m.geometry.attributes.uv && m.material.normalNode));
 assert(ghosts.meshes.every(m => m.geometry.isInstancedBufferGeometry && m.geometry.groups.length === 0 && !Array.isArray(m.material)));
 for (const side of [-1, 1]) {
   assert.equal(ghosts.people.filter(p => p.side === side && p.route.axis === 'z').length, 12);
@@ -210,11 +302,11 @@ for(const Builder of [WGSLNodeBuilder,GLSLNodeBuilder]) {
     assert(/positionPrevious =/.test(builder.vertexShader), 'VAT previous pose must reach motion vectors');
     assert(Builder === WGSLNodeBuilder ? /textureLoad/.test(builder.vertexShader) : /texelFetch/.test(builder.vertexShader));
   }
-  target.dispose(); console.log(`PASS ${Builder.name}: 4 VAT materials, texture fetch + velocity MRT`);
+  target.dispose(); console.log(`PASS ${Builder.name}: 4 VAT materials, VAT fetch + UV diffuse/normal/alpha + velocity MRT`);
 }
 let disposed=0;
-for(const o of ghosts.outfits) for(const resource of [o.geometry,o.material,o.positions,o.normals]) resource.addEventListener('dispose',()=>disposed++);
-ghosts.dispose(ctx); assert.equal(disposed,16); assert.equal(ctx.scene.children.length,0); assert(!ctx.api.ghosts);
+for(const o of ghosts.outfits) for(const resource of [o.geometry,o.material,o.positions,o.normals,...Object.values(o.textures)]) resource.addEventListener('dispose',()=>disposed++);
+ghosts.dispose(ctx); assert.equal(disposed,24); assert.equal(ctx.scene.children.length,0); assert(!ctx.api.ghosts);
 const loadPeople=legacyTemplate.loadPeople;
 legacyTemplate.loadPeople=async()=>null;
 const fallback=Object.create(ghostsTemplate), fallbackCtx=context('memlife=1');

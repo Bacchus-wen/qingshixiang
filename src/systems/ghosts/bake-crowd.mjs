@@ -6,6 +6,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { VAT_FORMAT, materialSpec } from './crowd-materials.mjs';
 
 const OUTPUT = 'assets/models/crowd';
 const FRAMES = 20;
@@ -16,7 +17,7 @@ const selections = [
   { sex: 'male', outfit: 'm_hoodie', clip: 'walk', umbrella: false },
 ];
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
-const manifest = { version: 1, format: 'indices-u32_positions-f32_normals-f32', frames: FRAMES, variants: [] };
+const manifest = { version: 2, format: VAT_FORMAT, frames: FRAMES, variants: [] };
 await mkdir(OUTPUT, { recursive: true });
 for (const selection of selections) {
   // Fresh scene per bake prevents animation state from leaking between outfits.
@@ -38,11 +39,28 @@ for (const selection of selections) {
   const vertexCount = meshes.reduce((n, m) => n + m.geometry.attributes.position.count, 0);
   const indexCount = meshes.reduce((n, m) => n + m.geometry.index.count, 0);
   const indices = new Uint32Array(indexCount);
+  const uvs = new Float32Array(vertexCount * 2);
+  const materials = [], primitives = [];
   const positions = new Float32Array(FRAMES * vertexCount * 3);
   const normals = new Float32Array(positions.length);
   let vertexOffset = 0, indexOffset = 0;
   for (const mesh of meshes) {
     const idx = mesh.geometry.index;
+    const uv = mesh.geometry.attributes.uv;
+    assert(uv && uv.count === mesh.geometry.attributes.position.count, `Missing UV: ${mesh.name}`);
+    assert(!Array.isArray(mesh.material), 'Expected one source material per primitive');
+    let material = materials.findIndex(m => m.name === mesh.material.name);
+    if (material < 0) {
+      material = materials.length;
+      assert(material < 16, 'Atlas tile budget exceeded');
+      materials.push(materialSpec(mesh.material.name, meta, material));
+    }
+    primitives.push({ name: mesh.name, material, vertexOffset, vertexCount: uv.count,
+      indexOffset, indexCount: idx.count });
+    for (let i = 0; i < uv.count; i++) {
+      uvs[(vertexOffset + i) * 2] = uv.getX(i);
+      uvs[(vertexOffset + i) * 2 + 1] = uv.getY(i);
+    }
     for (let i = 0; i < idx.count; i++) indices[indexOffset++] = idx.getX(i) + vertexOffset;
     vertexOffset += mesh.geometry.attributes.position.count;
   }
@@ -92,12 +110,13 @@ for (const selection of selections) {
     }
   }
   assert(maxReferenceError < 1e-5, `Skinning differs from Three: ${maxReferenceError}`);
-  assert(positions.every(Number.isFinite) && normals.every(Number.isFinite));
+  assert(positions.every(Number.isFinite) && normals.every(Number.isFinite) && uvs.every(Number.isFinite));
   assert(minBodyY > -.15 && maxBodyY > 1.4 && maxBodyY < 2.2, 'Invalid human scale/axis');
-  const binary = Buffer.concat([Buffer.from(indices.buffer), Buffer.from(positions.buffer), Buffer.from(normals.buffer)]);
+  const binary = Buffer.concat([Buffer.from(indices.buffer), Buffer.from(positions.buffer), Buffer.from(normals.buffer), Buffer.from(uvs.buffer)]);
   const file = `${selection.outfit}.vat`;
   await writeFile(`${OUTPUT}/${file}`, binary);
-  const result = { ...selection, file, vertexCount, indexCount, frames: FRAMES, duration: clip.duration,
+  const result = { ...selection, file, format: VAT_FORMAT, materials, primitives,
+    atlas: { size: 1024, color: `${selection.outfit}-color.jpg`, normalAlpha: `${selection.outfit}-normal-alpha.jpg`, normalPacking: 'rg-normal_b-opacity' }, vertexCount, indexCount, frames: FRAMES, duration: clip.duration,
     speed: meta.clips[selection.clip].speed, height: maxBodyY, radius: radius + .02,
     bounds: { min: bounds.min.toArray(), max: bounds.max.toArray() }, bytes: binary.length,
     sha256: sha256(binary), source, sourceSha256: sha256(bytes), maxReferenceError };
@@ -109,4 +128,4 @@ for (const selection of selections) {
 manifest.bytes = manifest.variants.reduce((n, v) => n + v.bytes, 0);
 assert(manifest.bytes < 8_000_000, 'Asset budget exceeded');
 await writeFile(`${OUTPUT}/manifest.json`, JSON.stringify(manifest, null, 2) + '\n');
-console.log(`TOTAL ${(manifest.bytes / 1e6).toFixed(3)} MB. Float32 animation positions/normals, no quantization.`);
+console.log(`TOTAL ${(manifest.bytes / 1e6).toFixed(3)} MB. Float32 animation positions/normals, UVs and material ranges, no quantization.`);

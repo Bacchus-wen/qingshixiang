@@ -1,12 +1,13 @@
 // Adapted from xikhar/cybercity src/systems/crowd/vat.js, internal demo only.
-// Offline-baked Float32 VAT: no runtime mixers, skinning, or texture downloads.
+// Offline-baked Float32 VAT: no runtime mixers or skinning; two 1024px JPG atlases per outfit.
 // See assets/models/crowd/CREDITS.md and bake-crowd.mjs.
 import * as THREE from 'three/webgpu';
 import {
   Fn, attribute, vertexIndex, int, ivec2, floor, mod, mix, vec3, cos, sin,
   textureLoad, normalLocal, positionPrevious,
 } from 'three/tsl';
-import { silhouette, coverage, lifeMask } from './life.js';
+import { silhouette, dressedLife, coverage, lifeMask } from './life.js';
+import { VAT_FORMAT } from './crowd-materials.mjs';
 
 const BASE = import.meta.env?.BASE_URL || '/';
 async function fetchChecked(url, kind) {
@@ -17,8 +18,32 @@ async function fetchChecked(url, kind) {
 export async function loadCrowd() {
   const base = `${BASE}models/crowd/`;
   const manifest = await fetchChecked(`${base}manifest.json`, 'json');
-  if (manifest.version !== 1 || manifest.variants?.length !== 4) throw new Error('Unsupported memory crowd manifest');
-  return Promise.all(manifest.variants.map(async meta => ({ meta, buffer: await fetchChecked(base + meta.file) })));
+  if (manifest.version !== 2 || manifest.format !== VAT_FORMAT || manifest.variants?.length !== 4) {
+    throw new Error('Unsupported memory crowd manifest');
+  }
+  const variants = await Promise.all(manifest.variants.map(async meta => {
+    const buffer = await fetchChecked(base + meta.file);
+    decodeVAT(meta, buffer); // Validate before allocating/loading any textures.
+    return { meta, buffer };
+  }));
+  await Promise.all(variants.map(async variant => {
+    const loader = new THREE.TextureLoader();
+    const results = await Promise.allSettled(['color', 'normalAlpha'].map(async kind => {
+      const tex = await loader.loadAsync(`${BASE}textures/crowd/${variant.meta.atlas[kind]}`);
+      tex.colorSpace = kind === 'color' ? THREE.SRGBColorSpace : THREE.NoColorSpace;
+      tex.flipY = false; // original glTF UV orientation
+      // Tile gutters protect bilinear samples. Disabling whole-atlas mipmaps
+      // avoids unrelated material tiles bleeding into skin/hair at a distance.
+      tex.generateMipmaps = false; tex.minFilter = tex.magFilter = THREE.LinearFilter;
+      return tex;
+    }));
+    if (results.some(result => result.status === 'rejected')) {
+      for (const result of results) if (result.status === 'fulfilled') result.value.dispose();
+      console.warn(`[ghosts] ${variant.meta.outfit}: atlases unavailable; retaining silhouette VAT`);
+      variant.textures = null;
+    } else variant.textures = { color: results[0].value, normalAlpha: results[1].value };
+  }));
+  return variants;
 }
 
 export function decodeVAT(meta, buffer) {
@@ -26,21 +51,45 @@ export function decodeVAT(meta, buffer) {
   if (![vertexCount, indexCount, frames].every(n => Number.isInteger(n) && n > 0) || vertexCount > 65536 || frames > 120) {
     throw new Error('Invalid VAT dimensions');
   }
+  if (meta.format !== VAT_FORMAT) throw new Error('Unsupported VAT format');
   const samples = vertexCount * frames * 3;
-  const expected = (indexCount + samples * 2) * 4;
+  const expected = (indexCount + samples * 2 + vertexCount * 2) * 4;
   if (buffer.byteLength !== expected) throw new Error(`Truncated VAT ${meta.file}: ${buffer.byteLength}/${expected}`);
   const indices = new Uint32Array(buffer, 0, indexCount);
   if (!indices.every(i => i < vertexCount)) throw new Error('Invalid VAT indices');
   const positions = new Float32Array(buffer, indexCount * 4, samples);
   const normals = new Float32Array(buffer, (indexCount + samples) * 4, samples);
-  if (!positions.every(Number.isFinite) || !normals.every(Number.isFinite)) throw new Error('Nonfinite VAT');
-  return { indices, positions, normals };
+  const uvs = new Float32Array(buffer, (indexCount + samples * 2) * 4, vertexCount * 2);
+  if (![positions, normals, uvs].every(a => a.every(Number.isFinite))) throw new Error('Nonfinite VAT');
+  if (!Array.isArray(meta.materials) || meta.materials.length < 1 || meta.materials.length > 16
+    || !Array.isArray(meta.primitives)) throw new Error('Invalid VAT materials');
+  if (meta.atlas?.size !== 1024 || meta.atlas?.normalPacking !== 'rg-normal_b-opacity'
+    || !['color', 'normalAlpha'].every(k => /^[a-z0-9_-]+\.jpg$/.test(meta.atlas[k]))) throw new Error('Invalid VAT atlas');
+  let vertexEnd = 0, indexEnd = 0;
+  for (const part of meta.primitives) {
+    if (part.vertexOffset !== vertexEnd || part.indexOffset !== indexEnd
+      || !Number.isInteger(part.vertexCount) || part.vertexCount <= 0
+      || !Number.isInteger(part.indexCount) || part.indexCount <= 0 || part.indexCount % 3
+      || !Number.isInteger(part.material) || !meta.materials[part.material]) throw new Error('Invalid VAT primitive');
+    vertexEnd += part.vertexCount; indexEnd += part.indexCount;
+    if (!indices.subarray(part.indexOffset, indexEnd).every(i => i >= part.vertexOffset && i < vertexEnd)) {
+      throw new Error('Cross-material VAT triangle');
+    }
+  }
+  if (vertexEnd !== vertexCount || indexEnd !== indexCount) throw new Error('Incomplete VAT primitives');
+  for (const m of meta.materials) {
+    if (!Array.isArray(m.rect) || m.rect.length !== 4 || !m.rect.every(v => Number.isFinite(v) && v >= 0 && v <= 1)
+      || !Number.isFinite(m.repeat) || m.repeat <= 0 || !Number.isFinite(m.roughness)
+      || !Number.isFinite(m.normalScale)) throw new Error('Invalid VAT surface');
+  }
+  return { indices, positions, normals, uvs };
 }
 
 export class MemoryOutfit {
-  constructor({ meta, buffer }, state, maxInstances) {
+  constructor({ meta, buffer, textures = null }, state, maxInstances) {
     this.meta = meta;
-    const { indices, positions, normals } = decodeVAT(meta, buffer);
+    const { indices, positions, normals, uvs } = decodeVAT(meta, buffer);
+    this.textures = textures;
     const width = Math.min(1024, meta.vertexCount), rows = Math.ceil(meta.vertexCount / width);
     const height = rows * meta.frames;
     const makeTexture = (samples, w) => {
@@ -60,6 +109,17 @@ export class MemoryOutfit {
     this.geometry.setIndex(new THREE.BufferAttribute(indices.slice(), 1));
     this.geometry.setAttribute('position', new THREE.BufferAttribute(positions.slice(0, meta.vertexCount * 3), 3));
     this.geometry.setAttribute('normal', new THREE.BufferAttribute(normals.slice(0, meta.vertexCount * 3), 3));
+    this.geometry.setAttribute('uv', new THREE.BufferAttribute(uvs.slice(), 2));
+    const rects = new Float32Array(meta.vertexCount * 4), surfaces = new Float32Array(meta.vertexCount * 4);
+    for (const part of meta.primitives) {
+      const m = meta.materials[part.material];
+      for (let v = part.vertexOffset; v < part.vertexOffset + part.vertexCount; v++) {
+        rects.set(m.rect, v * 4);
+        surfaces.set([m.roughness, m.normalScale, Number(m.umbrella), m.repeat], v * 4);
+      }
+    }
+    this.geometry.setAttribute('crowdAtlas', new THREE.BufferAttribute(rects, 4));
+    this.geometry.setAttribute('crowdSurface', new THREE.BufferAttribute(surfaces, 4));
     const instanced = (name, size) => {
       const a = new THREE.InstancedBufferAttribute(new Float32Array(maxInstances * size), size);
       a.setUsage(THREE.DynamicDrawUsage); this.geometry.setAttribute(name, a); return a;
@@ -86,9 +146,11 @@ export class MemoryOutfit {
       return vec3(p.x.mul(c).add(p.z.mul(s)), p.y, p.z.mul(c).sub(p.x.mul(s)));
     };
     const deform = (pose, motion) => rotate(sample(this.positions, motion.x), pose.w).mul(motion.y).add(pose.xyz);
-    this.material = silhouette(state, tint.rgb);
+    this.material = textures ? dressedLife(state, tint.rgb, textures)
+      : silhouette(state, tint.rgb, 1, mix(.35, .9, attribute('crowdSurface', 'vec4').z));
     this.material.name = `memory-${meta.outfit}`;
-    this.material.maskNode = coverage(lifeMask(state).mul(tint.w));
+    const reveal = coverage(lifeMask(state).mul(tint.w));
+    this.material.maskNode = textures ? reveal.and(this.material.maskNode) : reveal;
     this.material.positionNode = Fn(() => {
       // Explicit previous VAT pose is essential: otherwise TRAA treats walking
       // vertices as if they came from the unanimated mesh at the world origin.
@@ -129,5 +191,6 @@ export class MemoryOutfit {
   dispose() {
     this.mesh.removeFromParent();
     this.geometry.dispose(); this.material.dispose(); this.positions.dispose(); this.normals.dispose();
+    for (const tex of Object.values(this.textures || {})) tex.dispose();
   }
 }

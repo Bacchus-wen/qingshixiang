@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { uniform, positionWorld, floor, float, vec3, pow, abs, dot, normalView, positionViewDirection, lights, normalize, cameraPosition, normalWorld, mix } from 'three/tsl';
+import { uniform, positionWorld, floor, float, vec3, pow, abs, dot, normalize, cameraPosition, normalWorld, mix, attribute, texture, uv, fract, normalMap, vec2, sqrt } from 'three/tsl';
 import { memoryMask, memoryMaskCPU } from '../../materials/memory.js';
 
 // Per-system uniforms keep ?only=traffic independent of ghosts initialization.
@@ -31,15 +31,40 @@ export function coverage(mask) {
   const threshold = bayer(x,y).mul(4).add(bayer(floor(x.div(2)),floor(y.div(2)))).add(.5).div(16);
   return mask.greaterThan(threshold);
 }
-export function silhouette(state, tint, brightness = 1) {
+export function silhouette(state, tint, brightness = 1, rimStrength = .35) {
   // v3 (Grok r17): the remembered people are people -- dark clothes that take the real light (signs, shop openings,
   // the beam), with only a thin neon edge left of the old hologram look
   const material = new THREE.MeshStandardNodeMaterial({ roughness: .75, metalness: .05, side: THREE.DoubleSide });
   material.colorNode = mix(vec3(0.09, 0.085, 0.085), tint.mul(0.25), 0.35);
   const V = normalize(cameraPosition.sub(positionWorld));
   const rim = pow(float(1).sub(abs(dot(normalWorld, V))), 6.0);
-  material.emissiveNode = tint.mul(rim.mul(0.9).add(0.01)).mul(brightness);
+  material.emissiveNode = tint.mul(rim.mul(rimStrength).add(0.01)).mul(brightness);
   material.maskNode = coverage(lifeMask(state));
+  return material;
+}
+// Two atlas samplers, one batch per outfit (including its existing umbrella).
+export function dressedLife(state, tint, maps) {
+  const material = new THREE.MeshStandardNodeMaterial({ roughness: .6, metalness: .05, side: THREE.DoubleSide });
+  const rect = attribute('crowdAtlas', 'vec4');
+  const surface = attribute('crowdSurface', 'vec4'); // roughness, normal strength, umbrella, UV repeat
+  // Wrap in the fragment shader: wrapping baked vertices would stretch triangles
+  // crossing a repeat seam. The geometry's unwrapped UV drives the tangent frame.
+  const atlasUV = fract(uv().mul(surface.w)).mul(rect.zw).add(rect.xy);
+  const color = texture(maps.color, atlasUV).rgb;
+  const packed = texture(maps.normalAlpha, atlasUV);
+  const xy = packed.rg.mul(2).sub(1);
+  const z = sqrt(float(1).sub(dot(xy, xy)).max(0));
+  const umbrella = surface.z;
+  const oldColor = mix(vec3(.09, .085, .085), tint.mul(.25), .35);
+  material.colorNode = mix(color.mul(.7), oldColor, umbrella);
+  material.roughnessNode = surface.x;
+  material.normalNode = normalMap(vec3(packed.rg, z.mul(.5).add(.5)), vec2(surface.y));
+  const V = normalize(cameraPosition.sub(positionWorld));
+  const rim = pow(float(1).sub(abs(dot(normalWorld, V))), 6);
+  material.emissiveNode = tint.mul(rim.mul(mix(.35, .9, umbrella)).add(.01));
+  // Blue stores original PNG opacity; JPEG keeps all output assets in one format.
+  // lifeMask and per-instance nearFade are combined by the VAT caller.
+  material.maskNode = packed.b.greaterThan(.45);
   return material;
 }
 const fallback = ['#24e9ee', '#ff3ba7', '#b572ff', '#63ed75', '#ffe6bf'];
