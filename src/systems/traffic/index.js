@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { attribute, uv, float, smoothstep } from 'three/tsl';
+import { attribute, uv, float, smoothstep, vec3 } from 'three/tsl';
 import { crowd } from '../ghosts/index.js';
 import { lifeState, syncLife, fullFlood, lifeMask, inMemory, silhouette, coverage, streetTint } from '../ghosts/life.js';
 
@@ -149,6 +149,8 @@ export default {
     this.life = lifeState();
     const presence = attribute('lifePresence');
     const bodyMaterial = silhouette(this.life, attribute('lifeTint', 'vec3'), .3); // dark bodies, neon on the edges
+    // r18: near-black wet paint (it read as a beige box under the flood); the lights and reflections carry it
+    bodyMaterial.colorNode = vec3(0.025, 0.025, 0.03); bodyMaterial.roughnessNode = float(0.32); bodyMaterial.metalnessNode = float(0.5);
     bodyMaterial.maskNode = coverage(lifeMask(this.life).mul(presence));
     const lampMaterial = new THREE.MeshBasicNodeMaterial({ side: THREE.DoubleSide });
     lampMaterial.colorNode = attribute('lampTint', 'vec3').mul(attribute('lampPower'));
@@ -218,7 +220,7 @@ export default {
       // including at loop boundaries and beside the over-the-shoulder camera.
       const camD = Math.hypot(car.position.x - this.camPos.x, car.position.z - this.camPos.z);
       const along = car.axis === 'x' ? car.position.x : car.position.z;
-      const presence = fullFlood(ctx) ? 1 : (this.life.debug.value || !car.speed ? 1
+      const presence = fullFlood(ctx) ? THREE.MathUtils.smoothstep(camD, 4.5, 7) : (this.life.debug.value || !car.speed ? 1
         : THREE.MathUtils.smoothstep(along, car.min, car.min+2)
           * (1-THREE.MathUtils.smoothstep(along, car.max-2, car.max))) * THREE.MathUtils.smoothstep(camD, 8, 11);
       for (const part of this.parts) for (let j=0; j<part.multiplier; j++) {

@@ -13,6 +13,13 @@ export const SHOTS = {
   'eye-close': { pos: [-3.7, 1.05, -13.3], look: [-4.45, 0.95, -13.55], fov: 30, setup: (ctx) => { ctx.memory.forceOpen = true; } },
   'eye-closed-close': { pos: [-3.7, 1.05, -13.3], look: [-4.45, 0.95, -13.55], fov: 30, setup: (ctx) => { ctx.memory.forceOpen = false; } },
   'memory-windows': { pos: [-5.0, 1.55, -12.6], look: [3, 4.5, -16], fov: 55, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.lookOverride = { x: -0.15, y: 0.55, copy() {} }; } },
+  // the gameplay over-the-shoulder (director 'look'): rebuilt from the live eye each frame
+  'look-beam': { pos: [-5.2, 1.0, -13.4], look: [3, 0.9, -15], fov: 50, setup: (ctx) => {
+    ctx.memory.forceOpen = true; ctx.memory.lookOverride = { x: -0.25, y: 0.02 };
+    const m = ctx.memory; if (!m.origin || m.origin.lengthSq() === 0) return;
+    const w = new ctx.THREE.Vector3(m.dir.z, 0, -m.dir.x).normalize(), c = ctx.camera;
+    c.position.copy(m.origin).addScaledVector(m.dir, -0.95).addScaledVector(w, -0.46); c.position.y = m.origin.y + 0.2;
+    c.lookAt(c.position.clone().copy(m.origin).addScaledVector(m.dir, 9).addScaledVector(w, 0.9)); } },
   'memory-street': { pos: [-5.1, 1.5, -13.0], look: [3, 0.9, -19], fov: 50, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.lookOverride = { x: -0.35, y: 0.05 }; } },
   'memory-down': { pos: [-5.1, 1.5, -13.0], look: [2, 0.6, -24], fov: 50, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.lookOverride = { x: -0.6, y: -0.05 }; } },
   'fragment-mark': { pos: [-5.1, 1.5, -13.0], look: [5, 1.2, -14.2], fov: 40, setup: (ctx, t) => {

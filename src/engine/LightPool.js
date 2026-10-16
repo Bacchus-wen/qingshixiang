@@ -41,7 +41,7 @@ export class LightPool {
     for (const c of this.cands) {
       const memory = pastMode ? 1 : memoryMaskCPU(c.pos, ctx.memory);
       const now = c.alive * mains.value * (c.power ? c.power() : 1);
-      c.k = Math.max(now * 0.9, memory);
+      c.k = Math.max(now * 0.9, memory * 0.6); // r18: in the past every sign burns, so each one lights less (no green-washed walls)
     }
     if (this.frame++ % 8 === 0) this.rank(ctx.camera);
     for (let s = 0; s < this.size; s++) {

@@ -11,10 +11,12 @@ import { wetUniforms } from '../../materials/wet.js';
 const loader = new GLTFLoader();
 const cache = new Map();
 
-function weathered(src, ccAC = false) {
+function weathered(src, ccAC = false, prop = '') {
   const base = src.color ? (src.color.r + src.color.g + src.color.b) / 3 : 0.4;
   const n = (src.name || '').toLowerCase();
-  const m = new THREE.MeshStandardNodeMaterial();
+  // r18: the abandoned car read as a beige box. Old dark-maroon paint under a wet clearcoat that carries the neon.
+  const carPaint = prop === 'car' && (n === 'paint' || n === 'paint_chipped');
+  const m = carPaint ? new THREE.MeshPhysicalNodeMaterial() : new THREE.MeshStandardNodeMaterial();
   const P = positionWorld;
   const pocket = smoothstep(0.15, 0.7, mx_fractal_noise_float(P.mul(4.0), 3, 2.0, 0.5).mul(0.5).add(0.5));
   const runs = smoothstep(0.55, 0.85, mx_noise_float(vec3(P.x.mul(22), P.y.mul(1.8), P.z.mul(22))));
@@ -24,6 +26,12 @@ function weathered(src, ccAC = false) {
   m.roughnessNode = mix(float(rough), float(0.1), up.mul(n.includes('paper') ? 0.2 : 0.75));
   m.metalnessNode = float(n.includes('metal') || n.includes('paint') ? Math.min(src.metalness ?? 0.4, 0.6) : 0);
   if (n.includes('glass')) { m.transparent = false; m.colorNode = vec3(0.02); }
+  if (carPaint) {
+    const paint = n === 'paint' ? vec3(0.085, 0.024, 0.02) : vec3(0.05, 0.03, 0.025);
+    m.colorNode = paint.mul(mix(float(1), float(0.55), pocket.mul(0.6))).mul(mix(float(1), float(0.7), runs));
+    m.metalnessNode = float(0.15); m.roughnessNode = float(0.45);
+    m.clearcoatNode = float(n === 'paint' ? 0.9 : 0.3); m.clearcoatRoughnessNode = mix(float(0.25), float(0.08), up);
+  }
   if (ccAC && src.name === 'ac_dark') {
     // Fan coordinate is baked before static merging, so rings stay centered on each unit.
     const q = attribute('ccFan', 'vec2').sub(vec2(-0.12, 0.34));
@@ -50,7 +58,7 @@ export async function loadProp(name) {
       g.scene.traverse((o) => {
         if (!o.isMesh) return;
         const key = o.material.name || o.material.uuid;
-        if (!mats.has(key)) mats.set(key, weathered(o.material, name === 'cc/ac_unit'));
+        if (!mats.has(key)) mats.set(key, weathered(o.material, name === 'cc/ac_unit', name));
         if (name === 'cc/ac_unit' && key === 'ac_dark') {
           o.geometry = o.geometry.clone();
           const pos = o.geometry.attributes.position;

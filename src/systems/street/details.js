@@ -275,7 +275,7 @@ export async function buildDetails(ctx, root, facades, M, r) {
   win.position.set(wf.frontX - 0.04, wf.h - 2.4, wf.z); win.rotation.y = -Math.PI / 2 * wf.side;
   root.add(win);
 
-  scene.add(new THREE.HemisphereLight(0x5c6470, 0x1c1c1e, 0.34)); // v3 (Grok r17): neutral cool fill, no purple cast // v3: the haze and real lights carry the night now
+  scene.add(new THREE.HemisphereLight(0x5c6470, 0x2a2826, 0.42)); // v3 (Grok r17): neutral cool fill, no purple cast // v3: the haze and real lights carry the night now
   // things people dropped: an umbrella upside down in the road near the robot, one left open against a shutter,
   // soaked flyers and a crate by the shops
   props.push(['umbrella_broken', -1.6, 0, -11.2, 0.7], ['umbrella_open', -(L.halfRoad + L.walk) + 0.6, L.curb, -21.5, 1.2, { rz: 0.35 }],

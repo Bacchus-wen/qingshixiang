@@ -7,7 +7,7 @@ import { LANE } from '../street/index.js';
 import { syncMemory } from '../../materials/memory.js';
 import { rippleNormal, wetUniforms } from '../../materials/wet.js';
 import {
-  abs, cameraPosition, color, dot, float, mx_noise_float, normalWorld, normalize, positionGeometry, positionWorld, smoothstep, time, transformNormalToView, uniform, vec3,
+  abs, atan, cameraPosition, color, cross, dot, float, Fn, Loop, max, min, mx_noise_float, normalWorld, normalize, positionGeometry, positionWorld, smoothstep, time, transformNormalToView, uniform, vec3,
 } from 'three/tsl';
 
 // The robot has sat here long enough for water to pool around it: an irregular, mirror-dark puddle.
@@ -199,19 +199,59 @@ export default {
     scene.add(this.signKey);
     this.beamVol = ctx.api.atmo?.volume(new THREE.Vector3(0.0, 3, -15), new THREE.Vector3(13, 6.5, 26), 0.0, [spot]);
 
-    // v3 (Grok r17, after gsimone): a fake volumetric cone that follows the eye -- the amber beam as the visible
-    // protagonist of the memory shots. Additive, soft along its length and toward its silhouette edges, a little dust.
+    // v3 (Grok r17/r18): the amber beam as the visible protagonist of the memory shots. The cone mesh is only a proxy:
+    // each front-face fragment marches 14 steps along its view ray through the cone (soft edge, inverse-square-ish
+    // falloff from the eye, a little dust), so the beam has the most density where the path through it is longest --
+    // a soft column from the side, a bright core looking down the beam (r18: N.V made it vanish along the axis).
     {
-      const L = 16, R0 = 1;
-      const g = new THREE.CylinderGeometry(0.03, R0, L, 40, 1, true).translate(0, -L / 2, 0); // apex at origin, along -Y
-      const mat = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide });
-      const along = positionGeometry.y.negate().div(L).clamp(0, 1);
-      const V = normalize(cameraPosition.sub(positionWorld));
-      const facing = abs(dot(normalWorld, V)).pow(1.6);
-      const dust = mx_noise_float(positionWorld.mul(1.7).add(vec3(0, time.mul(-0.4), 0))).mul(0.35).add(0.75);
+      const L = 16;
+      const g = new THREE.CylinderGeometry(0.01, 1.2, L, 48, 1, true).translate(0, -L / 2, 0); // apex at origin, along -Y
+      const mat = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.FrontSide });
+      const apex = this.coneApex = uniform(new THREE.Vector3());
+      const axis = this.coneAxis = uniform(new THREE.Vector3(1, 0, 0));
+      const tanA = this.coneTan = uniform(0.3);
       this.coneK = uniform(0);
-      const near = smoothstep(1.5, 6.0, positionWorld.sub(cameraPosition).length()); // never a flat wash when the lens is inside the cone
-      mat.colorNode = color(eyeColor).mul(float(1).sub(along).pow(1.6)).mul(smoothstep(0, 0.04, along)).mul(facing).mul(dust).mul(near).mul(this.coneK).mul(0.16);
+      mat.colorNode = Fn(() => {
+        // exact interval of the camera ray inside the (infinite, double) cone, then 16 samples inside it
+        const rd = normalize(positionWorld.sub(cameraPosition));
+        const CO = cameraPosition.sub(apex);
+        const c2 = float(1).div(tanA.mul(tanA).add(1));
+        const rdD = dot(rd, axis), coD = dot(CO, axis);
+        const qa = rdD.mul(rdD).sub(c2);
+        const qb = rdD.mul(coD).sub(c2.mul(dot(rd, CO))).mul(2);
+        const qc = coD.mul(coD).sub(c2.mul(dot(CO, CO)));
+        const disc = qb.mul(qb).sub(qa.mul(qc).mul(4));
+        const sq = disc.max(0).sqrt();
+        const ta = qb.negate().sub(sq).div(qa.mul(2)), tb = qb.negate().add(sq).div(qa.mul(2));
+        const tn = min(ta, tb), tf = max(ta, tb);
+        const FAR = float(18);
+        // along the axis (qa > 0): inside beyond tf going with the axis, before tn going against it; across (qa < 0): [tn, tf]
+        const along0 = qa.greaterThan(0);
+        const tEnter = along0.select(rdD.greaterThan(0).select(disc.lessThan(0).select(float(0), tf), float(0)), tn);
+        const tExit = along0.select(rdD.greaterThan(0).select(FAR, disc.lessThan(0).select(FAR, tn)), disc.lessThan(0).select(float(-1), tf));
+        const t0 = tEnter.max(0.25), t1 = tExit.min(FAR);
+        const span = t1.sub(t0).max(0);
+        const dt = span.div(16);
+        const bu = normalize(cross(axis, vec3(0, 1, 0))), bv = cross(axis, bu);
+        const acc = float(0).toVar();
+        Loop(16, ({ i }) => {
+          const p = cameraPosition.add(rd.mul(t0.add(dt.mul(float(i).add(0.5)))));
+          const q = p.sub(apex);
+          const along = dot(q, axis);
+          const rad = q.sub(axis.mul(along)).length();
+          const edgeR = along.max(0.001).mul(tanA);
+          const inside = float(1).sub(smoothstep(edgeR.mul(0.7), edgeR, rad)).mul(float(1).sub(smoothstep(0, edgeR.mul(0.7), rad)).mul(0.6).add(0.4)).mul(smoothstep(0.0, 0.2, along));
+          const fall = float(1).div(along.mul(along).mul(0.2).add(0.6)).mul(float(1).sub(smoothstep(10.0, 15.0, along))); // ~1/d^2: path grows with d, so the shaft is brightest at the lens and fades along
+          const camNear = smoothstep(0.2, 0.9, p.sub(cameraPosition).length());
+          // shafts: the cracked lens and the aperture blades throw streaks along the beam (angular noise around the axis)
+          const ang = atan(dot(q, bv), dot(q, bu));
+          const streak = mx_noise_float(vec3(ang.mul(2.2), along.mul(0.12), 3.1)).mul(0.55).add(0.75);
+          const dust = mx_noise_float(p.mul(1.9).add(vec3(0, time.mul(-0.5), 0))).mul(0.3).add(0.85).mul(streak);
+          acc.addAssign(inside.mul(fall).mul(camNear).mul(dust));
+        });
+        return color(eyeColor).mul(acc.mul(dt)).mul(this.coneK).mul(0.3);
+      })();
+      if (ctx.params?.get('conedebug')) { mat.colorNode = vec3(0.05, 0.02, 0.0); mat.wireframe = true; }
       this.cone = new THREE.Mesh(g, mat); this.cone.frustumCulled = false; this.cone.renderOrder = 8; this.coneL = L;
       scene.add(this.cone);
     }
@@ -313,7 +353,7 @@ export default {
     this.spot.shadow.autoUpdate = o > 0.005 || this.frames < 30;
     // v3: the amber cone is the protagonist of the memory shots (targets/memory.jpg)
     // the visible cone carries the beam now; the raymarched box keeps the gobo and occlusion
-    if (this.beamVol) { this.beamVol.material.userData.density.value = 0.25 * o; this.beamVol.visible = o > 0.01 || this.frames < 30; }
+    if (this.beamVol) { this.beamVol.material.userData.density.value = 0.12 * o * Number(ctx.params?.get('bvol') ?? 1); this.beamVol.visible = o > 0.01 || this.frames < 30; }
     const mode = ctx.memory.goboMode;
     const fq = Math.round(flood * 10) / 10;
     if (mode !== this._lastMode || fq !== this._lastFlood || (mode !== 'line' && t - this.goboT > 1 / 15 && Math.abs(o - (this._lastGobo ?? -1)) > 0.01)) {
@@ -329,9 +369,11 @@ export default {
     if (this.cone) {
       this.cone.position.copy(this._v);
       this.cone.quaternion.setFromUnitVectors(_DOWN, this._d);
-      const R = Math.tan(Math.min(0.45, coneAngle)) * this.coneL;
-      this.cone.scale.set(R, 1, R);
-      this.coneK.value = o * (1 - 0.8 * flood) * (ctx.memory.goboMode === 'line' ? 0.15 : 1);
+      const tanA = Math.tan(Math.min(0.45, coneAngle));
+      this.cone.scale.set(tanA * this.coneL / 1.2 * 1.1, 1, tanA * this.coneL / 1.2 * 1.1); // proxy a little wider than the light
+      this.coneApex.value.copy(this._v); this.coneAxis.value.copy(this._d); this.coneTan.value = tanA;
+      // r18: the beam stays in the flood and the last breath (it only thins a little while the whole street is lit)
+      this.coneK.value = o * (1 - 0.35 * flood) * (ctx.memory.goboMode === 'line' ? 0.15 : 1) * Number(ctx.params?.get('cone') ?? 1);
       this.cone.visible = o > 0.01 || (this.frames ?? 0) < 30;
     }
     // ---- publish the memory cone
