@@ -188,7 +188,7 @@ export default {
     const rim = new THREE.SpotLight(0xc8d2dc, 16, 5, 0.55, 0.9, 2); // v3: the wet shell must read against the dark
     rim.position.copy(ROBOT_POS).add(new THREE.Vector3(-0.6, 1.9, 0.9));
     rim.target.position.copy(ROBOT_POS).add(new THREE.Vector3(0.2, 0.8, 0));
-    scene.add(rim, rim.target);
+    scene.add(rim, rim.target); this.rim = rim;
     // v3: a surviving sign just out of frame up the street throws a weak magenta edge on the robot and its puddle
     // (it trips with the street's mains like every surviving light)
     this.signKey = new THREE.PointLight(0xff4fb4, 0, 7, 2);
@@ -300,7 +300,11 @@ export default {
       this.gobo.draw(o, mode, fq); this.goboT = t; this._lastGobo = o; this._lastMode = mode; this._lastFlood = fq;
     }
 
-    if (this.signKey) this.signKey.intensity = 3.5 * (ctx.world.mains ?? 1);
+    // over the shoulder (look) the helmet must read as a dark wet silhouette in the foreground, not a lit white dome
+    const ph = ctx.api.director?.phase, overShoulder = ph === 'look' || ph === 'fade';
+    this.rimK = (this.rimK ?? 1) + ((overShoulder ? 0.12 : 1) - (this.rimK ?? 1)) * Math.min(1, dt * 2);
+    if (this.rim) this.rim.intensity = 16 * this.rimK;
+    if (this.signKey) this.signKey.intensity = 3.5 * (ctx.world.mains ?? 1) * (0.25 + 0.75 * this.rimK);
     // ---- publish the memory cone
     const m = ctx.memory;
     m.origin.copy(this._v); m.dir.copy(this._d);

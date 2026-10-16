@@ -61,11 +61,11 @@ function drawCell(sign, w, h) {
   }
   if (strokes.length) {
     const [x, y] = strokes[Math.floor(random01(sign.seed * 331) * strokes.length)];
-    b.fillRect(x - 12, y - 5, 24, 10);
+    b.fillRect(x - 18, y - 8, 36, 15);
   }
   const halo = (source) => {
     const c = canvas(w, h), p = c.getContext('2d', { willReadFrequently: true });
-    p.shadowColor = '#fff'; p.shadowBlur = 10; p.globalAlpha = 0.65;
+    p.shadowColor = "#fff"; p.shadowBlur = 15; p.globalAlpha = 0.65;
     p.drawImage(source, 0, 0); p.shadowBlur = 4; p.globalAlpha = 0.35; p.drawImage(source, 0, 0);
     return p.getImageData(0, 0, w, h).data;
   };
@@ -79,17 +79,17 @@ export function planAtlas(signs) {
   const entries = new Map();
   for (const s of signs) if (!entries.has(artKey(s))) entries.set(artKey(s), {
     // Leave room for gutters: four horizontal cells / eight diffuser cells fit a 2048 px row.
-    sign: s, w: s.kind === 'box' ? 240 : s.kind === 'blade' ? 128 : 480,
-    h: s.kind === 'box' ? 240 : s.kind === 'blade' ? 512 : 128,
+    sign: s, w: s.kind === 'box' ? 320 : s.kind === 'blade' ? 192 : 704, // v3: 1.5x -- strokes stay readable at distance
+    h: s.kind === 'box' ? 320 : s.kind === 'blade' ? 768 : 192,
   });
-  const width = 2048, gap = 8;
+  const width = 4096, gap = 8; // v3: 1.5x cells need a 4096-wide atlas
   let x = gap, y = gap, row = 0;
   for (const e of [...entries.values()].sort((a, b) => b.h - a.h)) {
     if (x + e.w + gap > width) { x = gap; y += row + gap; row = 0; }
     e.x = x; e.y = y; x += e.w + gap; row = Math.max(row, e.h);
   }
   const height = 2 ** Math.ceil(Math.log2(y + row + gap));
-  if (height > 4096) throw new Error('[neon] atlas budget exceeded');
+  if (height > 4096) throw new Error('[neon] atlas budget exceeded'); // (4096x4096 RGBA8 = 64 MB GPU)
   return { entries, width, height };
 }
 

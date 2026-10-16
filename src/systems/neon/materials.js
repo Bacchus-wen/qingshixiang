@@ -23,8 +23,9 @@ export function createMaterials(atlas, mode) {
   const diffuser = mix(paper, tint.mul(0.72), masks.r);
   face.colorNode = mix(mix(tubeSurface, diffuser.mul(0.22).mul(dirt), style.x), vec3(0.12), isAccent);
   const now = faded.mul(masks.g.mul(2.6).add(masks.a.mul(0.3))).mul(power).mul(mains); // the surviving tubes trip with the street
-  const tube = mix(masks.r, masks.g, style.y);
-  const halo = mix(masks.b, masks.a, style.y);
+  // in memory the street is whole again: every sign intact (broken strokes belong to the present only)
+  const tube = masks.r;
+  const halo = masks.b;
   // Small halo keeps the hollow glyph centre dark. The same broken mask cuts tube AND halo.
   const core = smoothstep(0.82, 0.98, tube); // Middle stroke composites to 0.805; only the inner stroke goes white.
   const tubeThen = tint.mul(tube.mul(TUBE_INTENSITY).add(halo.mul(0.22)))
