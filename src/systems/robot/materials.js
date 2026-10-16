@@ -95,7 +95,7 @@ export function robotMaterial(name) {
     m.colorNode = vec3(0.02);
     // dim ember when closed, bright when open; slow breathing so it reads as "not quite dead"
     const breathe = mx_noise_float(vec3(time.mul(0.35), 0, 0)).mul(0.5).add(0.5);
-    m.emissiveNode = color(eyeColor).mul(float(0.04).add(breathe.mul(0.03)).add(eyeGlow.mul(eyeGlow).mul(14)));
+    m.emissiveNode = color(eyeColor).mul(float(0.04).add(breathe.mul(0.03)).add(eyeGlow.mul(eyeGlow).mul(7))); // v2 review: a pupil of light, the metal rings around it stay readable
   } else if (n.includes('chest_core')) {
     // status light: a very slow, faint breath. Never coloured, never bright.
     m.colorNode = vec3(0.02);
