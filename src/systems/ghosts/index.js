@@ -73,7 +73,7 @@ export default {
       pose(p, t);
       this.center.copy(p.position); this.center.y += .9 * p.scale;
       const distance = Math.hypot(p.position.x - this.cameraPosition.x, p.position.z - this.cameraPosition.z);
-      const fade = fullFlood(ctx) ? 1 : nearFade(distance);
+      const fade = nearFade(distance); // even in the full flood: nobody walks through the lens
       const visible = enabled && fade > 0 && inMemory(this.center, meta.radius * p.scale, ctx, this.life, this.broad);
       if (!visible && !warmup) {
         outfit.hide(p.slot);
