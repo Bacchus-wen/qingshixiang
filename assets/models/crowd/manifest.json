@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "format": "indices-u32_positions-f32_normals-f32",
+  "version": 2,
+  "format": "indices-u32_positions-f32_normals-f32_uvs-f32",
   "frames": 20,
   "variants": [
     {
@@ -9,6 +9,389 @@
       "clip": "umbrella_walk",
       "umbrella": true,
       "file": "m_raincoat.vat",
+      "format": "indices-u32_positions-f32_normals-f32_uvs-f32",
+      "materials": [
+        {
+          "name": "skin",
+          "slot": 0,
+          "diffuse": "textures/crowd/young_lightskinned_male_diffuse3.jpg",
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.00830078125,
+            0.00830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "cloth_msuit",
+          "slot": 1,
+          "diffuse": "textures/crowd/male_elegantsuit01_diffuse.jpg",
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.25830078125,
+            0.00830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "hair_short02",
+          "slot": 2,
+          "diffuse": "textures/crowd/short02_diffuse.png",
+          "normal": null,
+          "alphaCutout": true,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.50830078125,
+            0.00830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "rain_black",
+          "slot": 3,
+          "diffuse": "textures/crowd/fab_pvc_d.jpg",
+          "normal": "textures/crowd/fab_pvc_n.jpg",
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            0.017999999225139618,
+            0.017999999225139618,
+            0.019999999552965164
+          ],
+          "fabricDetail": true,
+          "repeat": 2.5,
+          "normalScale": 0.6,
+          "roughness": 0.35,
+          "rect": [
+            0.75830078125,
+            0.00830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "boots_black",
+          "slot": 4,
+          "diffuse": "textures/crowd/fab_pvc_d.jpg",
+          "normal": "textures/crowd/fab_pvc_n.jpg",
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            0.019999999552965164,
+            0.017999999225139618,
+            0.017000000923871994
+          ],
+          "fabricDetail": true,
+          "repeat": 4,
+          "normalScale": 0.3,
+          "roughness": 0.6,
+          "rect": [
+            0.00830078125,
+            0.25830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "sole",
+          "slot": 5,
+          "diffuse": null,
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            0.014999999664723873,
+            0.014999999664723873,
+            0.014999999664723873
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.25830078125,
+            0.25830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "eyes",
+          "slot": 6,
+          "diffuse": "textures/crowd/brown_eye.jpg",
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.50830078125,
+            0.25830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "brow",
+          "slot": 7,
+          "diffuse": "textures/crowd/eyebrow001.png",
+          "normal": null,
+          "alphaCutout": true,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.75830078125,
+            0.25830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "lash",
+          "slot": 8,
+          "diffuse": "textures/crowd/eyelashes01.png",
+          "normal": null,
+          "alphaCutout": true,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.00830078125,
+            0.50830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "umb_black",
+          "slot": 9,
+          "diffuse": null,
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": true,
+          "color": [
+            0.012000000104308128,
+            0.012000000104308128,
+            0.014000000432133675
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.75,
+          "rect": [
+            0.25830078125,
+            0.50830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "umb_handle",
+          "slot": 10,
+          "diffuse": null,
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": true,
+          "color": [
+            0.019999999552965164,
+            0.019999999552965164,
+            0.019999999552965164
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.75,
+          "rect": [
+            0.50830078125,
+            0.50830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "umb_metal",
+          "slot": 11,
+          "diffuse": null,
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": true,
+          "color": [
+            0.6000000238418579,
+            0.6000000238418579,
+            0.6200000047683716
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.75,
+          "rect": [
+            0.75830078125,
+            0.50830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        }
+      ],
+      "primitives": [
+        {
+          "name": "outfit_m_raincoat_lod1_1",
+          "material": 0,
+          "vertexOffset": 0,
+          "vertexCount": 504,
+          "indexOffset": 0,
+          "indexCount": 2103
+        },
+        {
+          "name": "outfit_m_raincoat_lod1_2",
+          "material": 1,
+          "vertexOffset": 504,
+          "vertexCount": 635,
+          "indexOffset": 2103,
+          "indexCount": 2238
+        },
+        {
+          "name": "outfit_m_raincoat_lod1_3",
+          "material": 2,
+          "vertexOffset": 1139,
+          "vertexCount": 166,
+          "indexOffset": 4341,
+          "indexCount": 741
+        },
+        {
+          "name": "outfit_m_raincoat_lod1_4",
+          "material": 3,
+          "vertexOffset": 1305,
+          "vertexCount": 1202,
+          "indexOffset": 5082,
+          "indexCount": 3972
+        },
+        {
+          "name": "outfit_m_raincoat_lod1_5",
+          "material": 4,
+          "vertexOffset": 2507,
+          "vertexCount": 187,
+          "indexOffset": 9054,
+          "indexCount": 462
+        },
+        {
+          "name": "outfit_m_raincoat_lod1_6",
+          "material": 5,
+          "vertexOffset": 2694,
+          "vertexCount": 66,
+          "indexOffset": 9516,
+          "indexCount": 150
+        },
+        {
+          "name": "outfit_m_raincoat_lod1_7",
+          "material": 6,
+          "vertexOffset": 2760,
+          "vertexCount": 58,
+          "indexOffset": 9666,
+          "indexCount": 255
+        },
+        {
+          "name": "outfit_m_raincoat_lod1_8",
+          "material": 7,
+          "vertexOffset": 2818,
+          "vertexCount": 15,
+          "indexOffset": 9921,
+          "indexCount": 36
+        },
+        {
+          "name": "outfit_m_raincoat_lod1_9",
+          "material": 8,
+          "vertexOffset": 2833,
+          "vertexCount": 32,
+          "indexOffset": 9957,
+          "indexCount": 72
+        },
+        {
+          "name": "umbrella_black_1",
+          "material": 9,
+          "vertexOffset": 2865,
+          "vertexCount": 512,
+          "indexOffset": 10029,
+          "indexCount": 2688
+        },
+        {
+          "name": "umbrella_black_2",
+          "material": 10,
+          "vertexOffset": 3377,
+          "vertexCount": 16,
+          "indexOffset": 12717,
+          "indexCount": 66
+        },
+        {
+          "name": "umbrella_black_3",
+          "material": 11,
+          "vertexOffset": 3393,
+          "vertexCount": 144,
+          "indexOffset": 12783,
+          "indexCount": 384
+        }
+      ],
+      "atlas": {
+        "size": 1024,
+        "color": "m_raincoat-color.jpg",
+        "normalAlpha": "m_raincoat-normal-alpha.jpg",
+        "normalPacking": "rg-normal_b-opacity"
+      },
       "vertexCount": 3537,
       "indexCount": 13167,
       "frames": 20,
@@ -28,8 +411,8 @@
           0.6441989602635587
         ]
       },
-      "bytes": 1750428,
-      "sha256": "6183d5277e7affb3f8eee6b9936cfec1c89ca63f116e33a0d16e55c6cd2fe149",
+      "bytes": 1778724,
+      "sha256": "58cd77cc6f8ddeaffbf1236c0b8e7ee140f2e6de338ce0d988af3a4193498c75",
       "source": "reference/cybercity/assets/models/crowd/male.glb",
       "sourceSha256": "e0d69ea2bb6eb3625decd749072af02c00312f2747ee7ec19130bafd7946138b",
       "maxReferenceError": 5.0354377162563404e-8
@@ -40,6 +423,389 @@
       "clip": "umbrella_walk",
       "umbrella": true,
       "file": "f_raincoat.vat",
+      "format": "indices-u32_positions-f32_normals-f32_uvs-f32",
+      "materials": [
+        {
+          "name": "skin",
+          "slot": 0,
+          "diffuse": "textures/crowd/young_lightskinned_female_diffuse3.jpg",
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.00830078125,
+            0.00830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "hair_bob02",
+          "slot": 1,
+          "diffuse": "textures/crowd/bob02_diffuse.png",
+          "normal": null,
+          "alphaCutout": true,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.25830078125,
+            0.00830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "tights_black",
+          "slot": 2,
+          "diffuse": null,
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            0.029999999329447746,
+            0.029999999329447746,
+            0.03500000014901161
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.50830078125,
+            0.00830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "rain_red",
+          "slot": 3,
+          "diffuse": "textures/crowd/fab_pvc_d.jpg",
+          "normal": "textures/crowd/fab_pvc_n.jpg",
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            0.25,
+            0.019999999552965164,
+            0.029999999329447746
+          ],
+          "fabricDetail": true,
+          "repeat": 2.5,
+          "normalScale": 0.6,
+          "roughness": 0.35,
+          "rect": [
+            0.75830078125,
+            0.00830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "boots_black",
+          "slot": 4,
+          "diffuse": "textures/crowd/fab_pvc_d.jpg",
+          "normal": "textures/crowd/fab_pvc_n.jpg",
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            0.019999999552965164,
+            0.017999999225139618,
+            0.017000000923871994
+          ],
+          "fabricDetail": true,
+          "repeat": 4,
+          "normalScale": 0.3,
+          "roughness": 0.6,
+          "rect": [
+            0.00830078125,
+            0.25830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "sole",
+          "slot": 5,
+          "diffuse": null,
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            0.014999999664723873,
+            0.014999999664723873,
+            0.014999999664723873
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.25830078125,
+            0.25830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "eyes",
+          "slot": 6,
+          "diffuse": "textures/crowd/brown_eye.jpg",
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.50830078125,
+            0.25830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "brow",
+          "slot": 7,
+          "diffuse": "textures/crowd/eyebrow001.png",
+          "normal": null,
+          "alphaCutout": true,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.75830078125,
+            0.25830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "lash",
+          "slot": 8,
+          "diffuse": "textures/crowd/eyelashes01.png",
+          "normal": null,
+          "alphaCutout": true,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.00830078125,
+            0.50830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "umb_black",
+          "slot": 9,
+          "diffuse": null,
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": true,
+          "color": [
+            0.012000000104308128,
+            0.012000000104308128,
+            0.014000000432133675
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.75,
+          "rect": [
+            0.25830078125,
+            0.50830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "umb_handle",
+          "slot": 10,
+          "diffuse": null,
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": true,
+          "color": [
+            0.019999999552965164,
+            0.019999999552965164,
+            0.019999999552965164
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.75,
+          "rect": [
+            0.50830078125,
+            0.50830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "umb_metal",
+          "slot": 11,
+          "diffuse": null,
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": true,
+          "color": [
+            0.6000000238418579,
+            0.6000000238418579,
+            0.6200000047683716
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.75,
+          "rect": [
+            0.75830078125,
+            0.50830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        }
+      ],
+      "primitives": [
+        {
+          "name": "outfit_f_raincoat_lod1_1",
+          "material": 0,
+          "vertexOffset": 0,
+          "vertexCount": 452,
+          "indexOffset": 0,
+          "indexCount": 1863
+        },
+        {
+          "name": "outfit_f_raincoat_lod1_2",
+          "material": 1,
+          "vertexOffset": 452,
+          "vertexCount": 515,
+          "indexOffset": 1863,
+          "indexCount": 1542
+        },
+        {
+          "name": "outfit_f_raincoat_lod1_3",
+          "material": 2,
+          "vertexOffset": 967,
+          "vertexCount": 341,
+          "indexOffset": 3405,
+          "indexCount": 1044
+        },
+        {
+          "name": "outfit_f_raincoat_lod1_4",
+          "material": 3,
+          "vertexOffset": 1308,
+          "vertexCount": 1296,
+          "indexOffset": 4449,
+          "indexCount": 3996
+        },
+        {
+          "name": "outfit_f_raincoat_lod1_5",
+          "material": 4,
+          "vertexOffset": 2604,
+          "vertexCount": 184,
+          "indexOffset": 8445,
+          "indexCount": 480
+        },
+        {
+          "name": "outfit_f_raincoat_lod1_6",
+          "material": 5,
+          "vertexOffset": 2788,
+          "vertexCount": 63,
+          "indexOffset": 8925,
+          "indexCount": 147
+        },
+        {
+          "name": "outfit_f_raincoat_lod1_7",
+          "material": 6,
+          "vertexOffset": 2851,
+          "vertexCount": 58,
+          "indexOffset": 9072,
+          "indexCount": 255
+        },
+        {
+          "name": "outfit_f_raincoat_lod1_8",
+          "material": 7,
+          "vertexOffset": 2909,
+          "vertexCount": 14,
+          "indexOffset": 9327,
+          "indexCount": 30
+        },
+        {
+          "name": "outfit_f_raincoat_lod1_9",
+          "material": 8,
+          "vertexOffset": 2923,
+          "vertexCount": 33,
+          "indexOffset": 9357,
+          "indexCount": 75
+        },
+        {
+          "name": "umbrella_black_1",
+          "material": 9,
+          "vertexOffset": 2956,
+          "vertexCount": 512,
+          "indexOffset": 9432,
+          "indexCount": 2688
+        },
+        {
+          "name": "umbrella_black_2",
+          "material": 10,
+          "vertexOffset": 3468,
+          "vertexCount": 16,
+          "indexOffset": 12120,
+          "indexCount": 66
+        },
+        {
+          "name": "umbrella_black_3",
+          "material": 11,
+          "vertexOffset": 3484,
+          "vertexCount": 144,
+          "indexOffset": 12186,
+          "indexCount": 384
+        }
+      ],
+      "atlas": {
+        "size": 1024,
+        "color": "f_raincoat-color.jpg",
+        "normalAlpha": "f_raincoat-normal-alpha.jpg",
+        "normalPacking": "rg-normal_b-opacity"
+      },
       "vertexCount": 3628,
       "indexCount": 12570,
       "frames": 20,
@@ -59,8 +825,8 @@
           0.6296068951421743
         ]
       },
-      "bytes": 1791720,
-      "sha256": "c865ad9eea3e183023c7199d8b8b845769f8066cdd9b978d5f71635b4fe2fe10",
+      "bytes": 1820744,
+      "sha256": "579de5c435a458a6fd3b33e69603f99bb39a125b261454e742af906e9a338533",
       "source": "reference/cybercity/assets/models/crowd/female.glb",
       "sourceSha256": "7812ff43516bb29ff476be7ea6d0b7e7dd8c558cd90114389f1d84439e3b7838",
       "maxReferenceError": 4.249198720659507e-8
@@ -71,6 +837,420 @@
       "clip": "umbrella_walk",
       "umbrella": true,
       "file": "f_trench.vat",
+      "format": "indices-u32_positions-f32_normals-f32_uvs-f32",
+      "materials": [
+        {
+          "name": "skin",
+          "slot": 0,
+          "diffuse": "textures/crowd/young_lightskinned_female_diffuse3.jpg",
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.00830078125,
+            0.00830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "cloth_fcasual",
+          "slot": 1,
+          "diffuse": "textures/crowd/female_casualsuit01_diffuse.jpg",
+          "normal": "textures/crowd/female_casualsuit01_normal.jpg",
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 1,
+          "roughness": 0.6,
+          "rect": [
+            0.25830078125,
+            0.00830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "hair_long01",
+          "slot": 2,
+          "diffuse": "textures/crowd/long01_diffuse.png",
+          "normal": null,
+          "alphaCutout": true,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.50830078125,
+            0.00830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "trench_beige",
+          "slot": 3,
+          "diffuse": "textures/crowd/fab_twill_d.jpg",
+          "normal": "textures/crowd/fab_twill_n.jpg",
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            0.41999998688697815,
+            0.3499999940395355,
+            0.25
+          ],
+          "fabricDetail": true,
+          "repeat": 9,
+          "normalScale": 0.7,
+          "roughness": 0.6,
+          "rect": [
+            0.75830078125,
+            0.00830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "trench_beige_belt",
+          "slot": 4,
+          "diffuse": "textures/crowd/fab_twill_d.jpg",
+          "normal": "textures/crowd/fab_twill_n.jpg",
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            0.019999999552965164,
+            0.017999999225139618,
+            0.014999999664723873
+          ],
+          "fabricDetail": true,
+          "repeat": 9,
+          "normalScale": 0.7,
+          "roughness": 0.6,
+          "rect": [
+            0.00830078125,
+            0.25830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "boots_black",
+          "slot": 5,
+          "diffuse": "textures/crowd/fab_pvc_d.jpg",
+          "normal": "textures/crowd/fab_pvc_n.jpg",
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            0.019999999552965164,
+            0.017999999225139618,
+            0.017000000923871994
+          ],
+          "fabricDetail": true,
+          "repeat": 4,
+          "normalScale": 0.3,
+          "roughness": 0.6,
+          "rect": [
+            0.25830078125,
+            0.25830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "sole",
+          "slot": 6,
+          "diffuse": null,
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            0.014999999664723873,
+            0.014999999664723873,
+            0.014999999664723873
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.50830078125,
+            0.25830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "eyes",
+          "slot": 7,
+          "diffuse": "textures/crowd/brown_eye.jpg",
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.75830078125,
+            0.25830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "brow",
+          "slot": 8,
+          "diffuse": "textures/crowd/eyebrow001.png",
+          "normal": null,
+          "alphaCutout": true,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.00830078125,
+            0.50830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "lash",
+          "slot": 9,
+          "diffuse": "textures/crowd/eyelashes01.png",
+          "normal": null,
+          "alphaCutout": true,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.25830078125,
+            0.50830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "umb_black",
+          "slot": 10,
+          "diffuse": null,
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": true,
+          "color": [
+            0.012000000104308128,
+            0.012000000104308128,
+            0.014000000432133675
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.75,
+          "rect": [
+            0.50830078125,
+            0.50830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "umb_handle",
+          "slot": 11,
+          "diffuse": null,
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": true,
+          "color": [
+            0.019999999552965164,
+            0.019999999552965164,
+            0.019999999552965164
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.75,
+          "rect": [
+            0.75830078125,
+            0.50830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "umb_metal",
+          "slot": 12,
+          "diffuse": null,
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": true,
+          "color": [
+            0.6000000238418579,
+            0.6000000238418579,
+            0.6200000047683716
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.75,
+          "rect": [
+            0.00830078125,
+            0.75830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        }
+      ],
+      "primitives": [
+        {
+          "name": "outfit_f_trench_lod1_1",
+          "material": 0,
+          "vertexOffset": 0,
+          "vertexCount": 426,
+          "indexOffset": 0,
+          "indexCount": 1731
+        },
+        {
+          "name": "outfit_f_trench_lod1_2",
+          "material": 1,
+          "vertexOffset": 426,
+          "vertexCount": 231,
+          "indexOffset": 1731,
+          "indexCount": 933
+        },
+        {
+          "name": "outfit_f_trench_lod1_3",
+          "material": 2,
+          "vertexOffset": 657,
+          "vertexCount": 957,
+          "indexOffset": 2664,
+          "indexCount": 2811
+        },
+        {
+          "name": "outfit_f_trench_lod1_4",
+          "material": 3,
+          "vertexOffset": 1614,
+          "vertexCount": 1126,
+          "indexOffset": 5475,
+          "indexCount": 3315
+        },
+        {
+          "name": "outfit_f_trench_lod1_5",
+          "material": 4,
+          "vertexOffset": 2740,
+          "vertexCount": 152,
+          "indexOffset": 8790,
+          "indexCount": 297
+        },
+        {
+          "name": "outfit_f_trench_lod1_6",
+          "material": 5,
+          "vertexOffset": 2892,
+          "vertexCount": 156,
+          "indexOffset": 9087,
+          "indexCount": 390
+        },
+        {
+          "name": "outfit_f_trench_lod1_7",
+          "material": 6,
+          "vertexOffset": 3048,
+          "vertexCount": 57,
+          "indexOffset": 9477,
+          "indexCount": 135
+        },
+        {
+          "name": "outfit_f_trench_lod1_8",
+          "material": 7,
+          "vertexOffset": 3105,
+          "vertexCount": 55,
+          "indexOffset": 9612,
+          "indexCount": 240
+        },
+        {
+          "name": "outfit_f_trench_lod1_9",
+          "material": 8,
+          "vertexOffset": 3160,
+          "vertexCount": 14,
+          "indexOffset": 9852,
+          "indexCount": 30
+        },
+        {
+          "name": "outfit_f_trench_lod1_10",
+          "material": 9,
+          "vertexOffset": 3174,
+          "vertexCount": 31,
+          "indexOffset": 9882,
+          "indexCount": 69
+        },
+        {
+          "name": "umbrella_black_1",
+          "material": 10,
+          "vertexOffset": 3205,
+          "vertexCount": 512,
+          "indexOffset": 9951,
+          "indexCount": 2688
+        },
+        {
+          "name": "umbrella_black_2",
+          "material": 11,
+          "vertexOffset": 3717,
+          "vertexCount": 16,
+          "indexOffset": 12639,
+          "indexCount": 66
+        },
+        {
+          "name": "umbrella_black_3",
+          "material": 12,
+          "vertexOffset": 3733,
+          "vertexCount": 144,
+          "indexOffset": 12705,
+          "indexCount": 384
+        }
+      ],
+      "atlas": {
+        "size": 1024,
+        "color": "f_trench-color.jpg",
+        "normalAlpha": "f_trench-normal-alpha.jpg",
+        "normalPacking": "rg-normal_b-opacity"
+      },
       "vertexCount": 3877,
       "indexCount": 13089,
       "frames": 20,
@@ -90,8 +1270,8 @@
           0.6296068951421743
         ]
       },
-      "bytes": 1913316,
-      "sha256": "5d37e4138d31b7cb8210f6dbc04d0c43d839027a34f8035889cba3d3fff0f4f5",
+      "bytes": 1944332,
+      "sha256": "f884ffdd3658ecac764e4a0d0d5e32dcd78ec80ee9c6cff29a9a528e1e97926b",
       "source": "reference/cybercity/assets/models/crowd/female.glb",
       "sourceSha256": "7812ff43516bb29ff476be7ea6d0b7e7dd8c558cd90114389f1d84439e3b7838",
       "maxReferenceError": 4.3562416031285576e-8
@@ -102,6 +1282,234 @@
       "clip": "walk",
       "umbrella": false,
       "file": "m_hoodie.vat",
+      "format": "indices-u32_positions-f32_normals-f32_uvs-f32",
+      "materials": [
+        {
+          "name": "skin",
+          "slot": 0,
+          "diffuse": "textures/crowd/young_lightskinned_male_diffuse3.jpg",
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.00830078125,
+            0.00830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "cloth_mtee",
+          "slot": 1,
+          "diffuse": "textures/crowd/male_casualsuit06_diffuse.jpg",
+          "normal": "textures/crowd/male_casualsuit06_normal.jpg",
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 1,
+          "roughness": 0.6,
+          "rect": [
+            0.25830078125,
+            0.00830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "shoes_white",
+          "slot": 2,
+          "diffuse": "textures/crowd/shoes05_diffuse.jpg",
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.50830078125,
+            0.00830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "knit_charcoal",
+          "slot": 3,
+          "diffuse": "textures/crowd/fab_knit_d.jpg",
+          "normal": "textures/crowd/fab_knit_n.jpg",
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            0.07000000029802322,
+            0.07000000029802322,
+            0.07500000298023224
+          ],
+          "fabricDetail": true,
+          "repeat": 9,
+          "normalScale": 0.9,
+          "roughness": 0.6,
+          "rect": [
+            0.75830078125,
+            0.00830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "eyes",
+          "slot": 4,
+          "diffuse": "textures/crowd/brown_eye.jpg",
+          "normal": null,
+          "alphaCutout": false,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.00830078125,
+            0.25830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "brow",
+          "slot": 5,
+          "diffuse": "textures/crowd/eyebrow001.png",
+          "normal": null,
+          "alphaCutout": true,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.25830078125,
+            0.25830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        },
+        {
+          "name": "lash",
+          "slot": 6,
+          "diffuse": "textures/crowd/eyelashes01.png",
+          "normal": null,
+          "alphaCutout": true,
+          "umbrella": false,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "fabricDetail": false,
+          "repeat": 1,
+          "normalScale": 0,
+          "roughness": 0.6,
+          "rect": [
+            0.50830078125,
+            0.25830078125,
+            0.2333984375,
+            0.2333984375
+          ]
+        }
+      ],
+      "primitives": [
+        {
+          "name": "outfit_m_hoodie_lod1_1",
+          "material": 0,
+          "vertexOffset": 0,
+          "vertexCount": 515,
+          "indexOffset": 0,
+          "indexCount": 2148
+        },
+        {
+          "name": "outfit_m_hoodie_lod1_2",
+          "material": 1,
+          "vertexOffset": 515,
+          "vertexCount": 368,
+          "indexOffset": 2148,
+          "indexCount": 1407
+        },
+        {
+          "name": "outfit_m_hoodie_lod1_3",
+          "material": 2,
+          "vertexOffset": 883,
+          "vertexCount": 232,
+          "indexOffset": 3555,
+          "indexCount": 930
+        },
+        {
+          "name": "outfit_m_hoodie_lod1_4",
+          "material": 3,
+          "vertexOffset": 1115,
+          "vertexCount": 1474,
+          "indexOffset": 4485,
+          "indexCount": 4134
+        },
+        {
+          "name": "outfit_m_hoodie_lod1_5",
+          "material": 4,
+          "vertexOffset": 2589,
+          "vertexCount": 57,
+          "indexOffset": 8619,
+          "indexCount": 249
+        },
+        {
+          "name": "outfit_m_hoodie_lod1_6",
+          "material": 5,
+          "vertexOffset": 2646,
+          "vertexCount": 15,
+          "indexOffset": 8868,
+          "indexCount": 36
+        },
+        {
+          "name": "outfit_m_hoodie_lod1_7",
+          "material": 6,
+          "vertexOffset": 2661,
+          "vertexCount": 31,
+          "indexOffset": 8904,
+          "indexCount": 69
+        }
+      ],
+      "atlas": {
+        "size": 1024,
+        "color": "m_hoodie-color.jpg",
+        "normalAlpha": "m_hoodie-normal-alpha.jpg",
+        "normalPacking": "rg-normal_b-opacity"
+      },
       "vertexCount": 2692,
       "indexCount": 8973,
       "frames": 20,
@@ -121,12 +1529,12 @@
           0.6108389453007104
         ]
       },
-      "bytes": 1328052,
-      "sha256": "2ff435f916a6c1648e401697bf381ec8d1b97e6e24664033c801344c5c22e091",
+      "bytes": 1349588,
+      "sha256": "2aa920e0935fa1082be2f9abb3ea6729fc154457fb8eaa182d22e5a6031e5944",
       "source": "reference/cybercity/assets/models/crowd/male.glb",
       "sourceSha256": "e0d69ea2bb6eb3625decd749072af02c00312f2747ee7ec19130bafd7946138b",
       "maxReferenceError": 5.2002926847747355e-8
     }
   ],
-  "bytes": 6783516
+  "bytes": 6893388
 }

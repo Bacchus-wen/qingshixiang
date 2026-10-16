@@ -118,21 +118,25 @@ export class MemoryOutfit {
         surfaces.set([m.roughness, m.normalScale, Number(m.umbrella), m.repeat], v * 4);
       }
     }
-    this.geometry.setAttribute('crowdAtlas', new THREE.BufferAttribute(rects, 4));
-    this.geometry.setAttribute('crowdSurface', new THREE.BufferAttribute(surfaces, 4));
+    // WebGPU allows 8 vertex buffers: atlas rect + surface share one interleaved buffer, motion current/previous one vec4
+    const packed = new Float32Array(rects.length * 2);
+    for (let v = 0; v < rects.length / 4; v++) { packed.set(rects.subarray(v * 4, v * 4 + 4), v * 8); packed.set(surfaces.subarray(v * 4, v * 4 + 4), v * 8 + 4); }
+    const ib = new THREE.InterleavedBuffer(packed, 8);
+    this.geometry.setAttribute('crowdAtlas', new THREE.InterleavedBufferAttribute(ib, 4, 0));
+    this.geometry.setAttribute('crowdSurface', new THREE.InterleavedBufferAttribute(ib, 4, 4));
     const instanced = (name, size) => {
       const a = new THREE.InstancedBufferAttribute(new Float32Array(maxInstances * size), size);
       a.setUsage(THREE.DynamicDrawUsage); this.geometry.setAttribute(name, a); return a;
     };
     this.pose = instanced('crowdPose', 4); // xyz, yaw; already in group-local world metres
-    this.motion = instanced('crowdMotion', 2); // fractional frame, scale
+    this.motions = instanced('crowdMotions', 4); // current (frame, scale), previous (frame, scale)
     this.previousPose = instanced('crowdPreviousPose', 4);
-    this.previousMotion = instanced('crowdPreviousMotion', 2);
     this.tint = instanced('lifeTint', 4); // nearest sign RGB, CPU visibility * near-camera fade
-    this.attributes = [this.pose, this.motion, this.previousPose, this.previousMotion, this.tint];
+    this.attributes = [this.pose, this.motions, this.previousPose, this.tint];
     this.geometry.instanceCount = maxInstances;
-    const pose = attribute('crowdPose', 'vec4'), motion = attribute('crowdMotion', 'vec2');
-    const previousPose = attribute('crowdPreviousPose', 'vec4'), previousMotion = attribute('crowdPreviousMotion', 'vec2');
+    const motions = attribute('crowdMotions', 'vec4');
+    const pose = attribute('crowdPose', 'vec4'), motion = motions.xy;
+    const previousPose = attribute('crowdPreviousPose', 'vec4'), previousMotion = motions.zw;
     const tint = attribute('lifeTint', 'vec4');
     const sample = (texture, frame) => {
       const vertex = int(vertexIndex), f0 = floor(frame);
@@ -167,17 +171,17 @@ export class MemoryOutfit {
   }
   begin() {
     this.previousPose.array.set(this.pose.array);
-    this.previousMotion.array.set(this.motion.array);
+    const mo = this.motions.array; for (let i = 0; i < mo.length; i += 4) { mo[i + 2] = mo[i]; mo[i + 3] = mo[i + 1]; }
     this.active = 0;
   }
   set(slot, person, frame, tint, opacity, resetHistory = false) {
     const p = person.position;
     this.pose.setXYZW(slot, p.x, p.y, p.z, person.yaw);
-    this.motion.setXY(slot, frame, person.scale);
+    this.motions.setX(slot, frame); this.motions.setY(slot, person.scale);
     this.tint.setXYZW(slot, tint.r, tint.g, tint.b, opacity);
     if (resetHistory) {
       this.previousPose.setXYZW(slot, p.x, p.y, p.z, person.yaw);
-      this.previousMotion.setXY(slot, frame, person.scale);
+      this.motions.setZ(slot, frame); this.motions.setW(slot, person.scale);
     }
     if (opacity > 0) this.active++;
   }

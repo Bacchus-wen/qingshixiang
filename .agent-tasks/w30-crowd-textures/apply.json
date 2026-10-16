@@ -1,0 +1,25 @@
+{
+ "state": "applied",
+ "files": [
+  "assets/models/crowd/CREDITS.md",
+  "assets/models/crowd/f_raincoat.vat",
+  "assets/models/crowd/f_trench.vat",
+  "assets/models/crowd/m_hoodie.vat",
+  "assets/models/crowd/m_raincoat.vat",
+  "assets/models/crowd/manifest.json",
+  "assets/textures/crowd/CREDITS.md",
+  "src/systems/ghosts/bake-crowd.mjs",
+  "src/systems/ghosts/crowd-materials.mjs",
+  "src/systems/ghosts/life.js",
+  "src/systems/ghosts/prepare-textures.mjs",
+  "src/systems/ghosts/vat.js",
+  "src/systems/ghosts/verify.mjs"
+ ],
+ "created": [
+  "assets/models/crowd/CREDITS.md",
+  "assets/textures/crowd/CREDITS.md",
+  "src/systems/ghosts/crowd-materials.mjs",
+  "src/systems/ghosts/prepare-textures.mjs"
+ ],
+ "at": "2026-10-17 05:36:35"
+}

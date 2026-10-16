@@ -1,0 +1,148 @@
+{
+  "version": 1,
+  "jpegQuality": 85,
+  "normalPacking": "rg-normal_b-opacity",
+  "textureBytes": 781221,
+  "uvBytes": 109872,
+  "incrementalBytes": 891093,
+  "sources": [
+    {
+      "source": "reference/cybercity/assets/textures/crowd/young_lightskinned_male_diffuse3.jpg",
+      "sha256": "ebcc08aef418c1b3901c33f2772cdbe645c6d15f5747cba833845b74b0b5e766"
+    },
+    {
+      "source": "reference/cybercity/assets/textures/crowd/male_elegantsuit01_diffuse.jpg",
+      "sha256": "80bfc9eb024d0132a150a0a5fbfa070fce259a59f71ed3eb83820759f66afa4d"
+    },
+    {
+      "source": "reference/cybercity/assets/textures/crowd/short02_diffuse.png",
+      "sha256": "d0afdcb791eabb7bb7566ce9dc36baf1193438a7248438cd7a6c2b8a10523738"
+    },
+    {
+      "source": "reference/cybercity/assets/textures/crowd/fab_pvc_d.jpg",
+      "sha256": "b87fa6b0af88a6f9daabbc519ffa5e38cddc72a27bb2dceeafa3f24b8bca6fd8"
+    },
+    {
+      "source": "reference/cybercity/assets/textures/crowd/fab_pvc_n.jpg",
+      "sha256": "cddd04d53f250701978718b80587d53a7f07fbf2c2e1911de9695a1cdf8c7795"
+    },
+    {
+      "source": "reference/cybercity/assets/textures/crowd/brown_eye.jpg",
+      "sha256": "1483c55c019f0cfb0487a67de2d6d2189993eed3568a1509246d2bd7f421fced"
+    },
+    {
+      "source": "reference/cybercity/assets/textures/crowd/eyebrow001.png",
+      "sha256": "f06bb953f726402fa2e70a48ca325b9047e4c76f9e5f35f53b5bd5b71dbdcfee"
+    },
+    {
+      "source": "reference/cybercity/assets/textures/crowd/eyelashes01.png",
+      "sha256": "7395346626b48aa966f8bc16b4ee7c236e5dd6a97c113f23cdf4a970fe632f8b"
+    },
+    {
+      "source": "reference/cybercity/assets/textures/crowd/young_lightskinned_female_diffuse3.jpg",
+      "sha256": "5e347a9b68dd5d249e6c57a34599392f9a27cd7714abbcdab24ee2644c32a87f"
+    },
+    {
+      "source": "reference/cybercity/assets/textures/crowd/bob02_diffuse.png",
+      "sha256": "02cb7f7cc9556ef9f5de3a6b93ec48af814253da1a6631117d5479fc6ecd07f5"
+    },
+    {
+      "source": "reference/cybercity/assets/textures/crowd/female_casualsuit01_diffuse.jpg",
+      "sha256": "3558326996404037c57df9bbab92263ef00151212ff7ff6fb7b81407f9d92fec"
+    },
+    {
+      "source": "reference/cybercity/assets/textures/crowd/female_casualsuit01_normal.jpg",
+      "sha256": "b07343117b1106ff75126aa231de1fd726dab4e5e6f3080b084c370c1273a9f2"
+    },
+    {
+      "source": "reference/cybercity/assets/textures/crowd/long01_diffuse.png",
+      "sha256": "720b3f384034aa06ef11257cddc4540ef6c181a49dff6b23fa3a6ddb9fd49564"
+    },
+    {
+      "source": "reference/cybercity/assets/textures/crowd/fab_twill_d.jpg",
+      "sha256": "b2dc7db5d15631c6cfa6df3478e806bd041311501cd7e132aff76fb20563319e"
+    },
+    {
+      "source": "reference/cybercity/assets/textures/crowd/fab_twill_n.jpg",
+      "sha256": "2f96fde270114e693ac1c3bc28d863987f077e08ef0543853d8a5a84fcc1bb3d"
+    },
+    {
+      "source": "reference/cybercity/assets/textures/crowd/male_casualsuit06_diffuse.jpg",
+      "sha256": "a0317d438a5aac956b1a452965ee1fc20e71f87389d6c42ddc34f4ba1a641874"
+    },
+    {
+      "source": "reference/cybercity/assets/textures/crowd/male_casualsuit06_normal.jpg",
+      "sha256": "d2ffbb7e3825461be1e2819ebe893ff51d5af8cf6f98de0c89b9549806fbc319"
+    },
+    {
+      "source": "reference/cybercity/assets/textures/crowd/shoes05_diffuse.jpg",
+      "sha256": "6c3361f2f5f8ae408c4403680f04b9bd984ca97382ad49d51e4b6869ac2bcdf0"
+    },
+    {
+      "source": "reference/cybercity/assets/textures/crowd/fab_knit_d.jpg",
+      "sha256": "6dcf65d19ff18ec02fbcab0bbe3d2a9fe6c631d7883b3ba93d75e3a35ba3952b"
+    },
+    {
+      "source": "reference/cybercity/assets/textures/crowd/fab_knit_n.jpg",
+      "sha256": "a40d4c5b1134cb42a23527e01d2dfb439aa7b33f916e5a5559c463be2a3f97e9"
+    }
+  ],
+  "outputs": [
+    {
+      "file": "m_raincoat-color.jpg",
+      "bytes": 86049,
+      "sha256": "a704528d26cb807e666c781d3d3ec96a1b49b7e5b06cc0784448e5c169875aab",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "m_raincoat-normal-alpha.jpg",
+      "bytes": 74623,
+      "sha256": "07cc14e762aa0598673781be952d010d513e928bb643b632a1f19999851a223d",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "f_raincoat-color.jpg",
+      "bytes": 92696,
+      "sha256": "4fdbf4855dc46cfd814c5a6fbc5d4b1c2e741bf49fecef66b8a5d75beed9327d",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "f_raincoat-normal-alpha.jpg",
+      "bytes": 79373,
+      "sha256": "47797f1da2233db2e67962cad444e5c777f02580e775491ea27cff47d85a7f2c",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "f_trench-color.jpg",
+      "bytes": 143227,
+      "sha256": "c5cba8e6d8c1a4278af0c2cd545e79c558fb800418bf7450bb0ae5b40b12e99f",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "f_trench-normal-alpha.jpg",
+      "bytes": 138557,
+      "sha256": "98e2823858c13824aaf95f5eeb221ae069da744dc5b603db4ac55874ab788f55",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "m_hoodie-color.jpg",
+      "bytes": 91784,
+      "sha256": "854d53aa2ed0b2f7d4fd94c2f58820033ca4552e168221571bcef4ca63a90699",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "m_hoodie-normal-alpha.jpg",
+      "bytes": 74912,
+      "sha256": "1d3a43b8ab6338cf593ef08ffb446f0f597cbe0aee4a464b0368262c57800c64",
+      "width": 1024,
+      "height": 1024
+    }
+  ]
+}
