@@ -292,6 +292,37 @@ export async function buildDetails(ctx, root, facades, M, r) {
     ['props2/laundry', -(W + 0.05), 6.6, -10.2, Math.PI / 2],
     ['props2/notice_board', -(W - 0.12), L.curb + 0.9, -4.6, Math.PI / 2],
   );
+  // v3 (critiques, after targets/present.jpg): the overhead tangle of an old street -- bundles of 5-14 sagging cables
+  // strung across the lane between facades, plus runs along the walls. One merged mesh (wind only sways the few
+  // individual pole cables), so hundreds of wires cost one draw.
+  {
+    const rr = (() => { let sd = 0x7a11; return () => (sd = (Math.imul(sd, 1664525) + 1013904223) >>> 0) / 4294967296; })();
+    const geos = [];
+    const wireOf = (a, b, sag, rad) => {
+      const pts = [];
+      for (let i = 0; i <= 14; i++) { const t = i / 14; const p = new THREE.Vector3().lerpVectors(a, b, t); p.y -= sag * 4 * t * (1 - t); pts.push(p); }
+      const g = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 18, rad, 3);
+      g.deleteAttribute('uv'); return g;
+    };
+    const W = L.halfRoad + L.walk;
+    for (let z = 8; z > -66; z -= 5 + rr() * 6) {
+      if (Math.abs(z - L.crossZ) < L.crossHalf + 1) continue;
+      const n = 5 + Math.floor(rr() * 10), y0 = 5.2 + rr() * 3.5, skew = (rr() - 0.5) * 4;
+      for (let k = 0; k < n; k++) {
+        const a = new THREE.Vector3(-W + 0.05, y0 + (rr() - 0.5) * 0.7, z + (rr() - 0.5) * 0.6);
+        const b = new THREE.Vector3(W - 0.05, y0 + (rr() - 0.5) * 0.7 + (rr() - 0.5) * 0.8, z + skew + (rr() - 0.5) * 0.6);
+        geos.push(wireOf(a, b, 0.5 + rr() * 1.6, 0.008 + rr() * 0.012));
+      }
+    }
+    for (const side of [-1, 1]) for (let z = 6; z > -66; z -= 9 + rr() * 8) { // along the walls, just under the first floor
+      const y = 3.15 + rr() * 0.4;
+      for (let k = 0; k < 3 + Math.floor(rr() * 4); k++) {
+        geos.push(wireOf(new THREE.Vector3(side * (W - 0.04), y + k * 0.05, z), new THREE.Vector3(side * (W - 0.04), y + k * 0.05 - 0.2, z - 8), 0.25 + rr() * 0.3, 0.01));
+      }
+    }
+    const bundle = new THREE.Mesh(mergeGeometries(geos), wire); bundle.name = 'overhead-cables';
+    bundle.castShadow = false; root.add(bundle);
+  }
   const placed = await placeProps(root, props);
   // the past of two things in the present: the abandoned car (door shut, lamps on) and the dead plants (in leaf)
   setupPastCar(ctx, placed.find((o) => o.userData.prop === 'car'));
