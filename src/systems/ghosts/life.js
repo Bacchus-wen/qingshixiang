@@ -33,9 +33,9 @@ export function silhouette(state, tint, brightness = 1) {
   const material = new THREE.MeshStandardNodeMaterial({ roughness: .85, metalness: .15, side: THREE.DoubleSide });
   material.lightsNode = lights([]);
   material.colorNode = vec3(0);
-  const rim = pow(float(1).sub(abs(dot(normalView, positionViewDirection))), 2.8);
-  // A small coloured fill keeps coats legible; grazing edges carry the sign colour.
-  material.emissiveNode = tint.mul(rim.mul(.85).add(.045)).mul(brightness);
+  // Dark bodies, the sign colour only on the grazing edges (review r13: not candy-coloured figures)
+  const rim = pow(float(1).sub(abs(dot(normalView, positionViewDirection))), 5.0);
+  material.emissiveNode = tint.mul(rim.mul(1.3).add(.012)).mul(brightness);
   material.maskNode = coverage(lifeMask(state));
   return material;
 }

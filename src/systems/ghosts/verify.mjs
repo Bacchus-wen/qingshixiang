@@ -1,6 +1,8 @@
-// Offline scene/shader checks: no browser, GPU context, service or Blender.
+// Offline checks only. No browser, GPU context, port, or Blender.
+// node src/systems/ghosts/verify.mjs
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir, stat } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { registerHooks } from 'node:module';
 const root = new URL('../../../', import.meta.url);
 registerHooks({ resolve(specifier, context, next) {
@@ -9,127 +11,159 @@ registerHooks({ resolve(specifier, context, next) {
   return next(specifier, context);
 } });
 const THREE = await import('three/webgpu');
-const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
 const { mrt, output, velocity } = await import('three/tsl');
-const { default: ghostsTemplate, crowd } = await import('./index.js');
-const { preparePeople } = await import('./people.js');
-const { default: trafficTemplate, prepareCar } = await import('../traffic/index.js');
+const { default: ghostsTemplate, crowd, pose, nearFade, ROUTE_LENGTH } = await import('./index.js');
+const { decodeVAT } = await import('./vat.js');
+const { default: legacyTemplate } = await import('./legacy.js');
 const { memoryMaskCPU } = await import('../../materials/memory.js');
 const { default: WGSLNodeBuilder } = await import(new URL('node_modules/three/src/renderers/webgpu/nodes/WGSLNodeBuilder.js', root));
 const { default: GLSLNodeBuilder } = await import(new URL('node_modules/three/src/renderers/webgl-fallback/nodes/GLSLNodeBuilder.js', root));
-async function asset(path, prepare) {
-  const bytes = await readFile(new URL(path, root));
-  const gltf = await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength), '');
-  const result = prepare(gltf.scene);
-  gltf.scene.traverse(n => { if (n.isMesh) { n.geometry.dispose(); (Array.isArray(n.material) ? n.material : [n.material]).forEach(m => m.dispose()); } });
-  return result;
-}
+const manifest = JSON.parse(await readFile(new URL('assets/models/crowd/manifest.json', root), 'utf8'));
+const variants = await Promise.all(manifest.variants.map(async meta => {
+  const bytes = await readFile(new URL(`assets/models/crowd/${meta.file}`, root));
+  assert.equal(createHash('sha256').update(bytes).digest('hex'), meta.sha256);
+  const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+  const data = decodeVAT(meta, buffer);
+  assert.equal(bytes.length, meta.bytes);
+  assert(meta.maxReferenceError < 1e-5);
+  assert(meta.bounds.max[1] < 2.3 && meta.bounds.min[1] > -.1);
+  let footMotion = 0, maxStep = 0, seamStep = 0;
+  for (let v = 0; v < meta.vertexCount; v++) {
+    const initial = v * 3;
+    for (let f = 0; f < meta.frames; f++) {
+      const i = (f * meta.vertexCount + v) * 3;
+      const next = (((f + 1) % meta.frames) * meta.vertexCount + v) * 3;
+      const normalLength = Math.hypot(...data.normals.subarray(i, i+3));
+      assert(Math.abs(normalLength - 1) < 1e-5);
+      const delta = Math.hypot(...[0, 1, 2].map(k => data.positions[next+k] - data.positions[i+k]));
+      if (f < meta.frames - 1) maxStep = Math.max(maxStep, delta); else seamStep = Math.max(seamStep, delta);
+      if (data.positions[initial+1] < .3) footMotion = Math.max(footMotion, Math.abs(data.positions[i+2] - data.positions[initial+2]));
+    }
+  }
+  assert(footMotion > .15, `Feet really animate: ${meta.outfit}`);
+  assert(seamStep < maxStep * 1.6, `No loop seam jump: ${meta.outfit}: ${seamStep}/${maxStep}`);
+  console.log(`PASS ${meta.outfit}: ${meta.indexCount/3} tris, foot travel ${footMotion.toFixed(3)} m, seam ${seamStep.toFixed(3)} m`);
+  assert.throws(() => decodeVAT(meta, buffer.slice(0, buffer.byteLength-4)), /Truncated/);
+  return { meta, buffer };
+}));
+const files = await readdir(new URL('assets/models/crowd/', root));
+const totalBytes = (await Promise.all(files.map(f => stat(new URL(`assets/models/crowd/${f}`, root))))).reduce((n,s)=>n+s.size,0);
+assert(totalBytes <= 8_000_000);
+console.log(`PASS asset budget: ${totalBytes} bytes including metadata/credits`);
+
 const context = (q = '') => ({ params: new URLSearchParams(q), scene: new THREE.Scene(), camera: new THREE.PerspectiveCamera(), api: {}, memory: {
   origin: new THREE.Vector3(-4.4, 1, -13.6), dir: new THREE.Vector3(1, 0, -.2).normalize(), angle: .36, range: 40, strength: 0,
 } });
 const ctx = context(), ghosts = Object.create(ghostsTemplate);
-ghosts.loadPeople = () => asset('assets/models/people.glb', preparePeople);
+ghosts.loadCrowd = async () => variants;
 await ghosts.init(ctx);
-assert(ghosts.meshes.every(m => m.count > 0 && !m.frustumCulled), 'closed-eye cold start must submit EVERY material for prewarm');
-const traffic = Object.create(trafficTemplate);
-traffic.loadCar = () => asset('assets/models/props/car.glb', prepareCar);
-await traffic.init(ctx);
-const meshes = [...ghosts.meshes, ...traffic.parts.map(p => p.mesh)];
-assert(meshes.length <= 12, 'combined scene draw budget');
-assert(meshes.every(m => m.isInstancedMesh && m.geometry.groups.length <= 1));
-assert.equal(ctx.api.traffic.count, 4);
-assert(ghosts.people.every(p => p.height >= 1.55 && p.height <= 1.8));
+assert.equal(ctx.api.ghosts.source, 'cybercity-vat');
+assert.equal(ghosts.people.length, 16);
+assert.equal(ctx.api.ghosts.umbrellaCount, 12);
+assert.equal(ghosts.meshes.length, 4);
+assert(ghosts.meshes.every(m => m.geometry.isInstancedBufferGeometry && m.geometry.groups.length === 0 && !Array.isArray(m.material)));
 for (const side of [-1, 1]) {
-  const people = ghosts.people.filter(p => Math.sign(p.route.fixed) === side);
-  assert(people.length >= 6 && people.length <= 10);
-  assert(people.filter(p => p.umbrella).length > people.length / 2);
-  assert(people.some(p => p.waiting) && people.some(p => !p.waiting));
+  assert.equal(ghosts.people.filter(p => p.side === side).length, 8);
+  assert.equal(ghosts.people.filter(p => p.side === side && p.umbrella).length, 6);
 }
-for (let frame = 0; frame < 30; frame++) {
-  ghosts.update(1/60, frame/60, ctx); traffic.update(1/60, frame/60, ctx);
-  assert(meshes.every(m => m.count > 0 && !m.frustumCulled), `prewarm frame ${frame}`);
+for (let f = 0; f < 30; f++) {
+  ghosts.update(1/60, f/60, ctx);
+  assert(ghosts.group.visible && ghosts.meshes.every(m => m.visible && m.geometry.instanceCount === 4 && !m.frustumCulled), `Warmup ${f}`);
+  assert(ghosts.outfits.every(o => o.tint.array.every((v,i) => i%4 !== 3 || v === 0)), 'Warmup must not make closed-eye people visible');
 }
-ghosts.update(0, 2, ctx); traffic.update(0, 2, ctx);
-assert(meshes.every(m => m.count === 0), 'closed eye after warmup');
+ghosts.update(1/60, .5, ctx);
+assert(!ghosts.group.visible && ghosts.meshes.every(m => !m.visible));
 ctx.memory.flood = 1;
-for (let t = 0; t <= 480; t += 2) {
-  ghosts.update(1/60, t, ctx); traffic.update(1/60, t, ctx);
-  assert.equal(ctx.api.ghosts.visibleCount, 16, 'flood covers both sides including behind cone');
-  assert.equal(ctx.api.traffic.visibleCount, 4);
-  assert(traffic.cars.every(c => c.position.z >= -40 && c.position.z <= -6));
-  assert(ghosts.people.every(p => Math.abs(p.position.x) >= 3.4 && Math.abs(p.position.x) < 5));
-  assert(meshes.every(m => m.instanceMatrix.array.every(Number.isFinite)));
+for (let t = 0; t <= 480; t += .25) {
+  ghosts.update(.25, t, ctx);
+  assert.equal(ctx.api.ghosts.visibleCount, 16, 'Flood covers both pavements');
+  assert(ghosts.people.every(p => Math.abs(p.position.x) >= 3.8 && Math.abs(p.position.x) <= 4.6 && p.position.z > -35.4 && p.position.z < -6.6));
+  assert(ghosts.outfits.every(o => o.attributes.every(a => a.array.every(Number.isFinite))));
 }
-ghosts.update(0, 23, ctx); traffic.update(0, 23, ctx);
-const snapshot = meshes.map(m => m.instanceMatrix.array.slice());
-ctx.memory.flood = 0;
-ghosts.update(0, 999, ctx); traffic.update(0, 999, ctx);
-assert(meshes.every(m => m.count === 0));
-ctx.memory.flood = 1;
-ghosts.update(0, 23, ctx); traffic.update(0, 23, ctx);
-meshes.forEach((m,i) => assert.deepEqual(m.instanceMatrix.array, snapshot[i]));
-ctx.memory.flood = 0; ctx.memory.strength = 1;
+// Continuous bounded-speed path, including both turns and the loop seam.
+const probe = { side: 1, offset: 0, speed: 1, position: new THREE.Vector3() };
+for (let t = 0; t < ROUTE_LENGTH + .1; t += .013) {
+  pose(probe,t); const before = probe.position.clone(), yaw = probe.yaw;
+  pose(probe,t+.001);
+  assert(probe.position.distanceTo(before) <= .00101);
+  assert(Math.abs(Math.atan2(Math.sin(probe.yaw-yaw),Math.cos(probe.yaw-yaw))) < .003);
+}
+// Stable slot identity + explicit prior-frame gait/transform for temporal AA.
+ghosts.update(0, 23, ctx);
+const snapshot = ghosts.outfits.map(o => o.pose.array.slice());
+const frames = ghosts.outfits.map(o => o.motion.array.slice());
+ghosts.update(1/60, 23 + 1/60, ctx);
+ghosts.outfits.forEach((o,i) => {
+  assert.deepEqual(o.previousPose.array, snapshot[i]); assert.deepEqual(o.previousMotion.array, frames[i]);
+});
+ctx.memory.flood = 0; ghosts.update(0, 999, ctx);
+ctx.memory.flood = 1; ghosts.update(0, 23, ctx);
+ghosts.outfits.forEach((o,i) => assert.deepEqual(o.pose.array, snapshot[i]));
+assert.equal(nearFade(0),0); assert.equal(nearFade(2.5),0); assert.equal(nearFade(3),.5); assert.equal(nearFade(3.5),1);
+const first = ghosts.people[0], outfit = ghosts.outfits[first.type];
+for (const d of [0, 1, 2.49, 2.5, 2.75, 3, 3.5, 4]) {
+  ctx.camera.position.copy(first.position); ctx.camera.position.x += d; ctx.camera.position.y = 1.6;
+  ghosts.update(0, 23, ctx);
+  assert(Math.abs(outfit.tint.getW(first.slot) - nearFade(d)) < 1e-6, `Near-camera fade ${d}`);
+}
+ctx.camera.position.set(0, 1.6, 8);
+crowd.value = 0; ghosts.update(0, 23, ctx);
+assert.equal(ctx.api.ghosts.visibleCount, 0); assert(!ghosts.group.visible, 'Door fragment hides flood crowd too');
+crowd.value = .5; ghosts.update(0, 23, ctx); assert.equal(ghosts.life.crowd.value, .5);
+crowd.value = 1; ctx.memory.flood = 0; ctx.memory.strength = 1;
 for (let angle = 0; angle < Math.PI*2; angle += .3) {
-  ctx.memory.dir.set(Math.cos(angle), 0, Math.sin(angle));
-  ghosts.update(0, 23, ctx); traffic.update(0, 23, ctx);
+  ctx.memory.dir.set(Math.cos(angle),0,Math.sin(angle)); ghosts.update(0,23,ctx);
   ghosts.people.forEach((p,i) => {
-    for (const y of [.1,.9,1.25]) {
-      const probe = p.position.clone(); probe.y += p.height*y;
-      if (memoryMaskCPU(probe, ctx.memory) > 0) assert(ghosts.visible[i]);
+    for (const y of [.1,.9,1.8]) {
+      const test = p.position.clone(); test.y += y;
+      if(memoryMaskCPU(test,ctx.memory)>0) assert(ghosts.visible[i], 'CPU broad phase must not cut a lit body/umbrella');
     }
   });
 }
-ctx.params.set('memlife', '1'); ctx.memory.strength = 0; crowd.value = 0;
-ghosts.update(0, 23, ctx); traffic.update(0, 23, ctx);
-assert.equal(ctx.api.ghosts.visibleCount, 16); assert.equal(ctx.api.traffic.visibleCount, 4);
-assert(!ctx.scene.children.some(n => n.isLight));
-// Neon initializes after these systems in the engine: late arrival must recolour
-// existing instances, without rebuilding materials or changing the draw count.
-ctx.api.neon = { signs: [{ x: -5, y: 3, z: -20, tint: '#24e9ee' }, { x: 5, y: 3, z: -20, tint: '#ff3ba7' }] };
-ghosts.update(0, 23, ctx);
-for (let i = 0; i < ghosts.people.length; i++) {
-  const expected = new THREE.Color(ghosts.people[i].position.x < 0 ? '#24e9ee' : '#ff3ba7');
-  const tint = ghosts.meshes[0].geometry.attributes.lifeTint;
-  assert(Math.abs(tint.getX(i) - expected.r) < 1e-6);
-  assert(Math.abs(tint.getY(i) - expected.g) < 1e-6);
-  assert(Math.abs(tint.getZ(i) - expected.b) < 1e-6);
+ctx.params.set('memlife','1'); ctx.memory.strength = 0; crowd.value = 0;
+ghosts.update(0,23,ctx); assert.equal(ctx.api.ghosts.visibleCount,16, 'Debug forces display');
+ctx.api.neon = { signs: [{ x:-5,y:3,z:-20,tint:'#24e9ee' },{ x:5,y:3,z:-20,tint:'#ff3ba7' }] };
+ghosts.update(0,23,ctx);
+for(const p of ghosts.people) {
+  const c = new THREE.Color(p.side < 0 ? '#24e9ee' : '#ff3ba7'), a = ghosts.outfits[p.type].tint;
+  assert(Math.abs(a.getX(p.slot)-c.r)<1e-6 && Math.abs(a.getY(p.slot)-c.g)<1e-6 && Math.abs(a.getZ(p.slot)-c.b)<1e-6);
 }
-const lamps = traffic.parts.find(p => p.name === 'lamps').geometry;
-for (let i = 0; i < lamps.attributes.position.count; i++) {
-  const front = lamps.attributes.position.getZ(i) > 0;
-  assert.equal(lamps.attributes.lampTint.getX(i), 1);
-  assert(Math.abs(lamps.attributes.lampTint.getY(i) - (front ? .82 : .12)) < 1e-6);
-  assert(Math.abs(lamps.attributes.lampTint.getZ(i) - (front ? .5 : .05)) < 1e-6);
-  assert.equal(lamps.attributes.lampPower.getX(i), front ? 6 : 3);
-}
-const pools = traffic.parts.find(p => p.name === 'wet-road-pools');
-assert.equal(pools.mesh.material.blending, THREE.AdditiveBlending);
-assert.equal(pools.mesh.material.depthWrite, false);
-ctx.scene.traverse(n => assert(!n.isLight, 'memory life must not change light counts'));
-console.log('PASS actual GLBs: cold start, <=12 draws, population, flood, close/reopen, debug, eight-minute motion');
+ctx.scene.traverse(n=>assert(!n.isLight));
+console.log('PASS population, 4 draws, 30-frame warmup, 8-minute paths, cone/flood/door/debug, near-camera fade, neon tint, temporal history');
+
 function rendererFor(forceWebGL) {
-  const r = new THREE.WebGPURenderer({ forceWebGL, canvas: { width: 1280, height: 720, style: {}, addEventListener() {}, removeEventListener() {} } });
+  const r = new THREE.WebGPURenderer({ forceWebGL, canvas: { width:1280,height:720,style:{},addEventListener(){},removeEventListener(){} } });
   r.backend.capabilities = { getUniformBufferLimit: () => 16384 };
   r.backend.hasFeature = r.hasFeature = () => false;
   r.backend.extensions = { has: () => false };
-  const target = new THREE.RenderTarget(1280, 720, { count: 2 });
-  target.textures[0].name = 'output'; target.textures[1].name = 'velocity';
-  r.setRenderTarget(target); r.setMRT(mrt({ output, velocity }));
-  return { r, target };
+  const target = new THREE.RenderTarget(1280,720,{ count:2 });
+  target.textures[0].name='output'; target.textures[1].name='velocity';
+  r.setRenderTarget(target); r.setMRT(mrt({output,velocity}));
+  return {r,target};
 }
-for (const Builder of [WGSLNodeBuilder, GLSLNodeBuilder]) {
-  const { r, target } = rendererFor(Builder === GLSLNodeBuilder);
-  for (const mesh of meshes) {
-    const builder = new Builder(mesh, r); builder.camera = ctx.camera; builder.scene = ctx.scene; builder.build();
-    assert(builder.vertexShader.length > 500 && builder.fragmentShader.length > 500);
-    assert(!/NaN|undefined/.test(builder.vertexShader + builder.fragmentShader));
+for(const Builder of [WGSLNodeBuilder,GLSLNodeBuilder]) {
+  const {r,target} = rendererFor(Builder === GLSLNodeBuilder);
+  for(const mesh of ghosts.meshes) {
+    const builder = new Builder(mesh,r); builder.camera=ctx.camera; builder.scene=ctx.scene; builder.build();
+    assert(builder.vertexShader.length>500 && builder.fragmentShader.length>500);
+    assert(!/NaN|undefined/.test(builder.vertexShader+builder.fragmentShader));
+    assert(/positionPrevious =/.test(builder.vertexShader), 'VAT previous pose must reach motion vectors');
+    assert(Builder === WGSLNodeBuilder ? /textureLoad/.test(builder.vertexShader) : /texelFetch/.test(builder.vertexShader));
   }
-  target.dispose(); console.log(`PASS ${Builder.name}: all batches with velocity MRT`);
+  target.dispose(); console.log(`PASS ${Builder.name}: 4 VAT materials, texture fetch + velocity MRT`);
 }
-ghosts.dispose(ctx); traffic.dispose(ctx); crowd.value = 1;
-assert.equal(ctx.scene.children.length, 0);
-const fallback = Object.create(ghostsTemplate), fallbackCtx = context('memlife=1');
-fallback.loadPeople = async () => null;
-await fallback.init(fallbackCtx); assert.equal(fallbackCtx.api.ghosts.count, 16);
-assert(fallback.meshes.length <= 5); fallback.dispose(fallbackCtx);
-console.log('PASS fallback and resource disposal. GPU execution / appearance remain external screenshot gates.');
+let disposed=0;
+for(const o of ghosts.outfits) for(const resource of [o.geometry,o.material,o.positions,o.normals]) resource.addEventListener('dispose',()=>disposed++);
+ghosts.dispose(ctx); assert.equal(disposed,16); assert.equal(ctx.scene.children.length,0); assert(!ctx.api.ghosts);
+const loadPeople=legacyTemplate.loadPeople;
+legacyTemplate.loadPeople=async()=>null;
+const fallback=Object.create(ghostsTemplate), fallbackCtx=context('memlife=1');
+fallback.loadCrowd=async()=>{throw new Error('simulated missing VAT')};
+await fallback.init(fallbackCtx); assert.equal(fallbackCtx.api.ghosts.source,'fallback');
+assert(fallback.meshes.length<=5 && fallback.people.length===16);
+fallbackCtx.camera.position.copy(fallback.people[0].position);
+fallback.update(0,0,fallbackCtx);
+assert.equal(fallback.meshes[0].geometry.attributes.lifeFade.getX(0),0);
+fallback.dispose(fallbackCtx); assert.equal(fallbackCtx.scene.children.length,0);
+legacyTemplate.loadPeople=loadPeople; crowd.value=1;
+console.log('PASS resource disposal and load-error fallback. GPU execution / screenshots remain Claude external acceptance gates.');

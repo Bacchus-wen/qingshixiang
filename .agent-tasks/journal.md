@@ -88,3 +88,5 @@
 - 2026-10-16 18:05:52 | codex | 未完成（timeout）：记忆里的人和车(彩色霓虹边光、车灯)（w21-memory-life）｜任务没完成，它的半成品改动没有带回项目，副本保留在 /Users/wenbin/.local/share/agent-team/work/新游戏--53fa3746--w21-memory-life
 - 2026-10-16 18:08:59 | grok | 未完成（timeout）：雨丝吃到霓虹颜色（w23-rain-color）
 - 2026-10-16 18:14:46 | codex | 完成：霓虹加层次:灯箱、吊牌、缺笔画（w22-neon-depth）
+- 2026-10-16 18:26:34 | claude | 派给 codex：记忆里的行人:移植 cybercity 会走路的人群（w24-crowd，可写 src/systems/ghosts/**,assets/models/crowd/**）
+- 2026-10-16 20:41:24 | codex | 未完成（timeout）：记忆里的行人:移植 cybercity 会走路的人群（w24-crowd）｜任务没完成，它的半成品改动没有带回项目，副本保留在 /Users/wenbin/.local/share/agent-team/work/新游戏--53fa3746--w24-crowd

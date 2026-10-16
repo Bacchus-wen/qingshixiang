@@ -1,0 +1,10 @@
+{
+ "task_id": "w24-crowd",
+ "agent": "codex",
+ "cwd": "/Users/wenbin/.local/share/agent-team/work/新游戏--53fa3746--w24-crowd",
+ "write": true,
+ "task_sha256": "6413e52332bcc3f5df3011f9fb0ebe4cae2ddaef4fd14b8b52e4c73135455929",
+ "started": "2026-10-16T18:26:36+0800",
+ "status": "timeout",
+ "seconds": 8086.4
+}

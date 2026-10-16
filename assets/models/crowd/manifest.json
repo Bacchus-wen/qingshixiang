@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "format": "indices-u32_positions-f32_normals-f32",
+  "frames": 20,
+  "variants": [
+    {
+      "sex": "male",
+      "outfit": "m_raincoat",
+      "clip": "umbrella_walk",
+      "umbrella": true,
+      "file": "m_raincoat.vat",
+      "vertexCount": 3537,
+      "indexCount": 13167,
+      "frames": 20,
+      "duration": 1.2999999523162842,
+      "speed": 1.015625,
+      "height": 1.8130234338524343,
+      "radius": 1.3923500388654628,
+      "bounds": {
+        "min": [
+          -0.747405353095693,
+          -0.04384080633499722,
+          -0.45755400478191777
+        ],
+        "max": [
+          0.3605000242351174,
+          2.1277142197330616,
+          0.6441989602635587
+        ]
+      },
+      "bytes": 1750428,
+      "sha256": "6183d5277e7affb3f8eee6b9936cfec1c89ca63f116e33a0d16e55c6cd2fe149",
+      "source": "reference/cybercity/assets/models/crowd/male.glb",
+      "sourceSha256": "e0d69ea2bb6eb3625decd749072af02c00312f2747ee7ec19130bafd7946138b",
+      "maxReferenceError": 5.0354377162563404e-8
+    },
+    {
+      "sex": "female",
+      "outfit": "f_raincoat",
+      "clip": "umbrella_walk",
+      "umbrella": true,
+      "file": "f_raincoat.vat",
+      "vertexCount": 3628,
+      "indexCount": 12570,
+      "frames": 20,
+      "duration": 1.2666666507720947,
+      "speed": 0.9672131147540983,
+      "height": 1.585458111766345,
+      "radius": 1.210180007986668,
+      "bounds": {
+        "min": [
+          -0.7172191270642206,
+          -0.039973497036315586,
+          -0.4380293284054477
+        ],
+        "max": [
+          0.4161882305909945,
+          1.9404761494392333,
+          0.6296068951421743
+        ]
+      },
+      "bytes": 1791720,
+      "sha256": "c865ad9eea3e183023c7199d8b8b845769f8066cdd9b978d5f71635b4fe2fe10",
+      "source": "reference/cybercity/assets/models/crowd/female.glb",
+      "sourceSha256": "7812ff43516bb29ff476be7ea6d0b7e7dd8c558cd90114389f1d84439e3b7838",
+      "maxReferenceError": 4.249198720659507e-8
+    },
+    {
+      "sex": "female",
+      "outfit": "f_trench",
+      "clip": "umbrella_walk",
+      "umbrella": true,
+      "file": "f_trench.vat",
+      "vertexCount": 3877,
+      "indexCount": 13089,
+      "frames": 20,
+      "duration": 1.2666666507720947,
+      "speed": 0.9672131147540983,
+      "height": 1.5867260707917528,
+      "radius": 1.210180007986668,
+      "bounds": {
+        "min": [
+          -0.7172191270642206,
+          -0.039973497036315586,
+          -0.4380293284054477
+        ],
+        "max": [
+          0.4161882305909945,
+          1.9404761494392333,
+          0.6296068951421743
+        ]
+      },
+      "bytes": 1913316,
+      "sha256": "5d37e4138d31b7cb8210f6dbc04d0c43d839027a34f8035889cba3d3fff0f4f5",
+      "source": "reference/cybercity/assets/models/crowd/female.glb",
+      "sourceSha256": "7812ff43516bb29ff476be7ea6d0b7e7dd8c558cd90114389f1d84439e3b7838",
+      "maxReferenceError": 4.3562416031285576e-8
+    },
+    {
+      "sex": "male",
+      "outfit": "m_hoodie",
+      "clip": "walk",
+      "umbrella": false,
+      "file": "m_hoodie.vat",
+      "vertexCount": 2692,
+      "indexCount": 8973,
+      "frames": 20,
+      "duration": 1.1333333253860474,
+      "speed": 1.3636363636363635,
+      "height": 1.839843804761344,
+      "radius": 1.1119918449762953,
+      "bounds": {
+        "min": [
+          -0.3532181479970444,
+          -0.013537753976116545,
+          -0.5153861642451821
+        ],
+        "max": [
+          0.35379538491048246,
+          1.839843804761344,
+          0.6108389453007104
+        ]
+      },
+      "bytes": 1328052,
+      "sha256": "2ff435f916a6c1648e401697bf381ec8d1b97e6e24664033c801344c5c22e091",
+      "source": "reference/cybercity/assets/models/crowd/male.glb",
+      "sourceSha256": "e0d69ea2bb6eb3625decd749072af02c00312f2747ee7ec19130bafd7946138b",
+      "maxReferenceError": 5.2002926847747355e-8
+    }
+  ],
+  "bytes": 6783516
+}

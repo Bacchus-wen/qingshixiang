@@ -264,7 +264,7 @@ export default {
     this._d.set(0, 0, 1).transformDirection(this.eye.matrixWorld).normalize();
     this.spot.position.copy(this._v).addScaledVector(this._d, 0.03);
     this.spot.target.position.copy(this._v).addScaledVector(this._d, 10);
-    this.spot.intensity = 260 * o * o;
+    this.spot.intensity = 140 * o * o; // v2: the street inside the beam stays readable (260 blew the centre to white)
     // the surveyor's level mark is a tight beam (thin and short on the jamb), but the past it reveals keeps the
     // full cone: light and memory are separate here
     let coneAngle = 0.12 + 0.24 * o;
