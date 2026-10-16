@@ -2,7 +2,7 @@ import * as THREE from 'three/webgpu';
 import {
   pass, depthPass, mrt, output, velocity, normalView, metalness, roughness, packNormalToRGB, unpackRGBToNormal, sample,
   normalWorld, materialReference, uniform, vec2, vec3, vec4, float, screenUV, time, hash, floor, fract, mix,
-  smoothstep, length, luminance, clamp, max, renderOutput, Fn,
+  smoothstep, length, luminance, clamp, max, min, renderOutput, Fn,
 } from 'three/tsl';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 import { traa } from 'three/addons/tsl/display/TRAANode.js';
@@ -33,6 +33,8 @@ export class PostFX {
       contrast: uniform(0.38),
       blackPoint: uniform(0.018),
       lift: uniform(new THREE.Vector3(0.004, 0.006, 0.009)),
+      // film: amber halation hugging warm highlights, gate weave (sub-pixel frame drift), density flicker
+      halation: uniform(0.55), weave: uniform(new THREE.Vector2()), flicker: uniform(0),
       ssrIntensity: uniform(1.0),
       // depth of field, driven by the director (bokeh 0 = off)
       focus: uniform(10), focalRange: uniform(6), bokeh: uniform(0),
@@ -110,7 +112,16 @@ export class PostFX {
 
     const bloomPass = bloom(aa, params.bloomStrength, params.bloomRadius, params.bloomThreshold);
     this.bloomPass = bloomPass;
-    const hdr = aa.add(bloomPass).mul(params.exposure);
+    // gate weave: the whole developed frame drifts a fraction of a pixel, like film in a projector gate
+    const aaTex = aa.getTextureNode?.();
+    const frameCol = aaTex ? aaTex.sample(screenUV.add(params.weave)) : aa;
+    // halation: light scattered back through the film base. Only chromatic (memory-amber) glow gets the warm
+    // fringe, so the silver present stays neutral and the past bleeds a little more than it should.
+    const bl = bloomPass.rgb;
+    const bmax = max(bl.r, max(bl.g, bl.b));
+    const chroma = smoothstep(0.04, 0.3, bmax.sub(min(bl.r, min(bl.g, bl.b))).div(bmax.add(1e-4)));
+    const halo = bl.mul(vec3(1.0, 0.42, 0.16)).mul(chroma).mul(params.halation);
+    const hdr = frameCol.rgb.add(bl).add(halo).mul(params.exposure).mul(params.flicker.add(1));
     const mapped = renderOutput(vec4(hdr.rgb, 1), THREE.AgXToneMapping, THREE.SRGBColorSpace);
 
     const grade = Fn(() => {
@@ -141,6 +152,12 @@ export class PostFX {
     if (p) { p.position.copy(c.position); p.quaternion.copy(c.quaternion); p.fov = c.fov; p.aspect = c.aspect; p.near = c.near; p.far = c.far; p.updateProjectionMatrix(); p.updateMatrixWorld(); }
     const h = HALTON[this.frame++ % 32];
     this.volumeJitter.value.set(h[0], h[1]);
+    // weave/flicker: smooth pseudo-random drift stepped at 24 fps (film cadence), deterministic in frame count
+    const f = Math.floor(this.frame * 24 / 60), n = (k) => Math.sin(f * 12.9898 + k * 78.233) * 43758.5453 % 1;
+    const P = this.params, a = 0.45 / 1080; // ~0.45 px at 1080p
+    P.weave.value.x += (n(1) * a * 0.6 - P.weave.value.x) * 0.35;
+    P.weave.value.y += (n(2) * a - P.weave.value.y) * 0.35;
+    P.flicker.value += (n(3) * 0.012 - P.flicker.value) * 0.3;
     this.pipeline.render();
   }
 }
