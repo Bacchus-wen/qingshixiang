@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { uniform, positionWorld, floor, float, vec3, pow, abs, dot, normalView, positionViewDirection, lights } from 'three/tsl';
+import { uniform, positionWorld, floor, float, vec3, pow, abs, dot, normalView, positionViewDirection, lights, normalize, cameraPosition, normalWorld } from 'three/tsl';
 import { memoryMask, memoryMaskCPU } from '../../materials/memory.js';
 
 // Per-system uniforms keep ?only=traffic independent of ghosts initialization.
@@ -34,8 +34,10 @@ export function silhouette(state, tint, brightness = 1) {
   material.lightsNode = lights([]);
   material.colorNode = vec3(0);
   // Dark bodies, the sign colour only on the grazing edges (review r13: not candy-coloured figures)
-  const rim = pow(float(1).sub(abs(dot(normalView, positionViewDirection))), 5.0);
-  material.emissiveNode = tint.mul(rim.mul(1.3).add(.012)).mul(brightness);
+  const V = normalize(cameraPosition.sub(positionWorld));
+  const rim = pow(float(1).sub(abs(dot(normalWorld, V))), 6.0);
+  material.colorNode = vec3(0.02);
+  material.emissiveNode = tint.mul(rim.mul(1.4).add(.006)).mul(brightness);
   material.maskNode = coverage(lifeMask(state));
   return material;
 }

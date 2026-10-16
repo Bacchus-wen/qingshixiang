@@ -148,7 +148,7 @@ export default {
     g.add(this.porch);
     const bulbMat = new THREE.MeshStandardNodeMaterial({ color: 0x111111, roughness: 0.4 });
     this.porchGlow = uniform(0);
-    bulbMat.emissiveNode = amberNode().mul(this.porchGlow).mul(6);
+    bulbMat.emissiveNode = amberNode().mul(this.porchGlow).mul(2.5);
     box(0.16, 0.1, 0.16, bulbMat, x - 0.12, DOOR.h + 0.32, z);
     scene.add(g);
 

@@ -102,8 +102,8 @@ export function groundRoad(textures, ctx, lane = DEFAULT_GROUND_LANE) {
   const patched = mix(age.mul(0.45), float(1), patch);
   let albedo = mix(A.a, B.a.mul(0.74), patched).mul(0.82);
   albedo = mix(albedo, albedo.mul(0.44), seam.mul(0.75));
-  let xy = mix(A.xy, B.xy, patched).mul(0.42);
-  let roughness = mix(float(0.9), float(0.72), mix(A.h, B.h, patched));
+  let xy = mix(A.xy, B.xy, patched).mul(0.2);
+  let roughness = mix(float(0.6), float(0.45), mix(A.h, B.h, patched)); // r14: smoother asphalt, longer reflections
 
   // Same surviving dash centres/crosswalk location as street's old geometry, now chipped into the road.
   let markings = float(0);
@@ -116,7 +116,7 @@ export function groundRoad(textures, ctx, lane = DEFAULT_GROUND_LANE) {
   albedo = mix(albedo, float(0.39).mul(mix(0.65, 1, wear.a)), paint);
   xy = mix(xy, wear.xy.mul(0.18), paint);
   roughness = mix(roughness, float(0.66), paint);
-  return wetMaterial('cc_ground_road', ctx, { albedo, roughness, xy, ...frame, coverage: 0.55, porosity: 0.7 });
+  return wetMaterial('cc_ground_road', ctx, { albedo, roughness, xy, ...frame, coverage: 0.75, porosity: 0.7 });
 }
 
 export function groundWalk(textures, ctx) {

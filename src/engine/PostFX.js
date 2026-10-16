@@ -26,7 +26,7 @@ export class PostFX {
     this.volumeJitter = uniform(new THREE.Vector2());
     this.frame = 0;
     this.params = {
-      exposure: uniform(1.3), // v2: readable night
+      exposure: uniform(1.15), // v2: readable night
       vignette: uniform(0.5),
       grain: uniform(0.035),
       saturation: uniform(1.0),

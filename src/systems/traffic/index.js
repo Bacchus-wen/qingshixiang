@@ -137,7 +137,7 @@ export default {
     const poolMaterial = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false, depthTest: true, blending: THREE.AdditiveBlending });
     poolMaterial.forceSinglePass = true;
     const falloff = float(1).sub(smoothstep(.05, 1, uv().sub(.5).mul(2).length())).pow(2);
-    poolMaterial.colorNode = attribute('poolTint', 'vec3').mul(.35);
+    poolMaterial.colorNode = attribute('poolTint', 'vec3').mul(.1);
     // Both source and receiver must be remembered, or an off-cone car could
     // illuminate the present. Flood/debug are shared by both tests.
     poolMaterial.opacityNode = falloff.mul(lifeMask(this.life)).mul(lifeMask(this.life, attribute('lampAnchor', 'vec3'))).mul(presence);
