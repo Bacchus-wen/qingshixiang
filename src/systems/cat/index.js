@@ -1,6 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { float, mix, normalWorldGeometry, smoothstep, uniform, vec3 } from 'three/tsl';
+import { float, mix, mx_noise_float, normalWorldGeometry, positionLocal, sin, smoothstep, uniform, vec3 } from 'three/tsl';
 import { wetUniforms } from '../../materials/wet.js';
 
 const PARTS = ['body', 'head', 'ear_l', 'ear_r', 'tail_0', 'tail_1', 'tail_2', 'tail_3', 'tail_4',
@@ -12,18 +12,29 @@ const clamp = THREE.MathUtils.clamp;
 const lerp = THREE.MathUtils.lerp;
 const ease = (x) => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
 
+export const catEye = uniform(0.12);
 function catMaterial(name, presence) {
-  const m = new THREE.MeshStandardNodeMaterial();
+  // review5: the cat read as a black blob. Still a black cat (its low-poly form must stay in shadow), but with a
+  // fur sheen at grazing angles so the outline reads, and eyes that catch the light (tapetum), facing the camera.
+  const m = new THREE.MeshPhysicalNodeMaterial();
   m.name = name;
-  let gray = 0.085, roughness = 0.48;
-  if (name === 'cat_muzzle') { gray = 0.14; roughness = 0.56; }
-  else if (name === 'cat_inner_ear') { gray = 0.045; roughness = 0.58; }
-  else if (name === 'cat_nose') { gray = 0.018; roughness = 0.26; }
-  else if (name === 'cat_eye') { gray = 0.024; roughness = 0.18; }
+  let gray = 0.07, roughness = 0.6;
+  if (name === 'cat_muzzle') { gray = 0.1; roughness = 0.62; }
+  else if (name === 'cat_inner_ear') { gray = 0.06; roughness = 0.58; }
+  else if (name === 'cat_nose') { gray = 0.03; roughness = 0.26; }
+  else if (name === 'cat_eye') { gray = 0.03; roughness = 0.08; }
   const wet = smoothstep(0.3, 0.9, normalWorldGeometry.y).mul(wetUniforms.wetness);
-  m.colorNode = vec3(gray).mul(mix(float(1), float(0.78), wet));
-  m.roughnessNode = mix(float(roughness), float(0.16), wet.mul(0.8));
+  const fur = name === 'cat_fur' || name.startsWith('cat_body') || name === 'cat_tail';
+  // mackerel stripes: bands across the body (local x) broken by noise
+  const P = positionLocal;
+  const stripe = fur ? smoothstep(0.35, 0.7, sin(P.x.mul(46).add(mx_noise_float(P.mul(9)).mul(3.2))).mul(0.5).add(0.5)) : float(0);
+  m.colorNode = vec3(gray).mul(mix(float(1), float(0.7), stripe)).mul(vec3(1.0, 0.94, 0.86)).mul(mix(float(1), float(0.78), wet));
+  m.roughnessNode = mix(float(roughness), float(0.22), wet.mul(0.8));
   m.metalness = 0;
+  if (name !== 'cat_eye' && name !== 'cat_nose') {
+    m.sheen = 1; m.sheenRoughness = 0.45; m.sheenColor = new THREE.Color(0.32, 0.3, 0.28);
+  }
+  if (name === 'cat_eye') m.emissiveNode = vec3(0.9, 0.75, 0.32).mul(catEye);
   // Opaque depth/shadow behavior while present; dither the last few steps into rain.
   // The end camera looks along -Z, so that path cannot literally cross its frustum.
   m.alphaHash = true;
@@ -88,8 +99,8 @@ export default {
       // +X is the robot's facing direction. The cat sleeps on its +Z side, against the wall by the torn
       // shoulder's cables (dry, out of the puddle, and in view of the waiting camera) (Claude)
       ctx.api.robot?.root?.getWorldPosition(this.origin);
-      this.origin.x += 0.12;
-      this.origin.z += 0.62;
+      this.origin.x += Number(ctx.params?.get('catx') ?? 0.12);
+      this.origin.z += Number(ctx.params?.get('catz') ?? 0.62);
       this.origin.y = 0.14;
       root.position.copy(this.origin);
       this.debug = ctx.params?.get('cat');
@@ -102,6 +113,8 @@ export default {
         ctx.camera.lookAt(this.origin.x, 0.33, this.origin.z);
         ctx.camera.updateProjectionMatrix();
       }
+      this.dozeP = Number(ctx.params?.get('catp') ?? 0.3);
+      this.dozeY = Number(ctx.params?.get('caty') ?? -0.6);
       this.root = root;
       this.state = 'sleep';
       this.awake = 0;
@@ -148,6 +161,7 @@ export default {
     this.root.position.z = this.origin.z - distance;
     this.root.rotation.y = lerp(Math.PI / 2, Math.PI, stand);
     this.awake += ((this.state !== 'sleep' ? 1 : 0) - this.awake) * (1 - Math.exp(-dt * 1.25));
+    catEye.value = 0.1 + 0.55 * this.awake;
 
     // Rising edge only: a held lightning value must not pin the animal in a flinch.
     const flash = debug === 'lightning' ? (time >= 1 && time < 1.12 ? 1 : 0) : ctx.world?.lightning ?? 0;
@@ -178,9 +192,10 @@ export default {
     this.pitch += (targetPitch - this.pitch) * follow;
     const attentive = this.awake * (1 - stand);
     this.nodes.head.position.copy(this.rest.head.position);
-    this.nodes.head.position.y -= 0.065 * (1 - this.awake) * (1 - stand);
-    this.pose('head', lerp(0.62, this.pitch, this.awake) * (1 - stand) + shock * 0.14,
-      lerp(0.85, this.yaw, this.awake) * (1 - stand), -0.12 * (1 - this.awake) * (1 - stand));
+    // dozing, not curled: head resting low but turned out toward the street, one eye catching the light (review5)
+    this.nodes.head.position.y -= 0.035 * (1 - this.awake) * (1 - stand);
+    this.pose('head', lerp(this.dozeP, this.pitch, this.awake) * (1 - stand) + shock * 0.14,
+      lerp(this.dozeY, this.yaw, this.awake) * (1 - stand), -0.12 * (1 - this.awake) * (1 - stand));
     this.pose('ear_l', -0.12 + attentive * Math.sin(time * 0.91) * 0.09 + twitch * 0.45,
       attentive * (this.yaw * 0.28 + Math.sin(time * 0.63) * 0.18), -0.12 - shock * 0.55);
     this.pose('ear_r', -0.08 + attentive * Math.sin(time * 1.13 + 1) * 0.08 - twitch * 0.40,

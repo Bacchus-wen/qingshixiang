@@ -1,6 +1,6 @@
 import * as THREE from 'three/webgpu';
 import {
-  bumpMap, color, float, mix, mx_fractal_noise_float, mx_noise_float, mx_worley_noise_float, normalWorldGeometry, positionWorld, smoothstep, time, uniform, vec3,
+  abs, bumpMap, cameraPosition, color, dot, float, fwidth, mix, normalWorld, mx_fractal_noise_float, mx_noise_float, mx_worley_noise_float, normalWorldGeometry, positionLocal, positionWorld, smoothstep, time, uniform, vec3,
 } from 'three/tsl';
 import { wetUniforms } from '../../materials/wet.js';
 
@@ -41,13 +41,21 @@ export function robotMaterial(name) {
     // seams, road grime from the ground up, chips through to dark metal, and a wet clearcoat on everything facing up
     const P = positionWorld;
     const vertical = float(1).sub(smoothstep(0.25, 0.6, normalWorldGeometry.y.abs()));
-    const tears = smoothstep(0.5, 0.72, mx_noise_float(vec3(P.x.mul(38), P.y.mul(2.2), P.z.mul(38)).add(4.1)).mul(0.5).add(0.5)).mul(vertical.mul(0.7).add(0.3));
+    // review5: chips were a uniform dalmatian pattern and the rust runs evenly spaced bars. Wear now lives where
+    // it would: on the rounded panel edges (screen-space curvature of the smooth normal) and in a few worn zones;
+    // runs only come down some panels, with jittered spacing and lengths.
+    const curv = fwidth(normalWorldGeometry).length().div(fwidth(P).length().add(1e-4)).mul(0.03).clamp(0, 1);
+    const zone = smoothstep(0.45, 0.75, mx_noise_float(P.mul(2.3).add(1.7)).mul(0.5).add(0.5));
+    const jitter = mx_noise_float(P.mul(3.1).add(7.7)).mul(5.0);
+    const runs = mx_noise_float(vec3(P.x.mul(31).add(jitter), P.y.mul(1.6), P.z.mul(31).add(jitter))).mul(0.5).add(0.5);
+    const tears = smoothstep(0.52, 0.76, runs).mul(vertical.mul(0.7).add(0.3)).mul(zone.mul(0.85).add(0.15));
     const low = smoothstep(0.75, 0.15, P.y);
-    const chips = smoothstep(0.76, 0.82, mx_fractal_noise_float(P.mul(70).add(9.3), 3, 2.0, 0.5).mul(0.5).add(0.5)); // small chips at panel scale, not camouflage blotches
+    const chipN = mx_fractal_noise_float(P.mul(55).add(9.3), 3, 2.0, 0.5).mul(0.5).add(0.5);
+    const chips = smoothstep(0.86, 0.9, chipN.add(curv.mul(0.22)).add(zone.mul(0.06)));
     let c = grime(vec3(0.6, 0.57, 0.51)).mul(mix(float(1), float(0.75), oil()));
-    c = mix(c, vec3(0.16, 0.08, 0.035), tears.mul(0.8));
+    c = mix(c, vec3(0.2, 0.11, 0.05), tears.mul(0.7));
     c = mix(c, vec3(0.07, 0.065, 0.055), low.mul(0.5));
-    c = mix(c, vec3(0.14, 0.13, 0.12), chips); // chipped through to bare grey metal
+    c = mix(c, vec3(0.22, 0.17, 0.13), chips); // chipped through to bare, rust-stained metal
     const pm = new THREE.MeshPhysicalNodeMaterial();
     pm.colorNode = c.add(scratches().mul(0.1)).mul(shellDim);
     pm.roughnessNode = mix(mix(wetRough(0.45), float(0.3), chips), float(0.6), tears.mul(0.5));
@@ -101,12 +109,20 @@ export function robotMaterial(name) {
     m.colorNode = vec3(0.01);
     m.roughnessNode = float(0.05);
     m.metalnessNode = float(0);
-    m.emissiveNode = color(eyeColor).mul(eyeGlow.mul(eyeGlow).mul(0.6).add(0.01));
+    // glass catches the core: a soft ring of light toward the rim of the lens (grazing view), dim in the middle
+    const Vl = cameraPosition.sub(positionWorld).normalize();
+    const graze = float(1).sub(abs(dot(normalWorld, Vl))).pow(2);
+    m.emissiveNode = color(eyeColor).mul(eyeGlow.mul(eyeGlow).mul(graze.mul(1.4).add(0.25)).add(0.01));
   } else if (n.includes('eye_core')) {
     m.colorNode = vec3(0.02);
     // dim ember when closed, bright when open; slow breathing so it reads as "not quite dead"
     const breathe = mx_noise_float(vec3(time.mul(0.35), 0, 0)).mul(0.5).add(0.5);
-    m.emissiveNode = color(eyeColor).mul(float(0.04).add(breathe.mul(0.03)).add(eyeGlow.mul(eyeGlow).mul(2.2))); // v3 review: a pupil of light; the rings and glass around it stay readable
+    // review5: not a flat peach disc. A white-hot amber centre (facing term over the domed core) falling to deep
+    // amber at the rim; the hot centre is far over the bloom threshold, so it throws its own halo.
+    const V = cameraPosition.sub(positionWorld).normalize();
+    const centre = abs(dot(normalWorld, V)).pow(7);
+    const hue = mix(color(eyeColor).mul(0.8), vec3(1.0, 0.86, 0.62), centre);
+    m.emissiveNode = hue.mul(float(0.04).add(breathe.mul(0.03)).add(eyeGlow.mul(eyeGlow).mul(float(1.2).add(centre.mul(9)))));
   } else if (n.includes('chest_core')) {
     // status light: a very slow, faint breath. Never coloured, never bright.
     m.colorNode = vec3(0.02);
@@ -120,3 +136,22 @@ export function robotMaterial(name) {
   }
   return m;
 }
+
+// review5: the core is a flat disc, so a facing term cannot shade it. Grade it radially in its own geometry space:
+// white-hot amber at the centre (far over the bloom threshold, so it throws its own halo), deep amber at the rim.
+export function eyeCoreRadial(node) {
+  node?.traverse((o) => {
+    if (!o.isMesh) return;
+    o.geometry.computeBoundingSphere();
+    const bs = o.geometry.boundingSphere;
+    const r = positionLocal.sub(vec3(bs.center.x, bs.center.y, bs.center.z)).length().div(bs.radius);
+    const centre = smoothstep(0.75, 0.0, r).pow(2);
+    const breathe = mx_noise_float(vec3(time.mul(0.35), 0, 0)).mul(0.5).add(0.5);
+    const m = o.material.clone();
+    m.colorNode = vec3(0.02);
+    m.emissiveNode = mix(color(eyeColor).mul(0.55), vec3(1.0, 0.85, 0.6), centre)
+      .mul(float(0.03).add(breathe.mul(0.03)).add(centre.mul(0.05)).add(eyeGlow.mul(eyeGlow).mul(float(0.9).add(centre.mul(12)))));
+    o.material = m;
+  });
+}
+

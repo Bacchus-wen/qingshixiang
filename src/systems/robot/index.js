@@ -2,7 +2,7 @@ import * as THREE from 'three/webgpu';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
-import { robotMaterial, eyeGlow, eyeColor, shellDim } from './materials.js';
+import { robotMaterial, eyeGlow, eyeColor, shellDim, eyeCoreRadial } from './materials.js';
 import { LANE } from '../street/index.js';
 import { syncMemory } from '../../materials/memory.js';
 import { rippleNormal, wetUniforms } from '../../materials/wet.js';
@@ -169,7 +169,7 @@ export default {
     }
     this.iris = [];
     // the glowing core was hidden behind the barrel's front cap: bring it just in front of the cap, behind the lens
-    const core = find('eye_core'); if (core) core.position.z += 0.012;
+    const core = find('eye_core'); if (core) { core.position.z += 0.012; eyeCoreRadial(core); }
     // the iris sits in front of the lens (visible petals over a smoked-glass lens, the core glowing through)
     for (let i = 0; i < 8; i++) {
       const p = find(`iris_${i}`);

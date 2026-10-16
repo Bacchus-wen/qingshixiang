@@ -247,7 +247,8 @@ export default {
         this.drawPerson(p, i); last = i; visibleCount++;
         if (p.umbrella) lastUmbrella = Math.max(lastUmbrella, p.umbrellaIndex);
         streetTint(ctx, p.position, this.tint);
-        const fade = fullFlood(ctx) ? 1 : THREE.MathUtils.smoothstep(Math.hypot(p.position.x - ctx.camera.position.x, p.position.z - ctx.camera.position.z), 2.5, 3.5);
+        // near fade even in the full flood: nobody walks through the lens
+        const fade = THREE.MathUtils.smoothstep(Math.hypot(p.position.x - ctx.camera.position.x, p.position.z - ctx.camera.position.z), 3.5, 5.5);
         for (const mesh of this.meshes) {
           if (mesh === this.limbs) for (let j = 0; j < 6; j++) mesh.geometry.attributes.lifeFade.setX(i * 6 + j, fade);
           else if (mesh === this.canopies || mesh === this.shafts) { if (p.umbrella) mesh.geometry.attributes.lifeFade.setX(p.umbrellaIndex, fade); }

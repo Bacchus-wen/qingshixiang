@@ -31,7 +31,7 @@ export function coverage(mask) {
   const threshold = bayer(x,y).mul(4).add(bayer(floor(x.div(2)),floor(y.div(2)))).add(.5).div(16);
   return mask.greaterThan(threshold);
 }
-export function silhouette(state, tint, brightness = 1, rimStrength = .35) {
+export function silhouette(state, tint, brightness = 1, rimStrength = .2) {
   // v3 (Grok r17): the remembered people are people -- dark clothes that take the real light (signs, shop openings,
   // the beam), with only a thin neon edge left of the old hologram look
   const material = new THREE.MeshStandardNodeMaterial({ roughness: .75, metalness: .05, side: THREE.DoubleSide });
@@ -61,13 +61,14 @@ export function dressedLife(state, tint, maps) {
   material.normalNode = normalMap(vec3(packed.rg, z.mul(.5).add(.5)), vec2(surface.y));
   const V = normalize(cameraPosition.sub(positionWorld));
   const rim = pow(float(1).sub(abs(dot(normalWorld, V))), 6);
-  material.emissiveNode = tint.mul(rim.mul(mix(.35, .9, umbrella)).add(.01));
+  material.emissiveNode = tint.mul(rim.mul(mix(.16, .45, umbrella)).add(.006));
   // Blue stores original PNG opacity; JPEG keeps all output assets in one format.
   // lifeMask and per-instance nearFade are combined by the VAT caller.
   material.maskNode = packed.b.greaterThan(.45);
   return material;
 }
 const fallback = ['#24e9ee', '#ff3ba7', '#b572ff', '#63ed75', '#ffe6bf'];
+const WARM = new THREE.Color(1.0, 0.72, 0.5);
 export function streetTint(ctx, position, out) {
   let nearest, best = Infinity;
   for (const sign of ctx.api.neon?.signs || []) {
@@ -75,5 +76,7 @@ export function streetTint(ctx, position, out) {
     const d = (sign.x-position.x)**2 + (sign.z-position.z)**2 + (sign.y-1.2)**2 * .3;
     if (d < best) { best = d; nearest = sign; }
   }
-  return out.set(nearest?.tint || fallback[((Math.floor(-position.z / 7) + (position.x > 0 ? 2 : 0)) % fallback.length + fallback.length) % fallback.length]);
+  out.set(nearest?.tint || fallback[((Math.floor(-position.z / 7) + (position.x > 0 ? 2 : 0)) % fallback.length + fallback.length) % fallback.length]);
+  // the signs now light people for real (clustered lights); the rim only hints at the colour, pulled toward lamp amber
+  return out.lerp(WARM, 0.5);
 }
