@@ -2,7 +2,7 @@ import * as THREE from 'three/webgpu';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
-import { robotMaterial, eyeGlow, eyeColor } from './materials.js';
+import { robotMaterial, eyeGlow, eyeColor, shellDim } from './materials.js';
 import { LANE } from '../street/index.js';
 import { syncMemory } from '../../materials/memory.js';
 import { rippleNormal, wetUniforms } from '../../materials/wet.js';
@@ -324,6 +324,7 @@ export default {
     const ph = ctx.api.director?.phase, overShoulder = ph === 'look' || ph === 'fade';
     this.rimK = (this.rimK ?? 1) + ((overShoulder ? 0.12 : 1) - (this.rimK ?? 1)) * Math.min(1, dt * 2);
     if (this.rim) this.rim.intensity = 16 * this.rimK;
+    shellDim.value = 0.3 + 0.7 * this.rimK;
     if (this.signKey) this.signKey.intensity = 1.2 * (ctx.world.mains ?? 1) * (0.25 + 0.75 * this.rimK); // (Grok r17: the shell went purple)
     if (this.cone) {
       this.cone.position.copy(this._v);

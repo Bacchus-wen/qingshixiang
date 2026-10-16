@@ -6,7 +6,8 @@ import { wetUniforms } from '../../materials/wet.js';
 
 // Robot materials, rebuilt from the glb material names. Achromatic: grime in noise pockets, dark runs streaking
 // down from seams (years of rain), a water film on up-facing plates. Only the eye core carries colour.
-export const eyeGlow = uniform(0);                       // 0..1, driven by the eye state machine
+export const eyeGlow = uniform(0);
+export const shellDim = uniform(1); // < 1 over the shoulder: the helmet reads as a dark wet foreground silhouette                       // 0..1, driven by the eye state machine
 export const eyeColor = uniform(new THREE.Color(1.0, 0.56, 0.26));
 
 function grime(base) {
@@ -48,7 +49,7 @@ export function robotMaterial(name) {
     c = mix(c, vec3(0.07, 0.065, 0.055), low.mul(0.5));
     c = mix(c, vec3(0.14, 0.13, 0.12), chips); // chipped through to bare grey metal
     const pm = new THREE.MeshPhysicalNodeMaterial();
-    pm.colorNode = c.add(scratches().mul(0.1));
+    pm.colorNode = c.add(scratches().mul(0.1)).mul(shellDim);
     pm.roughnessNode = mix(mix(wetRough(0.45), float(0.3), chips), float(0.6), tears.mul(0.5));
     pm.metalnessNode = chips.mul(0.85);
     // rain on the shell: beads on everything facing up, thin rivulets running down the sides (a bump, so the
