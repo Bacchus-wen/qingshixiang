@@ -241,7 +241,17 @@ export default {
     this.spot.intensity = 260 * o * o;
     // the surveyor's level mark is a tight beam (thin and short on the jamb), but the past it reveals keeps the
     // full cone: light and memory are separate here
-    const coneAngle = 0.12 + 0.24 * o;
+    let coneAngle = 0.12 + 0.24 * o;
+    // memory flood: the first time the eye is fully open, the whole street comes back at once for a breath,
+    // then narrows into the beam. The director can also call one (the last breath before it dies).
+    if (!this.flooded && this.open > 0.95 && !ctx.isShot) { this.flooded = true; this.floodT = 0; }
+    let flood = ctx.memory.flood ?? 0;
+    if (this.floodT !== undefined && this.floodT < 2.4) {
+      this.floodT += dt;
+      const f = this.floodT;
+      flood = Math.max(flood, f < 0.3 ? f / 0.3 : f < 0.8 ? 1 : Math.max(0, 1 - (f - 0.8) / 1.6));
+    }
+    coneAngle += (1.35 - coneAngle) * flood;
     this.spot.angle = ctx.memory.goboMode === 'line' ? 0.05 + 0.03 * o : coneAngle;
     // never toggle the light's visibility (changing the light set recompiles every lit material = a visible hitch);
     // just stop re-rendering its shadow map while the eye is shut. The beam volume is kept visible for the first
@@ -257,7 +267,7 @@ export default {
     // ---- publish the memory cone
     const m = ctx.memory;
     m.origin.copy(this._v); m.dir.copy(this._d);
-    m.angle = coneAngle; m.range = 40; m.strength = o;
+    m.angle = coneAngle; m.range = 40 + 50 * flood; m.strength = Math.max(o, flood * 0.9); m.floodNow = flood;
     syncMemory(m);
   },
 };

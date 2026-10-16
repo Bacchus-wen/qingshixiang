@@ -124,9 +124,11 @@ export default {
         break;
       }
       case 'fade': {
-        // the eye tries to stay open, stutters, and dies
-        m.forceOpen = this.t < 5 ? Math.random() > Math.min(0.9, this.t * 0.18) : false;
-        if (this.t > 6.5) this.set('end');
+        // the last breath: the whole street comes back once more, then the eye stutters and dies
+        const lb = this.t < 0.4 ? this.t / 0.4 : this.t < 1.6 ? 1 : Math.max(0, 1 - (this.t - 1.6) / 1.2);
+        m.flood = lb;
+        m.forceOpen = this.t < 2.8 ? true : this.t < 5.5 ? Math.random() > Math.min(0.9, (this.t - 2.8) * 0.3) : false;
+        if (this.t > 7) { m.flood = 0; this.set('end'); }
         break;
       }
       case 'end': {

@@ -42,5 +42,6 @@ export const SHOTS = {
   'past-car-door': { pos: [4.0, 1.5, -16.2], look: [1.0, 0.7, -17.8], fov: 40, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.aimAt = new ctx.THREE.Vector3(0.9, 0.7, -18); } },
   'present-car-door': { pos: [4.0, 1.5, -16.2], look: [1.0, 0.7, -17.8], fov: 40, setup: (ctx) => { ctx.memory.forceOpen = false; } },
   'past-traffic': { pos: [-4.9, 1.5, -13.2], look: [2, 0.8, -26], fov: 50, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.aimAt = new ctx.THREE.Vector3(1.5, 0.8, -24); } },
+  'flood': { pos: [-4.9, 1.6, -13.0], look: [3, 1.6, -20], fov: 62, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.flood = 1; } },
   'beam-street': { pos: [-4.0, 1.7, -10.5], look: [3, 1.2, -17], fov: 50, setup: (ctx) => { ctx.memory.forceOpen = true; } },
 };
