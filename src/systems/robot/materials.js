@@ -42,11 +42,11 @@ export function robotMaterial(name) {
     const vertical = float(1).sub(smoothstep(0.25, 0.6, normalWorldGeometry.y.abs()));
     const tears = smoothstep(0.5, 0.72, mx_noise_float(vec3(P.x.mul(38), P.y.mul(2.2), P.z.mul(38)).add(4.1)).mul(0.5).add(0.5)).mul(vertical.mul(0.7).add(0.3));
     const low = smoothstep(0.75, 0.15, P.y);
-    const chips = smoothstep(0.72, 0.8, mx_fractal_noise_float(P.mul(22).add(9.3), 3, 2.0, 0.5).mul(0.5).add(0.5));
+    const chips = smoothstep(0.76, 0.82, mx_fractal_noise_float(P.mul(70).add(9.3), 3, 2.0, 0.5).mul(0.5).add(0.5)); // small chips at panel scale, not camouflage blotches
     let c = grime(vec3(0.6, 0.57, 0.51)).mul(mix(float(1), float(0.75), oil()));
     c = mix(c, vec3(0.16, 0.08, 0.035), tears.mul(0.8));
     c = mix(c, vec3(0.07, 0.065, 0.055), low.mul(0.5));
-    c = mix(c, vec3(0.045, 0.045, 0.05), chips);
+    c = mix(c, vec3(0.14, 0.13, 0.12), chips); // chipped through to bare grey metal
     const pm = new THREE.MeshPhysicalNodeMaterial();
     pm.colorNode = c.add(scratches().mul(0.1));
     pm.roughnessNode = mix(mix(wetRough(0.45), float(0.3), chips), float(0.6), tears.mul(0.5));
