@@ -1,0 +1,9 @@
+{
+ "task_id": "w20-ground",
+ "agent": "codex",
+ "cwd": "/Users/wenbin/.local/share/agent-team/work/新游戏--53fa3746--w20-ground",
+ "write": true,
+ "task_sha256": "eb6a9df521177b864357444b85af973ef97f89aafaff188b98b67de546dbd201",
+ "started": "2026-10-16T16:07:52+0800",
+ "status": "running"
+}

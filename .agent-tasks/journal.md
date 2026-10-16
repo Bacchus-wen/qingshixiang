@@ -78,3 +78,6 @@
 - 2026-10-16 15:29:53 | grok | 完成：扒参考作品和同类作品的素材来源（r12-scrape）
 - 2026-10-16 15:46:24 | claude | 派给 codex：霓虹招牌层:现在残存、记忆满街（w18-neon，可写 src/systems/neon/**,src/systems/index.js,assets/textures/neon/**）
 - 2026-10-16 15:54:57 | codex | 完成：霓虹招牌层:现在残存、记忆满街（w18-neon）
+- 2026-10-16 16:07:51 | claude | 派给 codex：地面升级:cybercity 沥青/方砖/井盖+我们的湿润层（w20-ground，可写 src/materials/**,assets/textures/cc/ground/**,CREDITS.md）
+- 2026-10-16 16:08:09 | claude | 派给 grok：第二版中期画面评审（r13-midreview，只读）
+- 2026-10-16 16:14:22 | grok | 完成：第二版中期画面评审（r13-midreview）

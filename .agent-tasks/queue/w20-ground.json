@@ -1,0 +1,15 @@
+{
+ "id": "w20-ground",
+ "from": "claude",
+ "to": "codex",
+ "title": "地面升级:cybercity 沥青/方砖/井盖+我们的湿润层",
+ "write": true,
+ "paths": [
+  "src/materials/**",
+  "assets/textures/cc/ground/**",
+  "CREDITS.md"
+ ],
+ "status": "running",
+ "posted": "2026-10-16 16:07:51",
+ "started": "2026-10-16 16:07:52"
+}
