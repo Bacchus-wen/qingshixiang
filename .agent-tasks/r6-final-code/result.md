@@ -1,0 +1,13 @@
+只读静态检查；未联网、未启动程序。
+
+**致命：没有。**
+
+**重要：**
+
+1. [Engine.js:67](/Users/wenbin/Games/新游戏/src/engine/Engine.js:67)：核心系统初始化失败仍继续进入游戏。[robot/index.js:95](/Users/wenbin/Games/新游戏/src/systems/robot/index.js:95) 模型加载若失败，robot 接口不会建立，而 [director.js:82](/Users/wenbin/Games/新游戏/src/story/director.js:82) 必须依赖它离开等待阶段，导致永久卡住，仅控制台报错。改法：核心系统失败时中止启动，显示具体错误和重试入口。
+
+2. [README.md:32](/Users/wenbin/Games/新游戏/README.md:32)：工具命令缺少首次安装步骤。音频脚本第 13 行直接启动 Playwright Chromium；试玩脚本第 61 行调用系统 `ffmpeg`，两者均不会随 `npm install` 自动齐备。改法：补充 `npx playwright install chromium` 和 FFmpeg 安装要求。
+
+3. [README.md:7](/Users/wenbin/Games/新游戏/README.md:7)：未声明 Node 版本门槛；锁定的 Vite 在 `package-lock.json:1125` 要求 `^20.19.0 || >=22.12.0`，旧 Node 环境不能可靠启动。改法：README 写明要求，package.json 添加对应 `engines.node`。
+
+当前 esbuild 已显式声明。正常流程、WebGL2 回退、缩放及失焦恢复，静态检查未发现其他致命或重要问题；未作运行验证。

@@ -22,6 +22,7 @@ npm run dev      # 打开终端里显示的地址(推荐 Chrome / Edge,支持 We
 | `?speed=4` | 时间加速(测试用) |
 | `?power=0.2` | 电量少,快速看结尾 |
 | `?q=low` | 低画质(关 SSR、景深,体积光步数减半) |
+| `?stats` | 显示帧率 / CPU 面板 |
 | `?webgl` | 强制 WebGL2 |
 | `?dpr=1.5` | 固定内部分辨率倍数(默认 1,并会自动下调) |
 | `?shot=<名字>` | 固定镜头截图模式(镜头列表见 `src/engine/shots.js`) |

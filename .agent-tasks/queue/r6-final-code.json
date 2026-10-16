@@ -5,7 +5,10 @@
  "title": "最终代码检查",
  "write": false,
  "paths": [],
- "status": "running",
+ "status": "done",
  "posted": "2026-10-16 13:03:52",
- "started": "2026-10-16 13:03:52"
+ "started": "2026-10-16 13:03:52",
+ "seconds": 77.6,
+ "finished": "2026-10-16 13:05:12",
+ "reason": null
 }

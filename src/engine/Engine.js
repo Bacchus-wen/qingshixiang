@@ -74,6 +74,14 @@ export class Engine {
     if (this.shot) document.body.classList.add('shot');
     addEventListener('resize', () => this.resize());
     window.__engine = this;
+    // ?stats: a small FPS / CPU panel (stats-gl) for checking performance on your own machine
+    if (this.params.get('stats') !== null) {
+      const { default: Stats } = await import('stats-gl');
+      this.stats = new Stats({ trackGPU: false, horizontal: true });
+      this.stats.init(renderer);
+      this.stats.dom.style.zIndex = 10;
+      document.body.appendChild(this.stats.dom);
+    }
   }
 
   applyShot() {
@@ -126,6 +134,7 @@ export class Engine {
       this.ctx.input.endFrame();
       const t0 = performance.now();
       this.postfx.render(dt);
+      this.stats?.update();
       this.frame++;
       // perf probe (read by tools): CPU submit time, wall frame interval, draw calls, triangles
       const now = performance.now();
