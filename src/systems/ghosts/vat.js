@@ -119,6 +119,9 @@ export class MemoryOutfit {
     }
     if (opacity > 0) this.active++;
   }
+  hide(slot) {
+    this.tint.setW(slot, 0);
+  }
   end(warmup) {
     this.mesh.visible = warmup || this.active > 0;
     for (const attribute of this.attributes) attribute.needsUpdate = true;

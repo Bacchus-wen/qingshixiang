@@ -3,27 +3,15 @@ import { attribute, positionLocal } from 'three/tsl';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { lifeState, syncLife, inMemory, silhouette, streetTint, coverage } from './life.js';
 import { loadPeople } from './people.js';
+import { population, pose as routePose } from './routes.js';
 
-// Metres, matching street/LANE. Keep this system independent of street's init/assets.
-const CURB = 0.14, CROSS_Z = -42, CROSS_HALF = 4.5;
 const TAU = Math.PI * 2;
 const X_AXIS = new THREE.Vector3(1, 0, 0);
 const UP = new THREE.Vector3(0, 1, 0);
-const wrap = (n, span) => ((n % span) + span) % span;
 
 function makePeople() {
-  // Eight per pavement, six umbrellas each. Local routes prevent a parade
-  // bunching up at a shared endpoint; two shop customers stay under the awnings.
-  return [-1, 1].flatMap(side => Array.from({ length: 8 }, (_, i) => {
-    const z = -7.5 - i * 4.0 - (side > 0 ? .8 : 0);
-    return {
-      route: { axis: 'z', fixed: side * (i >= 6 ? 4.55 : 4.05 + (i % 2) * .25), min: z - 1.3, max: z + 1.3 },
-      height: 1.55 + ((i * 7 + (side > 0 ? 3 : 0)) % 11) * .025,
-      width: .88 + (i % 3) * .06, speed: .38 + (i % 3) * .07,
-      offset: i * .59, phase: i * 1.7, umbrella: i < 6,
-      waiting: i >= 6, waitZ: z, waitYaw: -side * Math.PI / 2,
-      partner: -1, position: new THREE.Vector3(), yaw: 0, bob: 0, stride: 0,
-    };
+  return population().map((p, i) => ({ ...p, width: .88 + (i % 3) * .06,
+    umbrella: i % 4 !== 3, waiting: false, partner: -1, bob: 0, stride: 0,
   }));
 }
 
@@ -61,16 +49,7 @@ function batchRigs(rigs, people, batch) {
 }
 
 function pose(p, t) {
-  const r = p.route, span = r.max - r.min;
-  const travel = wrap(p.offset + t * p.speed, span * 2);
-  const direction = travel < span ? 1 : -1;
-  const along = r.min + (direction === 1 ? travel : span * 2 - travel);
-  p.position.set(r.axis === 'z' ? r.fixed + (p.lateral || 0) : along, 0,
-    r.axis === 'z' ? (p.waiting ? p.waitZ : along) : r.fixed);
-  // Sidewalks stop at the crossing. Ease the 14 cm kerb step over 24 cm.
-  const kerb = THREE.MathUtils.smoothstep(Math.abs(p.position.z - CROSS_Z), CROSS_HALF, CROSS_HALF + 0.24);
-  p.position.y = kerb * CURB;
-  p.yaw = p.waiting ? p.waitYaw : r.axis === 'z' ? (direction === 1 ? 0 : Math.PI) : direction * Math.PI / 2;
+  routePose(p, t);
   const gait = t * p.speed / (p.height * 0.34) * TAU + p.phase;
   p.stride = p.waiting ? 0 : Math.sin(gait);
   p.bob = p.waiting ? Math.sin(t * 0.8 + p.phase) * 0.002 : (1 - Math.cos(gait * 2)) * 0.006;

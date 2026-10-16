@@ -107,6 +107,7 @@ try {
     await rain.init(ctx);
     assert.equal(ctx.api.rain.particleCount, gpu ? (low ? 20000 : 60000) : (low ? 2400 : 6000));
     assert.equal(rain.meshes.length, 5);
+    assert.equal(ctx.api.rain.lightGated, true);
     assert(rain.meshes.every(m => m.material.transparent && !m.material.depthWrite));
     assert(rain.lights.every(light => light.intensity.value === 0));
     assert.equal(rain.neon.selected.length, 8);
@@ -176,6 +177,8 @@ try {
       const b = new Builder(mesh, renderer); b.camera = ctx.camera; b.scene = ctx.scene; b.build();
       assert(b.vertexShader.length > 500 && b.fragmentShader.length > 500);
       assert(!/NaN|undefined/.test(b.vertexShader + b.fragmentShader));
+      if (mesh.name === 'rain-streaks') assert.match(b.fragmentShader, /rainLight\.w/, 'Incident light gates streak opacity');
+      if (mesh.name === 'rain-splashes') assert.match(b.fragmentShader, /rainHitLight\.w/, 'Dark splash opacity is also gated');
       if (mesh.name !== 'rain-splashes') {
         // The two packed arrays compile on both backends, and mains is the exact
         // shared live uniform (no CPU copy that could lag by the selection interval).

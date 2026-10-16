@@ -5,13 +5,34 @@ import { attribute, uv, float, smoothstep } from 'three/tsl';
 import { crowd } from '../ghosts/index.js';
 import { lifeState, syncLife, lifeMask, inMemory, silhouette, coverage, streetTint } from '../ghosts/life.js';
 
-const MIN_Z = -40, MAX_Z = -6, COUNT = 4;
+const COUNT = 11;
 const UP = new THREE.Vector3(0, 1, 0);
 const wrap = (n, span) => ((n % span) + span) % span;
+
+export function makeCars() {
+  // Four parked bodies along the right kerb, away from the wreck at z=-18.
+  // Three moving cars share the opposite lane; four more use the cross street.
+  // Main-lane memories dissolve before the zebra; cross traffic never crosses
+  // their route. One batch per part, including the parked headlights.
+  const cars = [-8.5, -26, -31, -52].map(offset => ({
+    axis: 'z', fixed: 2.3, direction: 1, speed: 0, offset, min: -68, max: -6,
+  }));
+  for (let i = 0; i < 3; i++) cars.push({
+    axis: 'z', fixed: -1.65, direction: -1, speed: 1.35,
+    offset: 5 + i * 26 / 3, min: -32, max: -6,
+  });
+  for (const direction of [-1, 1]) for (let i = 0; i < 2; i++) cars.push({
+    axis: 'x', fixed: -42 + direction * 2, direction, speed: 1.6,
+    offset: 5 + i * 24 + (direction > 0 ? 9 : 0), min: -24, max: 24,
+  });
+  return cars.map(car => ({ ...car, position: new THREE.Vector3(), travel: 0 }));
+}
+
 export function poseCar(car, t) {
   car.travel = car.offset + t * car.speed;
-  car.position.set(car.direction > 0 ? 1.65 : -1.65, 0,
-    car.speed === 0 ? car.offset : MAX_Z - wrap(car.travel, MAX_Z - MIN_Z));
+  const along = car.speed === 0 ? car.offset
+    : car.min + wrap(car.direction * car.travel, car.max - car.min);
+  car.position.set(car.axis === 'x' ? along : car.fixed, 0, car.axis === 'x' ? car.fixed : along);
 }
 
 // Exported for headless geometry checks. The GLB is centred around its OPEN door,
@@ -151,13 +172,7 @@ export default {
       { name: 'wet-road-pools', geometry: new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2), multiplier: 2, material: 2 },
     ];
     source.forEach(p => p.geometry.dispose());
-    this.cars = Array.from({ length: COUNT }, (_, i) => ({
-      // Parked on the right, away from the present-day wreck at z=-18;
-      // two departing cars move down the clear opposite lane, 17 m apart.
-      direction: i < 2 ? 1 : -1, speed: i < 2 ? 0 : 1.35,
-      offset: i < 2 ? [-9.5, -31][i] : (i-2)*17 + 6,
-      position: new THREE.Vector3(), travel: 0,
-    }));
+    this.cars = makeCars();
     this.group = new THREE.Group(); this.group.name = 'traffic';
     this.hidden = new THREE.Matrix4().makeScale(1e-6,1e-6,1e-6).setPosition(0,-10000,0);
     this.matrix = new THREE.Matrix4(); this.rootMatrix = new THREE.Matrix4(); this.localMatrix = new THREE.Matrix4();
@@ -183,7 +198,7 @@ export default {
       this.group.add(part.mesh);
     }
     ctx.scene.add(this.group);
-    ctx.api.traffic = { count: COUNT, visibleCount: 0, source: 'glb', sceneDraws: 4 };
+    ctx.api.traffic = { count: COUNT, visibleCount: 0, source: 'glb', sceneDraws: 4, parkedCount: 4, movingCount: 7 };
     this.frames = 0; this.update(0,0,ctx); this.frames = 0;
   },
   update(dt,t,ctx) {
@@ -197,16 +212,17 @@ export default {
       this.center.copy(car.position); this.center.y = .75;
       // Bounds cover the body AND the 6 m headlight reflection in front.
       const visible = warmup || (enabled && inMemory(this.center,9,ctx,this.life,this.broad));
-      this.rotation.setFromAxisAngle(UP,car.direction > 0 ? 0 : Math.PI);
+      this.rotation.setFromAxisAngle(UP, car.axis === 'x' ? car.direction * Math.PI / 2 : car.direction > 0 ? 0 : Math.PI);
       this.rootMatrix.compose(car.position,this.rotation,this.scale);
       streetTint(ctx,car.position,this.tint);
       // Dissolve at the route boundaries before wrapping; never teleport a lit
       // car/reflection across the remembered street. Debug shows every slot.
       // and never through the lens: cars dissolve within ~6 m of the camera (over-the-shoulder shots sit by the kerb)
       const camD = Math.hypot(car.position.x - this.camPos.x, car.position.z - this.camPos.z);
+      const along = car.axis === 'x' ? car.position.x : car.position.z;
       const presence = (this.life.debug.value || !car.speed ? 1
-        : THREE.MathUtils.smoothstep(car.position.z, MIN_Z, MIN_Z+2)
-          * (1-THREE.MathUtils.smoothstep(car.position.z, MAX_Z-2, MAX_Z))) * THREE.MathUtils.smoothstep(camD, 4.5, 7);
+        : THREE.MathUtils.smoothstep(along, car.min, car.min+2)
+          * (1-THREE.MathUtils.smoothstep(along, car.max-2, car.max))) * THREE.MathUtils.smoothstep(camD, 4.5, 7);
       for (const part of this.parts) for (let j=0; j<part.multiplier; j++) {
         const slot=i*part.multiplier+j;
         part.geometry.attributes.lifePresence.setX(slot,presence);

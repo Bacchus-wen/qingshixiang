@@ -12,7 +12,8 @@ registerHooks({ resolve(specifier, context, next) {
 } });
 const THREE = await import('three/webgpu');
 const { mrt, output, velocity } = await import('three/tsl');
-const { default: ghostsTemplate, crowd, pose, nearFade, ROUTE_LENGTH } = await import('./index.js');
+const { default: ghostsTemplate, crowd, pose, nearFade } = await import('./index.js');
+const { routeLength } = await import('./routes.js');
 const { decodeVAT } = await import('./vat.js');
 const { default: legacyTemplate } = await import('./legacy.js');
 const { memoryMaskCPU } = await import('../../materials/memory.js');
@@ -58,17 +59,17 @@ const ctx = context(), ghosts = Object.create(ghostsTemplate);
 ghosts.loadCrowd = async () => variants;
 await ghosts.init(ctx);
 assert.equal(ctx.api.ghosts.source, 'cybercity-vat');
-assert.equal(ghosts.people.length, 16);
-assert.equal(ctx.api.ghosts.umbrellaCount, 12);
+assert.equal(ghosts.people.length, 44);
+assert.equal(ctx.api.ghosts.umbrellaCount, 33);
 assert.equal(ghosts.meshes.length, 4);
 assert(ghosts.meshes.every(m => m.geometry.isInstancedBufferGeometry && m.geometry.groups.length === 0 && !Array.isArray(m.material)));
 for (const side of [-1, 1]) {
-  assert.equal(ghosts.people.filter(p => p.side === side).length, 8);
-  assert.equal(ghosts.people.filter(p => p.side === side && p.umbrella).length, 6);
+  assert.equal(ghosts.people.filter(p => p.side === side && p.route.axis === 'z').length, 18);
+  assert.equal(ghosts.people.filter(p => p.side === side && p.route.axis === 'z').map(p => p.route).filter((r,i,a) => a.indexOf(r) === i).length, 3);
 }
 for (let f = 0; f < 30; f++) {
   ghosts.update(1/60, f/60, ctx);
-  assert(ghosts.group.visible && ghosts.meshes.every(m => m.visible && m.geometry.instanceCount === 4 && !m.frustumCulled), `Warmup ${f}`);
+  assert(ghosts.group.visible && ghosts.meshes.every(m => m.visible && m.geometry.instanceCount === 11 && !m.frustumCulled), `Warmup ${f}`);
   assert(ghosts.outfits.every(o => o.tint.array.every((v,i) => i%4 !== 3 || v === 0)), 'Warmup must not make closed-eye people visible');
 }
 ghosts.update(1/60, .5, ctx);
@@ -76,18 +77,26 @@ assert(!ghosts.group.visible && ghosts.meshes.every(m => !m.visible));
 ctx.memory.flood = 1;
 for (let t = 0; t <= 480; t += .25) {
   ghosts.update(.25, t, ctx);
-  assert.equal(ctx.api.ghosts.visibleCount, 16, 'Flood covers both pavements');
-  assert(ghosts.people.every(p => Math.abs(p.position.x) >= 3.8 && Math.abs(p.position.x) <= 4.6 && p.position.z > -35.4 && p.position.z < -6.6));
+  assert.equal(ctx.api.ghosts.visibleCount, 44, 'Flood covers both pavements');
+  assert(ghosts.people.every(p => p.route.axis === 'z'
+    ? Math.abs(p.position.x) >= 3.65 && Math.abs(p.position.x) <= 4.75 && p.position.z > -33 && p.position.z < -7
+    : Math.abs(p.position.x) <= 4.65 && p.position.z >= -36 && p.position.z <= -35));
+  for (let i = 0; i < ghosts.people.length; i++) for (let j = i + 1; j < ghosts.people.length; j++) {
+    assert(ghosts.people[i].position.distanceTo(ghosts.people[j].position) > .75, `Crowd overlap at ${t}: ${i}/${j}`);
+  }
   assert(ghosts.outfits.every(o => o.attributes.every(a => a.array.every(Number.isFinite))));
 }
 // Continuous bounded-speed path, including both turns and the loop seam.
-const probe = { side: 1, offset: 0, speed: 1, position: new THREE.Vector3() };
-for (let t = 0; t < ROUTE_LENGTH + .1; t += .013) {
-  pose(probe,t); const before = probe.position.clone(), yaw = probe.yaw;
-  pose(probe,t+.001);
-  assert(probe.position.distanceTo(before) <= .00101);
-  assert(Math.abs(Math.atan2(Math.sin(probe.yaw-yaw),Math.cos(probe.yaw-yaw))) < .003);
+for (const route of new Set(ghosts.people.map(p => p.route))) {
+  const probe = { route, offset: 0, speed: 1, position: new THREE.Vector3() };
+  for (let t = 0; t < routeLength(route) + .1; t += .013) {
+    pose(probe,t); const before = probe.position.clone(), yaw = probe.yaw;
+    pose(probe,t+.001);
+    assert(probe.position.distanceTo(before) <= .0014); // includes smooth kerb step
+    assert(Math.abs(Math.atan2(Math.sin(probe.yaw-yaw),Math.cos(probe.yaw-yaw))) < .003);
+  }
 }
+assert.equal(ghosts.people.filter(p => p.route.axis === 'x').length, 8);
 // Stable slot identity + explicit prior-frame gait/transform for temporal AA.
 ghosts.update(0, 23, ctx);
 const snapshot = ghosts.outfits.map(o => o.pose.array.slice());
@@ -99,9 +108,9 @@ ghosts.outfits.forEach((o,i) => {
 ctx.memory.flood = 0; ghosts.update(0, 999, ctx);
 ctx.memory.flood = 1; ghosts.update(0, 23, ctx);
 ghosts.outfits.forEach((o,i) => assert.deepEqual(o.pose.array, snapshot[i]));
-assert.equal(nearFade(0),0); assert.equal(nearFade(2.5),0); assert.equal(nearFade(3),.5); assert.equal(nearFade(3.5),1);
+assert.equal(nearFade(0),0); assert.equal(nearFade(3.5),0); assert.equal(nearFade(4.5),.5); assert.equal(nearFade(5.5),1);
 const first = ghosts.people[0], outfit = ghosts.outfits[first.type];
-for (const d of [0, 1, 2.49, 2.5, 2.75, 3, 3.5, 4]) {
+for (const d of [0, 1, 3.49, 3.5, 4, 4.5, 5.5, 6]) {
   ctx.camera.position.copy(first.position); ctx.camera.position.x += d; ctx.camera.position.y = 1.6;
   ghosts.update(0, 23, ctx);
   assert(Math.abs(outfit.tint.getW(first.slot) - nearFade(d)) < 1e-6, `Near-camera fade ${d}`);
@@ -121,13 +130,33 @@ for (let angle = 0; angle < Math.PI*2; angle += .3) {
   });
 }
 ctx.params.set('memlife','1'); ctx.memory.strength = 0; crowd.value = 0;
-ghosts.update(0,23,ctx); assert.equal(ctx.api.ghosts.visibleCount,16, 'Debug forces display');
+ghosts.update(0,23,ctx); assert.equal(ctx.api.ghosts.visibleCount,44, 'Debug forces display');
 ctx.api.neon = { signs: [{ x:-5,y:3,z:-20,tint:'#24e9ee' },{ x:5,y:3,z:-20,tint:'#ff3ba7' }] };
 ghosts.update(0,23,ctx);
 for(const p of ghosts.people) {
-  const c = new THREE.Color(p.side < 0 ? '#24e9ee' : '#ff3ba7'), a = ghosts.outfits[p.type].tint;
+  const c = new THREE.Color(p.position.x < 0 ? '#24e9ee' : '#ff3ba7'), a = ghosts.outfits[p.type].tint;
   assert(Math.abs(a.getX(p.slot)-c.r)<1e-6 && Math.abs(a.getY(p.slot)-c.g)<1e-6 && Math.abs(a.getZ(p.slot)-c.b)<1e-6);
 }
+// Distant slots keep their deterministic gait phase and resume without a TRAA jump.
+ctx.camera.position.set(0, 1.6, 50);
+ghosts.update(0, 23, ctx);
+const frozen = ghosts.outfits.map(o => o.motion.array.slice());
+ghosts.update(1/60, 23+1/60, ctx);
+assert.equal(ctx.api.ghosts.animatedCount, 0);
+ghosts.outfits.forEach((o,i) => assert.deepEqual(o.motion.array, frozen[i]));
+ctx.camera.position.set(0, 1.6, 0);
+ghosts.update(0, 23, ctx);
+assert.equal(ctx.api.ghosts.animatedCount, 44);
+ghosts.outfits.forEach(o => assert.deepEqual(o.previousMotion.array, o.motion.array));
+ctx.params.delete('memlife'); ctx.memory.strength = 0; ctx.memory.flood = 0;
+let writes = 0;
+for (const o of ghosts.outfits) {
+  const original = o.set;
+  o.set = function (...args) { writes++; return original.apply(this,args); };
+}
+ghosts.update(1/60,24,ctx);
+assert.equal(writes, 0, 'Invisible crowd skips VAT and tint updates');
+assert(ghosts.outfits.every(o => o.tint.array.every((v,i) => i%4 !== 3 || v === 0)));
 ctx.scene.traverse(n=>assert(!n.isLight));
 console.log('PASS population, 4 draws, 30-frame warmup, 8-minute paths, cone/flood/door/debug, near-camera fade, neon tint, temporal history');
 
@@ -160,7 +189,7 @@ legacyTemplate.loadPeople=async()=>null;
 const fallback=Object.create(ghostsTemplate), fallbackCtx=context('memlife=1');
 fallback.loadCrowd=async()=>{throw new Error('simulated missing VAT')};
 await fallback.init(fallbackCtx); assert.equal(fallbackCtx.api.ghosts.source,'fallback');
-assert(fallback.meshes.length<=5 && fallback.people.length===16);
+assert(fallback.meshes.length<=5 && fallback.people.length===44);
 fallbackCtx.camera.position.copy(fallback.people[0].position);
 fallback.update(0,0,fallbackCtx);
 assert.equal(fallback.meshes[0].geometry.attributes.lifeFade.getX(0),0);

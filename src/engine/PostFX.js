@@ -8,6 +8,7 @@ import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 import { traa } from 'three/addons/tsl/display/TRAANode.js';
 import { ssr } from 'three/addons/tsl/display/SSRNode.js';
 import { dof } from 'three/addons/tsl/display/DepthOfFieldNode.js';
+import { ao } from 'three/addons/tsl/display/GTAONode.js';
 
 // Post pipeline v1:
 //   opaque depth pre-pass (volumes read it for occlusion)
@@ -34,11 +35,11 @@ export class PostFX {
       blackPoint: uniform(0.02),
       lift: uniform(new THREE.Vector3(0.004, 0.006, 0.009)),
       // film: amber halation hugging warm highlights, gate weave (sub-pixel frame drift), density flicker
-      halation: uniform(0.55), weave: uniform(new THREE.Vector2()), flicker: uniform(0),
+      halation: uniform(0.55), aoStrength: uniform(0.85), weave: uniform(new THREE.Vector2()), flicker: uniform(0),
       ssrIntensity: uniform(1.0),
       // depth of field, driven by the director (bokeh 0 = off)
       focus: uniform(10), focalRange: uniform(6), bokeh: uniform(0),
-      bloomStrength: 0.25, bloomRadius: 0.5, bloomThreshold: 0.9,
+      bloomStrength: 0.3, bloomRadius: 0.7, bloomThreshold: 1.4, // v3: only lamp and tube cores bloom
     };
     renderer.toneMapping = THREE.AgXToneMapping;
   }
@@ -87,8 +88,19 @@ export class PostFX {
     const nTex = scenePass.getTextureNode('normal');
     const mr = scenePass.getTextureNode('metalrough');
 
+    // v3 (review): ground-truth AO at half resolution -- contact shadows under the robot, props and cars, dark seams
+    // and corners; the flat "grey box" look came largely from its absence
+    let base = color;
+    if (!dbg.includes('noao') && this.ctx?.quality !== 'low') {
+      const aoPass = ao(depth, sample((u) => unpackRGBToNormal(nTex.sample(u))), camera);
+      aoPass.resolutionScale = 0.5; aoPass.radius.value = 1.1; aoPass.thickness.value = 1.5; aoPass.scale.value = 1.8; aoPass.samples.value = 12;
+      this.aoPass = aoPass;
+      const occ = aoPass.getTextureNode().r;
+      base = vec4(color.rgb.mul(mix(float(1), occ, params.aoStrength)), color.a);
+      if (dbg.includes('aoonly')) base = vec4(vec3(occ), 1);
+    }
     // SSR only on smooth, up-facing (wet ground, puddles) surfaces; walls and rough surfaces use the environment.
-    let lit = color;
+    let lit = base;
     if (!dbg.includes('nossr')) {
       const refl = float(1).sub(smoothstep(0.04, 0.45, mr.g)).mul(mr.b);
       const ssrPass = ssr(color, depth, sample((u) => unpackRGBToNormal(nTex.sample(u))), {
@@ -102,7 +114,7 @@ export class PostFX {
       ssrPass.blurQuality = 2;
       this.ssrPass = ssrPass;
       // gate SSR ourselves: only up-facing, glossy pixels receive reflections (walls/shutters never smear)
-      lit = color.add(ssrPass.rgb.mul(params.ssrIntensity).mul(mr.b)); // v3: refl was applied twice (SSR already weights it)
+      lit = base.add(ssrPass.rgb.mul(params.ssrIntensity).mul(mr.b)); // v3: refl was applied twice (SSR already weights it)
       if (dbg.includes('ssronly')) lit = ssrPass.rgb.mul(4);
       if (dbg.includes('refl')) lit = vec3(refl);
       if (dbg.includes('nrm')) lit = nTex.rgb;

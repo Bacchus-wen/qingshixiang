@@ -117,14 +117,18 @@ export default {
     const shade = (p, flash = 0.6, coloredRain = true) => Fn(() => {
       const mask = memoryMask(p).toVar();
       const lit = this.lights.map(light => light.color.mul(spot(p, light)));
-      const base = vec3(0.65, 0.72, 0.8).mul(float(0.05).add(u.lightning.mul(flash)))
-        .add(lit[0].add(lit[1]).mul(0.95))
-        .add(amber.mul(mask).mul(0.95)).min(vec3(1));
-      if (!coloredRain) return base;
-      // Local incident colour, weight 0.4; darkness stays unchanged away from signs.
-      // Keep the beam's x3 in HDR (no clamp after multiplication), for bloom.
-      return base.add(neonLight(this.neon, p, mask).mul(0.4))
-        .mul(float(1).add(mask.mul(2).mul(this.neon.enabled)));
+      const sign = coloredRain ? neonLight(this.neon, p, mask).mul(0.4).toVar() : vec3(0);
+      // No ambient floor: incident lamp/sign/beam/flash energy owns visibility.
+      // Compute the gate before the HDR beam boost, preserving its exact x3.
+      const incident = lit[0].add(lit[1]).mul(0.95)
+        .add(amber.mul(mask).mul(0.95))
+        .add(vec3(0.65, 0.72, 0.8).mul(u.lightning).mul(flash)).toVar();
+      const energy = incident.add(sign).toVar();
+      const brightness = energy.dot(vec3(0.2126, 0.7152, 0.0722));
+      const visibility = smoothstep(0, 0.12, brightness);
+      const base = incident.min(vec3(1)).add(sign);
+      const color = coloredRain ? base.mul(float(1).add(mask.mul(2).mul(this.neon.enabled))) : base;
+      return vec4(color, visibility);
     })();
     const material = () => new THREE.MeshBasicNodeMaterial({
       transparent: true, depthWrite: false, depthTest: true,
@@ -150,11 +154,12 @@ export default {
       .add(u.right.mul(positionGeometry.x).mul(width).mul(float(1).add(defocus.mul(3))));
     const dropWorld = varying(centre, 'rainWorld');
     // Light each tiny ribbon in the vertex stage, not for every covered pixel.
-    streak.colorNode = varying(shade(centre), 'rainLight');
+    const streakLight = varying(shade(centre), 'rainLight');
+    streak.colorNode = streakLight.rgb;
     const blur = varying(defocus, 'rainDefocus');
     const ribbon = float(1).sub(smoothstep(float(0.12).mul(float(1).sub(blur)), 0.5, uv().x.sub(0.5).abs())).pow(2);
     const taper = sin(uv().y.mul(Math.PI)).max(0);
-    streak.opacityNode = ribbon.mul(taper).mul(0.56).mul(u.rain)
+    streak.opacityNode = ribbon.mul(taper).mul(0.56).mul(u.rain).mul(streakLight.w)
       .mul(float(1).div(float(1).add(blur.mul(7))))
       .mul(varying(smoothstep(0.0225, 0.2025, distance2), 'rainNearFade'))
       .mul(smoothstep(0, 0.2, dropWorld.y))
@@ -171,10 +176,11 @@ export default {
     const age = impact.w.div(hitRandom.mul(0.5).add(0.22)).clamp();
     const radius = age.mul(sizeRandom.mul(0.15).add(0.04)).add(0.012);
     rings.positionNode = impact.xyz.add(vec3(positionGeometry.x, 0, positionGeometry.y).mul(radius.mul(2)));
-    rings.colorNode = varying(shade(impact.xyz, 0.12, false).mul(0.8), 'rainHitLight');
+    const hitLight = varying(shade(impact.xyz, 0.12, false), 'rainHitLight');
+    rings.colorNode = hitLight.rgb.mul(0.8);
     const circle = uv().sub(0.5).length().mul(2);
     rings.opacityNode = float(1).sub(smoothstep(0.035, 0.12, circle.sub(0.8).abs()))
-      .mul(float(1).sub(varying(age, 'rainHitAge'))).mul(u.rain).mul(0.38);
+      .mul(float(1).sub(varying(age, 'rainHitAge'))).mul(u.rain).mul(0.38).mul(hitLight.w);
     const hitsGeometry = quad(THREE, this.splashCount);
     if (!this.gpu) hitsGeometry.setAttribute('rainImpact', this.cpuImpacts);
     add(hitsGeometry, rings, 'rain-splashes');
@@ -192,14 +198,15 @@ export default {
       const trail = smoothstep(0.65, 0.95, fract(uv().y.mul(12).add(u.time.mul(2.2 - i * 0.35)).add(rnd)));
       const edge = smoothstep(0, 0.12, uv().x).mul(float(1).sub(smoothstep(0.88, 1, uv().x)))
         .mul(smoothstep(0, 0.08, uv().y)).mul(float(1).sub(smoothstep(0.7, 1, uv().y)));
-      curtain.colorNode = shade(world, 0.08);
-      curtain.opacityNode = line.mul(trail).mul(edge).mul(u.rain).mul(0.13);
+      const curtainLight = shade(world, 0.08).toVar();
+      curtain.colorNode = curtainLight.rgb;
+      curtain.opacityNode = line.mul(trail).mul(edge).mul(u.rain).mul(0.13).mul(curtainLight.w);
       add(new THREE.PlaneGeometry(1, 1), curtain, `rain-curtain-${i}`);
     }
     scene.add(this.group);
     ctx.api.rain = {
       mode: this.gpu ? 'gpu-compute' : 'cpu', particleCount: this.count,
-      splashCount: this.splashCount, curtains: 3,
+      splashCount: this.splashCount, curtains: 3, lightGated: true,
       bounds: { width: WIDTH, height: HEIGHT, depth: DEPTH, zMin: Z_MIN },
     };
     this.sync(ctx);
