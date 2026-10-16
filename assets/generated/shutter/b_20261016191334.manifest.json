@@ -1,0 +1,53 @@
+{
+  "batch_id": "b_20261016191334",
+  "tasks": 1,
+  "submitted": 1,
+  "failed": 0,
+  "total_images": 1,
+  "items": [
+    {
+      "index": 1,
+      "prompt": "Orthographic front view texture of a closed metal roller shutter of a small shop in an old southern Chinese street, filling the whole frame edge to edge, horizontal corrugated steel slats, faded grey-green paint, rust streaks running down, dirt at the bottom, a large red spray-painted character 拆 inside a hand-drawn red circle in the middle, smaller red 拆 nearby, several small black stencilled phone-number ads (办证 13*********, 通下水道), torn paper notices taped on, flat even lighting, no perspective, no shadows, photorealistic texture, no Latin graffiti",
+      "id": "img_43560",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43560/793c738b-924d-48c5-8d54-0bd1801f189d.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T19%3A13%3A26Z%2F3600%2F%2F72ccaa237dd91430e4714c76fe7ed75fb08a87ea6e3b0b5d5d3736966e05fe58"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shutter/img_43560/ai_generate_43560_1.png"
+      ]
+    }
+  ],
+  "plan": {
+    "kind": "image",
+    "model": "gpt",
+    "version": "gpt-image-2.5-sunburst",
+    "count": 1,
+    "quota": {
+      "limit": 300,
+      "used": 10,
+      "remaining": 290,
+      "unit": "张",
+      "after": 11
+    },
+    "running": {
+      "limit": 20,
+      "current": 0
+    },
+    "allowed": true,
+    "blockers": [],
+    "cost": {
+      "amount": 0,
+      "currency": "USD",
+      "priced": false,
+      "estimated": false,
+      "note": null
+    },
+    "request": {
+      "batch": true,
+      "tasks": 1,
+      "total_images": 1,
+      "local_uploads": []
+    }
+  }
+}
