@@ -106,7 +106,7 @@ export default {
     root.traverse((o) => {
       if (o.isMesh) {
         const key = o.material.name || '';
-        if (!matCache.has(key)) matCache.set(key, robotMaterial(key));
+        if (!matCache.has(key)) { const m = robotMaterial(key); m.vertexColors = !ctx.params.has('noao'); matCache.set(key, m); }
         o.material = matCache.get(key);
         o.castShadow = true; o.receiveShadow = true;
       }
@@ -122,13 +122,19 @@ export default {
       root.traverse((o) => {
         if (!o.isMesh || inHead(o)) return;
         const g = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone());
-        for (const k of Object.keys(g.attributes)) if (!['position', 'normal'].includes(k)) g.deleteAttribute(k);
+        for (const k of Object.keys(g.attributes)) if (!['position', 'normal', 'color'].includes(k)) g.deleteAttribute(k);
         // meshopt-quantized (int16, normalized) attributes: back to float before transforming and merging
         for (const k of ['position', 'normal']) {
           const a = g.attributes[k]; if (!a || a.array instanceof Float32Array) continue;
           const f = new Float32Array(a.count * a.itemSize);
           for (let i = 0; i < a.count; i++) for (let c = 0; c < a.itemSize; c++) f[i * a.itemSize + c] = a.getComponent(i, c);
           g.setAttribute(k, new THREE.BufferAttribute(f, a.itemSize));
+        }
+        // baked AO (tools/blender/bake_ao.py) in COLOR_0: float rgb for every part (white where a part has none)
+        {
+          const a = g.attributes.color, n = g.attributes.position.count, f = new Float32Array(n * 3).fill(1);
+          if (a) for (let i = 0; i < n; i++) for (let c = 0; c < 3; c++) f[i * 3 + c] = a.getComponent(i, c);
+          g.setAttribute('color', new THREE.BufferAttribute(f, 3));
         }
         g.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld));
         if (!groups.has(o.material)) groups.set(o.material, []);
