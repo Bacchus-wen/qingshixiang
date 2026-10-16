@@ -21,10 +21,10 @@ class Node {
   }
   connect(node) { this.connections.push(node); return node; }
   disconnect() { this.connections = []; }
-  start(...args) { this.started = args; }
+  start(...args) { this.started = args; this.startCount = (this.startCount || 0) + 1; }
   stop() { this.stopped = true; }
 }
-class Context {
+export class Context {
   sampleRate = 1000;
   currentTime = 0;
   nodes = [];

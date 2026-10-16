@@ -1,6 +1,7 @@
 import { DEFAULTS, clamp, random, mixState, createStorm, createMemoryGate, createLampContact } from './control.js';
 import { createDetails } from './details.js';
 import { createRecordings } from './recordings.js';
+import { createPassingCar } from './passing.js';
 
 // The same native Web Audio graph is used in realtime and OfflineAudioContext.
 // Audio time owns scheduling: deterministic shot frame time must not accelerate it.
@@ -54,7 +55,7 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
   const rainBus = gain(), rainFilter = filter('lowpass', 12000);
   rainBus.connect(rainFilter); rainFilter.connect(mix); rainFilter.connect(reverb);
   const buses = {};
-  for (const name of Object.keys(DEFAULTS).filter(k => !['master', 'reverb', 'dog', 'radio', 'alley', 'rec'].includes(k))) {
+  for (const name of Object.keys(DEFAULTS).filter(k => !['master', 'reverb', 'dog', 'radio', 'alley', 'rec', 'passingCar'].includes(k))) {
     const bus = gain(params[name]); buses[name] = bus;
     if (['nearRain', 'farRain', 'drips'].includes(name)) bus.connect(rainBus);
     else if (name !== 'memory') {
@@ -68,6 +69,7 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
   }
   const recordings = createRecordings(ac, { params, rain: rainBus, mix, reverb, seed, onEvent, loadBuffer });
   const details = createDetails(ac, { mix, rain: rainFilter, params, seed, onEvent, recordedDog: at => recordings.dog(at) });
+  const passingCar = createPassingCar(ac, { mix, params, impulse: reverb.buffer, seed });
   // Individual source amplitudes leave substantial headroom before the compressor.
   function loopNoise(bus, type, hz, amplitude, q = 0.7) {
     const s = ac.createBufferSource(); s.buffer = noise; s.loop = true;
@@ -232,6 +234,7 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
     target(rainFilter.frequency, state.cutoff, at, 0.3);
     recordings.update(at, world, memory);
     details.update(at, memory, camera);
+    passingCar.update(at, world.passingCar, state.cutoff, camera);
     setMemory(memoryEnvelope(at, state.memory), at);
     const contact = lampContact(at, lampIntensity);
     target(lampGate.gain, contact.level, at, 0.008);
@@ -284,6 +287,7 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
       disposed = true;
       recordings.dispose();
       details.dispose();
+      passingCar.dispose();
       for (const s of sources) { s.onended = null; try { s.stop(); } catch { /* already stopped */ } }
       for (const n of nodes) n.disconnect();
       sources.clear(); nodes.clear();

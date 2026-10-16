@@ -63,3 +63,6 @@
 - 2026-10-16 13:51:17 | claude | 派给 codex：把真实录音混进音景（w16-recordings，可写 src/systems/audio/**）
 - 2026-10-16 13:57:10 | claude | 派给 grok：策展人视角的最终评论（r8-curator，只读）
 - 2026-10-16 13:58:52 | codex | 完成：把真实录音混进音景（w16-recordings）
+- 2026-10-16 14:02:19 | claude | 派给 codex：远处路口开过的车的声音（w17-passing-car-audio，可写 src/systems/audio/**）
+- 2026-10-16 14:06:59 | grok | 完成：策展人视角的最终评论（r8-curator）
+- 2026-10-16 14:07:20 | codex | 完成：远处路口开过的车的声音（w17-passing-car-audio）

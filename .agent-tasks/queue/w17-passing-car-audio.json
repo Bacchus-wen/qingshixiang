@@ -1,0 +1,26 @@
+{
+ "id": "w17-passing-car-audio",
+ "from": "claude",
+ "to": "codex",
+ "title": "远处路口开过的车的声音",
+ "write": true,
+ "paths": [
+  "src/systems/audio/**"
+ ],
+ "status": "done",
+ "posted": "2026-10-16 14:02:19",
+ "started": "2026-10-16 14:02:20",
+ "seconds": 298.1,
+ "touched": [
+  "src/systems/audio/README.md",
+  "src/systems/audio/control.js",
+  "src/systems/audio/graph.js",
+  "src/systems/audio/offline.js",
+  "src/systems/audio/passing.js",
+  "src/systems/audio/verify-recordings.mjs",
+  "src/systems/audio/verify.mjs"
+ ],
+ "applied": 7,
+ "finished": "2026-10-16 14:07:20",
+ "reason": null
+}

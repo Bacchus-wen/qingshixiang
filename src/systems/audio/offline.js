@@ -6,7 +6,7 @@ import { RADIO_POSITION } from './details-control.js';
 export async function renderOffline({
   seconds = 10, muted = false, levels = {}, memory = 'ramp', effects = true,
   storm = true, rain = 1, lamp = 650, seed = 0x5eed, windows = {},
-  camera, memoryCone = {}, windGust = 0.2, loadBuffer,
+  camera, memoryCone = {}, windGust = 0.2, loadBuffer, passingCar,
 } = {}) {
   const ac = new OfflineAudioContext(2, Math.ceil(24000 * seconds), 24000);
   const events = [];
@@ -16,6 +16,7 @@ export async function renderOffline({
     for (let i = 0; i < seconds * 60; i++) {
       const t = i / 60;
       graph.update(t, { rain: typeof rain === 'function' ? rain(t) : rain,
+        passingCar: typeof passingCar === 'function' ? passingCar(t) : passingCar,
         windGust: typeof windGust === 'function' ? windGust(t) : windGust,
         lightning: typeof storm === 'function' ? storm(t) : storm && i === 60 ? 1 : 0 }, {
         ...(typeof memoryCone === 'function' ? memoryCone(t) : memoryCone),
@@ -58,7 +59,8 @@ export async function runOfflineTest({ muted = false, loadBuffer } = {}) {
   // Their dedicated assertions are in runDetailsTest, invoked by audio-render.
   for (const name of Object.keys(DEFAULTS).filter(k => !['master', 'reverb', 'dog', 'alley', 'rec'].includes(k))) {
     const levels = Object.fromEntries(Object.keys(DEFAULTS).map(k => [k, k === 'master' || k === name ? (k === 'wind' ? 0.25 : DEFAULTS[k]) : 0]));
-    layers[name] = await renderOffline({ seconds: 10, memory: name === 'memory' ? 1 : 0, levels });
+    layers[name] = await renderOffline({ seconds: 10, memory: name === 'memory' ? 1 : 0, levels,
+      passingCar: name === 'passingCar' ? { x: 0, z: -42, k: 1 } : undefined });
   }
   const audible = s => s.finite && s.rms > 0.000001 && s.peak < 0.98;
   const pass = (muted ? main.peak === 0 : audible(main)) && silence.peak === 0 &&

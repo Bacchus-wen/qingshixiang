@@ -44,7 +44,28 @@ ctx.api.audio.levels.rec = 1; // 恢复录音
 ctx.api.audio.setMuted(true);
 ```
 
-`levels` 均为 0..1：master、nearRain、farRain、drips、wind、lamp、thunder、memory、servo、click、shutter、whine、reverb、dog、radio、alley、**rec（默认 1）**。
+`levels` 均为 0..1：master、nearRain、farRain、drips、wind、lamp、thunder、memory、servo、click、shutter、whine、reverb、dog、radio、alley、**rec（默认 1）**、**passingCar（默认 0.3）**。
+
+## 远处路口的现在车辆（w17）
+
+`passing.js` 每帧读取 `ctx.world.passingCar = { x, z, k }`，不另外调度车辆。一条固定种子的单声道循环噪声产生湿胎嘶声和低频粗糙声，54 Hz 三角波产生轻微发动机声；两条声源只在解锁音景时启动一次，后续过车不新建或重复触发。没有新增录音、下载或定时器，销毁音景时停止声源并断开节点。
+
+距离按摄像机世界坐标计算，缺少摄像机时取机器人附近 `(0, 1.6, -10)`；按逆平方形式衰减，路口中央最近最响，声像随相对位置和摄像机朝向变化。胎声先限制到约 170–1450 Hz，发动机低通到 150 Hz。干声为 0.24，湿声为 `3.5 * levels.reverb`（默认约 0.77），复用已有 2.8 秒混响脉冲。车辆自己的混响输出与干声一起接受现有 `mixState.cutoff` 控制（记忆中降到 850 Hz），随后经过存在感/距离增益和原有主压缩器、master；不经过雨量总线，因此无雨和记忆中仍会存在。`k=0`、世界状态缺失或滑杆归零时，最终增益在 30 ms 内归零，包括车辆的混响尾音。
+
+沙箱外试听用 `?passcar`，手势解锁后约第 2 秒出现；`?passcar&audio.passingCar=0` 可做 A/B，`audio.rec=0` 不会关掉合成车声。检查左右两个方向、路口中央音量、记忆开合和多次过车；实际响度与混响比例仍需 Claude 沙箱外听验。`verify.mjs` 覆盖缺失/无效输入和 `k=0` 静音、距离衰减、双向声像、记忆低通、完整音景接入、连续帧/后续过车不增加或重启声源、音量归零及销毁。
+
+离线 DSP 试听可向 `renderOffline()` 传 `passingCar` 对象或函数，例如：
+
+```js
+await renderOffline({ seconds: 16, effects: false, storm: false, memory: 0,
+  passingCar: t => {
+    const x = -58 + (t - 2) * 9.5;
+    return { x, z: -42, k: Math.max(0, Math.min(1, (58 - Math.abs(x)) / 12)) };
+  },
+});
+```
+
+本次只做 Node 控制/路由/生命周期测试和静态检查；未启动浏览器、Vite 服务或 Blender，未做实际 DSP、试听或截图验收。集成方验收后再记入 `docs/PROGRESS.md`。
 
 URL 示例：`?audio.rec=0` 与默认值对照，`?volume=0.5&audio.wind=0.25`，`?mute`，`?skip=audio`。`rec` 是平滑输入增益；关闭后已有的混响自然衰减，完全静音使用 `setMuted(true)`。手势前调用不积压音效；显式 relay 在没有可用录音时返回 false。
 

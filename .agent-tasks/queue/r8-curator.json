@@ -5,7 +5,10 @@
  "title": "策展人视角的最终评论",
  "write": false,
  "paths": [],
- "status": "running",
+ "status": "done",
  "posted": "2026-10-16 13:57:10",
- "started": "2026-10-16 13:57:11"
+ "started": "2026-10-16 13:57:11",
+ "seconds": 586.0,
+ "finished": "2026-10-16 14:06:59",
+ "reason": null
 }
