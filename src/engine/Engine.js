@@ -1,4 +1,6 @@
 import * as THREE from 'three/webgpu';
+import { ClusteredLighting } from 'three/addons/lighting/ClusteredLighting.js';
+import { LightPool } from './LightPool.js';
 import { PostFX } from './PostFX.js';
 import { Input } from './Input.js';
 import { SHOTS } from './shots.js';
@@ -32,6 +34,9 @@ export class Engine {
     if (backend !== 'webgpu') console.warn('[engine] WebGPU unavailable, running on WebGL2 fallback');
     // quality: ?q=low|high; WebGL2 defaults to low (no SSR/DOF, fewer volume steps, smaller shadows)
     const quality = this.params.get('q') || (backend === 'webgpu' ? 'high' : 'low');
+    // v3: Forward+ clustered lighting so dozens of signs and shop openings can really light the street (WebGPU only)
+    const clustered = backend === 'webgpu' && quality !== 'low' && this.params.get('noclustered') === null;
+    if (clustered) renderer.lighting = new ClusteredLighting(256, 32, 24, 64);
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.05, 600);
@@ -43,6 +48,7 @@ export class Engine {
 
     this.ctx = {
       THREE, renderer, scene, camera, engine: this, backend, quality,
+      lightPool: clustered ? new LightPool(scene, Number(this.params.get('pool') || 64)) : null,
       params: this.params,
       isShot: !!this.shot,
       input: new Input(renderer.domElement),

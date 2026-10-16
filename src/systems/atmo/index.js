@@ -1,7 +1,6 @@
 import * as THREE from 'three/webgpu';
 import {
-  vec3, Fn, texture3D, screenCoordinate, uniform, fract, interleavedGradientNoise, time, fog, color,
-  exponentialHeightFogFactor, smoothstep, float, abs, lights, cameraPosition, distance, mix, positionWorldDirection,
+  Fn, abs, cameraPosition, color, distance, exp, exponentialHeightFogFactor, float, fog, fract, interleavedGradientNoise, lights, mix, positionWorld, positionWorldDirection, screenCoordinate, smoothstep, texture3D, time, uniform, vec3,
 } from 'three/tsl';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 
@@ -24,19 +23,38 @@ export default {
   name: 'atmo',
   async init(ctx) {
     const { scene, postfx, params } = ctx;
-    this.fogDensity = uniform(0.006); // v2: the street's far end (and its neon) stays readable
+    this.fogDensity = uniform(0.0045); // v3: clear first 8 m, ~9% at 30 m, ~30% at the lane's end
     this.fogHeight = uniform(8);
     // v2: night is not black. A cold blue-grey haze (moonlit rain) that silhouettes read against
     this.fogBase = new THREE.Color(0.030, 0.036, 0.052);
     this.fogColor = uniform(this.fogBase.clone());
-    scene.fogNode = fog(this.fogColor, exponentialHeightFogFactor(this.fogDensity, this.fogHeight));
+    // v3 (after cybercity): clear air for the first metres, then a height-attenuated haze whose colour is the sky's
+    // own light pollution in that direction -- distant buildings dissolve into light, not into grey
+    const hazeColor = Fn(([dir]) => {
+      const h = dir.y.max(0);
+      const base = this.fogColor;
+      const sodium = vec3(0.07, 0.04, 0.02).mul(exp(h.mul(-12))).mul(smoothstep(0.2, -0.9, dir.z)); // down the lane (-Z)
+      const magenta = vec3(0.04, 0.012, 0.035).mul(exp(h.mul(-7)));
+      return base.add(sodium).add(magenta);
+    });
+    this.hazeColor = hazeColor;
+    {
+      const V = positionWorld.sub(cameraPosition);
+      const dist = V.length();
+      const y = positionWorld.y;
+      const height = exp(y.max(0).mul(-0.05));                                   // thins out above the street
+      const fogStart = float(8);
+      const optical = dist.sub(fogStart).max(0).mul(this.fogDensity).mul(height);
+      const factor = float(1).sub(exp(optical.negate())).min(0.9);
+      scene.fogNode = fog(hazeColor(V.normalize()), factor);
+    }
     // the sky stays dark even in a flash (a lit sky between the rooftops read as a flat grey rectangle)
     // v2 sky: deep navy overhead, the city's sodium/neon glow low on the horizon between the rooftops
     this.skyColor = uniform(new THREE.Color(0x050506)); // lightning still adds to it
     {
       const d = positionWorldDirection.y;
       const zen = vec3(0.006, 0.009, 0.022), hor = vec3(0.075, 0.05, 0.065);
-      scene.backgroundNode = mix(hor, zen, smoothstep(-0.02, 0.45, d)).add(this.skyColor);
+      scene.backgroundNode = mix(hazeColor(positionWorldDirection).mul(1.6), zen, smoothstep(-0.02, 0.45, d)).add(this.skyColor);
     }
 
     const tex = noise3D();
@@ -92,9 +110,10 @@ export default {
     // shafts under the street lamps (positions published by the street system)
     const st = ctx.api.street;
     if (st) {
+      // v3: only a narrow shaft hugging each lamp cone (the 12 m boxes were the grey slab across the street)
       for (const l of [st.lamp, st.far]) {
-        const p = l.position.clone(); p.y = 3.8; p.x = (p.x + l.target.position.x) / 2; p.z = (p.z + l.target.position.z) / 2;
-        volume(p, new THREE.Vector3(12, 8.5, 12), 0.03, [l]);
+        const p = l.position.clone(); p.y = 3.6; p.x = (p.x + l.target.position.x) / 2; p.z = (p.z + l.target.position.z) / 2;
+        volume(p, new THREE.Vector3(5, 7.5, 5), 0.012, [l]);
       }
     }
   },

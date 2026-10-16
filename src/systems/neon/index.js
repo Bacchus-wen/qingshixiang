@@ -3,7 +3,7 @@ import { planSigns } from './layout.js';
 import { buildAtlas } from './atlas.js';
 import { createMaterials } from './materials.js';
 import { buildMeshes, updatePowers } from './geometry.js';
-import { updateNeonLights } from '../../materials/neonlight.js';
+import { updateNeonLights, neonGain } from '../../materials/neonlight.js';
 
 export default {
   name: 'neon',
@@ -24,6 +24,22 @@ export default {
     this.meshes = buildMeshes(this.signs, this.atlas, this.materials);
     this.root = new THREE.Group(); this.root.name = 'neon';
     this.root.add(...this.meshes); ctx.scene.add(this.root);
+    // real lights (clustered renderer): one per sign, in front of its face; plus a warm one in every shop opening
+    if (ctx.lightPool) {
+      neonGain.value = 0; // the analytic fallback would light everything twice
+      const C = new THREE.Color();
+      for (const sg of this.signs) {
+        const facing = sg.kind === 'blade' ? 0 : -sg.side;
+        const area = Math.min(6, sg.w * sg.h);
+        ctx.lightPool.add({ pos: new THREE.Vector3(sg.x + facing * (0.6 + 0.15 * sg.h), sg.y - 0.25 * sg.h, sg.z),
+          color: C.set(sg.tint).clone(), intensity: (sg.kind === 'box' ? 6 : 9) * Math.sqrt(area) * 0.9,
+          distance: Math.min(16, 8 + sg.w * 1.3), alive: sg.alive ? 1 : 0, power: () => sg.power ?? 1, importance: sg.kind === 'roof' ? 1.4 : 1 });
+      }
+      for (const f of facades) if (f.shop && !f.home) {
+        ctx.lightPool.add({ pos: new THREE.Vector3(f.frontX - f.side * 0.7, 2.6, f.z), color: new THREE.Color(1, 0.72, 0.45),
+          intensity: 8, distance: 8, alive: 0, importance: 0.8 });
+      }
+    }
     ctx.api.neon = {
       enabled: true, mode: this.mode, count: this.signs.length,
       surviving: this.signs.filter((s) => s.alive).length,
@@ -37,7 +53,9 @@ export default {
   update(dt, t, ctx) {
     // Shot mode uses the engine's fixed dt and simulation t; never renderer/OS wall time.
     if (this.meshes && this.mode !== 'past') updatePowers(this.meshes, t);
-    if (this.signs && ctx.params.get('nolight') === null) updateNeonLights(ctx, this.signs, { pastMode: this.mode === 'past' });
+    if (!this.signs || ctx.params.get('nolight') !== null) return;
+    if (ctx.lightPool) ctx.lightPool.update(ctx, { pastMode: this.mode === 'past' });
+    else updateNeonLights(ctx, this.signs, { pastMode: this.mode === 'past' });
   },
   dispose() {
     this.root?.removeFromParent();

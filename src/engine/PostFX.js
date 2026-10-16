@@ -2,7 +2,7 @@ import * as THREE from 'three/webgpu';
 import {
   pass, depthPass, mrt, output, velocity, normalView, metalness, roughness, packNormalToRGB, unpackRGBToNormal, sample,
   normalWorld, materialReference, uniform, vec2, vec3, vec4, float, screenUV, time, hash, floor, fract, mix,
-  smoothstep, length, luminance, clamp, max, min, renderOutput, Fn,
+  smoothstep, length, luminance, clamp, max, min, renderOutput, Fn, agxToneMapping,
 } from 'three/tsl';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 import { traa } from 'three/addons/tsl/display/TRAANode.js';
@@ -26,12 +26,12 @@ export class PostFX {
     this.volumeJitter = uniform(new THREE.Vector2());
     this.frame = 0;
     this.params = {
-      exposure: uniform(1.15), // v2: readable night
+      exposure: uniform(0.95), // v3: real lights now carry the street
       vignette: uniform(0.5),
       grain: uniform(0.035),
-      saturation: uniform(1.0),
-      contrast: uniform(0.38),
-      blackPoint: uniform(0.01),
+      saturation: uniform(1.12), hueKeep: uniform(0.45),
+      contrast: uniform(0.45),
+      blackPoint: uniform(0.02),
       lift: uniform(new THREE.Vector3(0.004, 0.006, 0.009)),
       // film: amber halation hugging warm highlights, gate weave (sub-pixel frame drift), density flicker
       halation: uniform(0.55), weave: uniform(new THREE.Vector2()), flicker: uniform(0),
@@ -96,12 +96,13 @@ export class PostFX {
       });
       ssrPass.resolutionScale = 0.5;
       ssrPass.quality.value = 0.5;
-      ssrPass.maxDistance.value = 60;
+      ssrPass.maxDistance.value = 100; // v3: high signs still reflect in the road
+      if (ssrPass.maxLuminance) ssrPass.maxLuminance.value = 40; // neon reflections not clipped
       ssrPass.thickness.value = 0.15;
       ssrPass.blurQuality = 2;
       this.ssrPass = ssrPass;
       // gate SSR ourselves: only up-facing, glossy pixels receive reflections (walls/shutters never smear)
-      lit = color.add(ssrPass.rgb.mul(refl).mul(params.ssrIntensity));
+      lit = color.add(ssrPass.rgb.mul(params.ssrIntensity).mul(mr.b)); // v3: refl was applied twice (SSR already weights it)
       if (dbg.includes('ssronly')) lit = ssrPass.rgb.mul(4);
       if (dbg.includes('refl')) lit = vec3(refl);
       if (dbg.includes('nrm')) lit = nTex.rgb;
@@ -122,7 +123,13 @@ export class PostFX {
     const chroma = smoothstep(0.04, 0.3, bmax.sub(min(bl.r, min(bl.g, bl.b))).div(bmax.add(1e-4)));
     const halo = bl.mul(vec3(1.0, 0.42, 0.16)).mul(chroma).mul(params.halation);
     const hdr = frameCol.rgb.add(bl).add(halo).mul(params.exposure).mul(params.flicker.add(1));
-    const mapped = renderOutput(vec4(hdr.rgb, 1), THREE.AgXToneMapping, THREE.SRGBColorSpace);
+    // v3 hue-preserving AgX (after cybercity): plain AgX bleaches saturated neon to white too early; blending in a
+    // max-channel mapped version keeps the colour, only the hottest cores go white
+    const tmFull = agxToneMapping(hdr.rgb, float(1));
+    const peak = max(hdr.r, max(hdr.g, hdr.b)).max(1e-4);
+    const tmPeak = agxToneMapping(vec3(peak), float(1)).g;
+    const tm = mix(tmFull, hdr.rgb.div(peak).mul(tmPeak), params.hueKeep);
+    const mapped = renderOutput(vec4(tm, 1), THREE.NoToneMapping, THREE.SRGBColorSpace);
 
     const grade = Fn(() => {
       const c = clamp(mapped.rgb, 0, 1).toVar();
@@ -131,6 +138,10 @@ export class PostFX {
       c.assign(max(c.sub(params.blackPoint), vec3(0)).div(float(1).sub(params.blackPoint)));
       c.assign(mix(c, c.mul(c).mul(float(3).sub(c.mul(2))), params.contrast));
       c.addAssign(params.lift.mul(float(1).sub(c)));
+      // split toning: cold, slightly teal shadows; faintly warm highlights
+      const lum = luminance(c);
+      c.addAssign(vec3(-0.012, 0.012, 0.022).mul(float(1).sub(lum).pow(3)));
+      c.mulAssign(mix(vec3(1), vec3(1.02, 0.99, 0.96), smoothstep(0.35, 0.9, lum)));
       const d = length(screenUV.sub(0.5).mul(vec2(1, 0.8)));
       c.mulAssign(float(1).sub(smoothstep(0.25, 0.85, d).mul(params.vignette)));
       const px = floor(screenUV.mul(vec2(1920, 1080)));
