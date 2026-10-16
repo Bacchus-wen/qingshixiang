@@ -153,6 +153,7 @@ export default {
       box(9, t, 8, M.wallA, k * 9.3 + 4, t / 2, L.zEnd - 45, root);
     }
     await buildDetails(ctx, root, this.facades, M, r);
+    ctx.api.street.facades = this.facades; // { side, z, w, h, frontX, shop, home, signName } for the neon layer
     this.passing = await setupPassingCar(ctx, root); // marks itself dynamic: never merged
     if (ctx.params.get('nomerge') === null) mergeStatic(root);
 
