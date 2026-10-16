@@ -46,7 +46,7 @@ def post(c, path, payload):
 def step(c, rec, name, path, payload):
     """Submit once; a recorded (or uncertain) step is never resubmitted."""
     st = rec['steps'].get(name)
-    if st:
+    if st and st.get('state') != 'rejected':   # a definite rejection (e.g. 429) may be retried; unknown never
         return st.get('task_id')
     rec['steps'][name] = {'state': 'submitting', 'path': path, 'payload': payload}; save(rec)
     try:
@@ -76,6 +76,8 @@ def hero(op, image, wait=900):
     rec['steps']['multiview']['status'] = r['status']; save(rec)
     if r['status'] != 'success':
         print(json.dumps({'op': op, 'stage': 'multiview', 'status': r['status']})); return
+    if not rec['steps'].get('model', {}).get('task_id'):
+        rec['steps'].pop('model', None)
     mdl = step(c, rec, 'model', '/generation/multiview-to-model', {'inputs': [{'task_id': mv}], **GEN})
     finish(c, rec, mdl, wait)
 
@@ -84,7 +86,7 @@ def finish(c, rec, tid, wait):
     r = poll(c, tid, wait)
     rec['steps']['model']['status'] = r['status']; save(rec)
     out = r.get('output') or {}
-    url = out.get('pbr_model') or out.get('model') or out.get('base_model')
+    url = out.get('pbr_model') or out.get('model_url') or out.get('model') or out.get('base_model')
     if r['status'] == 'success' and url:
         data = c.download_model(url)
         dst = LEDGER / f"{rec['op']}.glb"; dst.write_bytes(data)

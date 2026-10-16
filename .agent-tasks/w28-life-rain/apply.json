@@ -1,0 +1,20 @@
+{
+ "state": "applied",
+ "files": [
+  "src/systems/ghosts/index.js",
+  "src/systems/ghosts/legacy.js",
+  "src/systems/ghosts/routes.js",
+  "src/systems/ghosts/vat.js",
+  "src/systems/ghosts/verify.mjs",
+  "src/systems/rain/README.md",
+  "src/systems/rain/index.js",
+  "src/systems/rain/verify.mjs",
+  "src/systems/traffic/index.js",
+  "src/systems/traffic/verify.mjs"
+ ],
+ "created": [
+  "src/systems/ghosts/routes.js",
+  "src/systems/traffic/verify.mjs"
+ ],
+ "at": "2026-10-17 03:25:16"
+}
