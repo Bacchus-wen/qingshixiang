@@ -4,6 +4,7 @@ import { syncWet } from '../../materials/wet.js';
 import { memoryMaskCPU, amberNode } from '../../materials/memory.js';
 import { buildDetails } from './details.js';
 import { setupPassingCar } from './passing.js';
+import { placeV2Props } from './v2props.js';
 import { mergeStatic } from './merge.js';
 import { loadBuildingTextures, createWallMaterial, createWindowMaterial, createShutterMaterial, createShopMaterial, buildingMemory, buildingMemoryCPU } from './cc-materials.js';
 import { wallData, roomQuad, occupyWindows, addWindowIronwork, addShopInteriors } from './cc-geometry.js';
@@ -173,6 +174,7 @@ export default {
     const shopCount = addShopInteriors(root, this.facades, shopMaterials, box, M);
     ctx.api.street.buildings = { windows: windows.length, occupied, shops: shopCount, debug: ctx.params.get('ccmemory') || 'cone' };
     ctx.api.street.facades = this.facades; // { side, z, w, h, frontX, shop, home, signName } for the neon layer
+    if (ctx.params.get('nov2props') === null) await placeV2Props(ctx, root);
     this.passing = await setupPassingCar(ctx, root); // marks itself dynamic: never merged
     if (ctx.params.get('nomerge') === null) mergeStatic(root);
 

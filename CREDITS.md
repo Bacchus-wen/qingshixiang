@@ -43,3 +43,7 @@
   - `shop_ramen.png` → `assets/textures/cc/shop_ramen.jpg`（裁取 x=240、y=340、w=1160、h=650 的厨房，移除日文菜单、价格、布帘和装饰，供张记面馆等餐馆使用）
 - 模型：`assets/models/buildings/ac_unit.glb` → `assets/models/cc/ac_unit.glb`；保留几何，运行时替换为风化机壳与程序风扇格栅材质。未使用其他上游 GLB。
 - 贴图以 sips 转 JPEG，质量 90，最长边不超过 2048；裁图用 ffmpeg，无生成式服务。可在项目根目录运行 `sh src/systems/street/convert-cc.sh` 重建本组资产。
+
+## 生成素材(第二版,公司工具,内部展示)
+- 道具参考图:公司素材中台 vmc(Seedream 5.0)生成,assets/generated/refs/。
+- 道具 3D 模型:Tripo v3.1 图生模型(带 PBR 贴图),经 tools/blender/normalize_prop.py 统一尺寸与原点、贴图缩到 1024、meshopt 压缩,assets/models/v2/。
