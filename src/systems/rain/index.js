@@ -2,6 +2,8 @@ import {
   Fn, If, attribute, float, instanceIndex, storage, uniform, uv, varying,
   vec3, vec4, positionGeometry, smoothstep, fract, floor, sin,
 } from 'three/tsl';
+import { memoryMask } from '../../materials/memory.js';
+import { createNeonState, syncNeon, neonLight } from './neon.js';
 
 // Local, world-anchored weather volume, metres and seconds. No deposition ledger:
 // splash rings are visual impact events on the authored y=0 receiver only.
@@ -48,10 +50,9 @@ export default {
       dt: uniform(0), time: uniform(0), rain: uniform(1),
       wind: uniform(new THREE.Vector2()), windTravel: uniform(new THREE.Vector2()),
       right: uniform(new THREE.Vector3(1, 0, 0)),
-      origin: uniform(new THREE.Vector3()), dir: uniform(new THREE.Vector3(0, 0, -1)),
-      cosine: uniform(0.94), range: uniform(40), strength: uniform(0),
       camera: uniform(new THREE.Vector3()), lightning: uniform(0),
     };
+    this.neon = createNeonState(THREE, params.get('raincolor') !== '0');
     this.lights = ['lamp', 'far'].map(name => ({
       name, position: uniform(new THREE.Vector3()), direction: uniform(new THREE.Vector3(0, -1, 0)),
       outer: uniform(0), inner: uniform(1), range: uniform(1), intensity: uniform(0),
@@ -101,13 +102,6 @@ export default {
       drop = attribute('rainDrop', 'vec4'); impact = attribute('rainImpact', 'vec4');
     }
 
-    const cone = (p) => {
-      const delta = p.sub(u.origin), distance = delta.length().max(0.001);
-      const alignment = delta.div(distance).dot(u.dir);
-      return smoothstep(u.cosine, u.cosine.add(0.022).min(0.9999), alignment)
-        .mul(float(1).sub(smoothstep(u.range.mul(0.65), u.range, distance)))
-        .mul(u.strength);
-    };
     const amber = uniform(new THREE.Color('#c9854a'));
     const spot = (p, light) => Fn(() => {
       const delta = p.sub(light.position).toVar();
@@ -120,12 +114,18 @@ export default {
     })();
     // flash: thin streaks catch the lightning; big curtain planes and ground rings barely do (else they read as
     // lit squares on walls and water in the flash) (Claude, after Grok r5)
-    const shade = (p, flash = 0.6) => {
+    const shade = (p, flash = 0.6, coloredRain = true) => Fn(() => {
+      const mask = memoryMask(p).toVar();
       const lit = this.lights.map(light => light.color.mul(spot(p, light)));
-      return vec3(0.65, 0.72, 0.8).mul(float(0.05).add(u.lightning.mul(flash)))
+      const base = vec3(0.65, 0.72, 0.8).mul(float(0.05).add(u.lightning.mul(flash)))
         .add(lit[0].add(lit[1]).mul(0.95))
-        .add(amber.mul(cone(p)).mul(0.95)).min(vec3(1));
-    };
+        .add(amber.mul(mask).mul(0.95)).min(vec3(1));
+      if (!coloredRain) return base;
+      // Local incident colour, weight 0.4; darkness stays unchanged away from signs.
+      // Keep the beam's x3 in HDR (no clamp after multiplication), for bloom.
+      return base.add(neonLight(this.neon, p, mask).mul(0.4))
+        .mul(float(1).add(mask.mul(2).mul(this.neon.enabled)));
+    })();
     const material = () => new THREE.MeshBasicNodeMaterial({
       transparent: true, depthWrite: false, depthTest: true,
       blending: THREE.AdditiveBlending, side: THREE.DoubleSide, forceSinglePass: true,
@@ -171,7 +171,7 @@ export default {
     const age = impact.w.div(hitRandom.mul(0.5).add(0.22)).clamp();
     const radius = age.mul(sizeRandom.mul(0.15).add(0.04)).add(0.012);
     rings.positionNode = impact.xyz.add(vec3(positionGeometry.x, 0, positionGeometry.y).mul(radius.mul(2)));
-    rings.colorNode = varying(shade(impact.xyz, 0.12).mul(0.8), 'rainHitLight');
+    rings.colorNode = varying(shade(impact.xyz, 0.12, false).mul(0.8), 'rainHitLight');
     const circle = uv().sub(0.5).length().mul(2);
     rings.opacityNode = float(1).sub(smoothstep(0.035, 0.12, circle.sub(0.8).abs()))
       .mul(float(1).sub(varying(age, 'rainHitAge'))).mul(u.rain).mul(0.38);
@@ -208,7 +208,7 @@ export default {
   },
 
   sync(ctx) {
-    const u = this.u, memory = ctx.memory;
+    const u = this.u;
     u.rain.value = Math.max(0, Math.min(1, ctx.world?.rain ?? 1));
     u.lightning.value = Math.max(0, Math.min(1, ctx.world?.lightning ?? 0));
     u.wind.value.copy(ctx.world?.wind ?? { x: 0, y: 0 });
@@ -224,21 +224,16 @@ export default {
       light.range.value = source.distance > 0 ? source.distance : 1e6;
       light.color.value.copy(source.color);
     }
-    if (memory) {
-      u.origin.value.copy(memory.origin); u.dir.value.copy(memory.dir).normalize();
-      u.cosine.value = Math.cos(memory.angle);
-      u.range.value = Math.max(0.001, memory.range);
-      u.strength.value = Math.max(0, Math.min(1, memory.strength));
-    } else u.strength.value = 0;
     ctx.camera.updateMatrixWorld();
     u.camera.value.setFromMatrixPosition(ctx.camera.matrixWorld);
     u.right.value.setFromMatrixColumn(ctx.camera.matrixWorld, 0);
+    syncNeon(this.neon, ctx, u.camera.value, u.time.value);
     this.group.visible = u.rain.value > 0;
   },
 
   update(dt, t, ctx) {
-    this.sync(ctx);
     this.u.time.value = t;
+    this.sync(ctx);
     this.u.dt.value = Math.max(0, Math.min(dt, 0.1));
     this.u.windTravel.value.addScaledVector(this.u.wind.value, this.u.dt.value);
     if (this.gpu) ctx.renderer.compute(this.compute);

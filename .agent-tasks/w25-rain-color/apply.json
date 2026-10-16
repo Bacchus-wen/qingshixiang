@@ -1,0 +1,13 @@
+{
+ "state": "applied",
+ "files": [
+  "src/systems/rain/README.md",
+  "src/systems/rain/index.js",
+  "src/systems/rain/neon.js",
+  "src/systems/rain/verify.mjs"
+ ],
+ "created": [
+  "src/systems/rain/neon.js"
+ ],
+ "at": "2026-10-16 22:05:23"
+}

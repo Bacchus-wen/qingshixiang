@@ -13,21 +13,26 @@ registerHooks({ resolve(specifier, context, next) {
 const THREE = await import('three/webgpu');
 const { mrt, output, velocity } = await import('three/tsl');
 const { default: template } = await import('./index.js');
+const { syncMemory, mains } = await import('../../materials/memory.js');
+const { createNeonState, syncNeon } = await import('./neon.js');
 const { default: WGSLNodeBuilder } = await import(new URL('node_modules/three/src/renderers/webgpu/nodes/WGSLNodeBuilder.js', root));
 const { default: GLSLNodeBuilder } = await import(new URL('node_modules/three/src/renderers/webgl-fallback/nodes/GLSLNodeBuilder.js', root));
 
-const renderer = new THREE.WebGPURenderer({ canvas: {
-  width: 1280, height: 720, style: {}, addEventListener() {}, removeEventListener() {},
-} });
-// Shader generation only: no fake GPU execution, no device/context creation.
-renderer.backend.capabilities = { getUniformBufferLimit: () => 65536 };
-renderer.backend.hasFeature = () => false;
-renderer.hasFeature = () => false;
-renderer.backend.extensions = { has: () => false };
-// The real engine renders color + velocity into an MRT before TRAA/bloom.
-const target = new THREE.RenderTarget(1280, 720, { count: 2 });
-target.textures[0].name = 'output'; target.textures[1].name = 'velocity';
-renderer.setRenderTarget(target); renderer.setMRT(mrt({ output, velocity }));
+function shaderRenderer(gpu) {
+  const renderer = new THREE.WebGPURenderer({ forceWebGL: !gpu, canvas: {
+    width: 1280, height: 720, style: {}, addEventListener() {}, removeEventListener() {},
+  } });
+  // Shader generation only: no fake GPU execution, no device/context creation.
+  renderer.backend.capabilities = { getUniformBufferLimit: () => 65536 };
+  renderer.backend.hasFeature = () => false;
+  renderer.hasFeature = () => false;
+  renderer.backend.extensions = { has: () => false };
+  // The real engine renders color + velocity into an MRT before TRAA/bloom.
+  const target = new THREE.RenderTarget(1280, 720, { count: 2 });
+  target.textures[0].name = 'output'; target.textures[1].name = 'velocity';
+  renderer.setRenderTarget(target); renderer.setMRT(mrt({ output, velocity }));
+  return renderer;
+}
 const diagnostics = [];
 const warn = console.warn, error = console.error;
 console.warn = (...v) => diagnostics.push(v.join(' '));
@@ -45,13 +50,67 @@ function context(gpu, low) {
 }
 
 try {
+  // Nearest-source selection, deterministic half-second refresh and memory gates.
+  const selectionCtx = context(false, true);
+  const signs = Array.from({ length: 12 }, (_, i) => ({
+    id: i, x: 0, y: 1, z: -i - 1, alive: i === 1 ? 1 : 0,
+    tint: i % 2 ? '#ff3ba7' : '#24e9ee',
+  })).reverse();
+  const originalOrder = signs.slice();
+  selectionCtx.api.neon = { enabled: true, mode: 'cone', signs };
+  const state = createNeonState(THREE), camera = new THREE.Vector3();
+  selectionCtx.memory.strength = 0;
+  syncNeon(state, selectionCtx, camera, 0);
+  assert.deepEqual(state.selected.map(s => s.id), [0, 1, 2, 3, 4, 5, 6, 7]);
+  assert.deepEqual(signs, originalOrder, 'must not reorder another system\'s signs');
+  assert.deepEqual(state.positions.array.map(p => p.w), [0, 1, 0, 0, 0, 0, 0, 0]);
+  assert(state.colors.array.every(c => c.w === 0), 'closed eye cannot revive dead signs');
+  const cyan = new THREE.Color('#24e9ee');
+  assert.equal(state.colors.array[0].x, cyan.r);
+  assert.equal(state.colors.array[0].y, cyan.g);
+  assert.equal(state.colors.array[0].z, cyan.b);
+  camera.z = -20;
+  syncNeon(state, selectionCtx, camera, 0.499);
+  assert.equal(state.selected[0].id, 0, 'camera movement does not sort every frame');
+  syncNeon(state, selectionCtx, camera, 0.5);
+  assert.deepEqual(state.selected.map(s => s.id), [11, 10, 9, 8, 7, 6, 5, 4]);
+  selectionCtx.memory.origin.set(0, 1, 0);
+  selectionCtx.memory.dir.set(0, 0, -1); selectionCtx.memory.strength = 1;
+  syncNeon(state, selectionCtx, camera, 0.51);
+  assert(state.colors.array.every(c => c.w === 1), 'source memory updates before next selection');
+  selectionCtx.memory.dir.set(0, 0, 1);
+  syncNeon(state, selectionCtx, camera, 0.52);
+  assert(state.colors.array.every(c => c.w === 0), 'unlit sources outside cone stay dead');
+  selectionCtx.api.neon.mode = 'past';
+  syncNeon(state, selectionCtx, camera, 0.53);
+  assert.equal(state.past.value, 1); assert(state.colors.array.every(c => c.w === 1));
+  camera.z = 0;
+  syncNeon(state, selectionCtx, camera, 0);
+  assert.equal(state.selected[0].id, 0, 'rewinding deterministic time refreshes selection');
+  selectionCtx.api.neon.signs = [signs[0]];
+  syncNeon(state, selectionCtx, camera, 0.01);
+  assert.equal(state.selected.length, 1);
+  assert(state.colors.array.slice(1).every(c => c.lengthSq() === 0), 'unused slots clear all colour');
+  selectionCtx.api.neon.enabled = false;
+  syncNeon(state, selectionCtx, camera, 0.02);
+  assert.equal(state.selected.length, 0);
+  assert(state.positions.array.every(p => p.lengthSq() === 0));
+  assert(state.colors.array.every(c => c.lengthSq() === 0));
+  console.log('PASS neon selection: nearest 8, cadence, rewind, linear RGB, source memory, past/off and clearing');
   for (const gpu of [false, true]) for (const low of [true, false]) {
+    // Three caches compiled TSL functions by backend, so never share a backend
+    // between GLSL and WGSL builders (memoryMask now uses MaterialX noise Fns).
+    const renderer = shaderRenderer(gpu);
     const rain = Object.create(template), ctx = context(gpu, low);
+    ctx.api.neon = { enabled: true, mode: 'cone', signs };
+    syncMemory(ctx.memory);
     await rain.init(ctx);
     assert.equal(ctx.api.rain.particleCount, gpu ? (low ? 20000 : 60000) : (low ? 2400 : 6000));
     assert.equal(rain.meshes.length, 5);
     assert(rain.meshes.every(m => m.material.transparent && !m.material.depthWrite));
     assert(rain.lights.every(light => light.intensity.value === 0));
+    assert.equal(rain.neon.selected.length, 8);
+    assert(!ctx.scene.children.some(o => o.isLight), 'rain must not create THREE lights');
     // Real SpotLights, including a transformed parent and changing target.
     const parent = new THREE.Group(); parent.position.set(2, 0, -3);
     const lamp = new THREE.SpotLight(0xe4ebf2, 650, 26, 0.62, 0.7, 2);
@@ -108,9 +167,8 @@ try {
       ctx.world.wind.set(-4, 3); rain.update(0, 2, ctx);
       assert.deepEqual(p, before); assert(rain.u.windTravel.value.equals(travel));
       ctx.world.rain = 0; ctx.memory.strength = 0; rain.sync(ctx);
-      assert.equal(rain.group.visible, false); assert.equal(rain.u.strength.value, 0);
+      assert.equal(rain.group.visible, false);
       ctx.world.rain = 1; ctx.memory.origin.set(1, 2, 3); rain.sync(ctx);
-      assert(rain.u.origin.value.equals(ctx.memory.origin));
       assert.equal(rain.group.visible, true);
     }
     const Builder = gpu ? WGSLNodeBuilder : GLSLNodeBuilder;
@@ -118,6 +176,14 @@ try {
       const b = new Builder(mesh, renderer); b.camera = ctx.camera; b.scene = ctx.scene; b.build();
       assert(b.vertexShader.length > 500 && b.fragmentShader.length > 500);
       assert(!/NaN|undefined/.test(b.vertexShader + b.fragmentShader));
+      if (mesh.name !== 'rain-splashes') {
+        // The two packed arrays compile on both backends, and mains is the exact
+        // shared live uniform (no CPU copy that could lag by the selection interval).
+        const uniforms = [...b.uniforms.vertex, ...b.uniforms.fragment];
+        assert(uniforms.some(u => u.node === rain.neon.positions));
+        assert(uniforms.some(u => u.node === rain.neon.colors));
+        assert(uniforms.some(u => u.node === mains));
+      }
     }
     const mode = ctx.api.rain.mode, count = ctx.api.rain.particleCount;
     rain.dispose(ctx); assert.equal(ctx.scene.children.length, 0); assert.equal(ctx.api.rain, undefined);
