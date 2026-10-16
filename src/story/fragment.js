@@ -31,7 +31,7 @@ function marksTexture(count) {
       const y = 1024 - (m.y / 2.12) * 1024;
       g.globalAlpha = i === n - 1 ? 1 : 0.28;
       g.beginPath(); g.moveTo(14, y); g.lineTo(118, y + (i % 2 ? 3 : -2)); g.stroke();
-      g.fillText(m.label, i % 2 ? 150 : 122, y + 8); // alternate columns: the marks are only 6-7 cm apart
+      if (i === n - 1) g.fillText(m.label, 122, y + 8); // only this year's age is written; the old ones are just pencil lines
     });
     g.globalAlpha = 1; tex.needsUpdate = true;
   };

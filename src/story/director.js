@@ -120,6 +120,8 @@ export default {
         if (!this.moved && (Math.abs(input.pointer.x) > 0.15 || Math.abs(input.pointer.y) > 0.15)) { this.moved = true; this.film.hint(''); }
         // however it was used, the eye goes back to the door before it runs out (its resting gaze is the door)
         if (frag?.state === 'idle' && this.power < 0.35) { this.returning = Math.min(1, (this.returning ?? 0) + dt * 0.25); m.lookOverride = { x: 0, y: 0 }; }
+        // once the marks have been read the eye never leaves the door again: no second shop after the climax
+        if (frag?.state === 'done') m.lookOverride = { x: 0, y: 0 };
         // after the door memory the eye has nothing left: power runs out within ~14 s
         if (frag?.state === 'done') this.power = Math.max(0, this.power - dt / 14);
         else if (robot && robot.open > 0.2 && frag?.state !== 'playing') this.power = Math.max(0, this.power - dt / 150);
@@ -137,14 +139,15 @@ export default {
       }
       case 'end': {
         m.forceOpen = false;
+        // no crane up: stay at eye height and back away along the street, the robot and the cat still in frame
         const u = ease(Math.min(1, this.t / 18));
-        this.cam.pos.set(ROBOT.x + 2.2 + u * 3, 1.4 + u * 7, ROBOT.z + 3 + u * 6);
-        this.cam.look.set(ROBOT.x, 0.6 + u * 0.4, ROBOT.z - u * 2);
-        this.cam.fov = 44;
+        this.cam.pos.set(ROBOT.x + 2.4 + u * 2.2, 1.5, ROBOT.z + 3 + u * 5.5);
+        this.cam.look.set(ROBOT.x + 0.3, 0.75, ROBOT.z - 0.4);
+        this.cam.fov = 44 - u * 6;
         // fully black first, a held beat, then the two lines; replay only on a fresh press once offered
         this.film.fade(Math.min(1, Math.max(0, (this.t - 10) / 6)));
         if (this.t > 17.5) this.film.endCard();
-        if (this.t > 24) this.film.replayHint();
+        if (this.t > 50) this.film.replayHint(); // the card is left alone for a long while
         if (this.t > 24 && (input.wasPressed('Pointer') || input.wasPressed('Space'))) location.reload();
         break;
       }

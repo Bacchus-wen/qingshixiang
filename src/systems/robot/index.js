@@ -60,11 +60,11 @@ function makeGobo() {
     if (mode === 'line') {
       // surveyor's level: the eye narrows to a single horizontal line (with a faint double from the crack)
       // a faint fill around the mark so the jamb reads
-      g.fillStyle = 'rgba(255,255,255,0.07)'; g.beginPath(); g.ellipse(0, 0, 60, 50, 0, 0, 7); g.fill();
+      g.fillStyle = 'rgba(255,255,255,0.22)'; g.beginPath(); g.ellipse(0, 0, 110, 90, 0, 0, 7); g.fill(); // the whole door is seen, not just the mark
       // a short level mark, only as wide as the jamb and its pencil lines
-      const lg = g.createLinearGradient(-12, 0, 12, 0);
+      const lg = g.createLinearGradient(-7.5, 0, 7.5, 0); // (cone widened ~1.6x: mark drawn smaller to stay jamb-wide)
       lg.addColorStop(0, 'rgba(255,255,255,0)'); lg.addColorStop(0.25, '#fff'); lg.addColorStop(0.75, '#fff'); lg.addColorStop(1, 'rgba(255,255,255,0)');
-      g.fillStyle = lg; g.fillRect(-12, -1.5, 24, 3);
+      g.fillStyle = lg; g.fillRect(-7.5, -1, 15, 2);
       tex.needsUpdate = true;
       return;
     }
@@ -80,9 +80,9 @@ function makeGobo() {
     for (const [x, y, s, k] of specks) { g.fillStyle = k < 0.8 ? `rgba(0,0,0,${0.25 + k * 0.4})` : 'rgba(255,255,255,0.5)'; g.beginPath(); g.arc(x, y, s, 0, 7); g.fill(); }
     // cracks
     // (the flood throws the whole lens across the street: cracks would become metre-wide bars, so they thin out)
-    g.strokeStyle = `rgba(0,0,0,${0.8 * (1 - 0.8 * flood)})`; g.lineWidth = 2.2;
+    g.strokeStyle = `rgba(0,0,0,${0.8 * (1 - 0.8 * flood)})`; g.lineWidth = 1.2;
     g.beginPath(); g.moveTo(-90, -30); g.lineTo(-20, 5); g.lineTo(15, -12); g.lineTo(100, 40); g.stroke();
-    g.lineWidth = 1.1; g.beginPath(); g.moveTo(-20, 5); g.lineTo(-35, 80); g.moveTo(15, -12); g.lineTo(30, -95); g.moveTo(60, 20); g.lineTo(70, 70); g.stroke();
+    g.lineWidth = 0.7; g.beginPath(); g.moveTo(-20, 5); g.lineTo(-35, 80); g.moveTo(15, -12); g.lineTo(30, -95); g.moveTo(60, 20); g.lineTo(70, 70); g.stroke();
     g.restore();
     tex.needsUpdate = true;
   };
@@ -252,8 +252,11 @@ export default {
       const f = this.floodT;
       flood = Math.max(flood, f < 0.3 ? f / 0.3 : f < 0.8 ? 1 : Math.max(0, 1 - (f - 0.8) / 1.6));
     }
-    coneAngle += (1.35 - coneAngle) * flood;
-    this.spot.angle = ctx.memory.goboMode === 'line' ? 0.05 + 0.03 * o : coneAngle;
+    // the first full opening floods only part of the street (corners stay black, the door stays the climax);
+    // the last breath (director fade, memory.flood) may take the whole street
+    const wide = (ctx.memory.flood ?? 0) > 0 ? 1.35 : 0.72;
+    coneAngle += (wide - coneAngle) * flood;
+    this.spot.angle = ctx.memory.goboMode === 'line' ? 0.08 + 0.05 * o : coneAngle; // wide enough to show the whole door
     // never toggle the light's visibility (changing the light set recompiles every lit material = a visible hitch);
     // just stop re-rendering its shadow map while the eye is shut. The beam volume is kept visible for the first
     // frames (hidden by the black title) so its pipeline is compiled before the eye ever opens.
@@ -269,7 +272,7 @@ export default {
     // ---- publish the memory cone
     const m = ctx.memory;
     m.origin.copy(this._v); m.dir.copy(this._d);
-    m.angle = coneAngle; m.range = 40 + 50 * flood; m.strength = Math.max(o, flood * 0.9); m.floodNow = flood;
+    m.angle = coneAngle; m.range = 40 + 50 * flood; m.strength = Math.max(o, flood * ((ctx.memory.flood ?? 0) > 0 ? 0.9 : 0.5)); m.floodNow = flood;
     syncMemory(m);
   },
 };

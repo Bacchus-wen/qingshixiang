@@ -3,12 +3,12 @@
 export class Film {
   constructor(root) {
     root.innerHTML = `
-      <div class="film-edge top"><span class="fe-l">LARKHAVEN</span><span class="fe-r">ISO 400 · <b class="fe-frame">0000</b></span></div>
+      <div class="film-edge top"><span class="fe-l"></span><span class="fe-r">ISO 400 · <b class="fe-frame">0000</b></span></div>
       <div class="film-edge bottom"><span class="fe-l fe-phase">—</span><span class="fe-power"><i></i></span></div>
       <div class="film-hint"></div>
       <div class="film-black"></div>
-      <div class="film-title"><h1>青 石 巷</h1><p>请戴上耳机</p><small>点击画面开始</small></div>
-      <div class="film-card"><p>刻度停在十一岁。</p><p>灯灭了,门还是那么高。</p><small class="film-replay">点击画面重看</small><small class="film-credit">现场录音:Freesound 与 Wikimedia Commons 的 CC0 录音;远处的狗叫:YleArkisto(CC BY 4.0)。详见 CREDITS.md</small></div>`;
+      <div class="film-title"><h1>青 石 巷</h1><p>请戴上耳机</p><small>点击画面开始</small><small class="film-credit">现场录音来自 Freesound 与 Wikimedia Commons(CC0);远处的狗叫:YleArkisto,CC BY 4.0。出处见 CREDITS.md</small></div>
+      <div class="film-card"><p>刻度停在十一岁。</p><p>灯灭了,门还是那么高。</p><small class="film-replay">点击画面重看</small></div>`;
     this.el = root;
     this.frameEl = root.querySelector('.fe-frame');
     this.hintEl = root.querySelector('.film-hint');
@@ -25,10 +25,12 @@ export class Film {
   power(v, visible) { this.powerBar.style.width = `${(v * 100).toFixed(1)}%`; this.powerEl.classList.toggle('on', visible); }
   phase(name) {
     const label = { arrive: '01', wait: '02', waking: '03', look: '04', fade: '05', end: '06' }[name] || '—';
-    this.phaseEl.textContent = `FRAME ${label}`;
+    this.phaseEl.textContent = ''; // (the phase label read as a UI; the film edge keeps only the counter)
+    void label;
   }
   fade(v) { this.black.style.opacity = v; }
   endCard() { this.card.classList.add('on'); }
-  replayHint() { this.card.classList.add('replay'); }
-  title(on) { this.titleEl.classList.toggle('on', on); }
+  replayHint() { this.card.classList.add('replay'); document.body.classList.remove('playing'); }
+  // the cursor is hidden while the piece plays (the gaze is the cursor); it comes back for the title and replay
+  title(on) { this.titleEl.classList.toggle('on', on); document.body.classList.toggle('playing', !on); }
 }
