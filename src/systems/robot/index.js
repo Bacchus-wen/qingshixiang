@@ -52,7 +52,7 @@ function makeGobo() {
     }
     g.closePath();
   };
-  const draw = (open, mode) => {
+  const draw = (open, mode, flood = 0) => {
     const g = c.getContext('2d');
     g.setTransform(1, 0, 0, 1, 0, 0);
     g.fillStyle = '#000'; g.fillRect(0, 0, 256, 256);
@@ -79,7 +79,8 @@ function makeGobo() {
     // silver specks and dust: dark motes and a few bright pin-holes
     for (const [x, y, s, k] of specks) { g.fillStyle = k < 0.8 ? `rgba(0,0,0,${0.25 + k * 0.4})` : 'rgba(255,255,255,0.5)'; g.beginPath(); g.arc(x, y, s, 0, 7); g.fill(); }
     // cracks
-    g.strokeStyle = 'rgba(0,0,0,0.8)'; g.lineWidth = 2.2;
+    // (the flood throws the whole lens across the street: cracks would become metre-wide bars, so they thin out)
+    g.strokeStyle = `rgba(0,0,0,${0.8 * (1 - 0.8 * flood)})`; g.lineWidth = 2.2;
     g.beginPath(); g.moveTo(-90, -30); g.lineTo(-20, 5); g.lineTo(15, -12); g.lineTo(100, 40); g.stroke();
     g.lineWidth = 1.1; g.beginPath(); g.moveTo(-20, 5); g.lineTo(-35, 80); g.moveTo(15, -12); g.lineTo(30, -95); g.moveTo(60, 20); g.lineTo(70, 70); g.stroke();
     g.restore();
@@ -260,8 +261,9 @@ export default {
     this.spot.shadow.autoUpdate = o > 0.005 || this.frames < 30;
     if (this.beamVol) { this.beamVol.material.userData.density.value = 0.35 * o; this.beamVol.visible = o > 0.01 || this.frames < 30; }
     const mode = ctx.memory.goboMode;
-    if (mode !== this._lastMode || (mode !== 'line' && t - this.goboT > 1 / 15 && Math.abs(o - (this._lastGobo ?? -1)) > 0.01)) {
-      this.gobo.draw(o, mode); this.goboT = t; this._lastGobo = o; this._lastMode = mode;
+    const fq = Math.round(flood * 10) / 10;
+    if (mode !== this._lastMode || fq !== this._lastFlood || (mode !== 'line' && t - this.goboT > 1 / 15 && Math.abs(o - (this._lastGobo ?? -1)) > 0.01)) {
+      this.gobo.draw(o, mode, fq); this.goboT = t; this._lastGobo = o; this._lastMode = mode; this._lastFlood = fq;
     }
 
     // ---- publish the memory cone
