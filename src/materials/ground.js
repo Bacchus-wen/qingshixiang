@@ -2,9 +2,7 @@
 // Source/permission and packed RG normal + B height convention: see CREDITS.md.
 import * as THREE from 'three/webgpu';
 import {
-  texture, positionWorld, normalWorldGeometry, uv, attribute, vec2, vec3, vec4, float,
-  abs, select, normalize, mix, max, smoothstep, floor, fract, hash,
-  sin, cos, dot, fwidth, cameraViewMatrix, mx_noise_float,
+  abs, attribute, cameraPosition, cameraViewMatrix, cos, dot, float, floor, fract, fwidth, hash, max, metalness, mix, mrt, mx_noise_float, normalWorldGeometry, normalize, positionWorld, reflector, roughness, select, sin, smoothstep, texture, uv, vec2, vec3, vec4,
 } from 'three/tsl';
 import { wetLayer, wetUniforms, wetFbm, puddleMask, rippleNormal } from './wet.js';
 import { groundLayout, DEFAULT_GROUND_LANE } from './ground-layout.js';
@@ -62,7 +60,7 @@ function pair(T, name, st) {
   return { a: luminance(texture(T[`${name}_c`], st).rgb), xy: packed.rg.mul(2).sub(1), h: packed.b };
 }
 
-function wetMaterial(name, ctx, { albedo, roughness, xy, T, B, coverage = 0, porosity = 0.6, metal = 0, ripple = 1,
+function wetMaterial(name, ctx, { albedo, roughness, xy, T, B, coverage = 0, porosity = 0.6, metal = 0, ripple = 1, planar = null,
   wetness = wetUniforms.wetness, waterLevel = float(0), flow = float(0) }) {
   const dbg = paramsOf(ctx).get('surfdbg') || '';
   const up = smoothstep(0.6, 0.95, normalWorldGeometry.y);
@@ -81,7 +79,19 @@ function wetMaterial(name, ctx, { albedo, roughness, xy, T, B, coverage = 0, por
   m.normalNode = normalize(cameraViewMatrix.mul(vec4(worldNormal, 0)).xyz);
   m.roughnessNode = mix(max(w.roughness, 0.65), w.roughness, up).clamp(0.015, 1);
   m.metalnessNode = float(metal);
-  // No MRT override: PostFX writes b = smoothstep(0.55,0.9,normalWorld.y), uses g for roughness.
+  if (planar) {
+    // v3 (Grok r16, after Threejs-Punk): the road is a plane -- a half-resolution planar reflection, broken by the
+    // surface normal and gated by gloss, instead of screen-space rays sliding along it (SSR confetti, missing signs)
+    const refl = planar;
+    refl.uvNode = refl.uvNode.add(worldNormal.xz.mul(0.035));
+    const gloss = smoothstep(0.32, 0.03, m.roughnessNode).mul(up);
+    const V = cameraPosition.sub(positionWorld).normalize();
+    const fres = float(1).sub(V.y.abs()).pow(4).mul(0.85).add(0.15);
+    m.emissiveNode = m.emissiveNode.add(refl.rgb.mul(gloss).mul(fres));
+    // keep SSR off this surface: zero the up-facing gate PostFX reads from the metalrough MRT
+    m.mrtNode = mrt({ metalrough: vec4(metalness, roughness, float(0), float(1)) });
+  }
+  // (PostFX otherwise writes b = smoothstep(0.55,0.9,normalWorld.y), uses g for roughness.)
   m.userData.ccGround = { coverage, packedNormal: 'RG slope, B height', name };
   return m;
 }
@@ -136,7 +146,14 @@ export function groundRoad(textures, ctx, lane = DEFAULT_GROUND_LANE) {
   roughness = mix(roughness, float(0.66), paint);
   const { roughnessScale, wetness } = roadSurfaceVariation(P);
   roughness = roughness.mul(roughnessScale);
-  return wetMaterial('cc_ground_road', ctx, { albedo, roughness, xy, ...frame, coverage: 0.75, porosity: 0.7,
+  let planar = null;
+  // tried as default (Grok r16): sharper but dimmer than our SSR streaks and it re-renders the whole street (+15 ms); opt-in only
+  if (paramsOf(ctx).has('planar') && ctx?.scene && ctx.backend !== 'webgl2') {
+    planar = reflector({ resolutionScale: Number(paramsOf(ctx).get('planarScale') || 0.5), bounces: false });
+    planar.target.rotateX(-Math.PI / 2); planar.target.position.y = 0.001;
+    ctx.scene.add(planar.target);
+  }
+  return wetMaterial('cc_ground_road', ctx, { planar, albedo, roughness, xy, ...frame, coverage: 0.75, porosity: 0.7,
     wetness, ...roadWaterProfile(P.x, L.halfRoad) });
 }
 
