@@ -1,0 +1,113 @@
+{
+  "batch_id": "b_20261016183045",
+  "tasks": 6,
+  "submitted": 6,
+  "failed": 0,
+  "total_images": 6,
+  "items": [
+    {
+      "index": 1,
+      "prompt": "Single isolated object for 3D reconstruction, three-quarter front view from slightly above, entire object visible and centred, plain light grey seamless background, soft even studio lighting with no harsh shadows, photorealistic, highly detailed weathered materials, no text, no watermark, no people. Object: an enclosed balcony module from a 1990s southern Chinese concrete apartment block: a concrete slab and parapet wall with peeling paint and black rain stains, fully enclosed by a rusty welded steel security cage (防盗网) with vertical bars, a small potted plant and a plastic basin inside, a bamboo laundry pole with a few faded clothes sticking out",
+      "id": "img_43552",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43552/d4ec48c8-d3f9-4f4c-a18d-305d73a503c8.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T18%3A30%3A12Z%2F3600%2F%2F5aec9b4176b85560e613c76e38e7eb7a469ce43ff6025938e50468bae2119a5a"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/hero/img_43552/ai_generate_43552_1.png"
+      ]
+    },
+    {
+      "index": 2,
+      "prompt": "Single isolated object for 3D reconstruction, three-quarter front view from slightly above, entire object visible and centred, plain light grey seamless background, soft even studio lighting with no harsh shadows, photorealistic, highly detailed weathered materials, no text, no watermark, no people. Object: an old aluminium sliding window with a protruding rusty steel security cage box in front of it, an air-conditioner outdoor unit mounted on a rusty bracket below the cage, a drain pipe and tangled cables, grime streaks on the surrounding concrete wall patch",
+      "id": "img_43553",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43553/6cc7acf0-f7ef-499b-94e4-a33d511de3db.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T18%3A30%3A09Z%2F3600%2F%2F08dcc3e6c77709acc3e7968d91c36708bdee2f20c9b36b6cd5478b392b46ee9d"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/hero/img_43553/ai_generate_43553_1.png"
+      ]
+    },
+    {
+      "index": 3,
+      "prompt": "Single isolated object for 3D reconstruction, three-quarter front view from slightly above, entire object visible and centred, plain light grey seamless background, soft even studio lighting with no harsh shadows, photorealistic, highly detailed weathered materials, no text, no watermark, no people. Object: a torn and faded red-and-white striped canvas shop awning on a bent steel frame, sagging with rainwater stains, a bare fluorescent tube light mounted underneath",
+      "id": "img_43554",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43554/9ab1782c-ec6d-4be3-a82b-563be3c02082.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T18%3A29%3A56Z%2F3600%2F%2F83034398d6f0d56737c6db678815a453d797b5c80e337a95ff9d71e28750f867"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/hero/img_43554/ai_generate_43554_1.png"
+      ]
+    },
+    {
+      "index": 4,
+      "prompt": "Single isolated object for 3D reconstruction, three-quarter front view from slightly above, entire object visible and centred, plain light grey seamless background, soft even studio lighting with no harsh shadows, photorealistic, highly detailed weathered materials, no text, no watermark, no people. Object: a rooftop stainless-steel cylindrical water tank on a rusty steel stand next to a rooftop solar water heater with vacuum tubes, pipes connecting them, weathered and dirty",
+      "id": "img_43555",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43555/cd7e050b-4ea5-4eb4-8b6b-b40607c0b238.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T18%3A30%3A42Z%2F3600%2F%2F5f0abc49bc685e863ec9a96c3253c1dc99514fa570eea344b0eb09d0562d0f53"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/hero/img_43555/ai_generate_43555_1.png"
+      ]
+    },
+    {
+      "index": 5,
+      "prompt": "Single isolated object for 3D reconstruction, three-quarter front view from slightly above, entire object visible and centred, plain light grey seamless background, soft even studio lighting with no harsh shadows, photorealistic, highly detailed weathered materials, no text, no watermark, no people. Object: an old concrete utility pole with a grey pole-mounted transformer, insulators, a thick tangled bundle of black cables, layers of torn paper advertisements pasted on the pole",
+      "id": "img_43556",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43556/46a16d64-6456-4fb8-a014-a056fbc805c8.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T18%3A30%3A02Z%2F3600%2F%2Fa4050c3e3ff3da3f6f80182388cd01e08c8aeda7012fd60d874560ae45d37480"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/hero/img_43556/ai_generate_43556_1.png"
+      ]
+    },
+    {
+      "index": 6,
+      "prompt": "Single isolated object for 3D reconstruction, three-quarter front view from slightly above, entire object visible and centred, plain light grey seamless background, soft even studio lighting with no harsh shadows, photorealistic, highly detailed weathered materials, no text, no watermark, no people. Object: a closed street food stall cart with a dented stainless steel counter, a folded faded umbrella, plastic stools stacked on top, gas cylinder underneath, covered partly with a torn tarp",
+      "id": "img_43557",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43557/4fc293ee-76b2-4d5b-955d-f94b9b7b79d5.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T18%3A30%3A31Z%2F3600%2F%2F45149c5b6a8df06e2bcaa07cd0fb5b573567feb89da2d6e4dfcab3669973bd68"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/hero/img_43557/ai_generate_43557_1.png"
+      ]
+    }
+  ],
+  "plan": {
+    "kind": "image",
+    "model": "gpt",
+    "version": "gpt-image-2.5-sunburst",
+    "count": 6,
+    "quota": {
+      "limit": 300,
+      "used": 4,
+      "remaining": 296,
+      "unit": "张",
+      "after": 10
+    },
+    "running": {
+      "limit": 20,
+      "current": 0
+    },
+    "allowed": true,
+    "blockers": [],
+    "cost": {
+      "amount": 0,
+      "currency": "USD",
+      "priced": false,
+      "estimated": false,
+      "note": null
+    },
+    "request": {
+      "batch": true,
+      "tasks": 6,
+      "total_images": 6,
+      "local_uploads": []
+    }
+  }
+}

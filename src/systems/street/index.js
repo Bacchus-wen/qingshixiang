@@ -184,17 +184,44 @@ export default {
     // night sky environment for glossy reflections: faint, cold, almost black
     // v2 environment: a night sky with the city glow on the horizon (fills facades with a cold blue, gives the
     // wet road something to reflect besides black)
+    // v3 environment (after cybercity): a small offline "city" baked into PMREM -- haze dome, a dark ring of
+    // building silhouettes and ~140 small glowing panels (mostly cold/sodium window light, some faded neon). Rough
+    // surfaces barely pick it up at this intensity; wet, smooth ones catch scattered coloured points.
     const envScene = new THREE.Scene();
-    envScene.background = new THREE.Color(0.02, 0.026, 0.05);
-    const band = new THREE.Mesh(new THREE.CylinderGeometry(40, 40, 10, 32, 1, true), new THREE.MeshBasicNodeMaterial({ color: new THREE.Color(0.16, 0.1, 0.12), side: THREE.BackSide }));
-    band.position.y = 3; envScene.add(band);
-    const top = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8), new THREE.MeshBasicNodeMaterial({ color: new THREE.Color(0.035, 0.05, 0.1), side: THREE.BackSide }));
-    top.scale.set(50, 12, 50); top.position.y = 34; envScene.add(top);
+    envScene.background = new THREE.Color(0.018, 0.024, 0.045);
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(80, 24, 12), new THREE.MeshBasicNodeMaterial({ color: new THREE.Color(0.03, 0.036, 0.06), side: THREE.BackSide }));
+    envScene.add(dome);
+    const glowBand = new THREE.Mesh(new THREE.CylinderGeometry(70, 70, 14, 48, 1, true), new THREE.MeshBasicNodeMaterial({ color: new THREE.Color(0.11, 0.06, 0.05), side: THREE.BackSide }));
+    glowBand.position.y = 4; envScene.add(glowBand);
+    const wet = new THREE.Mesh(new THREE.CircleGeometry(80, 32), new THREE.MeshBasicNodeMaterial({ color: new THREE.Color(0.004, 0.005, 0.007) }));
+    wet.rotation.x = -Math.PI / 2; envScene.add(wet);
+    const silMat = new THREE.MeshBasicNodeMaterial({ color: new THREE.Color(0.006, 0.007, 0.01) });
+    const rr = (k) => { const x = Math.sin(k * 127.1) * 43758.5453; return x - Math.floor(x); };
+    for (let i = 0; i < 46; i++) {
+      const a = i / 46 * Math.PI * 2, R = 55 + rr(i) * 20, h = 10 + rr(i + 9) * 30;
+      const b = new THREE.Mesh(new THREE.BoxGeometry(6 + rr(i + 3) * 8, h, 6), silMat);
+      b.position.set(Math.cos(a) * R, h / 2, Math.sin(a) * R); b.lookAt(0, h / 2, 0); envScene.add(b);
+    }
+    const panelGeo = new THREE.PlaneGeometry(1, 1);
+    const neonCols = [0xff3ba7, 0x24e9ee, 0xb572ff, 0x63ed75, 0xffc35a];
+    for (let i = 0; i < 140; i++) {
+      const neon = rr(i + 50) < 0.3;
+      const c = new THREE.Color(neon ? neonCols[i % neonCols.length] : (rr(i + 70) < 0.5 ? 0xffd9a0 : 0xbcd2ff));
+      if (neon) c.lerp(new THREE.Color(0x888888), 0.4);
+      const m = new THREE.Mesh(panelGeo, new THREE.MeshBasicNodeMaterial({ color: c.multiplyScalar(neon ? 3.5 : 1.6), side: THREE.DoubleSide }));
+      const a = rr(i + 11) * Math.PI * 2, R = 30 + rr(i + 13) * 22, y = 2 + rr(i + 17) * 22;
+      m.position.set(Math.cos(a) * R, y, Math.sin(a) * R); m.scale.set(0.6 + rr(i + 19) * 2.5, 0.4 + rr(i + 23) * 1.6, 1);
+      m.lookAt(0, y, 0); envScene.add(m);
+    }
+    for (const z of [-20, 20]) { // two cold strip lights facing the road
+      const st = new THREE.Mesh(new THREE.PlaneGeometry(30, 0.5), new THREE.MeshBasicNodeMaterial({ color: new THREE.Color(1.6, 1.8, 2.2) }));
+      st.position.set(0, 12, z); st.lookAt(0, 0, z); envScene.add(st);
+    }
     const pm = new THREE.PMREMGenerator(ctx.renderer);
     scene.environment = pm.fromScene(envScene, 0.04).texture;
-    scene.environmentIntensity = 0.9;
+    scene.environmentIntensity = 0.35;
     // moonlight through the rain clouds: one weak, cold, shadowless key from high behind the robot's wall
-    const moon = new THREE.DirectionalLight(0x8ea3c8, 0.32);
+    const moon = new THREE.DirectionalLight(0x8ea3c8, 0.22);
     moon.position.set(-20, 30, 10); scene.add(moon, moon.target);
   },
   update(dt, t, ctx) {
@@ -220,7 +247,7 @@ export default {
       }
       mains.value += (k - mains.value) * Math.min(1, dt * 40);
       ctx.world.mains = mains.value;
-      ctx.scene.environmentIntensity = 0.9 * (0.3 + 0.7 * mains.value); // the city glow on the clouds dips too
+      ctx.scene.environmentIntensity = 0.35 * (0.3 + 0.7 * mains.value); // the city glow on the clouds dips too
       st.lamp.intensity = 650 * mains.value;
       if (st.far) st.far.intensity = 450 * mains.value;
       if (ctx.api.streetBulb) ctx.api.streetBulb.color.setRGB(9, 9.4, 10).multiplyScalar(Math.max(0.03, mains.value));
