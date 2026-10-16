@@ -29,6 +29,9 @@ npm run dev      # 打开终端里显示的地址(推荐 Chrome / Edge,支持 We
 | `?shot=<名字>` | 固定镜头截图模式(镜头列表见 `src/engine/shots.js`) |
 | `?pfx=nossr,notraa,nodof` | 关闭单项后处理 |
 | `?skip=rain,ghosts` / `?only=...` | 关闭或只开某些系统 |
+| `?windGust=1` | 固定风力(0–1) |
+| `?passcar` | 远处路口的车 2 秒后出现,之后每 6 秒一次 |
+| `?audio.rec=0` | 关掉全部真实录音层(与纯合成对比) |
 
 ## 工具
 首次使用工具前:`npx playwright install chromium`(工具只用 Playwright 自带的 Chromium,不会启动你自己的 Chrome);`tools/play.mjs` 拼图和 `tools/optimize-assets.sh` 需要系统里有 `ffmpeg`;Blender 脚本需要 Blender 5.2。
@@ -37,13 +40,14 @@ npm run dev      # 打开终端里显示的地址(推荐 Chrome / Edge,支持 We
 - `node tools/shot.mjs <镜头> [--uncap] [--size 1920x1080]`:单镜头截图 + 性能数据。
 - `node tools/profile.mjs <镜头>`:CPU 性能剖析。
 - `node tools/audio-render.mjs`:离线渲染并检查音景。
+- `node tools/audio-export.mjs [--norec]`:导出 40 秒试听 `docs/audio-preview.wav`(加 `--norec` 为纯合成版)。
 - `tools/blender/*.py`:无界面 Blender 生成机器人、道具、人物;导出后运行 `tools/optimize-assets.sh`。
 
 ## 目录
 ```
 src/engine/     渲染器、主循环、后处理(SSR、TRAA、景深、泛光、调色)、输入、镜头
 src/materials/  湿润层、世界坐标贴图、记忆光锥遮罩
-src/systems/    street(街道)、atmo(雾/体积光/闪电)、robot(机器人与眼睛)、ghosts(过去的人)、rain、audio
+src/systems/    street(街道、远处路口的车)、atmo(雾/体积光/闪电)、robot(机器人与眼睛)、ghosts(过去的人)、traffic(过去的车)、wind、cat、rain、audio
 src/story/      director(节奏与镜头)、fragment(门的记忆)
 src/ui/         片边 UI
 docs/           美术方向、剧情、调研、审查记录、汇报(REPORT.md)、性能(PERF.md)
