@@ -70,6 +70,10 @@ export class Engine {
       onProgress((i + 1) / active.length, s.name);
     }
     if (this.params.get('flatmat') !== null) scene.overrideMaterial = new THREE.MeshStandardNodeMaterial({ color: 0x777777, roughness: 0.5 }); // perf test only
+    // a story-critical system that failed would leave the experience stuck: stop with a visible error instead
+    const core = ['street', 'robot', 'director'];
+    const broken = this.systems.filter((x) => x._failed && core.includes(x.name)).map((x) => x.name);
+    if (broken.length) throw new Error(`核心系统初始化失败:${broken.join('、')}`);
     this.postfx.build();
     if (this.shot) document.body.classList.add('shot');
     addEventListener('resize', () => this.resize());

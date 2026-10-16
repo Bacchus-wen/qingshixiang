@@ -3,6 +3,7 @@
 一段 4 到 6 分钟的网页实时体验(three.js WebGPU)。雨夜里一条等待拆迁的老街,居民都搬走了。一台残破的测绘机器人靠墙坐着。按住,它那只还能用的机械眼会卡顿着睁开,琥珀色的光照到哪里,哪里就回到过去。
 
 ## 运行
+需要 Node.js 20.19+ 或 22.12+。
 ```bash
 npm install
 npm run dev      # 打开终端里显示的地址(推荐 Chrome / Edge,支持 WebGPU;否则自动退回 WebGL2)
@@ -30,6 +31,8 @@ npm run dev      # 打开终端里显示的地址(推荐 Chrome / Edge,支持 We
 | `?skip=rain,ghosts` / `?only=...` | 关闭或只开某些系统 |
 
 ## 工具
+首次使用工具前:`npx playwright install chromium`(工具只用 Playwright 自带的 Chromium,不会启动你自己的 Chrome);`tools/play.mjs` 拼图和 `tools/optimize-assets.sh` 需要系统里有 `ffmpeg`;Blender 脚本需要 Blender 5.2。
+
 - `node tools/play.mjs --speed 4`:自动试玩全程并截图(`renders/play-sheet.jpg`)。
 - `node tools/shot.mjs <镜头> [--uncap] [--size 1920x1080]`:单镜头截图 + 性能数据。
 - `node tools/profile.mjs <镜头>`:CPU 性能剖析。

@@ -20,5 +20,7 @@ try {
   engine.start();
 } catch (e) {
   console.error(e);
-  document.getElementById('ui').innerHTML = '<div class="film-title on"><p>这个浏览器无法运行 WebGPU 或 WebGL2</p><small>请用最新的 Chrome、Edge 或 Safari 打开</small></div>';
+  const msg = /核心系统/.test(e.message) ? `${e.message}` : '这个浏览器无法运行 WebGPU 或 WebGL2';
+  const hint = /核心系统/.test(e.message) ? '请刷新页面重试(详细信息见浏览器控制台)' : '请用最新的 Chrome、Edge 或 Safari 打开';
+  document.getElementById('ui').innerHTML = `<div class="film-title on"><p>${msg}</p><small>${hint}</small></div>`;
 }
