@@ -27,11 +27,11 @@ test('layered signs retain 8 surviving circuits, home clearance, local names and
   for (const side of [-1, 1]) assert.equal(signs.filter(s => s.side === side && s.alive).length, 4);
   facades.forEach((f, i) => {
     const local = signs.filter(s => s.facade === i);
-    assert.ok(local.length >= 1 && local.length <= 5);
+    assert.ok(local.length >= 1 && local.length <= 7);
     if (f.home) assert.ok(local.every(s => s.y - s.h / 2 >= 3.8 && !s.alive));
     else assert.equal(local.find(s => s.kind === 'fascia').text, f.signName);
     const blade = local.find(s => s.kind === 'blade');
-    assert.ok(blade.h >= 2.4 && blade.h <= 7.1);
+    assert.ok(blade.h >= 2.4 && blade.h <= (blade.multiStorey ? 9 : 7.1));
     assert.ok(Math.abs(blade.x) + blade.w / 2 < Math.abs(f.frontX));
   });
   const fallback = planSigns([{ ...facades[0], signName: undefined }], [{ side: -1, z: facades[0].z, name: '永记士多' }]);
@@ -41,9 +41,9 @@ test('layered signs retain 8 surviving circuits, home clearance, local names and
 test('one diffuser per shop, three size tiers, seeded ±0.8 m heights, 0.35 m boxes and 0.6–1.2 m hangers', () => {
   const signs = planSigns(facades);
   for (const [i, f] of facades.entries()) {
-    assert.equal(signs.filter(s => s.facade === i && s.kind === 'box').length, f.home ? 0 : 1);
+    assert.equal(signs.filter(s => s.facade === i && s.kind === 'box' && !s.upper).length, f.home ? 0 : 1);
   }
-  const blades = signs.filter(s => s.kind === 'blade');
+  const blades = signs.filter(s => s.kind === 'blade' && !s.upper);
   assert.equal(new Set(blades.map(s => s.w)).size, 3);
   assert.equal(new Set(blades.map(s => s.stroke)).size, 3);
   assert.ok(signs.every(s => Math.abs(s.heightOffset) <= 0.8));
@@ -165,6 +165,7 @@ test('fixed simulation time gives identical face/spill flicker; dead signs never
         const expected = Math.fround(flickerAt(sign.seed, t));
         assert.equal(a.getX(offset), expected);
         assert.equal(a.getX(offset + count - 1), expected);
+        assert.equal(sign.power, expected, 'lightPool callback must share geometry flicker');
         if (expected < 1) dips++;
       }
     }
@@ -178,4 +179,92 @@ test('fixed simulation time gives identical face/spill flicker; dead signs never
   updatePowers(f.meshes, 99); updatePowers(f.meshes, 6);
   assert.deepEqual(Array.from(face.geometry.attributes.neonPower.array), first);
   cleanup(f);
+});
+
+test('upper signs stay below the top storey, cap at two per facade and leave survivors unchanged', () => {
+  const tall = Array.from({ length: 400 }, (_, i) => ({ ...facades[i % facades.length], h: 26.3, home: false, w: 8 }));
+  const signs = planSigns(tall), upper = signs.filter(s => s.upper);
+  assert.deepEqual(new Set(upper.map(s => s.kind)), new Set(['upper', 'box', 'blade']));
+  for (let i = 0; i < tall.length; i++) {
+    const local = upper.filter(s => s.facade === i);
+    assert.ok(local.length <= 2);
+    assert.equal(new Set(local.map(s => s.floor)).size, local.length);
+    for (const s of local) {
+      assert.ok(s.floor >= 3 && s.floor < 8);
+      assert.ok(s.y - s.h / 2 > 6.3 && s.y + s.h / 2 < 21.8);
+      assert.equal(s.alive, 0);
+      if (s.kind === 'upper') assert.ok(s.w >= 2.5 && s.w <= 7);
+      if (s.kind === 'box') assert.equal(s.shape, 'square');
+    }
+  }
+  const rate = upper.filter(s => s.floor === 3).length / tall.length;
+  assert.ok(rate > 0.26 && rate < 0.38, `third-floor sampling rate ${rate}`);
+  const blades = signs.filter(s => s.kind === 'blade');
+  const ledRate = blades.filter(s => s.led).length / blades.length;
+  assert.ok(ledRate > 0.39 && ledRate < 0.51, `LED sampling rate ${ledRate}`);
+  assert.ok(signs.filter(s => s.alive).every(s => !s.upper));
+  assert.equal(planSigns(tall.map(f => ({ ...f, h: 10.1 }))).filter(s => s.upper).length, 0);
+  assert.equal(TUBE_INTENSITY, 5);
+});
+
+test('LED rails and downward shop lenses share the opaque face batch without extra draws', () => {
+  const f = fixture(), face = f.meshes[1];
+  const { neonAccent: accent, neonTint: tint, position, normal } = face.geometry.attributes;
+  let ledVertices = 0, lensVertices = 0;
+  for (let i = 0; i < accent.count; i++) {
+    if (Math.abs(accent.getX(i) - 3.2) < 1e-5) {
+      ledVertices++;
+      assert.ok(Math.abs(normal.getZ(i)) > 0.99);
+    }
+    if (Math.abs(accent.getX(i) - 1.6) < 1e-5) {
+      lensVertices++;
+      assert.ok(normal.getY(i) < -0.99);
+      assert.ok(Math.abs(position.getY(i) - 3.049) < 1e-5);
+      assert.equal(tint.getX(i), 1);
+      assert.ok(Math.abs(tint.getY(i) - 0.72) < 1e-5);
+    }
+  }
+  assert.equal(ledVertices, f.signs.filter(s => s.led).length * 4 * 4); // 2 rails, 2 sides, 4 vertices
+  const shops = f.signs.filter(s => s.shopOpening);
+  assert.equal(shops.length, facades.filter(s => s.shop && !s.home).length);
+  const lensCount = shops.reduce((sum, s) => {
+    const count = Math.ceil(s.shopOpening.w / 2.2), spacing = s.shopOpening.w / count;
+    assert.ok(spacing >= 1.4 && spacing <= 2.2);
+    return sum + count;
+  }, 0);
+  assert.equal(lensVertices, lensCount * 14); // centre + 13 points around the closed circle
+  assert.equal(f.meshes.length + f.meshes.filter(m => m.layers.isEnabled(1)).length, 5);
+  cleanup(f);
+});
+
+test('unchanged init registers every upper sign plus one warm candidate per shop in lightPool', async () => {
+  // No browser or rasterization: blank mask buffers exercise only atlas packing/init plumbing.
+  const oldDocument = globalThis.document;
+  globalThis.document = { createElement() {
+    const canvas = { width: 0, height: 0 };
+    const g = { getImageData: () => ({ data: new Uint8ClampedArray(canvas.width * canvas.height * 4) }) };
+    for (const name of ['fillText', 'strokeText', 'strokeRect', 'beginPath', 'arc', 'stroke', 'drawImage', 'fillRect', 'moveTo', 'lineTo']) g[name] = () => {};
+    canvas.getContext = () => g;
+    return canvas;
+  } };
+  const candidates = [];
+  const ctx = { params: new URLSearchParams(), api: { street: { facades } }, scene: new THREE.Scene(),
+    lightPool: { add: c => candidates.push(c) } };
+  try {
+    await neon.init(ctx);
+    assert.ok(neon.signs.some(s => s.upper));
+    assert.equal(candidates.length, neon.signs.length + facades.filter(f => f.shop && !f.home).length);
+    updatePowers(neon.meshes, 6);
+    for (const [i, sign] of neon.signs.entries()) {
+      const light = candidates[i];
+      assert.equal(light.alive, sign.alive);
+      assert.equal(light.power(), sign.power ?? 1);
+      assert.equal(light.pos.y, sign.y - 0.25 * sign.h);
+      assert.ok(light.intensity > 0 && light.distance > 0);
+    }
+  } finally {
+    neon.dispose();
+    if (oldDocument === undefined) delete globalThis.document;
+    else globalThis.document = oldDocument;
+  }
 });

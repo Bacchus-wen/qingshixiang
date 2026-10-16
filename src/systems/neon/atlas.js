@@ -28,13 +28,23 @@ function drawCell(sign, w, h) {
   }
   const size = vertical ? Math.min(w * 0.65, (h - 70) / chars.length * 0.84) : Math.min(h * 0.53, (w - 64) / chars.length * 0.95);
   g.font = `700 ${size}px ${FONT}`;
-  g.lineWidth = Math.max(1.1, size * sign.stroke);
-  if (vertical) chars.forEach((ch, i) => g.strokeText(ch, w / 2, 38 + (h - 76) * (i + 0.5) / chars.length));
-  else g.strokeText(sign.text, w / 2, h * 0.49, w - 64);
-  g.lineWidth = 1.8;
-  g.strokeRect(17, 17, w - 34, h - 34);
-  // A short second rule gives the rectangular fascia a period-appropriate tube frame.
-  if (!vertical) { g.beginPath(); g.moveTo(40, h - 28); g.lineTo(w - 40, h - 28); g.stroke(); }
+  // Coverage encodes the tube cross-section: soft coloured rim, hot white centre.
+  const stroke = (width, draw) => {
+    for (const [scale, alpha] of [[1, 0.35], [0.6, 0.7], [0.3, 1]]) {
+      g.lineWidth = width * scale; g.globalAlpha = alpha; draw();
+    }
+    g.globalAlpha = 1;
+  };
+  // Keep the 30% inner stroke at least one texel wide before mip filtering.
+  stroke(Math.max(3.4, size * sign.stroke * 2), () => {
+    if (vertical) chars.forEach((ch, i) => g.strokeText(ch, w / 2, 38 + (h - 76) * (i + 0.5) / chars.length));
+    else g.strokeText(sign.text, w / 2, h * 0.49, w - 64);
+  });
+  stroke(3.4, () => {
+    g.strokeRect(17, 17, w - 34, h - 34);
+    // A short second rule gives the rectangular fascia a period-appropriate tube frame.
+    if (!vertical) { g.beginPath(); g.moveTo(40, h - 28); g.lineTo(w - 40, h - 28); g.stroke(); }
+  });
   const b = broken.getContext('2d', { willReadFrequently: true }); b.drawImage(intact, 0, 0);
   b.globalCompositeOperation = 'destination-out';
   // Actual small gaps across strokes, not missing whole words. Stable for each artwork.

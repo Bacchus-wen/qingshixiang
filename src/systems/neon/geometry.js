@@ -11,7 +11,7 @@ function data(g, s) {
   const c = new THREE.Color(s.tint);
   constant(g, 'neonTint', [c.r, c.g, c.b]);
   constant(g, 'neonPower', [s.alive]);
-  constant(g, 'neonStyle', [s.kind === 'box' ? 1 : 0, s.broken]);
+  constant(g, 'neonStyle', [s.kind === 'box' ? 1 : 0, s.broken, 0]); // z = accent (WebGPU: max 8 vertex buffers)
   const paper = new THREE.Color(s.paper);
   constant(g, 'neonPaper', [paper.r, paper.g, paper.b]);
   constant(g, 'neonAnchor', [s.x, s.y, s.z]);
@@ -19,6 +19,21 @@ function data(g, s) {
   return g;
 }
 function transform(g, yaw, x, y, z) { return g.rotateY(yaw).translate(x, y, z); }
+function strut(a, b, width) {
+  const start = new THREE.Vector3(...a), end = new THREE.Vector3(...b);
+  const delta = end.clone().sub(start);
+  return new THREE.BoxGeometry(width, delta.length(), width)
+    .applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.normalize()))
+    .translate(...start.add(end).multiplyScalar(0.5).toArray());
+}
+// Reuse the opaque face material/batch; accents bypass atlas artwork in the shader.
+function accentFace(g, s, intensity, warm = false) {
+  data(g, s);
+  g.setAttribute('neonUV', g.attributes.uv.clone());
+  { const st = g.attributes.neonStyle; for (let i = 0; i < st.count; i++) st.setZ(i, intensity); }
+  if (warm) constant(g, 'neonTint', [1, 0.72, 0.45]);
+  return g;
+}
 function batch(parts, material, name, animated = false) {
   const geometry = mergeGeometries(parts, false);
   if (!geometry) throw new Error(`[neon] cannot merge ${name}`);
@@ -54,10 +69,23 @@ export function buildMeshes(signs, atlas, materials) {
       faces.push(transform(g, yaw, s.x + Math.sin(yaw) * d, s.y, s.z + Math.cos(yaw) * d));
     }
     if (s.kind === 'blade') {
-      // Two wall anchors hidden behind the sign; geometry only, no lights or per-sign material.
+      // Both side rails, upper/lower cantilevers and diagonal braces share the cabinet draw.
+      for (const side of [-1, 1]) {
+        const x = s.x + side * (s.w / 2 + 0.025);
+        cabinets.push(new THREE.BoxGeometry(0.07, s.h + 0.16, depth + 0.045).translate(x, s.y, s.z));
+        if (s.led) for (const back of [false, true]) {
+          const yaw = back ? Math.PI : 0;
+          const g = accentFace(new THREE.PlaneGeometry(0.035, s.h * 0.94), s, 3.2);
+          faces.push(transform(g, yaw, x, s.y, s.z + (back ? -1 : 1) * (depth / 2 + 0.027)));
+        }
+      }
       for (const dy of [-s.h * 0.34, s.h * 0.34]) {
-        const len = Math.abs(s.frontX - s.x) + 0.06;
-        cabinets.push(new THREE.BoxGeometry(len, 0.075, 0.075).translate((s.frontX + s.x) / 2, s.y + dy, s.z));
+        const outerX = s.x - s.side * s.w * 0.4, z = s.z - depth / 2 - 0.015;
+        const y = s.y + dy, braceRise = Math.min(0.55, s.h * 0.16);
+        cabinets.push(strut([s.frontX, y, z], [outerX, y, z], 0.075));
+        cabinets.push(strut([s.frontX, y + braceRise, z], [outerX, y, z], 0.05));
+        cabinets.push(new THREE.BoxGeometry(0.055, braceRise + 0.16, 0.18)
+          .translate(s.frontX - s.side * 0.025, y + braceRise / 2, z));
       }
     } else if (s.kind === 'hanger') {
       // Two cantilever arms and short drops make the extra depth visibly supported.
@@ -71,6 +99,20 @@ export function buildMeshes(signs, atlas, materials) {
       cabinets.push(new THREE.BoxGeometry(len, 0.12, 0.12).translate((s.frontX + s.x) / 2, s.y, s.z));
     } else if (s.kind === 'roof') {
       for (const dz of [-s.w * 0.33, s.w * 0.33]) cabinets.push(new THREE.BoxGeometry(0.09, 1.3, 0.09).translate(s.x, s.y - 1.1, s.z + dz));
+    }
+    // One row per actual shop, carried by its original blade. Upper signs never duplicate it.
+    // The existing per-shop warm lightPool candidate supplies the illumination below these lenses.
+    if (s.shopOpening) {
+      const { w, z } = s.shopOpening;
+      const count = Math.max(1, Math.ceil(w / 2.2)), spacing = w / count;
+      const x = s.frontX - s.side * 0.22;
+      cabinets.push(new THREE.BoxGeometry(0.44, 0.09, w).translate(x, 3.16, z));
+      for (let i = 0; i < count; i++) {
+        const lz = z - w / 2 + spacing * (i + 0.5);
+        cabinets.push(new THREE.CylinderGeometry(0.11, 0.11, 0.08, 12).translate(x, 3.09, lz));
+        const lens = accentFace(new THREE.CircleGeometry(0.085, 12), s, 1.6, true);
+        faces.push(lens.rotateX(Math.PI / 2).translate(x, 3.049, lz));
+      }
     }
     // Two clipped pieces of ONE pool follow the 14 cm curb; do not float a plane across it.
     // Lane dimensions are the existing scene's contract; no street module import/mutation.

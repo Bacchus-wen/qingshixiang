@@ -7,8 +7,10 @@ export function createMaterials(atlas, mode) {
   const past = mode === 'past' ? float(1) : memoryMask(positionWorld);
   const tint = attribute('neonTint', 'vec3');
   const power = attribute('neonPower', 'float');
-  const style = attribute('neonStyle', 'vec2'); // diffuser / selected broken circuit
+  const style = attribute('neonStyle', 'vec3'); // diffuser / selected broken circuit / accent
   const paper = attribute('neonPaper', 'vec3');
+  const accent = style.z; // 0 = artwork, otherwise LED/downlight intensity
+  const isAccent = smoothstep(0, 0.01, accent);
   const faded = mix(vec3(0.24, 0.28, 0.3), tint, 0.8); // v2 review: the survivors keep their colour
   const masks = texture(atlas);
   const local = attribute('neonUV', 'vec2');
@@ -19,15 +21,18 @@ export function createMaterials(atlas, mode) {
   face.name = 'neon-faces';
   const tubeSurface = vec3(0.025, 0.03, 0.032).mul(dirt).mul(edge.mul(0.6).add(0.4)).add(vec3(0.085).mul(masks.r));
   const diffuser = mix(paper, tint.mul(0.72), masks.r);
-  face.colorNode = mix(tubeSurface, diffuser.mul(0.22).mul(dirt), style.x);
+  face.colorNode = mix(mix(tubeSurface, diffuser.mul(0.22).mul(dirt), style.x), vec3(0.12), isAccent);
   const now = faded.mul(masks.g.mul(2.6).add(masks.a.mul(0.3))).mul(power).mul(mains); // the surviving tubes trip with the street
   const tube = mix(masks.r, masks.g, style.y);
   const halo = mix(masks.b, masks.a, style.y);
   // Small halo keeps the hollow glyph centre dark. The same broken mask cuts tube AND halo.
-  const tubeThen = tint.mul(tube.mul(TUBE_INTENSITY).add(halo.mul(0.22)));
+  const core = smoothstep(0.82, 0.98, tube); // Middle stroke composites to 0.805; only the inner stroke goes white.
+  const tubeThen = tint.mul(tube.mul(TUBE_INTENSITY).add(halo.mul(0.22)))
+    .add(vec3(1, 0.95, 0.92).mul(core).mul(TUBE_INTENSITY * 0.55));
   const then = mix(tubeThen, diffuser.mul(TUBE_INTENSITY * LIGHTBOX_RATIO), style.x);
   // A tiny cold floor keeps dead glass lettering legible even when no direct lamp reaches it.
-  face.emissiveNode = mix(now, then, past).add(vec3(0.008, 0.01, 0.012).mul(masks.r).mul(dirt).mul(float(1).sub(style.x)));
+  const signEmission = mix(now, then, past).add(vec3(0.008, 0.01, 0.012).mul(masks.r).mul(dirt).mul(float(1).sub(style.x)));
+  face.emissiveNode = mix(signEmission, tint.mul(accent).mul(past), isAccent);
 
   const housing = new THREE.MeshStandardNodeMaterial({ color: 0x252c2d, roughness: 0.78, metalness: 0.4 });
   housing.name = 'neon-cabinets-and-brackets';

@@ -94,3 +94,9 @@
 - 2026-10-16 22:05:23 | codex | 完成：雨丝吃霓虹颜色(重派)（w25-rain-color）
 - 2026-10-16 22:09:08 | claude | 派给 grok：第三轮画面评审（r14-review，只读）
 - 2026-10-16 22:15:12 | grok | 完成：第三轮画面评审（r14-review）
+- 2026-10-17 01:58:06 | claude | 派给 grok：X 上搜电影级浏览器雨夜城市的技术和工具（r15-x-techniques，只读）
+- 2026-10-17 02:03:36 | grok | 未完成（interrupted）：X 上搜电影级浏览器雨夜城市的技术和工具（r15-x-techniques）｜传达员重启时这个任务正在进行，已中断，改动没有带回项目；需要的话用新的任务名重派
+- 2026-10-17 02:37:24 | claude | 派给 codex：湿路面质感(辅助)（w26-ground-breakup，可写 src/materials/ground.js,src/materials/wet.js,src/materials/ground.test.mjs）
+- 2026-10-17 02:37:24 | claude | 派给 codex：招牌竖向分层+支架+白芯(辅助)（w27-sign-layers，可写 src/systems/neon/**）
+- 2026-10-17 02:42:04 | codex | 未完成（out_of_scope）：湿路面质感(辅助)（w26-ground-breakup）｜改了声明范围之外的文件：result.md。改动没有带回项目，副本保留在 /Users/wenbin/.local/share/agent-team/work/新游戏--53fa3746--w26-ground-breakup
+- 2026-10-17 02:46:42 | codex | 未完成（out_of_scope）：招牌竖向分层+支架+白芯(辅助)（w27-sign-layers）｜改了声明范围之外的文件：result.md。改动没有带回项目，副本保留在 /Users/wenbin/.local/share/agent-team/work/新游戏--53fa3746--w27-sign-layers

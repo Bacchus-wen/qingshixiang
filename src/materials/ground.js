@@ -6,7 +6,7 @@ import {
   abs, select, normalize, mix, max, smoothstep, floor, fract, hash,
   sin, cos, dot, fwidth, cameraViewMatrix, mx_noise_float,
 } from 'three/tsl';
-import { wetLayer, puddleMask, rippleNormal } from './wet.js';
+import { wetLayer, wetUniforms, wetFbm, puddleMask, rippleNormal } from './wet.js';
 import { groundLayout, DEFAULT_GROUND_LANE } from './ground-layout.js';
 import { neonLightAt } from './neonlight.js';
 
@@ -62,15 +62,15 @@ function pair(T, name, st) {
   return { a: luminance(texture(T[`${name}_c`], st).rgb), xy: packed.rg.mul(2).sub(1), h: packed.b };
 }
 
-function wetMaterial(name, ctx, { albedo, roughness, xy, T, B, coverage = 0, porosity = 0.6, metal = 0, ripple = 1 }) {
+function wetMaterial(name, ctx, { albedo, roughness, xy, T, B, coverage = 0, porosity = 0.6, metal = 0, ripple = 1,
+  wetness = wetUniforms.wetness, waterLevel = float(0), flow = float(0) }) {
   const dbg = paramsOf(ctx).get('surfdbg') || '';
   const up = smoothstep(0.6, 0.95, normalWorldGeometry.y);
-  // IMPORTANT: identical world position, coverage, threshold/noise to old makeSurface.
-  const pud = coverage && !dbg.includes('nopud') ? puddleMask(positionWorld.xz, coverage).mul(up) : float(0);
-  const rip = ripple && !dbg.includes('norip') ? rippleNormal(positionWorld.xz).mul(up).mul(ripple) : vec2(0);
+  const pud = coverage && !dbg.includes('nopud') ? puddleMask(positionWorld.xz, coverage, { waterLevel, wetness }).mul(up) : float(0);
+  const rip = ripple && !dbg.includes('norip') ? rippleNormal(positionWorld.xz, flow).mul(up).mul(ripple) : vec2(0);
   const w = wetLayer({ albedo, roughness, porosity, puddle: pud, ripple: rip,
-    vertical: float(1).sub(up).mul(0.5), worldPos: positionWorld });
-  const tilt = xy.mul(float(1).sub(w.puddle.mul(0.9))).mul(up);
+    vertical: float(1).sub(up).mul(0.5), worldPos: positionWorld, wetness });
+  const tilt = xy.mul(float(1).sub(w.puddle)).mul(up);
   // Texture tilt follows its UV basis; rain tilt always follows world XZ, even on rotated decals.
   // Keep vertical/bottom faces geometric and rough, so they cannot leak into PostFX's SSR mask.
   const worldNormal = normalize(normalWorldGeometry.add(T.mul(tilt.x)).add(B.mul(tilt.y)).add(vec3(w.nxy.x, 0, w.nxy.y)));
@@ -79,11 +79,27 @@ function wetMaterial(name, ctx, { albedo, roughness, xy, T, B, coverage = 0, por
   m.emissiveNode = vec3(w.albedo).mul(neonLightAt()); // v3: coloured pools of sign light on the road
   // Already world-space: do not apply transformNormalToView's model normal matrix a second time.
   m.normalNode = normalize(cameraViewMatrix.mul(vec4(worldNormal, 0)).xyz);
-  m.roughnessNode = mix(max(w.roughness, 0.65), w.roughness, up).clamp(0.03, 1);
+  m.roughnessNode = mix(max(w.roughness, 0.65), w.roughness, up).clamp(0.015, 1);
   m.metalnessNode = float(metal);
   // No MRT override: PostFX writes b = smoothstep(0.55,0.9,normalWorld.y), uses g for roughness.
   m.userData.ccGround = { coverage, packedNormal: 'RG slope, B height', name };
   return m;
+}
+
+// Lane-relative drainage: a 30 cm strip on the road side of either curb.
+// The crown lowers the central water field by 0.08; the curb raises it by 0.25.
+export function roadWaterProfile(x, halfRoad) {
+  const distance = float(halfRoad).sub(abs(x));
+  const gutter = select(distance.greaterThanEqual(0), float(1).sub(smoothstep(0, 0.3, distance)), float(0));
+  const crown = float(1).sub(smoothstep(0, halfRoad, abs(x)));
+  return { waterLevel: gutter.mul(0.25).sub(crown.mul(0.08)), flow: gutter.mul(0.35) };
+}
+
+export function roadSurfaceVariation(P) {
+  return {
+    roughnessScale: mix(0.75, 1.25, wetFbm(P.mul(1.9))),
+    wetness: wetUniforms.wetness.mul(float(1).sub(smoothstep(0.35, 0.7, wetFbm(P.mul(0.06))).mul(0.3))),
+  };
 }
 
 export function groundRoad(textures, ctx, lane = DEFAULT_GROUND_LANE) {
@@ -118,7 +134,10 @@ export function groundRoad(textures, ctx, lane = DEFAULT_GROUND_LANE) {
   albedo = mix(albedo, float(0.39).mul(mix(0.65, 1, wear.a)), paint);
   xy = mix(xy, wear.xy.mul(0.18), paint);
   roughness = mix(roughness, float(0.66), paint);
-  return wetMaterial('cc_ground_road', ctx, { albedo, roughness, xy, ...frame, coverage: 0.75, porosity: 0.7 });
+  const { roughnessScale, wetness } = roadSurfaceVariation(P);
+  roughness = roughness.mul(roughnessScale);
+  return wetMaterial('cc_ground_road', ctx, { albedo, roughness, xy, ...frame, coverage: 0.75, porosity: 0.7,
+    wetness, ...roadWaterProfile(P.x, L.halfRoad) });
 }
 
 export function groundWalk(textures, ctx) {

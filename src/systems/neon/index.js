@@ -22,6 +22,8 @@ export default {
     this.atlas = await buildAtlas(this.signs);
     this.materials = createMaterials(this.atlas.texture, this.mode);
     this.meshes = buildMeshes(this.signs, this.atlas, this.materials);
+    // WebGPU allows 8 vertex buffers: the face batch never reads neonAnchor (only the ground spill does)
+    for (const m of this.meshes) if (m.material === this.materials.face && m.geometry.attributes.neonAnchor) m.geometry.deleteAttribute('neonAnchor');
     this.root = new THREE.Group(); this.root.name = 'neon';
     this.root.add(...this.meshes); ctx.scene.add(this.root);
     // real lights (clustered renderer): one per sign, in front of its face; plus a warm one in every shop opening
