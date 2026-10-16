@@ -13,7 +13,7 @@ const ROBOT = new THREE.Vector3(-4.58, 0.14, -13.5);
 const ARRIVE = new THREE.CatmullRomCurve3([
   // v3 (review, after targets/present.jpg): low along the left kerb, past a parked tricycle, the lane vanishing right
   new THREE.Vector3(-2.3, 0.5, 13.5), new THREE.Vector3(-1.6, 0.95, 7), new THREE.Vector3(-0.6, 1.4, 0),
-  new THREE.Vector3(0.0, 1.55, -5.5), new THREE.Vector3(-1.2, 1.05, -8.6), new THREE.Vector3(-2.6, 0.55, -10.6),
+  new THREE.Vector3(0.0, 1.55, -5.5), new THREE.Vector3(-1.6, 1.05, -8.9), new THREE.Vector3(-3.2, 0.62, -11.8),
 ]);
 // v3 (review, after targets/robot.jpg): low, close, three-quarter from the street side; the robot on the left third,
 // the wet lane receding down the right two thirds

@@ -7,7 +7,7 @@ export const SHOTS = {
   'street-eye': { pos: [0.6, 1.55, 10], look: [0, 1.8, -30], fov: 42 },
   'street-low': { pos: [-1.2, 0.25, 4], look: [0.5, 1.0, -25], fov: 35 },
   'street-high': { pos: [2.5, 9, 12], look: [0, 0, -20], fov: 50 },
-  'robot-wide': { pos: [-2.6, 0.55, -10.6], look: [-6.1, 0.95, -21.6], fov: 38 }, // = the wait-phase framing (v3)
+  'robot-wide': { pos: [-3.2, 0.62, -11.8], look: [-6.1, 0.95, -21.6], fov: 38 }, // = the wait-phase framing (v3)
   'eye-open-wide': { pos: [1.6, 1.3, -9.5], look: [-4.4, 0.7, -13.6], fov: 40, setup: (ctx) => { ctx.memory.forceOpen = true; } },
   'eye-hero': { pos: [-3.85, 0.74, -13.15], look: [-4.42, 0.78, -13.5], fov: 24, setup: (ctx) => { ctx.memory.forceOpen = true; } },
   'eye-close': { pos: [-3.7, 1.05, -13.3], look: [-4.45, 0.95, -13.55], fov: 30, setup: (ctx) => { ctx.memory.forceOpen = true; } },

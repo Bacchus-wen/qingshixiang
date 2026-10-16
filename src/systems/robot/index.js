@@ -143,7 +143,7 @@ export default {
       }
     }
     root.position.copy(ROBOT_POS);
-    root.rotation.y = Math.PI / 2; // glTF front (+Z) faces the road (+X)
+    root.rotation.y = Math.PI / 2 - 0.55; // glTF front (+Z) faces the road (+X), turned toward the up-street camera so its eye reads (critique r4)
     scene.add(root);
     const puddle = makePuddle();
     puddle.position.set(ROBOT_POS.x + 0.55, LANE.curb + 0.006, ROBOT_POS.z + 0.1);

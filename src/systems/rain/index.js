@@ -1,5 +1,5 @@
 import {
-  Fn, If, attribute, cameraPosition, float, floor, fract, instanceIndex, positionGeometry, sin, smoothstep, storage, uniform, uv, varying, vec3, vec4,
+  Fn, If, attribute, cameraPosition, float, floor, fract, instanceIndex, mix, positionGeometry, sin, smoothstep, storage, uniform, uv, varying, vec3, vec4,
 } from 'three/tsl';
 import { memoryMask } from '../../materials/memory.js';
 import { createNeonState, syncNeon, neonLight } from './neon.js';
@@ -146,21 +146,22 @@ export default {
     const distance2 = cameraOffset.dot(cameraOffset);
     const velocity = vec3(u.wind.x, drop.w.mul(speedNode(distance2)).negate(), u.wind.y);
     const middle = smoothstep(36, 100, distance2), far = smoothstep(324, 576, distance2);
-    const width = float(0.018).sub(middle.mul(0.008)).sub(far.mul(0.005));
+    const width = float(0.0065).sub(middle.mul(0.002)).sub(far.mul(0.0015)); // v3 (critique): fine streaks, not sparks
     const defocus = float(1).sub(smoothstep(0.1225, 6.25, distance2));
     // Velocity-aligned ribbons with camera-facing width; 24 ms shutter length.
     streak.positionNode = centre.add(velocity.mul(positionGeometry.y).mul(0.024))
-      .add(u.right.mul(positionGeometry.x).mul(width).mul(float(1).add(defocus.mul(3))));
+      .add(u.right.mul(positionGeometry.x).mul(width).mul(float(1).add(defocus.mul(0.8))));
     const dropWorld = varying(centre, 'rainWorld');
     // Light each tiny ribbon in the vertex stage, not for every covered pixel.
     const streakLight = varying(shade(centre), 'rainLight');
-    streak.colorNode = streakLight.rgb;
+    // desaturate a little: rain catches the light's colour but stays water, not embers
+    streak.colorNode = mix(vec3(streakLight.rgb.dot(vec3(0.2126, 0.7152, 0.0722))), streakLight.rgb, 0.65).mul(1.6);
     const blur = varying(defocus, 'rainDefocus');
     const ribbon = float(1).sub(smoothstep(float(0.12).mul(float(1).sub(blur)), 0.5, uv().x.sub(0.5).abs())).pow(2);
     const taper = sin(uv().y.mul(Math.PI)).max(0);
     streak.opacityNode = ribbon.mul(taper).mul(0.56).mul(u.rain).mul(streakLight.w)
       .mul(float(1).div(float(1).add(blur.mul(7))))
-      .mul(varying(smoothstep(0.0225, 0.2025, distance2), 'rainNearFade'))
+      .mul(varying(smoothstep(0.36, 4.0, distance2), 'rainNearFade')) // nothing closer than ~1 m to the lens
       .mul(smoothstep(0, 0.2, dropWorld.y))
       .mul(float(1).sub(smoothstep(12, 16, dropWorld.y)));
     const dropsGeometry = quad(THREE, this.count);
