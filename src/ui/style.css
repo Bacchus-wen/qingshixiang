@@ -23,6 +23,8 @@ body.shot #ui { display: none; }
 .film-card.on { opacity: 0.8; }
 .film-card .film-replay { opacity: 0; transition: opacity 3s; }
 .film-card.replay .film-replay { opacity: 0.5; }
+.film-card .film-credit { display: block; margin-top: 2.2em; font-size: 10px; letter-spacing: 0.08em; opacity: 0; transition: opacity 3s; }
+.film-card.replay .film-credit { opacity: 0.28; }
 .film-card small { margin-top: 3em; font-family: "SF Mono", Menlo, monospace; font-size: 9px; letter-spacing: 0.5em; opacity: 0.5; }
 .film-title { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;
   font-family: "Songti SC", "Noto Serif SC", serif; font-size: 14px; letter-spacing: 0.6em; opacity: 0; transition: opacity 2.5s; z-index: 2; }
