@@ -1,7 +1,6 @@
 import * as THREE from 'three/webgpu';
 import {
-  positionWorld, normalWorldGeometry, vec3, float, mix, smoothstep, mx_fractal_noise_float, mx_noise_float, time,
-  uniform, color,
+  bumpMap, color, float, mix, mx_fractal_noise_float, mx_noise_float, mx_worley_noise_float, normalWorldGeometry, positionWorld, smoothstep, time, uniform, vec3,
 } from 'three/tsl';
 import { wetUniforms } from '../../materials/wet.js';
 
@@ -41,17 +40,24 @@ export function robotMaterial(name) {
     // seams, road grime from the ground up, chips through to dark metal, and a wet clearcoat on everything facing up
     const P = positionWorld;
     const vertical = float(1).sub(smoothstep(0.25, 0.6, normalWorldGeometry.y.abs()));
-    const tears = smoothstep(0.58, 0.74, mx_noise_float(vec3(P.x.mul(45), P.y.mul(2.5), P.z.mul(45)).add(4.1)).mul(0.5).add(0.5)).mul(vertical);
+    const tears = smoothstep(0.5, 0.72, mx_noise_float(vec3(P.x.mul(38), P.y.mul(2.2), P.z.mul(38)).add(4.1)).mul(0.5).add(0.5)).mul(vertical.mul(0.7).add(0.3));
     const low = smoothstep(0.75, 0.15, P.y);
-    const chips = smoothstep(0.8, 0.87, mx_fractal_noise_float(P.mul(26).add(9.3), 2, 2.0, 0.5).mul(0.5).add(0.5));
+    const chips = smoothstep(0.72, 0.8, mx_fractal_noise_float(P.mul(22).add(9.3), 3, 2.0, 0.5).mul(0.5).add(0.5));
     let c = grime(vec3(0.6, 0.57, 0.51)).mul(mix(float(1), float(0.75), oil()));
-    c = mix(c, vec3(0.13, 0.07, 0.035), tears.mul(0.55));
+    c = mix(c, vec3(0.16, 0.08, 0.035), tears.mul(0.8));
     c = mix(c, vec3(0.07, 0.065, 0.055), low.mul(0.5));
     c = mix(c, vec3(0.045, 0.045, 0.05), chips);
     const pm = new THREE.MeshPhysicalNodeMaterial();
     pm.colorNode = c.add(scratches().mul(0.1));
     pm.roughnessNode = mix(mix(wetRough(0.45), float(0.3), chips), float(0.6), tears.mul(0.5));
     pm.metalnessNode = chips.mul(0.85);
+    // rain on the shell: beads on everything facing up, thin rivulets running down the sides (a bump, so the
+    // clearcoat catches every light in them)
+    const up = smoothstep(0.25, 0.8, normalWorldGeometry.y);
+    const beads = smoothstep(0.22, 0.02, mx_worley_noise_float(P.mul(40))).mul(up);
+    const rivulet = smoothstep(0.1, 0.0, mx_worley_noise_float(vec3(P.x.mul(70), P.y.mul(4).add(time.mul(0.25)), P.z.mul(70)))).mul(vertical).mul(0.6);
+    pm.normalNode = bumpMap(beads.add(rivulet), float(2.5));
+    pm.roughnessNode = pm.roughnessNode.mul(float(1).sub(beads.add(rivulet).clamp(0, 1).mul(0.85)));
     pm.clearcoatNode = smoothstep(0.3, 0.8, normalWorldGeometry.y).mul(0.6).add(0.15);
     pm.clearcoatRoughnessNode = float(0.12);
     return pm;
