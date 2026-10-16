@@ -13,11 +13,11 @@ const rand = (seed) => () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>
 export async function placeModules(ctx, root, windows, facades) {
   if (ctx.params.has('nomodules')) return;
   const kinds = {};
-  for (const k of ['balcony', 'window_ac']) {
+  for (const k of ['balcony', 'window_ac', 'awning', 'watertank', 'stall']) {
     try { kinds[k] = (await loader.loadAsync(`/models/v2/m_${k}.glb`)).scene; } catch (e) { console.warn('[modules] missing', k, e); }
   }
   const r = rand(0x5eed17);
-  const place = { balcony: [], window_ac: [] };
+  const place = { balcony: [], window_ac: [], awning: [], watertank: [], stall: [] };
   const used = new Set();
   for (const w of windows) {
     const f = facades.find((ff) => ff.side === w.side && Math.abs(ff.z - w.z) <= ff.w / 2 + 0.01);
@@ -31,6 +31,15 @@ export async function placeModules(ctx, root, windows, facades) {
     const y = kind === 'balcony' ? floorY + 0.05 : w.y - 0.95;
     place[kind].push({ x: f.frontX, y, z: w.z, side: w.side, flip: r() < 0.5 });
     w.mesh.removeFromParent(); // the module brings its own window
+  }
+  // shop awnings (torn canvas over the shutter), rooftop water tanks + solar heaters, a couple of closed food stalls
+  for (const f of facades) {
+    if (f.shop && !f.home && kinds.awning && r() < 0.5) place.awning.push({ x: f.frontX, y: 2.45, z: f.z + (r() - 0.5) * Math.max(0, f.w - 3), side: f.side, flip: r() < 0.5 });
+    if (kinds.watertank && r() < 0.6) place.watertank.push({ x: f.frontX + f.side * (2 + r() * 3), y: f.h + 0.5, z: f.z + (r() - 0.5) * Math.max(0, f.w - 2.6), side: f.side, flip: r() < 0.5 });
+  }
+  if (kinds.stall) {
+    const W = 3.4 + 1.6; // LANE.halfRoad + LANE.walk
+    place.stall.push({ x: W - 0.2, y: 0.14, z: -29.6, side: 1, flip: false }, { x: -(W - 0.2), y: 0.14, z: -21.8, side: -1, flip: true });
   }
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), e = new THREE.Euler();
   let n = 0;
