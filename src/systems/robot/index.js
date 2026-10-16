@@ -6,7 +6,9 @@ import { robotMaterial, eyeGlow, eyeColor } from './materials.js';
 import { LANE } from '../street/index.js';
 import { syncMemory } from '../../materials/memory.js';
 import { rippleNormal, wetUniforms } from '../../materials/wet.js';
-import { positionWorld, vec3, float, transformNormalToView, normalize } from 'three/tsl';
+import {
+  abs, cameraPosition, color, dot, float, mx_noise_float, normalWorld, normalize, positionGeometry, positionWorld, smoothstep, time, transformNormalToView, uniform, vec3,
+} from 'three/tsl';
 
 // The robot has sat here long enough for water to pool around it: an irregular, mirror-dark puddle.
 function makePuddle() {
@@ -32,6 +34,7 @@ function makePuddle() {
 // Eye state: closed -> (hold) opening -> open; release -> closing. The first attempt always fails (flicker, shut).
 // Publishes ctx.memory (origin, dir, angle, range, strength) every frame for every "past/present" consumer.
 const AXIS_Z = new THREE.Vector3(0, 0, 1);
+const _DOWN = new THREE.Vector3(0, -1, 0);
 const ROBOT_POS = new THREE.Vector3(-(LANE.halfRoad + LANE.walk) + 0.42, LANE.curb, -13.5);
 
 // Gobo: a low-frequency mask projected by the eye (cracked lens + 8-blade aperture), not a picture.
@@ -196,6 +199,22 @@ export default {
     scene.add(this.signKey);
     this.beamVol = ctx.api.atmo?.volume(new THREE.Vector3(0.0, 3, -15), new THREE.Vector3(13, 6.5, 26), 0.0, [spot]);
 
+    // v3 (Grok r17, after gsimone): a fake volumetric cone that follows the eye -- the amber beam as the visible
+    // protagonist of the memory shots. Additive, soft along its length and toward its silhouette edges, a little dust.
+    {
+      const L = 16, R0 = 1;
+      const g = new THREE.CylinderGeometry(0.03, R0, L, 40, 1, true).translate(0, -L / 2, 0); // apex at origin, along -Y
+      const mat = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide });
+      const along = positionGeometry.y.negate().div(L).clamp(0, 1);
+      const V = normalize(cameraPosition.sub(positionWorld));
+      const facing = abs(dot(normalWorld, V)).pow(1.6);
+      const dust = mx_noise_float(positionWorld.mul(1.7).add(vec3(0, time.mul(-0.4), 0))).mul(0.35).add(0.75);
+      this.coneK = uniform(0);
+      const near = smoothstep(1.5, 6.0, positionWorld.sub(cameraPosition).length()); // never a flat wash when the lens is inside the cone
+      mat.colorNode = color(eyeColor).mul(float(1).sub(along).pow(1.6)).mul(smoothstep(0, 0.04, along)).mul(facing).mul(dust).mul(near).mul(this.coneK).mul(0.16);
+      this.cone = new THREE.Mesh(g, mat); this.cone.frustumCulled = false; this.cone.renderOrder = 8; this.coneL = L;
+      scene.add(this.cone);
+    }
     // state
     this.open = 0; this.target = 0; this.attempts = 0; this.failT = -1; this.holdT = 0;
     this.look = new THREE.Vector2(0, 0); this.lookCur = new THREE.Vector2(0, 0);
@@ -293,7 +312,8 @@ export default {
     this.frames = (this.frames ?? 0) + 1;
     this.spot.shadow.autoUpdate = o > 0.005 || this.frames < 30;
     // v3: the amber cone is the protagonist of the memory shots (targets/memory.jpg)
-    if (this.beamVol) { this.beamVol.material.userData.density.value = 0.45 * o; this.beamVol.visible = o > 0.01 || this.frames < 30; }
+    // the visible cone carries the beam now; the raymarched box keeps the gobo and occlusion
+    if (this.beamVol) { this.beamVol.material.userData.density.value = 0.25 * o; this.beamVol.visible = o > 0.01 || this.frames < 30; }
     const mode = ctx.memory.goboMode;
     const fq = Math.round(flood * 10) / 10;
     if (mode !== this._lastMode || fq !== this._lastFlood || (mode !== 'line' && t - this.goboT > 1 / 15 && Math.abs(o - (this._lastGobo ?? -1)) > 0.01)) {
@@ -305,6 +325,14 @@ export default {
     this.rimK = (this.rimK ?? 1) + ((overShoulder ? 0.12 : 1) - (this.rimK ?? 1)) * Math.min(1, dt * 2);
     if (this.rim) this.rim.intensity = 16 * this.rimK;
     if (this.signKey) this.signKey.intensity = 1.2 * (ctx.world.mains ?? 1) * (0.25 + 0.75 * this.rimK); // (Grok r17: the shell went purple)
+    if (this.cone) {
+      this.cone.position.copy(this._v);
+      this.cone.quaternion.setFromUnitVectors(_DOWN, this._d);
+      const R = Math.tan(Math.min(0.45, coneAngle)) * this.coneL;
+      this.cone.scale.set(R, 1, R);
+      this.coneK.value = o * (1 - 0.8 * flood) * (ctx.memory.goboMode === 'line' ? 0.15 : 1);
+      this.cone.visible = o > 0.01 || (this.frames ?? 0) < 30;
+    }
     // ---- publish the memory cone
     const m = ctx.memory;
     m.origin.copy(this._v); m.dir.copy(this._d);
