@@ -1,0 +1,14 @@
+{
+ "id": "w15-wind",
+ "from": "claude",
+ "to": "codex",
+ "title": "风与环境动态",
+ "write": true,
+ "paths": [
+  "src/systems/wind/**",
+  "src/systems/index.js"
+ ],
+ "status": "running",
+ "posted": "2026-10-16 13:21:46",
+ "started": "2026-10-16 13:21:49"
+}

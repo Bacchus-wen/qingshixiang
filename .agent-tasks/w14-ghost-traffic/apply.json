@@ -1,0 +1,11 @@
+{
+ "state": "applied",
+ "files": [
+  "src/systems/index.js",
+  "src/systems/traffic/index.js"
+ ],
+ "created": [
+  "src/systems/traffic/index.js"
+ ],
+ "at": "2026-10-16 13:21:21"
+}

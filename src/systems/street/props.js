@@ -54,6 +54,7 @@ export async function placeProps(root, list) {
       o.position.set(x, y, z);
       o.rotation.set(extra.rx ?? 0, ry, extra.rz ?? 0);
       if (extra.scale) o.scale.setScalar(extra.scale);
+      o.userData.prop = name;
       root.add(o);
       out.push(o);
     } catch (e) { console.warn('[props] failed', name, e); }

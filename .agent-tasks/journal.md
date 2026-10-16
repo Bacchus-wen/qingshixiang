@@ -54,3 +54,7 @@
 - 2026-10-16 13:03:52 | claude | 派给 grok：最终画面检查（r6-final-visual，只读）
 - 2026-10-16 13:05:12 | codex | 完成：最终代码检查（r6-final-code）
 - 2026-10-16 13:09:19 | grok | 完成：最终画面检查（r6-final-visual）
+- 2026-10-16 13:17:49 | claude | 派给 codex：光锥里过去行驶的车（w14-ghost-traffic，可写 src/systems/traffic/**,src/systems/index.js）
+- 2026-10-16 13:21:21 | codex | 完成：光锥里过去行驶的车（w14-ghost-traffic）
+- 2026-10-16 13:21:46 | claude | 派给 codex：风与环境动态（w15-wind，可写 src/systems/wind/**,src/systems/index.js）
+- 2026-10-16 13:21:46 | claude | 派给 grok：找真实环境录音（r7-sounds，只读）

@@ -178,6 +178,17 @@ export default {
       const vk = (this.vmFail ?? 0) > 0 ? ((this.vmFail -= dt), 0.3) : 1;
       st.vmLight.intensity = 14 * vk;
     }
+    // the abandoned car: door shuts and lamps come on while lit; back to the present half a beat after
+    const pc = ctx.api.pastCar;
+    if (pc) {
+      const m = memoryMaskCPU(pc.center, ctx.memory);
+      if (m > 0.35) pc.grace = 0.8; else pc.grace = Math.max(0, pc.grace - dt);
+      const target = m > 0.35 || pc.grace > 0 ? 1 : 0;
+      pc.past += Math.sign(target - pc.past) * Math.min(Math.abs(target - pc.past), dt * (target ? 0.6 : 1.2));
+      const e = pc.past * pc.past * (3 - 2 * pc.past);
+      if (pc.pivot) pc.pivot.rotation.y = -0.873 * e; // 50 degrees
+      pc.glow.value = e * Math.max(m, 0.15);
+    }
     // shutters rise slowly while the eye holds on them and fall back half a beat after the light leaves
     for (const s of this.shutters) {
       const m = memoryMaskCPU(s.center, ctx.memory);

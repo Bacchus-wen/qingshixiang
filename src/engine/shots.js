@@ -35,5 +35,11 @@ export const SHOTS = {
   'eye-macro-open': { pos: [-4.0, 1.0, -13.28], look: [-4.42, 0.97, -13.47], fov: 20, setup: (ctx) => { ctx.memory.forceOpen = true; } },
   'cat-close': { pos: [-1.4, 1.32, -11.6], look: [-4.4, 0.6, -13.4], fov: 36 },
   'cat-awake': { pos: [-2.6, 0.7, -12.2], look: [-4.4, 0.3, -12.9], fov: 34, setup: (ctx) => { ctx.memory.forceOpen = true; } },
+  'past-car': { pos: [-4.9, 1.5, -13.2], look: [0.9, 0.6, -18], fov: 40, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.aimAt = new ctx.THREE.Vector3(0.9, 0.7, -18); } },
+  'present-car': { pos: [-4.9, 1.5, -13.2], look: [0.9, 0.6, -18], fov: 40, setup: (ctx) => { ctx.memory.forceOpen = false; } },
+  'past-plants': { pos: [3.0, 1.1, -15.4], look: [4.45, 0.45, -15.6], fov: 50, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.aimAt = new ctx.THREE.Vector3(4.45, 0.5, -15.35); } },
+  'present-plants': { pos: [3.0, 1.1, -15.4], look: [4.45, 0.45, -15.6], fov: 50, setup: (ctx) => { ctx.memory.forceOpen = false; } },
+  'past-car-door': { pos: [4.0, 1.5, -16.2], look: [1.0, 0.7, -17.8], fov: 40, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.aimAt = new ctx.THREE.Vector3(0.9, 0.7, -18); } },
+  'present-car-door': { pos: [4.0, 1.5, -16.2], look: [1.0, 0.7, -17.8], fov: 40, setup: (ctx) => { ctx.memory.forceOpen = false; } },
   'beam-street': { pos: [-4.0, 1.7, -10.5], look: [3, 1.2, -17], fov: 50, setup: (ctx) => { ctx.memory.forceOpen = true; } },
 };

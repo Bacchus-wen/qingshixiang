@@ -1,7 +1,8 @@
 import * as THREE from 'three/webgpu';
 import { LANE } from './index.js';
 import { placeProps } from './props.js';
-import { texture, vec3, float, mix, clamp } from 'three/tsl';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { texture, vec3, float, mix, uniform, clamp } from 'three/tsl';
 import { memoryMask, amberNode } from '../../materials/memory.js';
 
 // The demolition mark: '拆' sprayed in a circle. In the present it is on every other wall; inside the eye's cone
@@ -53,6 +54,49 @@ export function noticeMaterial(lines, seed = 0) {
   m.colorNode = vec3(lum.mul(0.55));
   m.opacityNode = t.a.mul(float(1).sub(clamp(memoryMask().mul(1.5), 0, 1)));
   return m;
+}
+
+// The abandoned car remembers itself: in the cone its open door swings shut around the hinge and the headlamps
+// come on; when the light leaves it falls back to the present half a beat late (driven in street update()).
+function setupPastCar(ctx, car) {
+  if (!car) return;
+  car.traverse((o) => { o.userData.dynamic = true; }); // animated: keep out of the static merge
+  const door = car.getObjectByName('door_fl');
+  let pivot = null;
+  if (door) {
+    // hinge from tools/blender/props.py (Blender (-0.825,-0.79,0.72) -> glTF (-0.825, 0.72, 0.79)), opened 50 deg
+    pivot = new THREE.Group(); pivot.position.set(-0.825, 0, 0.79);
+    door.parent.add(pivot); pivot.attach(door);
+  }
+  const glow = uniform(0);
+  const lampMat = new THREE.MeshStandardNodeMaterial({ color: 0x111111, roughness: 0.3 });
+  lampMat.emissiveNode = amberNode().mul(glow).mul(4);
+  for (const x of [-0.58, 0.58]) {
+    const l = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.09, 0.03), lampMat);
+    l.position.set(x, 0.66, 2.09); l.userData.dynamic = true; car.add(l);
+  }
+  car.updateMatrixWorld(true);
+  ctx.api.pastCar = { car, pivot, glow, center: new THREE.Vector3().setFromMatrixPosition(car.matrixWorld).setY(0.8), past: 0, grace: 0 };
+}
+
+// dead plants come back into leaf inside the cone (the leaves simply are not there in the present)
+function setupPastPlants(planters) {
+  if (!planters) return;
+  const leafMat = new THREE.MeshStandardNodeMaterial({ color: 0x3a3a38, roughness: 0.65, side: THREE.DoubleSide });
+  if (new URLSearchParams(location.search).get('leafdbg') === null) leafMat.maskNode = memoryMask().greaterThan(0.3);
+  // pot centres and heights from tools/blender/props2.py (Blender (x, y, h) -> glTF (x, h, -y))
+  for (const [cx, cy, h, n] of [[-0.63, 0, 0.27, 70], [-0.12, 0.025, 0.34, 90]]) {
+    const leaves = [];
+    for (let i = 0; i < n; i++) {
+      const g = new THREE.CircleGeometry(0.03, 7); g.scale(1.25, 0.55, 1); // an oval leaf, not a paper square
+      const a = i * 2.39996, r = 0.05 + ((i * 37) % 13) / 13 * 0.14, y = h + 0.05 + ((i * 53) % 17) / 17 * 0.32;
+      g.rotateX((i % 5) * 0.6); g.rotateY(a + 0.5); g.translate(cx + Math.cos(a) * r, y, -cy + Math.sin(a) * r);
+      leaves.push(g);
+    }
+    const m = new THREE.Mesh(mergeGeometries(leaves), leafMat);
+    m.userData.dynamic = true; m.castShadow = true;
+    planters.add(m);
+  }
 }
 
 // Shop fascia signs: dead grey plates now; inside the eye's cone the old names light up in amber.
@@ -248,6 +292,9 @@ export async function buildDetails(ctx, root, facades, M, r) {
     ['props2/notice_board', -(W - 0.12), L.curb + 0.9, -4.6, Math.PI / 2],
   );
   const placed = await placeProps(root, props);
+  // the past of two things in the present: the abandoned car (door shut, lamps on) and the dead plants (in leaf)
+  setupPastCar(ctx, placed.find((o) => o.userData.prop === 'car'));
+  setupPastPlants(placed.find((o) => o.userData.prop === 'props2/planters'));
   // notice board papers carry the relocation texts (and vanish in the past like the other notices)
   let pi = 0;
   for (const o of placed) o.traverse((m) => { if (m.isMesh && /paper/i.test(m.name)) { m.material = noticeMaterial(NOTICES[pi % NOTICES.length], pi + 7); m.renderOrder = 4; m.userData.dynamic = true; pi++; } });

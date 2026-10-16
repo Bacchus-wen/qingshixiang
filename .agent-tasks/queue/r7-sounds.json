@@ -1,0 +1,11 @@
+{
+ "id": "r7-sounds",
+ "from": "claude",
+ "to": "grok",
+ "title": "找真实环境录音",
+ "write": false,
+ "paths": [],
+ "status": "running",
+ "posted": "2026-10-16 13:21:46",
+ "started": "2026-10-16 13:21:49"
+}
