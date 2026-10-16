@@ -252,7 +252,7 @@ export async function buildDetails(ctx, root, facades, M, r) {
   props.push(['traffic_light', tlx, 3.95, tlz, 0]);
 
   // the cold failing street lamp: main present-day key light
-  const lamp = new THREE.SpotLight(0xe4ebf2, 650, 26, 0.62, 0.7, 2);
+  const lamp = new THREE.SpotLight(0xffc690, 650, 26, 0.62, 0.7, 2); // v2: an old sodium-ish lamp, warm against the blue night
   lamp.position.set(L.halfRoad - 0.3, 6.8, -3); lamp.target.position.set(-0.5, 0, -5);
   lamp.castShadow = true; lamp.shadow.mapSize.set(1024, 1024); lamp.shadow.bias = -0.0004;
   lamp.shadow.autoUpdate = false; lamp.shadow.needsUpdate = true; // the street does not move

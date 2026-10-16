@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
 import {
   vec3, Fn, texture3D, screenCoordinate, uniform, fract, interleavedGradientNoise, time, fog, color,
-  exponentialHeightFogFactor, smoothstep, float, abs, lights, cameraPosition, distance,
+  exponentialHeightFogFactor, smoothstep, float, abs, lights, cameraPosition, distance, mix, positionWorldDirection,
 } from 'three/tsl';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 
@@ -26,11 +26,18 @@ export default {
     const { scene, postfx, params } = ctx;
     this.fogDensity = uniform(0.014);
     this.fogHeight = uniform(5.5);
-    this.fogColor = uniform(new THREE.Color(0x08090a));
+    // v2: night is not black. A cold blue-grey haze (moonlit rain) that silhouettes read against
+    this.fogBase = new THREE.Color(0.030, 0.036, 0.052);
+    this.fogColor = uniform(this.fogBase.clone());
     scene.fogNode = fog(this.fogColor, exponentialHeightFogFactor(this.fogDensity, this.fogHeight));
     // the sky stays dark even in a flash (a lit sky between the rooftops read as a flat grey rectangle)
-    this.skyColor = uniform(new THREE.Color(0x050506));
-    scene.backgroundNode = this.skyColor;
+    // v2 sky: deep navy overhead, the city's sodium/neon glow low on the horizon between the rooftops
+    this.skyColor = uniform(new THREE.Color(0x050506)); // lightning still adds to it
+    {
+      const d = positionWorldDirection.y;
+      const zen = vec3(0.006, 0.009, 0.022), hor = vec3(0.075, 0.05, 0.065);
+      scene.backgroundNode = mix(hor, zen, smoothstep(-0.02, 0.45, d)).add(this.skyColor);
+    }
 
     const tex = noise3D();
     const jit = postfx.volumeJitter;
@@ -101,9 +108,9 @@ export default {
       let v = 0;
       for (const p of this.pulses) { const x = this.boltT - p; if (x > 0) v = Math.max(v, Math.exp(-x * 18) * (p === 0 ? 1 : 0.7)); }
       this.bolt.intensity = v * 2.2;
-      this.fogColor.value.setScalar(0.035 + v * 0.022);
+      this.fogColor.value.copy(this.fogBase).addScalar(v * 0.03);
       ctx.world.lightning = v;
-      if (this.boltT > 1.2) { this.boltT = -1; this.nextBolt = 25 + Math.random() * 30; this.fogColor.value.set(0x08090a); ctx.world.lightning = 0; }
+      if (this.boltT > 1.2) { this.boltT = -1; this.nextBolt = 25 + Math.random() * 30; this.fogColor.value.copy(this.fogBase); ctx.world.lightning = 0; }
     }
   },
 };

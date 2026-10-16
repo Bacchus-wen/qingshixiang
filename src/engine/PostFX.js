@@ -26,12 +26,12 @@ export class PostFX {
     this.volumeJitter = uniform(new THREE.Vector2());
     this.frame = 0;
     this.params = {
-      exposure: uniform(1.0),
+      exposure: uniform(1.3), // v2: readable night
       vignette: uniform(0.5),
       grain: uniform(0.035),
-      saturation: uniform(0.85),
+      saturation: uniform(1.0),
       contrast: uniform(0.38),
-      blackPoint: uniform(0.018),
+      blackPoint: uniform(0.01),
       lift: uniform(new THREE.Vector3(0.004, 0.006, 0.009)),
       // film: amber halation hugging warm highlights, gate weave (sub-pixel frame drift), density flicker
       halation: uniform(0.55), weave: uniform(new THREE.Vector2()), flicker: uniform(0),

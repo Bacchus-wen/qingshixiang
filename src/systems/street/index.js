@@ -177,13 +177,20 @@ export default {
     if (ctx.params.get('nomerge') === null) mergeStatic(root);
 
     // night sky environment for glossy reflections: faint, cold, almost black
+    // v2 environment: a night sky with the city glow on the horizon (fills facades with a cold blue, gives the
+    // wet road something to reflect besides black)
     const envScene = new THREE.Scene();
-    envScene.background = new THREE.Color(0x0b0c0e);
-    const glow = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8), new THREE.MeshBasicNodeMaterial({ color: 0x1c1e22, side: THREE.BackSide }));
-    glow.scale.set(50, 10, 50); glow.position.y = 30; envScene.add(glow);
+    envScene.background = new THREE.Color(0.02, 0.026, 0.05);
+    const band = new THREE.Mesh(new THREE.CylinderGeometry(40, 40, 10, 32, 1, true), new THREE.MeshBasicNodeMaterial({ color: new THREE.Color(0.16, 0.1, 0.12), side: THREE.BackSide }));
+    band.position.y = 3; envScene.add(band);
+    const top = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8), new THREE.MeshBasicNodeMaterial({ color: new THREE.Color(0.035, 0.05, 0.1), side: THREE.BackSide }));
+    top.scale.set(50, 12, 50); top.position.y = 34; envScene.add(top);
     const pm = new THREE.PMREMGenerator(ctx.renderer);
     scene.environment = pm.fromScene(envScene, 0.04).texture;
-    scene.environmentIntensity = 0.42;
+    scene.environmentIntensity = 0.9;
+    // moonlight through the rain clouds: one weak, cold, shadowless key from high behind the robot's wall
+    const moon = new THREE.DirectionalLight(0x8ea3c8, 0.32);
+    moon.position.set(-20, 30, 10); scene.add(moon, moon.target);
   },
   update(dt, t, ctx) {
     syncWet(ctx.world);
