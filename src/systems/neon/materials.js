@@ -1,6 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { attribute, texture, uv, positionWorld, vec3, float, mix, smoothstep, length, hash, floor } from 'three/tsl';
-import { memoryMask } from '../../materials/memory.js';
+import { mains, memoryMask } from '../../materials/memory.js';
 import { TUBE_INTENSITY, LIGHTBOX_RATIO } from './layout.js';
 
 export function createMaterials(atlas, mode) {
@@ -20,7 +20,7 @@ export function createMaterials(atlas, mode) {
   const tubeSurface = vec3(0.025, 0.03, 0.032).mul(dirt).mul(edge.mul(0.6).add(0.4)).add(vec3(0.085).mul(masks.r));
   const diffuser = mix(paper, tint.mul(0.72), masks.r);
   face.colorNode = mix(tubeSurface, diffuser.mul(0.22).mul(dirt), style.x);
-  const now = faded.mul(masks.g.mul(2.6).add(masks.a.mul(0.3))).mul(power);
+  const now = faded.mul(masks.g.mul(2.6).add(masks.a.mul(0.3))).mul(power).mul(mains); // the surviving tubes trip with the street
   const tube = mix(masks.r, masks.g, style.y);
   const halo = mix(masks.b, masks.a, style.y);
   // Small halo keeps the hollow glyph centre dark. The same broken mask cuts tube AND halo.
