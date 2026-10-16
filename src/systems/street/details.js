@@ -3,7 +3,7 @@ import { LANE } from './index.js';
 import { placeProps } from './props.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { texture, vec3, float, mix, uniform, clamp } from 'three/tsl';
-import { memoryMask, amberNode } from '../../materials/memory.js';
+import { memoryMask, amberNode, mains } from '../../materials/memory.js';
 
 // The demolition mark: '拆' sprayed in a circle. In the present it is on every other wall; inside the eye's cone
 // (the past, before the notices) the paint is simply not there yet.
@@ -239,7 +239,36 @@ export async function buildDetails(ctx, root, facades, M, r) {
   // vending machine: the only thing in the street still powered
   const vmZ = -8.5, vmX = -(L.halfRoad + L.walk) + 0.5;
   props.push(['vending', vmX - 0.05, L.curb, vmZ, Math.PI / 2]);
-  const panel = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 1.2), new THREE.MeshBasicNodeMaterial({ color: new THREE.Color(1.6, 1.62, 1.66) }));
+  // r19: the panel was a blank white rectangle. Now a backlit drinks display: half the slots sold out years ago,
+  // a few faded bottles left, price tags, a dusty glass (canvas texture, emissive)
+  const vc = document.createElement('canvas'); vc.width = 256; vc.height = 384;
+  const vg = vc.getContext('2d');
+  const bgG = vg.createLinearGradient(0, 0, 0, 384); bgG.addColorStop(0, '#e8eef2'); bgG.addColorStop(1, '#b9c4cc');
+  vg.fillStyle = bgG; vg.fillRect(0, 0, 256, 384);
+  vg.fillStyle = '#1d5fa8'; vg.fillRect(0, 0, 256, 46);
+  vg.fillStyle = '#f4f7fa'; vg.font = '700 30px "PingFang SC","Hiragino Sans GB",sans-serif'; vg.textAlign = 'center'; vg.fillText('冰镇饮料', 128, 34);
+  const cols = ['#c8202a', '#2f8f3a', '#e9862a', '#3a7bd5', '#d8c23a', '#c8202a', '#7a3b8f'];
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let row = 0; row < 4; row++) {
+    const y0 = 62 + row * 80;
+    vg.fillStyle = '#8a959e'; vg.fillRect(8, y0 + 62, 240, 4); // shelf
+    for (let k = 0; k < 6; k++) {
+      const x0 = 14 + k * 39;
+      if (rnd() < 0.45) continue; // sold out
+      const c = cols[Math.floor(rnd() * cols.length)];
+      vg.fillStyle = c; vg.globalAlpha = 0.75;
+      if (rnd() < 0.5) { vg.fillRect(x0 + 6, y0 + 22, 20, 40); vg.fillRect(x0 + 11, y0 + 12, 10, 12); } // bottle
+      else { vg.fillRect(x0 + 4, y0 + 30, 24, 32); } // can
+      vg.globalAlpha = 1; vg.fillStyle = '#f2f2f2'; vg.fillRect(x0 + 2, y0 + 68, 30, 10);
+      vg.fillStyle = '#c11'; vg.font = '600 9px sans-serif'; vg.fillText('¥' + (2 + Math.floor(rnd() * 4)), x0 + 17, y0 + 76);
+    }
+  }
+  // dust and a rain-streaked glass
+  for (let i = 0; i < 40; i++) { vg.fillStyle = `rgba(90,96,100,${0.04 + rnd() * 0.08})`; vg.fillRect(rnd() * 256, rnd() * 384, 2 + rnd() * 3, 20 + rnd() * 120); }
+  const vtex = new THREE.CanvasTexture(vc); vtex.colorSpace = THREE.SRGBColorSpace;
+  const vmMat = new THREE.MeshBasicNodeMaterial();
+  vmMat.colorNode = texture(vtex).rgb.mul(1.25).mul(mains);
+  const panel = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 1.2), vmMat);
   panel.position.set(vmX + 0.38, L.curb + 1.1, vmZ); panel.rotation.y = Math.PI / 2;
   root.add(panel);
   const vmLight = new THREE.PointLight(0xeef2f6, 14, 9, 2);

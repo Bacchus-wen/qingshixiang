@@ -68,7 +68,9 @@ export default {
     for (const side of [-1, 1]) {
       for (const [z0, z1] of [[L.zStart, L.crossZ + L.crossHalf], [L.crossZ - L.crossHalf, L.zEnd]]) {
         const d = z0 - z1;
-        box(L.walk, L.curb, d, M.walk, side * (L.halfRoad + L.walk / 2), L.curb / 2, (z0 + z1) / 2, root);
+        // r19: run the sidewalk 1.5 m in under the facades, so set-back shop fronts never open a gap down to the wet
+        // ground plane (it read as a lavender painted strip along the wall base)
+        box(L.walk + 1.5, L.curb, d, M.walk, side * (L.halfRoad + (L.walk + 1.5) / 2), L.curb / 2, (z0 + z1) / 2, root);
       }
     }
 
