@@ -1,0 +1,10 @@
+1. **P2：远处车的光斑会露出矩形底色。** [passing.js:21](/Users/wenbin/Games/新游戏/src/systems/street/passing.js:21)、[passing.js:33](/Users/wenbin/Games/新游戏/src/systems/street/passing.js:33)  
+   光斑和灯晕只在 RGB 中做衰减，透明度仍为 1；场景雾会把黑色边缘混成雾色，再通过 additive 叠到画面上。远处雾越浓，矩形边界越明显，闪电时尤其突出。**改法：两种材质设 `fog: false`，按雾的透射率乘暗发光值；不要向 additive 光效混入雾色。**
+
+2. **P2：首帧预热没有生效，首次过车仍会现场编译材质。** [passing.js:84](/Users/wenbin/Games/新游戏/src/systems/street/passing.js:84)  
+   等待期间车辆放在 `x=-58`，子对象仍启用视锥裁剪。纯 Node 几何检查确认：标题机位下，25 个车体网格、光斑和灯晕全部在视锥外，前 30 帧设置 `visible=true` 不会提交绘制，因此首次出现仍有编译卡顿风险。**改法：预热期间对所有 Mesh/Sprite 设置 `frustumCulled=false`，预热结束后恢复。**
+
+3. **P2：最后一口气会重新触发尚未播放的小记忆。** [director.js:134](/Users/wenbin/Games/新游戏/src/story/director.js:134)、[robot/index.js:275](/Users/wenbin/Games/新游戏/src/systems/robot/index.js:275)  
+   锁定 `lookOverride` 只限制方向；最后的宽光锥仍覆盖照相馆和面馆。实际调用 `micro.update()` 验证，两者都能累计超过 1.5 秒并进入播放，破坏刻度结束后的收尾。**改法：在 `micro` 的新片段触发入口增加阶段限制，`fragment.state === 'done'` 或导演进入 `fade/end` 后禁止启动新片段。**
+
+仅做静态与 Node 验证，未修改文件、未运行 GPU 画面验收。
