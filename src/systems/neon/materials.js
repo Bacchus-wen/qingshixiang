@@ -6,7 +6,7 @@ export function createMaterials(atlas, mode) {
   const past = mode === 'past' ? float(1) : memoryMask(positionWorld);
   const tint = attribute('neonTint', 'vec3');
   const power = attribute('neonPower', 'float');
-  const faded = mix(vec3(0.24, 0.28, 0.3), tint, 0.38);
+  const faded = mix(vec3(0.24, 0.28, 0.3), tint, 0.8); // v2 review: the survivors keep their colour
   const masks = texture(atlas);
   const local = attribute('neonUV', 'vec2');
   const dirt = hash(floor(positionWorld.mul(35)).dot(vec3(7, 31, 53))).mul(0.32).add(0.68);
@@ -15,8 +15,8 @@ export function createMaterials(atlas, mode) {
   const face = new THREE.MeshStandardNodeMaterial({ roughness: 0.67, metalness: 0.12 });
   face.name = 'neon-faces';
   face.colorNode = vec3(0.025, 0.03, 0.032).mul(dirt).mul(edge.mul(0.6).add(0.4)).add(vec3(0.085).mul(masks.r));
-  const now = faded.mul(masks.g.mul(1.05).add(masks.a.mul(0.24))).mul(power);
-  const then = tint.mul(masks.r.mul(5.4).add(masks.b.mul(1.4))).add(vec3(0.3).mul(masks.r));
+  const now = faded.mul(masks.g.mul(2.6).add(masks.a.mul(0.3))).mul(power);
+  const then = tint.mul(masks.r.mul(3.6).add(masks.b.mul(1.2))).add(vec3(0.12).mul(masks.r)); // tubes, not filled plates
   // A tiny cold floor keeps dead glass lettering legible even when no direct lamp reaches it.
   face.emissiveNode = mix(now, then, past).add(vec3(0.008, 0.01, 0.012).mul(masks.r).mul(dirt));
 
@@ -31,7 +31,7 @@ export function createMaterials(atlas, mode) {
   const groundPast = past.mul(sourcePast);
   const radius = length(uv().sub(0.5).mul(2));
   const falloff = float(1).sub(smoothstep(0.05, 1, radius)).pow(2);
-  ground.colorNode = mix(faded.mul(power).mul(0.075), tint.mul(0.55), groundPast);
+  ground.colorNode = mix(faded.mul(power).mul(0.22), tint.mul(0.55), groundPast);
   ground.opacityNode = falloff;
   ground.forceSinglePass = true;
   return { face, housing, ground };

@@ -180,6 +180,7 @@ export default {
     this.gobo = makeGobo(); this.gobo.draw(0);
     const spot = this.spot = new THREE.SpotLight(eyeColor.value.clone(), 0, 45, 0.3, 0.65, 1.4);
     spot.map = this.gobo.tex;
+    spot.color.setRGB(1.0, 0.84, 0.7); // v2: a warm-white beam, so the neon inside the cone keeps its own colours
     spot.castShadow = true; spot.shadow.mapSize.setScalar(ctx.quality === 'low' ? 512 : 1024); spot.shadow.camera.near = 0.2; spot.shadow.bias = -0.0005;
     scene.add(spot, spot.target);
     // a faint cold rim from behind and above (the street's ambient bounce): reads the shell, scratches and oil

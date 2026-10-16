@@ -44,7 +44,8 @@ export function robotMaterial(name) {
     const low = smoothstep(0.9, 0.2, P.y);                                         // road grime from the ground up
     const chips = smoothstep(0.78, 0.86, mx_fractal_noise_float(P.mul(26).add(9.3), 2, 2.0, 0.5).mul(0.5).add(0.5));
     let c = grime(vec3(0.34, 0.32, 0.28)).mul(mix(float(1), float(0.62), oil()));
-    c = mix(c, vec3(0.12, 0.065, 0.03), tears.mul(0.75));                                // rust tears
+    // rust tears run down vertical faces only (on the helmet top they read as camouflage blotches)
+    c = mix(c, vec3(0.12, 0.065, 0.03), tears.mul(0.75).mul(float(1).sub(smoothstep(0.35, 0.8, normalWorldGeometry.y.abs()))));
     c = mix(c, vec3(0.06, 0.055, 0.045), low.mul(0.6));
     c = mix(c, vec3(0.035), chips);
     m.colorNode = c.add(scratches().mul(0.12));

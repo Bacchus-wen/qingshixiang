@@ -24,8 +24,8 @@ export default {
   name: 'atmo',
   async init(ctx) {
     const { scene, postfx, params } = ctx;
-    this.fogDensity = uniform(0.014);
-    this.fogHeight = uniform(5.5);
+    this.fogDensity = uniform(0.006); // v2: the street's far end (and its neon) stays readable
+    this.fogHeight = uniform(8);
     // v2: night is not black. A cold blue-grey haze (moonlit rain) that silhouettes read against
     this.fogBase = new THREE.Color(0.030, 0.036, 0.052);
     this.fogColor = uniform(this.fogBase.clone());
