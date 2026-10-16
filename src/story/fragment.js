@@ -41,11 +41,13 @@ function marksTexture(count) {
 }
 
 // unlit black with an amber rim, visible only inside the cone (same language as the ghosts)
-function rimMaterial(extraMask) {
+function rimMaterial(extraMask, headStart = null) {
   const m = new THREE.MeshStandardNodeMaterial();
   m.lightsNode = lights([]);
   m.colorNode = vec3(0);
-  const rim = pow(float(1).sub(abs(dot(normalView, positionViewDirection))), 6.0);
+  let rim = pow(float(1).sub(abs(dot(normalView, positionViewDirection))), 6.0);
+  // the head stays a plain dark shape: a rimmed sphere read as a hole against the lit door
+  if (headStart) rim = rim.mul(float(1).sub(smoothstep(headStart, headStart.add(0.05), positionWorld.y).mul(0.85)));
   const mask = memoryMask(positionWorld).mul(extraMask);
   m.emissiveNode = amberNode().mul(rim.mul(1.1)).mul(mask); // a faint thin outline (as dim as the pencil marks)
   m.maskNode = mask.greaterThan(0.08);
@@ -96,7 +98,8 @@ export default {
     g.add(markPlane);
     // the child, standing against the marked jamb
     this.childVis = uniform(0);
-    const childMat = rimMaterial(this.childVis);
+    this.childHead = uniform(9);
+    const childMat = rimMaterial(this.childVis, this.childHead);
     // the child from Codex's people.glb (person_2: child with a school bag); procedural fallback
     try {
       const gltf = await new GLTFLoader().loadAsync('/models/people.glb');
@@ -191,6 +194,7 @@ export default {
       // the child grows with the marks
       this.childVis.value = Math.min(1, Math.max(0, (this.t - 2) / 1.5));
       this.child.scale.setScalar(target.h / this.childBaseH);
+      this.childHead.value = FLOOR + target.h * 0.86; // where the neck ends
       if (step !== this.shown) { this.shown = step; this.marks.draw(step); ctx.api.audio?.play('click'); }
       const end = 3 + MARKS.length * 2.2 + 2.5;
       this.endT = end;
