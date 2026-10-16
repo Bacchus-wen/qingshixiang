@@ -1,12 +1,14 @@
 import * as THREE from 'three/webgpu';
 import { makeSurface } from '../../materials/surface.js';
 import { syncWet } from '../../materials/wet.js';
-import { memoryMask, memoryMaskCPU, pastWindowGlow, amberNode } from '../../materials/memory.js';
+import { memoryMaskCPU, amberNode } from '../../materials/memory.js';
 import { buildDetails } from './details.js';
 import { setupPassingCar } from './passing.js';
 import { mergeStatic } from './merge.js';
+import { loadBuildingTextures, createWallMaterial, createWindowMaterial, createShutterMaterial, createShopMaterial, buildingMemory, buildingMemoryCPU } from './cc-materials.js';
+import { wallData, roomQuad, occupyWindows, addWindowIronwork, addShopInteriors } from './cc-geometry.js';
 
-// The lane: one narrow street running -Z, crossing a wider road at z = CROSS_Z. Everything achromatic.
+// The lane: one narrow street running -Z, crossing a wider road at z = CROSS_Z. The present is dim/cold; rooms regain warmth inside the memory cone.
 // Layout is seeded so every run builds the same street.
 export const LANE = { halfRoad: 3.4, walk: 1.6, curb: 0.14, zStart: 14, zEnd: -70, crossZ: -42, crossHalf: 4.5 };
 
@@ -18,6 +20,7 @@ export function rng(seed) {
 function box(w, h, d, mat, x, y, z, parent) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
   m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true;
+  if (mat.userData.ccWall) wallData(m);
   parent.add(m);
   return m;
 }
@@ -30,24 +33,26 @@ export default {
     scene.add(root);
     scene.background = new THREE.Color(0x030304);
 
+    const ccTextures = this.ccTextures = await loadBuildingTextures();
+    const facadeMaterial = createWallMaterial(ccTextures, ctx.params);
+    const windowMaterial = createWindowMaterial(ccTextures, ctx.params);
+    const shopMaterials = {
+      kitchen: createShopMaterial(ccTextures.shop_ramen, ctx.params, 'kitchen'),
+      shelves: createShopMaterial(ccTextures.shelves, ctx.params, 'shelves'),
+    };
     const M = this.mats = {
       road: makeSurface('asphalt_02', { scale: 3, tone: 0.55, puddles: 0.55, porosity: 0.7, metal: 0 }),
       walk: makeSurface('concrete_slab_wall_02', { scale: 1.6, tone: 0.6, puddles: 0.25, metal: 0 }),
-      wallA: makeSurface('concrete_wall_001', { scale: 5, tone: 0.75, metal: 0, streaks: 0.8 }),
-      wallB: makeSurface('brick_4', { scale: 2.2, tone: 0.6, metal: 0, streaks: 0.6 }),
-      wallC: makeSurface('concrete_slab_wall_02', { scale: 3.5, tone: 0.85, metal: 0, streaks: 0.8 }),
-      shutter: makeSurface('corrugated_iron', { scale: 1.4, tone: 0.7, streaks: 0.4 }),
+      wallA: facadeMaterial, wallB: facadeMaterial, wallC: facadeMaterial,
+      shutter: createShutterMaterial(ccTextures),
       rust: makeSurface('green_metal_rust', { scale: 1.2, tone: 0.7, streaks: 0.3 }),
       void: new THREE.MeshStandardNodeMaterial({ color: 0x050505, roughness: 0.9 }),
-      glass: new THREE.MeshStandardNodeMaterial({ color: 0x0b0c0d, roughness: 0.08, metalness: 0 }),
+      glass: windowMaterial,
     };
-    // the past, inside the eye's cone: lit windows, lit shops (amber only)
-    const mask = memoryMask();
-    M.glass.emissiveNode = amberNode().mul(mask).mul(ctx.params.get('noglow') !== null ? 1 : pastWindowGlow()).mul(0.32); // well under the signs' brightness
-    M.void.emissiveNode = amberNode().mul(mask).mul(0.9);
+    const mask = buildingMemory(ctx.params);
     M.brickSeal = makeSurface('brick_4', { scale: 1.4, tone: 0.75, metal: 0, streaks: 0.4 });
     M.brickSeal.maskNode = mask.lessThan(0.45); // dissolves (with the cone's grain) inside the memory
-    if (ctx.params.get('memdbg') !== null) for (const k of ['wallA', 'wallB', 'wallC', 'road', 'walk']) M[k].emissiveNode = amberNode().mul(mask).mul(3);
+    if (ctx.params.get('memdbg') !== null) for (const k of ['road', 'walk']) M[k].emissiveNode = amberNode().mul(mask).mul(3);
     const L = LANE;
     const len = L.zStart - L.zEnd;
 
@@ -79,6 +84,7 @@ export default {
     const walls = [M.wallA, M.wallB, M.wallC];
     this.facades = [];
     this.shutters = [];
+    const windows = [];
     const frontX = L.halfRoad + L.walk;
     for (const side of [-1, 1]) {
       for (const [z0, z1] of [[L.zStart + 6, L.crossZ + L.crossHalf], [L.crossZ - L.crossHalf, L.zEnd - 10]]) {
@@ -91,9 +97,15 @@ export default {
           const zc = z - w / 2;
           const mat = walls[Math.floor(r() * walls.length)];
           const x = side * (frontX + inset + depth / 2);
+          // Separate RNG: facade choices must not shift buildings, home, signs, micro-story or wind anchors.
+          const detailRng = rng(7103 + this.facades.length * 97);
+          const tiles = [0, 1, 1, 2, 3, 3, 5, 6, 6, 7];
+          const tile = tiles[Math.floor(detailRng() * tiles.length)];
+          const data = [tile, tile === 6 ? 2.2 : tile === 5 ? 2.8 : 3.5, 0.78 + detailRng() * 0.22, detailRng() * 100];
+          const facadeBox = (...args) => wallData(box(...args), data);
           // upper mass, ground storey cut back to make a shop recess
-          box(depth, h - 3.2, w - 0.06, mat, x, 3.2 + (h - 3.2) / 2, zc, root);
-          box(depth - 1.2, 3.2, w - 0.06, mat, x + side * 0.6, 1.6, zc, root);
+          facadeBox(depth, h - 3.2, w - 0.06, mat, x, 3.2 + (h - 3.2) / 2, zc, root);
+          facadeBox(depth - 1.2, 3.2, w - 0.06, mat, x + side * 0.6, 1.6, zc, root);
           const f = { side, z: zc, w, h, frontX: side * (frontX + inset), shop: r() < 0.8 };
           // the home across the street from the robot: a plain door, no shop (see story/fragment.js)
           if (side > 0 && z0 > -42 && zc - w / 2 < -14.2 && zc + w / 2 > -14.2) { f.shop = false; f.home = true; }
@@ -103,7 +115,7 @@ export default {
             const open = r();
             const shutterH = open < 0.25 ? 1.9 : open < 0.5 ? 2.45 : 2.8;
             const sw = w - 0.9;
-            box(0.12, 2.8, sw, M.void, f.frontX + side * 1.3, 1.4, zc, root);
+            // Interior quads are added after buildDetails assigns the story shop names.
             if (r() < 0.3) {
               // sealed with fresh brick (a gap left at the top); in the past the brick is not there
               const bk = box(0.24, 2.55, sw, M.brickSeal, f.frontX + side * 1.12, 1.275, zc, root);
@@ -116,7 +128,7 @@ export default {
             box(0.5, 0.25, sw + 0.3, M.rust, f.frontX + side * 0.95, 2.95, zc, root); // shutter box
           }
           // silhouette detail: parapet, rooftop clutter, balconies on some floors
-          box(depth + 0.1, 0.5, w + 0.02, mat, x, h + 0.25, zc, root);
+          facadeBox(depth + 0.1, 0.5, w + 0.02, mat, x, h + 0.25, zc, root);
           if (r() < 0.55) box(1.4, 1.1, 1.4, M.rust, x + side * (r() - 0.5) * 3, h + 1.05, zc + (r() - 0.5) * (w - 1.6), root); // water tank
           if (r() < 0.35) { const ax = x + side * (r() - 0.5) * 4; box(0.06, 3 + r() * 3, 0.06, M.rust, ax, h + 2.5, zc, root); box(1.2, 0.04, 0.04, M.rust, ax, h + 3.6, zc, root); }
           for (let fl = 1; fl * 3.1 + 3.2 < h - 1.5; fl++) {
@@ -126,17 +138,21 @@ export default {
               box(0.04, 0.95, bw, M.rust, f.frontX - side * 0.88, by + 0.5, bz, root);    // railing
             }
           }
-          // windows: dark recessed glass rows
+          // Existing window layout; shared ray-box interior material and merged physical ironwork.
           for (let fl = 1; fl * 3.1 + 3.2 < h - 0.8; fl++) {
             const y = 3.2 + (fl - 1) * 3.1 + 1.7;
             const nWin = Math.max(1, Math.floor(w / 2.2));
             for (let k = 0; k < nWin; k++) {
               if (r() < 0.12) continue;
               const wz = zc - w / 2 + (k + 0.5) * (w / nWin);
-              box(0.06, 1.3, 1.1, M.glass, f.frontX - side * 0.03, y, wz, root);
+              const index = windows.length;
+              const room = roomQuad(root, M.glass, f, y, wz, 1.1, 1.3, -0.065,
+                [Math.floor(detailRng() * 16), 0, 1.8 + detailRng() * 1.2, index % 19 === 7 ? 0 : 1]);
+              windows.push({ mesh: room, side, z: wz, y });
+              if (!ctx.params.has('ccnodetails')) addWindowIronwork(root, f, y, wz, index, M, box);
               // sill, lintel and side frames so windows read as openings, not stickers
               box(0.16, 0.07, 1.3, M.wallC, f.frontX - side * 0.08, y - 0.7, wz, root);
-              box(0.08, 0.1, 1.24, mat, f.frontX - side * 0.04, y + 0.7, wz, root);
+              facadeBox(0.08, 0.1, 1.24, mat, f.frontX - side * 0.04, y + 0.7, wz, root);
               for (const e of [-1, 1]) box(0.08, 1.3, 0.06, M.rust, f.frontX - side * 0.04, y, wz + e * 0.58, root);
             }
           }
@@ -152,7 +168,10 @@ export default {
       const t = 22 + ((k * 104729) % 7 + 7) % 7 * 4;
       box(9, t, 8, M.wallA, k * 9.3 + 4, t / 2, L.zEnd - 45, root);
     }
+    const occupied = occupyWindows(windows);
     await buildDetails(ctx, root, this.facades, M, r);
+    const shopCount = addShopInteriors(root, this.facades, shopMaterials, box, M);
+    ctx.api.street.buildings = { windows: windows.length, occupied, shops: shopCount, debug: ctx.params.get('ccmemory') || 'cone' };
     ctx.api.street.facades = this.facades; // { side, z, w, h, frontX, shop, home, signName } for the neon layer
     this.passing = await setupPassingCar(ctx, root); // marks itself dynamic: never merged
     if (ctx.params.get('nomerge') === null) mergeStatic(root);
@@ -195,7 +214,7 @@ export default {
     }
     // shutters rise slowly while the eye holds on them and fall back half a beat after the light leaves
     for (const s of this.shutters) {
-      const m = memoryMaskCPU(s.center, ctx.memory);
+      const m = buildingMemoryCPU(ctx.params, memoryMaskCPU(s.center, ctx.memory));
       // lit for 0.6 s -> rise; once the light leaves, stay up for a 0.8 s grace, then fall (half a beat late)
       if (m > 0.35) { s.hold = Math.min(s.hold + dt, 1); s.grace = 0.8; } else { s.grace = Math.max(0, (s.grace ?? 0) - dt); if (s.grace === 0) s.hold = 0; }
       const target = s.hold > 0.6 ? 0.85 : 0;

@@ -1,37 +1,38 @@
 import * as THREE from 'three/webgpu';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
-// Collapse every static mesh under `root` into one mesh per material (draw calls: thousands -> dozens).
-// Meshes with userData.dynamic (shutters, anything animated) are left alone.
-const KEEP = ['position', 'normal', 'uv'];
+// Collapse static meshes by material AND attribute layout. Custom facade data must survive.
+// Dynamic shutters/cables and instanced meshes are kept. Source geometry is often shared by GLB clones.
 export function mergeStatic(root) {
   root.updateMatrixWorld(true);
+  const inverseRoot = root.matrixWorld.clone().invert();
   const groups = new Map();
-  const remove = [];
   root.traverse((o) => {
-    if (!o.isMesh || o.userData.dynamic || o.isInstancedMesh) return;
-    let g = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone();
-    for (const k of Object.keys(g.attributes)) if (!KEEP.includes(k)) g.deleteAttribute(k);
+    if (!o.isMesh || o.isInstancedMesh || Array.isArray(o.material)) return;
+    for (let p = o; p && p !== root; p = p.parent) if (p.userData.dynamic) return;
+    const g = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone();
+    // Tangents are unnecessary here (normal basis is reconstructed in world space).
+    for (const k of Object.keys(g.attributes)) if (!['position', 'normal', 'uv', 'color'].includes(k) && !k.startsWith('cc')) g.deleteAttribute(k);
     if (!g.attributes.normal) g.computeVertexNormals();
-    if (!g.attributes.uv) g.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(g.attributes.position.count * 2), 2));
-    g.applyMatrix4(o.matrixWorld);
-    const mats = Array.isArray(o.material) ? o.material : [o.material];
-    if (mats.length > 1) return; // multi-material meshes stay as they are
-    const key = mats[0];
-    if (!groups.has(key)) groups.set(key, { geoms: [], cast: false });
+    if (!g.attributes.uv) g.setAttribute('uv', new THREE.Float32BufferAttribute(new Float32Array(g.attributes.position.count * 2), 2));
+    g.applyMatrix4(inverseRoot.clone().multiply(o.matrixWorld));
+    const layout = Object.entries(g.attributes).sort(([a], [b]) => a.localeCompare(b)).map(([k, a]) => `${k}:${a.itemSize}:${a.normalized}:${a.array.constructor.name}`).join('|');
+    const key = `${o.material.uuid}/${layout}`;
+    if (!groups.has(key)) groups.set(key, { mat: o.material, geoms: [], meshes: [], cast: false, receive: false });
     const e = groups.get(key);
-    e.geoms.push(g); e.cast ||= o.castShadow;
-    remove.push(o);
+    e.geoms.push(g); e.meshes.push(o); e.cast ||= o.castShadow; e.receive ||= o.receiveShadow;
   });
-  for (const o of remove) o.removeFromParent();
-  let n = 0;
-  for (const [mat, e] of groups) {
+  let n = 0, count = 0;
+  for (const e of groups.values()) {
     const merged = mergeGeometries(e.geoms, false);
-    if (!merged) { console.warn('[merge] failed for', mat.name); continue; }
-    const m = new THREE.Mesh(merged, mat);
-    m.castShadow = e.cast; m.receiveShadow = true; m.name = `merged_${mat.name || n}`;
-    m.layers.enable(1); // occluder layer: volumes stop at these surfaces (PostFX OCCLUDER_LAYER)
+    for (const g of e.geoms) g.dispose();
+    if (!merged) { console.warn('[merge] failed; retaining originals', e.mat.name); continue; }
+    for (const o of e.meshes) o.removeFromParent();
+    count += e.meshes.length;
+    const m = new THREE.Mesh(merged, e.mat);
+    m.castShadow = e.cast; m.receiveShadow = e.receive; m.name = `merged_${e.mat.name || n}`;
+    m.layers.enable(1);
     root.add(m); n++;
   }
-  console.log(`[street] merged ${remove.length} meshes into ${n}`);
+  console.log(`[street] merged ${count} meshes into ${n}`);
 }

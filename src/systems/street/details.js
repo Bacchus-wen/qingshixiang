@@ -198,7 +198,7 @@ export async function buildDetails(ctx, root, facades, M, r) {
     }
     // AC units on upper floors
     for (let fl = 1; 3.2 + fl * 3.1 < f.h - 1; fl++) {
-      if (r() < 0.45) props.push(['ac_unit', f.frontX - s * 0.05, 3.2 + fl * 3.1 - 1.9, f.z + (r() - 0.5) * (f.w - 1), -s * Math.PI / 2]);
+      if (r() < 0.45) props.push(['cc/ac_unit', f.frontX - s * 0.05, 3.2 + fl * 3.1 - 1.9, f.z + (r() - 0.5) * (f.w - 1), -s * Math.PI / 2]);
     }
     // a downpipe at one edge
     if (r() < 0.6) {

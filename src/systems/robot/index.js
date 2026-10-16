@@ -151,6 +151,19 @@ export default {
     this.head = find('head');
     this.eye = find('eye');
     this.headRest = this.head.quaternion.clone();
+    // the resting gaze of a fully open eye must fall on the door across the street (the story's anchor), whatever
+    // the head's sculpted rest pose is: rotate the rest pose so the open, centred beam hits the door
+    {
+      const DOOR = new THREE.Vector3(4.95, 1.2, -14.7);
+      const qOpen = new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.32, 0, 0));
+      this.head.quaternion.copy(this.headRest).multiply(qOpen); root.updateMatrixWorld(true);
+      const p = this.eye.getWorldPosition(new THREE.Vector3());
+      const d0 = new THREE.Vector3(0, 0, 1).transformDirection(this.eye.matrixWorld).normalize();
+      const qw = new THREE.Quaternion().setFromUnitVectors(d0, DOOR.clone().sub(p).normalize());
+      const parentQ = this.head.parent.getWorldQuaternion(new THREE.Quaternion());
+      this.headRest.premultiply(parentQ.clone().invert().multiply(qw).multiply(parentQ));
+      this.head.quaternion.copy(this.headRest); root.updateMatrixWorld(true);
+    }
     this.iris = [];
     // the glowing core was hidden behind the barrel's front cap: bring it just in front of the cap, behind the lens
     const core = find('eye_core'); if (core) core.position.z += 0.012;

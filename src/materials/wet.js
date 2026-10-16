@@ -57,3 +57,14 @@ export function wetLayer({ albedo, roughness, porosity = 0.6, puddle = float(0),
   const nxy = ripple.mul(mix(float(0.25), float(1), puddle)).mul(w);
   return { albedo: a2, roughness: r2, puddle, nxy };
 }
+
+// Porous vertical facades: rain darkens them slightly but cannot form a mirror-like film.
+// Separate from horizontal puddles so atlas walls and roller shutters obey the same wetness control.
+export function verticalWetLayer({ albedo, roughness, worldPos }) {
+  const streak = smoothstep(0.58, 0.85, mx_noise_float(vec3(worldPos.x.mul(7), worldPos.y.mul(0.28), worldPos.z.mul(7))));
+  const w = wetUniforms.wetness;
+  return {
+    albedo: albedo.mul(float(1).sub(w.mul(0.1)).sub(streak.mul(w).mul(0.055))),
+    roughness: roughness.sub(w.mul(0.05)).max(0.65),
+  };
+}

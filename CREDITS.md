@@ -26,7 +26,20 @@
 
 ## 代码与库
 - three.js r186(MIT)、GSAP(标准许可)、Vite(MIT)、Playwright(Apache-2.0,仅开发)、stats-gl(MIT,仅开发)。
-- 参考但未复制:xikhar/cybercity(无许可证,只学思路);thtbee/waggles(CC BY-NC 4.0,只学思路,未改编其素材)。
+- thtbee/waggles(CC BY-NC 4.0):本次楼体工作未使用其代码或素材;机器人相关记录由对应工作流补充。
 
 ## 灵感
 杉本博司《海景》、塔可夫斯基《潜行者》、荣荣《废墟》、王兵《铁西区》、Todd Hido《House Hunting》。
+
+## cybercity 楼体与店内（w19，2026-10-16）
+- 来源：[xikhar/cybercity](https://github.com/xikhar/cybercity)。**无许可证，仅限公司内部展示**。本次按用户明确授权移植；不作为可公开再分发素材。
+- 改编做法/代码：`src/systems/buildings/materials.js` 的 4×2 墙面图集、程序窗框、视线射线与房间盒求交/4×4 房间图集；`shops.js` 的店内背板与门洞；`props.js` 的空调风扇环形格栅。重写为本项目的 `src/systems/street/cc-materials.js`、`cc-geometry.js` 和 `props.js`，接入现有 memoryMask、湿润度与按材质合并，保持原街道布局。
+- 使用贴图（上游均位于 `assets/textures/buildings/`）：
+  - `atlas_albedo.png` → `assets/textures/cc/atlas_albedo.jpg`
+  - `atlas_normal.png` → `assets/textures/cc/atlas_normal.jpg`（非颜色数据）
+  - `interior_atlas.png` → `assets/textures/cc/interior_atlas.jpg`
+  - `shutter.png` → `assets/textures/cc/shutter.jpg`
+  - `shelves.png` → `assets/textures/cc/shelves.jpg`
+  - `shop_ramen.png` → `assets/textures/cc/shop_ramen.jpg`（裁取 x=240、y=340、w=1160、h=650 的厨房，移除日文菜单、价格、布帘和装饰，供张记面馆等餐馆使用）
+- 模型：`assets/models/buildings/ac_unit.glb` → `assets/models/cc/ac_unit.glb`；保留几何，运行时替换为风化机壳与程序风扇格栅材质。未使用其他上游 GLB。
+- 贴图以 sips 转 JPEG，质量 90，最长边不超过 2048；裁图用 ffmpeg，无生成式服务。可在项目根目录运行 `sh src/systems/street/convert-cc.sh` 重建本组资产。
