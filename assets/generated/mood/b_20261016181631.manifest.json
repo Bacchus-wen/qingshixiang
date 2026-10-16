@@ -1,0 +1,84 @@
+{
+  "batch_id": "b_20261016181631",
+  "tasks": 4,
+  "submitted": 4,
+  "failed": 1,
+  "total_images": 4,
+  "items": [
+    {
+      "index": 1,
+      "prompt": "Cinematic film still, anamorphic 35mm, shot on ARRI Alexa, Blade Runner 2049 and Wong Kar-wai mood, heavy rain at night, volumetric haze, wet asphalt with long coloured reflections, deep blacks, teal-and-magenta neon against warm sodium light, photorealistic, extremely detailed, no text watermark. A narrow old street in a southern Chinese city awaiting demolition, 1990s concrete walkup buildings with rusty window security cages, laundry poles, tangled power cables, air conditioners, roller shutters sprayed with the character 拆 inside a circle. Almost every light is dead: only one buzzing sodium street lamp and two or three broken neon signs flickering with missing strokes. Abandoned tricycle, plastic stools, puddles. Empty, lonely, cold blue night.",
+      "id": "img_43546",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43546/a887d331-bc0d-466c-a429-9f5211625137.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T18%3A13%3A25Z%2F3600%2F%2F3e4acd607e14278e8c81e63cd05885ebc78cf83fe2f123861dfaf0bc709371d6"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/mood/img_43546/ai_generate_43546_1.png"
+      ]
+    },
+    {
+      "index": 2,
+      "prompt": "Cinematic film still, anamorphic 35mm, shot on ARRI Alexa, Blade Runner 2049 and Wong Kar-wai mood, heavy rain at night, volumetric haze, wet asphalt with long coloured reflections, deep blacks, teal-and-magenta neon against warm sodium light, photorealistic, extremely detailed, no text watermark. A broken white ceramic survey robot sits slumped against a closed roller shutter on the sidewalk in the rain, one forearm missing with cut cables hanging, panels chipped and rust-streaked, inner spine and teal hoses visible through the cracks, a single round mechanical eye with brass rings glowing faint amber. A small stray cat curled next to it. Dim cold light, rain drips off its head, puddle reflections.",
+      "id": "img_43547",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43547/af25c63b-dc34-4866-aa8c-8f7715945452.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T18%3A13%3A30Z%2F3600%2F%2Fb094f3045556b833d8acf3301b7f84302b7f5d69f1810cddf45d950a9333e3cc"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/mood/img_43547/ai_generate_43547_1.png"
+      ]
+    },
+    {
+      "index": 3,
+      "prompt": "Cinematic film still, anamorphic 35mm, shot on ARRI Alexa, Blade Runner 2049 and Wong Kar-wai mood, heavy rain at night, volumetric haze, wet asphalt with long coloured reflections, deep blacks, teal-and-magenta neon against warm sodium light, photorealistic, extremely detailed, no text watermark. From over the shoulder of a broken robot, its amber eye beam cuts across a rainy old Chinese street; inside the cone of light the street is alive again in the past: dense layered Chinese neon signs (粥粉面, 卡拉OK, 旅社, 士多) glowing pink cyan green, shop interiors warm and full of goods, people with umbrellas walking, a car with headlights; outside the beam the street is dark, dead and empty. Strong contrast between living past and dead present.",
+      "id": "img_43548",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43548/26e5c8ab-eb2f-458a-9c46-f51dd2faee0e.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T18%3A13%3A43Z%2F3600%2F%2F528f05b09a4c044d4529c16cba4ee4b4ea65583eafb29cefb0e39ba6c5c84e35"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/mood/img_43548/ai_generate_43548_1.png"
+      ]
+    },
+    {
+      "index": 4,
+      "prompt": "Cinematic film still, anamorphic 35mm, shot on ARRI Alexa, Blade Runner 2049 and Wong Kar-wai mood, heavy rain at night, volumetric haze, wet asphalt with long coloured reflections, deep blacks, teal-and-magenta neon against warm sodium light, photorealistic, extremely detailed, no text watermark. A plain wooden door of an old Chinese apartment at night in the rain, a single warm porch bulb, pencil height marks on the door frame with ages written beside them (五岁 to 十一岁), the faint silhouette of a child standing against the frame, rain streaking down, everything else dark. Melancholic, intimate, quiet.",
+      "id": "img_43549",
+      "status": "failed",
+      "error": "任务 img_43549 failed：AI生成失败: Error code: 400 - {'error': {'message': 'The request is invalid. Please check your input and try again.', 'type': 'invalid_request_error', 'code': 'invalid_request'}}"
+    }
+  ],
+  "plan": {
+    "kind": "image",
+    "model": "gpt",
+    "version": "gpt-image-2.5-sunburst",
+    "count": 4,
+    "quota": {
+      "limit": 300,
+      "used": 0,
+      "remaining": 300,
+      "unit": "张",
+      "after": 4
+    },
+    "running": {
+      "limit": 20,
+      "current": 0
+    },
+    "allowed": true,
+    "blockers": [],
+    "cost": {
+      "amount": 0,
+      "currency": "USD",
+      "priced": false,
+      "estimated": false,
+      "note": null
+    },
+    "request": {
+      "batch": true,
+      "tasks": 4,
+      "total_images": 4,
+      "local_uploads": []
+    }
+  }
+}

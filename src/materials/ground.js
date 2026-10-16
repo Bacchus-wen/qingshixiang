@@ -8,6 +8,7 @@ import {
 } from 'three/tsl';
 import { wetLayer, puddleMask, rippleNormal } from './wet.js';
 import { groundLayout, DEFAULT_GROUND_LANE } from './ground-layout.js';
+import { neonLightAt } from './neonlight.js';
 
 export const GROUND_TEXTURE_NAMES = Object.freeze([
   'asphalt_a_c', 'asphalt_a_n', 'asphalt_b_c', 'asphalt_b_n',
@@ -75,6 +76,7 @@ function wetMaterial(name, ctx, { albedo, roughness, xy, T, B, coverage = 0, por
   const worldNormal = normalize(normalWorldGeometry.add(T.mul(tilt.x)).add(B.mul(tilt.y)).add(vec3(w.nxy.x, 0, w.nxy.y)));
   const m = new THREE.MeshStandardNodeMaterial({ name });
   m.colorNode = vec3(w.albedo);
+  m.emissiveNode = vec3(w.albedo).mul(neonLightAt()); // v3: coloured pools of sign light on the road
   // Already world-space: do not apply transformNormalToView's model normal matrix a second time.
   m.normalNode = normalize(cameraViewMatrix.mul(vec4(worldNormal, 0)).xyz);
   m.roughnessNode = mix(max(w.roughness, 0.65), w.roughness, up).clamp(0.03, 1);
@@ -209,7 +211,9 @@ export async function installGround(ctx, root, M, lane, { paint, grate } = {}) {
   const textures = await loadGroundTextures();
   const road = groundRoad(textures, ctx, lane), walk = groundWalk(textures, ctx);
   const decals = createGroundDecals(textures, ctx, lane);
-  road.emissiveNode = M.road.emissiveNode; walk.emissiveNode = M.walk.emissiveNode;
+  // (keep the neon light; the old procedural emissive was the memory tint only)
+  if (M.road.emissiveNode) road.emissiveNode = road.emissiveNode.add(M.road.emissiveNode);
+  if (M.walk.emissiveNode) walk.emissiveNode = walk.emissiveNode.add(M.walk.emissiveNode);
   const remove = [];
   root.traverse(o => {
     if (!o.isMesh) return;

@@ -3,6 +3,7 @@ import { planSigns } from './layout.js';
 import { buildAtlas } from './atlas.js';
 import { createMaterials } from './materials.js';
 import { buildMeshes, updatePowers } from './geometry.js';
+import { updateNeonLights } from '../../materials/neonlight.js';
 
 export default {
   name: 'neon',
@@ -33,9 +34,10 @@ export default {
       atlasSize: [this.atlas.width, this.atlas.height], signs: this.signs,
     };
   },
-  update(dt, t) {
+  update(dt, t, ctx) {
     // Shot mode uses the engine's fixed dt and simulation t; never renderer/OS wall time.
     if (this.meshes && this.mode !== 'past') updatePowers(this.meshes, t);
+    if (this.signs && ctx.params.get('nolight') === null) updateNeonLights(ctx, this.signs, { pastMode: this.mode === 'past' });
   },
   dispose() {
     this.root?.removeFromParent();

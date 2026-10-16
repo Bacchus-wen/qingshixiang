@@ -7,6 +7,7 @@ import {
   normalize, smoothstep, step, sin, select, transformNormalToView,
 } from 'three/tsl';
 import { mains, memoryMask } from '../../materials/memory.js';
+import { neonLightAt } from '../../materials/neonlight.js';
 import { verticalWetLayer, wetUniforms } from '../../materials/wet.js';
 
 export async function loadBuildingTextures() {
@@ -55,6 +56,7 @@ export function createWallMaterial(tex, params) {
   const dirt = sin(positionWorld.y.mul(0.45).add(a.w)).mul(sin(positionWorld.x.add(positionWorld.z).mul(0.63))).mul(0.055).add(0.945);
   const wet = verticalWetLayer({ albedo: albedo.mul(a.z).mul(dirt), roughness: float(0.88), worldPos: positionWorld });
   m.colorNode = wet.albedo;
+  m.emissiveNode = wet.albedo.mul(neonLightAt()); // v3: the signs light the walls
   m.roughnessNode = mix(wet.roughness, float(0.42), smoothstep(0.65, 0.95, n.y).mul(wetUniforms.wetness));
   m.metalnessNode = tile.equal(2).or(tile.equal(4)).select(0.25, 0);
   const T = select(useY, vec3(1, 0, 0), select(useX, vec3(0, 0, 1), vec3(1, 0, 0)));
@@ -126,5 +128,6 @@ export function createShutterMaterial(tex) {
   const m = new THREE.MeshStandardNodeMaterial(); m.name = 'cc_shutter';
   const wet = verticalWetLayer({ albedo: texture(tex.shutter, uv()).rgb.mul(0.72), roughness: float(0.73), worldPos: positionWorld });
   m.colorNode = wet.albedo; m.roughnessNode = wet.roughness; m.metalness = 0.38;
+  m.emissiveNode = wet.albedo.mul(neonLightAt());
   return m;
 }

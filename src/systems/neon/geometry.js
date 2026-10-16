@@ -102,6 +102,7 @@ export function updatePowers(meshes, time) {
     let dirty = false;
     for (const { offset, count, sign } of mesh.geometry.userData.ranges) {
       const power = Math.fround(flickerAt(sign.seed, time));
+      sign.power = power; // read by materials/neonlight.js (the light the sign throws flickers with it)
       if (a.array[offset] === power) continue;
       a.array.fill(power, offset, offset + count); a.addUpdateRange(offset, count); dirty = true;
     }
