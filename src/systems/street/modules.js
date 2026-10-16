@@ -13,11 +13,11 @@ const rand = (seed) => () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>
 export async function placeModules(ctx, root, windows, facades) {
   if (ctx.params.has('nomodules')) return;
   const kinds = {};
-  for (const k of ['balcony', 'window_ac', 'awning', 'watertank', 'stall']) {
+  for (const k of ['balcony', 'balcony_open', 'window_ac', 'awning', 'watertank', 'stall', 'ac_cluster', 'roof_shack', 'cable_box', 'lightbox_wall', 'drainpipe']) {
     try { kinds[k] = (await loader.loadAsync(`/models/v2/m_${k}.glb`)).scene; } catch (e) { console.warn('[modules] missing', k, e); }
   }
   const r = rand(0x5eed17);
-  const place = { balcony: [], window_ac: [], awning: [], watertank: [], stall: [] };
+  const place = Object.fromEntries(Object.keys(kinds).map((k) => [k, []]));
   const used = new Set();
   for (const w of windows) {
     const f = facades.find((ff) => ff.side === w.side && Math.abs(ff.z - w.z) <= ff.w / 2 + 0.01);
@@ -25,10 +25,11 @@ export async function placeModules(ctx, root, windows, facades) {
     const floorY = w.y - 1.7;
     const key = `${w.side}:${Math.round(w.z / 2.6)}:${Math.round(floorY)}`;
     if (used.has(key) || r() > 0.42) continue;
-    const kind = f.w >= 3.2 && r() < 0.55 && kinds.balcony ? 'balcony' : kinds.window_ac ? 'window_ac' : null;
+    const bal = r() < 0.5 && kinds.balcony_open ? 'balcony_open' : 'balcony';
+    const kind = f.w >= 3.2 && r() < 0.55 && kinds[bal] ? bal : kinds.window_ac ? 'window_ac' : null;
     if (!kind) continue;
     used.add(key);
-    const y = kind === 'balcony' ? floorY + 0.05 : w.y - 0.95;
+    const y = kind.startsWith('balcony') ? floorY + 0.05 : w.y - 0.95;
     place[kind].push({ x: f.frontX, y, z: w.z, side: w.side, flip: r() < 0.5 });
     w.mesh.removeFromParent(); // the module brings its own window
   }
@@ -36,6 +37,19 @@ export async function placeModules(ctx, root, windows, facades) {
   for (const f of facades) {
     if (f.shop && !f.home && kinds.awning && r() < 0.5) place.awning.push({ x: f.frontX, y: 2.45, z: f.z + (r() - 0.5) * Math.max(0, f.w - 3), side: f.side, flip: r() < 0.5 });
     if (kinds.watertank && r() < 0.6) place.watertank.push({ x: f.frontX + f.side * (2 + r() * 3), y: f.h + 0.5, z: f.z + (r() - 0.5) * Math.max(0, f.w - 2.6), side: f.side, flip: r() < 0.5 });
+  }
+  // v3 batch 2: AC clusters and drainpipes on the walls, junction boxes and dead light boxes at street level,
+  // tin shacks on some roofs
+  for (const f of facades) {
+    const half = f.w / 2;
+    if (kinds.ac_cluster && f.h > 9 && r() < 0.35) place.ac_cluster.push({ x: f.frontX, y: 3.2 + Math.floor(r() * 2) * 3.1 + 1.2, z: f.z + (r() < 0.5 ? -1 : 1) * (half - 0.95), side: f.side, flip: r() < 0.5 });
+    if (kinds.drainpipe && r() < 0.5) place.drainpipe.push({ x: f.frontX - f.side * 0.12, y: f.h - 4.2, z: f.z + half - 0.2, side: f.side, flip: false });
+    if (kinds.cable_box && !f.home && r() < 0.3) place.cable_box.push({ x: f.frontX, y: 1.1, z: f.z - half + 0.75, side: f.side, flip: r() < 0.5 });
+    if (kinds.lightbox_wall && f.shop && !f.home && r() < 0.35) {
+      // a blade sign: bracket (local -X) on the wall, face along the street
+      place.lightbox_wall.push({ x: f.frontX - f.side * 0.63, y: 2.75, z: f.z + (r() < 0.5 ? -1 : 1) * (half - 0.35), side: f.side, ry: f.side > 0 ? Math.PI : 0, flip: false });
+    }
+    if (kinds.roof_shack && r() < 0.25) place.roof_shack.push({ x: f.frontX + f.side * (3.5 + r() * 2), y: f.h + 0.5, z: f.z + (r() - 0.5) * Math.max(0, f.w - 3.4), side: f.side, flip: r() < 0.5 });
   }
   if (kinds.stall) {
     const W = 3.4 + 1.6; // LANE.halfRoad + LANE.walk
@@ -52,7 +66,7 @@ export async function placeModules(ctx, root, windows, facades) {
       inst.castShadow = true; inst.receiveShadow = true; inst.userData.dynamic = true; inst.name = `module_${kind}_${o.name}`;
       list.forEach((L, i) => {
         p.set(L.x, L.y, L.z);
-        e.set(0, L.side > 0 ? -Math.PI / 2 : Math.PI / 2, 0); q.setFromEuler(e);
+        e.set(0, L.ry ?? (L.side > 0 ? -Math.PI / 2 : Math.PI / 2), 0); q.setFromEuler(e);
         s.set(L.flip ? -1 : 1, 1, 1); // mirrored variants (bars and stains read differently)
         m.compose(p, q, s).multiply(o.matrixWorld);
         inst.setMatrixAt(i, m);
