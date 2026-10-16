@@ -250,8 +250,8 @@ export default {
       mains.value += (k - mains.value) * Math.min(1, dt * 40);
       ctx.world.mains = mains.value;
       ctx.scene.environmentIntensity = 0.35 * (0.3 + 0.7 * mains.value); // the city glow on the clouds dips too
-      st.lamp.intensity = 650 * mains.value;
-      if (st.far) st.far.intensity = 450 * mains.value;
+      st.lamp.intensity = 140 * mains.value;
+      if (st.far) st.far.intensity = 100 * mains.value;
       if (ctx.api.streetBulb) ctx.api.streetBulb.color.setRGB(9, 9.4, 10).multiplyScalar(Math.max(0.03, mains.value));
       this.vmT = (this.vmT ?? 11) - dt;
       if (this.vmT < 0) { this.vmFail = 0.15 + Math.random() * 0.2; this.vmT = 15 + Math.random() * 20; }

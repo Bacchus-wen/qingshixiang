@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { uniform, positionWorld, floor, float, vec3, pow, abs, dot, normalView, positionViewDirection, lights, normalize, cameraPosition, normalWorld } from 'three/tsl';
+import { uniform, positionWorld, floor, float, vec3, pow, abs, dot, normalView, positionViewDirection, lights, normalize, cameraPosition, normalWorld, mix } from 'three/tsl';
 import { memoryMask, memoryMaskCPU } from '../../materials/memory.js';
 
 // Per-system uniforms keep ?only=traffic independent of ghosts initialization.
@@ -30,14 +30,13 @@ export function coverage(mask) {
   return mask.greaterThan(threshold);
 }
 export function silhouette(state, tint, brightness = 1) {
-  const material = new THREE.MeshStandardNodeMaterial({ roughness: .85, metalness: .15, side: THREE.DoubleSide });
-  material.lightsNode = lights([]);
-  material.colorNode = vec3(0);
-  // Dark bodies, the sign colour only on the grazing edges (review r13: not candy-coloured figures)
+  // v3 (Grok r17): the remembered people are people -- dark clothes that take the real light (signs, shop openings,
+  // the beam), with only a thin neon edge left of the old hologram look
+  const material = new THREE.MeshStandardNodeMaterial({ roughness: .75, metalness: .05, side: THREE.DoubleSide });
+  material.colorNode = mix(vec3(0.09, 0.085, 0.085), tint.mul(0.25), 0.35);
   const V = normalize(cameraPosition.sub(positionWorld));
   const rim = pow(float(1).sub(abs(dot(normalWorld, V))), 6.0);
-  material.colorNode = vec3(0.02);
-  material.emissiveNode = tint.mul(rim.mul(1.4).add(.006)).mul(brightness);
+  material.emissiveNode = tint.mul(rim.mul(0.9).add(0.01)).mul(brightness);
   material.maskNode = coverage(lifeMask(state));
   return material;
 }

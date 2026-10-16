@@ -113,7 +113,7 @@ export default {
       // v3: only a narrow shaft hugging each lamp cone (the 12 m boxes were the grey slab across the street)
       for (const l of [st.lamp, st.far]) {
         const p = l.position.clone(); p.y = 3.6; p.x = (p.x + l.target.position.x) / 2; p.z = (p.z + l.target.position.z) / 2;
-        volume(p, new THREE.Vector3(5, 7.5, 5), 0.012, [l]);
+        volume(p, new THREE.Vector3(5, 7.5, 5), 0.05, [l]); // a visible sodium shaft in the rain
       }
     }
   },

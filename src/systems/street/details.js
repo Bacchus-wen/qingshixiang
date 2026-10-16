@@ -252,7 +252,7 @@ export async function buildDetails(ctx, root, facades, M, r) {
   props.push(['traffic_light', tlx, 3.95, tlz, 0]);
 
   // the cold failing street lamp: main present-day key light
-  const lamp = new THREE.SpotLight(0xffc690, 650, 26, 0.62, 0.7, 2); // v2: an old sodium-ish lamp, warm against the blue night
+  const lamp = new THREE.SpotLight(0xffc690, 140, 26, 0.62, 0.7, 1); // v3: decay 1, a soft sodium pool instead of a hard ellipse // v2: an old sodium-ish lamp, warm against the blue night
   lamp.position.set(L.halfRoad - 0.3, 6.8, -3); lamp.target.position.set(-0.5, 0, -5);
   lamp.castShadow = true; lamp.shadow.mapSize.set(1024, 1024); lamp.shadow.bias = -0.0004;
   lamp.shadow.autoUpdate = false; lamp.shadow.needsUpdate = true; // the street does not move
@@ -265,7 +265,7 @@ export async function buildDetails(ctx, root, facades, M, r) {
   ctx.api.streetBulb = bulb;
   add(root, poleGeo, M.rust, L.halfRoad + 0.35, 4.5, -3);
   // a far lamp down the lane, dimmer, so depth reads in silhouettes
-  const far = new THREE.SpotLight(0xd6dde6, 450, 26, 0.66, 0.7, 2);
+  const far = new THREE.SpotLight(0xd6dde6, 100, 26, 0.66, 0.7, 1);
   far.position.set(-L.halfRoad + 0.4, 6.5, -34); far.target.position.set(0.5, 0, -36);
   far.castShadow = false;
   root.add(far, far.target);
@@ -275,7 +275,7 @@ export async function buildDetails(ctx, root, facades, M, r) {
   win.position.set(wf.frontX - 0.04, wf.h - 2.4, wf.z); win.rotation.y = -Math.PI / 2 * wf.side;
   root.add(win);
 
-  scene.add(new THREE.HemisphereLight(0x4a5a9a, 0x1a1020, 0.34)); // v3: the haze and real lights carry the night now
+  scene.add(new THREE.HemisphereLight(0x5c6470, 0x1c1c1e, 0.34)); // v3 (Grok r17): neutral cool fill, no purple cast // v3: the haze and real lights carry the night now
   // things people dropped: an umbrella upside down in the road near the robot, one left open against a shutter,
   // soaked flyers and a crate by the shops
   props.push(['umbrella_broken', -1.6, 0, -11.2, 0.7], ['umbrella_open', -(L.halfRoad + L.walk) + 0.6, L.curb, -21.5, 1.2, { rz: 0.35 }],

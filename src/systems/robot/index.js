@@ -293,7 +293,7 @@ export default {
     this.frames = (this.frames ?? 0) + 1;
     this.spot.shadow.autoUpdate = o > 0.005 || this.frames < 30;
     // v3: the amber cone is the protagonist of the memory shots (targets/memory.jpg)
-    if (this.beamVol) { this.beamVol.material.userData.density.value = 0.9 * o; this.beamVol.visible = o > 0.01 || this.frames < 30; }
+    if (this.beamVol) { this.beamVol.material.userData.density.value = 0.45 * o; this.beamVol.visible = o > 0.01 || this.frames < 30; }
     const mode = ctx.memory.goboMode;
     const fq = Math.round(flood * 10) / 10;
     if (mode !== this._lastMode || fq !== this._lastFlood || (mode !== 'line' && t - this.goboT > 1 / 15 && Math.abs(o - (this._lastGobo ?? -1)) > 0.01)) {
@@ -304,7 +304,7 @@ export default {
     const ph = ctx.api.director?.phase, overShoulder = ph === 'look' || ph === 'fade';
     this.rimK = (this.rimK ?? 1) + ((overShoulder ? 0.12 : 1) - (this.rimK ?? 1)) * Math.min(1, dt * 2);
     if (this.rim) this.rim.intensity = 16 * this.rimK;
-    if (this.signKey) this.signKey.intensity = 3.5 * (ctx.world.mains ?? 1) * (0.25 + 0.75 * this.rimK);
+    if (this.signKey) this.signKey.intensity = 1.2 * (ctx.world.mains ?? 1) * (0.25 + 0.75 * this.rimK); // (Grok r17: the shell went purple)
     // ---- publish the memory cone
     const m = ctx.memory;
     m.origin.copy(this._v); m.dir.copy(this._d);

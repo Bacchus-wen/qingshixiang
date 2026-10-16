@@ -222,7 +222,7 @@ export default {
       const along = car.axis === 'x' ? car.position.x : car.position.z;
       const presence = (this.life.debug.value || !car.speed ? 1
         : THREE.MathUtils.smoothstep(along, car.min, car.min+2)
-          * (1-THREE.MathUtils.smoothstep(along, car.max-2, car.max))) * THREE.MathUtils.smoothstep(camD, 4.5, 7);
+          * (1-THREE.MathUtils.smoothstep(along, car.max-2, car.max))) * THREE.MathUtils.smoothstep(camD, 8, 11);
       for (const part of this.parts) for (let j=0; j<part.multiplier; j++) {
         const slot=i*part.multiplier+j;
         part.geometry.attributes.lifePresence.setX(slot,presence);

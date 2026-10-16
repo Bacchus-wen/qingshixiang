@@ -82,7 +82,7 @@ export default {
     const doorMat = new THREE.MeshStandardNodeMaterial({ roughness: 0.62 });
     doorMat.colorNode = texture(leafTex).rgb.mul(0.75);
     // inside the memory the door leaf takes a little amber, so the dark child has something to stand against
-    doorMat.emissiveNode = texture(leafTex).rgb.mul(amberNode()).mul(memoryMask(positionWorld)).mul(0.9); // the remembered door, warmly lit
+    doorMat.emissiveNode = texture(leafTex).rgb.mul(amberNode()).mul(memoryMask(positionWorld)).mul(0.4); // the remembered door, warmly lit
     const g = this.group = new THREE.Group();
     const box = (w, h, d, mat, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); o.position.set(x, y, z); o.castShadow = o.receiveShadow = true; o.layers.enable(1); g.add(o); return o; };
     const x = DOOR.x, z = DOOR.z, hw = DOOR.w / 2;

@@ -1,6 +1,5 @@
 import {
-  Fn, If, attribute, float, instanceIndex, storage, uniform, uv, varying,
-  vec3, vec4, positionGeometry, smoothstep, fract, floor, sin,
+  Fn, If, attribute, cameraPosition, float, floor, fract, instanceIndex, positionGeometry, sin, smoothstep, storage, uniform, uv, varying, vec3, vec4,
 } from 'three/tsl';
 import { memoryMask } from '../../materials/memory.js';
 import { createNeonState, syncNeon, neonLight } from './neon.js';
@@ -121,13 +120,13 @@ export default {
       // No ambient floor: incident lamp/sign/beam/flash energy owns visibility.
       // Compute the gate before the HDR beam boost, preserving its exact x3.
       const incident = lit[0].add(lit[1]).mul(0.95)
-        .add(amber.mul(mask).mul(0.95))
+        .add(amber.mul(mask).mul(0.35)) // v3 (Grok r17): memory rain is lit by the beam, not painted orange
         .add(vec3(0.65, 0.72, 0.8).mul(u.lightning).mul(flash)).toVar();
       const energy = incident.add(sign).toVar();
       const brightness = energy.dot(vec3(0.2126, 0.7152, 0.0722));
       const visibility = smoothstep(0, 0.12, brightness);
       const base = incident.min(vec3(1)).add(sign);
-      const color = coloredRain ? base.mul(float(1).add(mask.mul(2).mul(this.neon.enabled))) : base;
+      const color = base; // (the x(1 + 2 mask) memory boost made orange slashes across every close-up)
       return vec4(color, visibility);
     })();
     const material = () => new THREE.MeshBasicNodeMaterial({
@@ -200,7 +199,9 @@ export default {
         .mul(smoothstep(0, 0.08, uv().y)).mul(float(1).sub(smoothstep(0.7, 1, uv().y)));
       const curtainLight = shade(world, 0.08).toVar();
       curtain.colorNode = curtainLight.rgb;
-      curtain.opacityNode = line.mul(trail).mul(edge).mul(u.rain).mul(0.13).mul(curtainLight.w);
+      // no curtain within 8 m of the lens (they read as scratches on the glass)
+      const near = smoothstep(8, 12, world.sub(cameraPosition).length());
+      curtain.opacityNode = line.mul(trail).mul(edge).mul(u.rain).mul(0.13).mul(curtainLight.w).mul(near);
       add(new THREE.PlaneGeometry(1, 1), curtain, `rain-curtain-${i}`);
     }
     scene.add(this.group);
