@@ -3,7 +3,7 @@ import { alleyPresence, createDogClock, createRadioListener } from './details-co
 
 // Quiet location details, with independent random streams so they cannot shift
 // existing rain/thunder cues. No AudioContext, timers or assets are created here.
-export function createDetails(ac, { mix, rain, params, seed, onEvent }) {
+export function createDetails(ac, { mix, rain, params, seed, onEvent, recordedDog }) {
   const start = ac.currentTime;
   const dogRng = random(seed ^ 0xd096), radioRng = random(seed ^ 0x7ad10);
   const noiseRng = random(seed ^ 0xa11e7);
@@ -58,6 +58,13 @@ export function createDetails(ac, { mix, rain, params, seed, onEvent }) {
   dogBus.connect(dogVerb).connect(filter('lowpass', 1050)).connect(dogWet).connect(mix);
   const dogClock = createDogClock(dogRng, start);
   function dogCall(group) {
+    // A field clip already contains the complete bark group. Keep synthesis as
+    // fallback when recordings are disabled, loading, or unavailable.
+    if (recordedDog?.(group.at)) {
+      onEvent?.({ name: 'dog-group', ...group, count: 1, recorded: true });
+      onEvent?.({ name: 'dog', at: group.at, groupAt: group.at, recorded: true });
+      return;
+    }
     onEvent?.({ name: 'dog-group', ...group });
     for (let i = 0; i < group.count; i++) {
       const at = group.at + i * group.spacing;

@@ -59,3 +59,7 @@
 - 2026-10-16 13:21:46 | claude | 派给 codex：风与环境动态（w15-wind，可写 src/systems/wind/**,src/systems/index.js）
 - 2026-10-16 13:21:46 | claude | 派给 grok：找真实环境录音（r7-sounds，只读）
 - 2026-10-16 13:27:49 | codex | 完成：风与环境动态（w15-wind）
+- 2026-10-16 13:36:14 | grok | 完成：找真实环境录音（r7-sounds）
+- 2026-10-16 13:51:17 | claude | 派给 codex：把真实录音混进音景（w16-recordings，可写 src/systems/audio/**）
+- 2026-10-16 13:57:10 | claude | 派给 grok：策展人视角的最终评论（r8-curator，只读）
+- 2026-10-16 13:58:52 | codex | 完成：把真实录音混进音景（w16-recordings）

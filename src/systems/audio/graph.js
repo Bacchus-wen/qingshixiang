@@ -1,9 +1,10 @@
 import { DEFAULTS, clamp, random, mixState, createStorm, createMemoryGate, createLampContact } from './control.js';
 import { createDetails } from './details.js';
+import { createRecordings } from './recordings.js';
 
 // The same native Web Audio graph is used in realtime and OfflineAudioContext.
 // Audio time owns scheduling: deterministic shot frame time must not accelerate it.
-export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed, onEvent } = {}) {
+export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed, onEvent, loadBuffer } = {}) {
   const rng = random(seed), noiseRng = random(seed ^ 0xa16b);
   const params = { ...DEFAULTS };
   for (const key of Object.keys(params)) if (key in levels) params[key] = clamp(levels[key], 0, 1, params[key]);
@@ -53,7 +54,7 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
   const rainBus = gain(), rainFilter = filter('lowpass', 12000);
   rainBus.connect(rainFilter); rainFilter.connect(mix); rainFilter.connect(reverb);
   const buses = {};
-  for (const name of Object.keys(DEFAULTS).filter(k => !['master', 'reverb', 'dog', 'radio', 'alley'].includes(k))) {
+  for (const name of Object.keys(DEFAULTS).filter(k => !['master', 'reverb', 'dog', 'radio', 'alley', 'rec'].includes(k))) {
     const bus = gain(params[name]); buses[name] = bus;
     if (['nearRain', 'farRain', 'drips'].includes(name)) bus.connect(rainBus);
     else if (name !== 'memory') {
@@ -65,7 +66,8 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
       if (name !== 'shutter') output.connect(reverb);
     }
   }
-  const details = createDetails(ac, { mix, rain: rainFilter, params, seed, onEvent });
+  const recordings = createRecordings(ac, { params, rain: rainBus, mix, reverb, seed, onEvent, loadBuffer });
+  const details = createDetails(ac, { mix, rain: rainFilter, params, seed, onEvent, recordedDog: at => recordings.dog(at) });
   // Individual source amplitudes leave substantial headroom before the compressor.
   function loopNoise(bus, type, hz, amplitude, q = 0.7) {
     const s = ac.createBufferSource(); s.buffer = noise; s.loop = true;
@@ -81,7 +83,7 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
   // The distant bed stays broad and diffuse; no sustained pitched present layer.
   loopNoise(buses.farRain, 'lowpass', 1000, 0.23);
   const wind = loopNoise(buses.wind, 'lowpass', 270, 0.1);
-  lfo(wind.level.gain, 0.027, 0.05); // optional broadband air, disabled by default
+  lfo(wind.level.gain, 0.027, 0.05);
   const lampGate = gain(0); lampGate.connect(buses.lamp);
   loopNoise(lampGate, 'highpass', 1800, 0.035);
 
@@ -160,6 +162,7 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
       const v = voice(buses.lamp, at, 0.025 + rng() * 0.06, 0.24 * level, 0.35, 0.001);
       if (v) { v.add('noise', 3600, 700, 0.6); v.finish(); }
     } else if (name === 'thunder') {
+      recordings.play('thunder_roll', at, { level: 0.45 * level * clamp(params.thunder), pan: pan * 0.5, cutoff: 650, wet: 0.35 });
       const v = voice(buses.thunder, at, 4.8, 0.8 * level, pan * 0.5, 0.42);
       if (v) { v.add('noise', 72, 36, 0.65); v.add('noise', 150, 48, 0.7); v.finish(); }
     } else if (name === 'servo') {
@@ -209,6 +212,7 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
     memoryRamp = { from: held, to: value, at, end: at + 0.01 };
   }
   const lastTargets = new WeakMap();
+  const recordedBeds = { nearRain: 'rain_roof_loop', farRain: 'rain_puddle_loop', wind: 'wind_loop' };
   function target(param, value, at, tau = 0.35) {
     if (lastTargets.get(param) === value) return;
     if (!lastTargets.has(param)) param.setValueAtTime(value, at);
@@ -221,9 +225,12 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
     target(master.gain, muted ? 0 : clamp(params.master), at, 0.04);
     target(wet.gain, clamp(params.reverb), at);
     target(memoryWet.gain, clamp(params.reverb), at);
-    for (const [name, bus] of Object.entries(buses)) target(bus.gain, clamp(params[name]), at);
+    for (const [name, bus] of Object.entries(buses)) {
+      target(bus.gain, clamp(params[name]) * recordings.synthScale(recordedBeds[name]), at);
+    }
     target(rainBus.gain, state.rain, at, 0.24);
     target(rainFilter.frequency, state.cutoff, at, 0.3);
+    recordings.update(at, world, memory);
     details.update(at, memory, camera);
     setMemory(memoryEnvelope(at, state.memory), at);
     const contact = lampContact(at, lampIntensity);
@@ -243,11 +250,16 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
   }
   // Existing robot callers issue whine + servo in the same frame. Group those
   // calls under one shutter, also accepting an explicit play('shutter') first.
-  let openingAt = -Infinity;
+  let openingAt = -Infinity, relayAt = -Infinity;
   function cue(name, at, options = {}) {
-    if (disposed || !['shutter', 'servo', 'click', 'whine'].includes(name)) return false;
+    if (disposed || !['shutter', 'servo', 'click', 'whine', 'relay'].includes(name)) return false;
     const level = clamp(options.gain, 0, 1, 1);
     if (level === 0) return true;
+    if (name === 'relay') return recordings.relay(at, level, options.pan);
+    // Group same-frame whine/servo/shutter into one relay; clicks mark failures.
+    if (name === 'click' || at < relayAt || at - relayAt > 0.25) {
+      recordings.relay(at, level, options.pan); relayAt = at;
+    }
     if (name === 'shutter') openingAt = at;
     if (name === 'servo' || name === 'whine') {
       if (at < openingAt || at - openingAt > 0.25) {
@@ -261,6 +273,7 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
   }
   return {
     params,
+    recordingsReady: recordings.ready,
     update,
     play(name, options = {}) { return cue(name, ac.currentTime + 0.005, options); },
     // Offline scores should schedule cues in request order, as realtime callers do.
@@ -269,6 +282,7 @@ export function createSoundscape(ac, { levels = {}, muted = false, seed = 0x5eed
     dispose() {
       if (disposed) return;
       disposed = true;
+      recordings.dispose();
       details.dispose();
       for (const s of sources) { s.onended = null; try { s.stop(); } catch { /* already stopped */ } }
       for (const n of nodes) n.disconnect();

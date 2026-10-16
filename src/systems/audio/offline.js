@@ -6,15 +6,18 @@ import { RADIO_POSITION } from './details-control.js';
 export async function renderOffline({
   seconds = 10, muted = false, levels = {}, memory = 'ramp', effects = true,
   storm = true, rain = 1, lamp = 650, seed = 0x5eed, windows = {},
-  camera, memoryCone = {},
+  camera, memoryCone = {}, windGust = 0.2, loadBuffer,
 } = {}) {
   const ac = new OfflineAudioContext(2, Math.ceil(24000 * seconds), 24000);
   const events = [];
-  const graph = createSoundscape(ac, { muted, levels, seed, onEvent: event => events.push(event) });
+  const graph = createSoundscape(ac, { muted, levels, seed, loadBuffer, onEvent: event => events.push(event) });
   try {
+    const recordings = await graph.recordingsReady;
     for (let i = 0; i < seconds * 60; i++) {
       const t = i / 60;
-      graph.update(t, { rain: typeof rain === 'function' ? rain(t) : rain, lightning: typeof storm === 'function' ? storm(t) : storm && i === 60 ? 1 : 0 }, {
+      graph.update(t, { rain: typeof rain === 'function' ? rain(t) : rain,
+        windGust: typeof windGust === 'function' ? windGust(t) : windGust,
+        lightning: typeof storm === 'function' ? storm(t) : storm && i === 60 ? 1 : 0 }, {
         ...(typeof memoryCone === 'function' ? memoryCone(t) : memoryCone),
         strength: typeof memory === 'function' ? memory(t) : memory === 'ramp' ? Math.max(0, Math.min(1, (t - 4) / 3)) : memory,
       }, typeof lamp === 'function' ? lamp(t) : lamp, typeof camera === 'function' ? camera(t) : camera);
@@ -39,21 +42,21 @@ export async function renderOffline({
       let low = 0;
       for (const x of samples) { low += alpha * (x - low); total += x * x; lowEnergy += low * low; }
     }
-    return { ...stats, seconds, segments, events, channelRms: channels.map(c => measure([c]).rms), lowRatio: total ? lowEnergy / total : 0 };
+    return { ...stats, seconds, segments, events, recordings, channelRms: channels.map(c => measure([c]).rms), lowRatio: total ? lowEnergy / total : 0 };
   } finally { graph.dispose(); }
 }
 
-export async function runOfflineTest({ muted = false } = {}) {
-  const main = await renderOffline({ muted });
+export async function runOfflineTest({ muted = false, loadBuffer } = {}) {
+  const main = await renderOffline({ muted, loadBuffer });
   console.log(`[audio-test] 10s RMS=${main.rms.toFixed(6)} peak=${main.peak.toFixed(6)} finite=${main.finite} mute=${muted}`);
-  const silence = await renderOffline({ muted: true });
+  const silence = await renderOffline({ muted: true, loadBuffer });
   const onlyRain = Object.fromEntries(Object.keys(DEFAULTS).map(k => [k, ['master', 'nearRain', 'farRain', 'drips'].includes(k) ? DEFAULTS[k] : 0]));
   const rain = await renderOffline({ seconds: 3, memory: 0, effects: false, storm: false, levels: onlyRain });
   const rememberedRain = await renderOffline({ seconds: 3, memory: 1, effects: false, storm: false, levels: onlyRain });
   const layers = {};
   // Sparse dogs need a minutes-long score, and alley is a rain send, not a source.
   // Their dedicated assertions are in runDetailsTest, invoked by audio-render.
-  for (const name of Object.keys(DEFAULTS).filter(k => !['master', 'reverb', 'dog', 'alley'].includes(k))) {
+  for (const name of Object.keys(DEFAULTS).filter(k => !['master', 'reverb', 'dog', 'alley', 'rec'].includes(k))) {
     const levels = Object.fromEntries(Object.keys(DEFAULTS).map(k => [k, k === 'master' || k === name ? (k === 'wind' ? 0.25 : DEFAULTS[k]) : 0]));
     layers[name] = await renderOffline({ seconds: 10, memory: name === 'memory' ? 1 : 0, levels });
   }
@@ -115,7 +118,7 @@ export async function runReviewTest() {
   checks.lampSync = crackles.length === 2 && crackles[0].at === 1 && crackles[1].at === 2.5 && lamp.rms > 0.0001;
   // The newly added intermittent radio is intentional; this check still guards
   // against the old sustained present-day wind/lamp drone.
-  const quiet = results.quiet = await renderOffline({ ...base, seconds: 10, levels: { radio: 0, dog: 0 } });
+  const quiet = results.quiet = await renderOffline({ ...base, seconds: 10, levels: { radio: 0, dog: 0, wind: 0, rec: 0 } });
   checks.noPresentDrone = quiet.peak === 0 && !quiet.events.some(e => e.name === 'crackle');
 
   const drips = results.drips = await renderOffline({ ...base, seconds: 28, rain: 1, levels: isolate('drips') });
@@ -143,7 +146,7 @@ export async function runDetailsTest() {
   ]));
   const base = { effects: false, storm: false, memory: 0, rain: 0, lamp: null };
   const results = {}, checks = {};
-  const dogs = results.dogs = await renderOffline({ ...base, seconds: 280, levels: isolate('dog'),
+  const dogs = results.dogs = await renderOffline({ ...base, seconds: 400, levels: isolate('dog'),
     windows: events => {
       const first = events.find(e => e.name === 'dog-group');
       if (!first) return {};
@@ -154,8 +157,8 @@ export async function runDetailsTest() {
   const groups = dogs.events.filter(e => e.name === 'dog-group');
   const barks = dogs.events.filter(e => e.name === 'dog');
   const gaps = groups.slice(1).map((g, i) => g.at - groups[i].at);
-  checks.dogIntervals = groups.length >= 3 && groups[0].at >= 40 && groups[0].at <= 90 &&
-    gaps.every(g => g >= 40 && g <= 90) && Math.max(...gaps) - Math.min(...gaps) > 1;
+  checks.dogIntervals = groups.length >= 3 && groups[0].at >= 45 && groups[0].at <= 120 &&
+    gaps.every(g => g >= 45 && g <= 120) && Math.max(...gaps) - Math.min(...gaps) > 1;
   checks.dogOneOrTwo = groups.every(g => (g.count === 1 || g.count === 2) &&
     barks.filter(b => b.groupAt === g.at).length === g.count);
   checks.dogDistantLevel = dogs.finite && dogs.peak < 10 ** (-36 / 20) &&

@@ -1,0 +1,28 @@
+{
+ "id": "w16-recordings",
+ "from": "claude",
+ "to": "codex",
+ "title": "把真实录音混进音景",
+ "write": true,
+ "paths": [
+  "src/systems/audio/**"
+ ],
+ "status": "done",
+ "posted": "2026-10-16 13:51:17",
+ "started": "2026-10-16 13:51:19",
+ "seconds": 450.7,
+ "touched": [
+  "src/systems/audio/README.md",
+  "src/systems/audio/control.js",
+  "src/systems/audio/details-control.js",
+  "src/systems/audio/details.js",
+  "src/systems/audio/graph.js",
+  "src/systems/audio/offline.js",
+  "src/systems/audio/recordings.js",
+  "src/systems/audio/verify-recordings.mjs",
+  "src/systems/audio/verify.mjs"
+ ],
+ "applied": 9,
+ "finished": "2026-10-16 13:58:52",
+ "reason": null
+}

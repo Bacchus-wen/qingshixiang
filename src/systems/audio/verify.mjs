@@ -38,12 +38,13 @@ globalThis.removeEventListener = events.removeEventListener.bind(events);
 globalThis.AudioContext = class { constructor() { attempts++; throw new Error('device unavailable'); } };
 try {
   const system = Object.create(template);
-  const ctx = { params: new URLSearchParams('mute&volume=0.2&audio.wind=0.8'), api: {}, world: {}, memory: {} };
+  const ctx = { params: new URLSearchParams('mute&volume=0.2&audio.wind=0.8&audio.rec=0'), api: {}, world: {}, memory: {} };
   await system.init(ctx);
   assert.equal(attempts, 0, 'initialization must wait for a gesture');
   assert.equal(ctx.api.audio.state, 'locked');
   assert.equal(ctx.api.audio.levels.master, 0.2);
   assert.equal(ctx.api.audio.levels.wind, 0.8);
+  assert.equal(ctx.api.audio.levels.rec, 0);
   assert.equal(ctx.api.audio.play('servo'), false, 'locked effects must not queue');
   events.dispatchEvent(new Event('pointerdown'));
   assert.equal(attempts, 1);
@@ -103,10 +104,10 @@ for (const fps of [30, 60, 144]) {
     const call = clock(frame / fps);
     if (call) calls.push(call);
   }
-  assert(calls.length >= 10);
-  assert(calls[0].at >= 40 && calls[0].at <= 90);
+  assert(calls.length >= 7);
+  assert(calls[0].at >= 45 && calls[0].at <= 120);
   const intervals = calls.slice(1).map((c, i) => c.at - calls[i].at);
-  assert(intervals.every(dt => dt >= 40 && dt <= 90), 'dog groups must stay 40–90s apart');
+  assert(intervals.every(dt => dt >= 45 && dt <= 120), 'dog groups must stay 45–120s apart');
   assert(Math.max(...intervals) - Math.min(...intervals) > 10);
   assert(calls.every(c => [1, 2].includes(c.count) && c.spacing >= 0.55 && c.spacing <= 0.9));
   assert(calls.some(c => c.count === 1) && calls.some(c => c.count === 2));
@@ -153,3 +154,5 @@ assert.equal(alleyPresence(0.35), 0);
 assert.equal(alleyPresence(1), 0);
 assert.equal(alleyPresence(NaN), 1);
 console.log('PASS street detail controls: dog cadence/count/resume, radio local cone/range/position/stereo, present-only alley');
+
+await import('./verify-recordings.mjs');

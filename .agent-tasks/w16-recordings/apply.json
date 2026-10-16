@@ -1,0 +1,19 @@
+{
+ "state": "applied",
+ "files": [
+  "src/systems/audio/README.md",
+  "src/systems/audio/control.js",
+  "src/systems/audio/details-control.js",
+  "src/systems/audio/details.js",
+  "src/systems/audio/graph.js",
+  "src/systems/audio/offline.js",
+  "src/systems/audio/recordings.js",
+  "src/systems/audio/verify-recordings.mjs",
+  "src/systems/audio/verify.mjs"
+ ],
+ "created": [
+  "src/systems/audio/recordings.js",
+  "src/systems/audio/verify-recordings.mjs"
+ ],
+ "at": "2026-10-16 13:58:52"
+}

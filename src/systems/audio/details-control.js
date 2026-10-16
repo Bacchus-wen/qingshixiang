@@ -6,7 +6,7 @@ export const RADIO_POSITION = Object.freeze({ x: -5.2, y: 1.35, z: -24 });
 
 // Intervals refer to the start of each group, not to the optional second bark.
 export function createDogClock(rng, start = 0) {
-  const gap = () => 40 + rng() * 50;
+  const gap = () => 45 + rng() * 75;
   let next = start + gap();
   return at => {
     // Resuming a hidden tab skips stale calls, with a fresh long quiet period.

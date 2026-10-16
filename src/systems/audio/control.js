@@ -1,8 +1,8 @@
 export const DEFAULTS = Object.freeze({
   master: 0.65, nearRain: 0.48, farRain: 0.65, drips: 0.28,
-  wind: 0, lamp: 0.2, thunder: 0.65, memory: 0.32,
+  wind: 0.25, lamp: 0.2, thunder: 0.65, memory: 0.32,
   servo: 0.42, click: 0.3, shutter: 0.5, whine: 0.14, reverb: 0.22,
-  dog: 0.12, radio: 0.45, alley: 0.16,
+  dog: 0.12, radio: 0.45, alley: 0.16, rec: 1,
 });
 
 export function clamp(value, lo = 0, hi = 1, fallback = 0) {

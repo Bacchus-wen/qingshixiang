@@ -1,0 +1,9 @@
+{
+ "task_id": "r8-curator",
+ "agent": "grok",
+ "cwd": "/Users/wenbin/Games/新游戏",
+ "write": false,
+ "task_sha256": "75dc2d8128f4c0ee4596483f1c391b9d4c6b0239a5845db68f0bd07fbda26694",
+ "started": "2026-10-16T13:57:11+0800",
+ "status": "running"
+}
