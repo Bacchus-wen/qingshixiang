@@ -141,7 +141,9 @@ def under(o, e):
         p = p.parent
     return False
 drop(lambda o: under(o, 'L_wrist') or (under(o, 'L_elbow') and ('forearm' in o.name or 'farm' in o.name)))
-drop(lambda o: o.name.startswith(('shell_shld_cap_accent_L', 'shell_thgh_accent_R', 'shell_batt_door_accent')))
+drop(lambda o: o.name.startswith(('shell_shld_cap_accent_L', 'shell_thgh_accent_R', 'shell_batt_door_accent',
+                                    # panels lost over the years: the knee drums, chest plates and a calf shell show what is under them
+                                    'shell_batt_door_main', 'shell_shin_front_main_L', 'shell_uarm_biceps_main_R', 'shell_head_crown_accent')))
 
 # ---------- materials by suffix (our runtime's robotMaterial keys) ----------
 def mat(name):
@@ -158,7 +160,7 @@ if DECIMATE:
     for o in [o for o in scene.objects if o.type == 'MESH']:
         n = len(o.data.vertices)
         small = any(k in o.name for k in ('idx_', 'mid_', 'rng_', 'lit_', 'th_', 'palm', 'wrist'))
-        target = 450 if small else 2200
+        target = 260 if small else 1300
         if n > target:
             mod = o.modifiers.new('dec', 'DECIMATE'); mod.ratio = max(0.08, target / n)
             dg = bpy.context.evaluated_depsgraph_get()

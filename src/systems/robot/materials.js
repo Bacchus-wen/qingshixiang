@@ -37,7 +37,17 @@ export function robotMaterial(name) {
   const n = name.toLowerCase();
   const m = new THREE.MeshStandardNodeMaterial();
   if (n.includes('shell_ceramic')) {
-    m.colorNode = vec3(grime(float(0.55)).mul(mix(float(1), float(0.62), oil())).add(scratches().mul(0.18)));
+    // v2 (kestrel shells): once-white ceramic, years in the rain. Yellowed, rust tears running down from every seam
+    // and fastener, the lower body caked with road grime, chips through to the dark primer.
+    const P = positionWorld;
+    const tears = smoothstep(0.56, 0.72, mx_noise_float(vec3(P.x.mul(45), P.y.mul(2.5), P.z.mul(45)).add(4.1)).mul(0.5).add(0.5)); // mx noise is ~[-1,1]
+    const low = smoothstep(0.9, 0.2, P.y);                                         // road grime from the ground up
+    const chips = smoothstep(0.78, 0.86, mx_fractal_noise_float(P.mul(26).add(9.3), 2, 2.0, 0.5).mul(0.5).add(0.5));
+    let c = grime(vec3(0.34, 0.32, 0.28)).mul(mix(float(1), float(0.62), oil()));
+    c = mix(c, vec3(0.12, 0.065, 0.03), tears.mul(0.75));                                // rust tears
+    c = mix(c, vec3(0.06, 0.055, 0.045), low.mul(0.6));
+    c = mix(c, vec3(0.035), chips);
+    m.colorNode = c.add(scratches().mul(0.12));
     m.roughnessNode = mix(wetRough(0.42), float(0.2), oil().mul(0.6));
     m.metalnessNode = float(0);
   } else if (n.includes('shell_dark')) {
