@@ -22,15 +22,21 @@ traffic.loadCar = async () => prepareCar(gltf.scene);
 const ctx = { scene: new THREE.Scene(), camera: new THREE.PerspectiveCamera(), params: new URLSearchParams('memlife=1'), api: {},
   memory: { origin: new THREE.Vector3(), dir: new THREE.Vector3(0,0,-1), angle: .3, range: 40, strength: 0 } };
 await traffic.init(ctx);
-assert.equal(ctx.api.traffic.count, 11);
-assert.equal(traffic.cars.filter(c => c.speed === 0).length, 4);
-assert.equal(traffic.cars.filter(c => c.axis === 'x').length, 4);
+assert.equal(ctx.api.traffic.count, 6);
+assert.equal(traffic.cars.filter(c => c.speed === 0).length, 2);
+assert.equal(traffic.cars.filter(c => c.axis === 'x').length, 2);
 assert.equal(traffic.parts.length, 4);
 assert(traffic.parts.every(p => p.mesh.isInstancedMesh && !p.geometry.groups.length));
-for (const p of traffic.parts) assert.equal(p.mesh.instanceMatrix.count, 11 * p.multiplier);
+for (const p of traffic.parts) assert.equal(p.mesh.instanceMatrix.count, 6 * p.multiplier);
 const parked = traffic.cars.filter(c => c.speed === 0).map(c => c.position.clone());
+ctx.params.delete('memlife'); ctx.memory.floodNow = .501; crowd.value = 0;
 for (let t = 0; t <= 480; t += .25) {
+  ctx.camera.position.copy(traffic.cars[2].position);
   traffic.update(.25,t,ctx);
+  assert.equal(ctx.api.traffic.visibleCount,6);
+  assert.equal(traffic.life.flood.value,1); assert.equal(traffic.life.crowd.value,1);
+  assert(traffic.parts.every(p => p.geometry.attributes.lifePresence.array.every(v => v === 1)));
+  assert(traffic.cars.some(c => c.position.z <= -60), 'Far street stays occupied');
   for (const c of traffic.cars) {
     const along = c.axis === 'x' ? c.position.x : c.position.z;
     assert(along >= c.min && along <= c.max);
@@ -42,10 +48,11 @@ for (let t = 0; t <= 480; t += .25) {
     const a = c.axis === 'x' ? c.position.x : c.position.z;
     const b = c.axis === 'x' ? other.position.x : other.position.z;
     const d = Math.abs(a-b);
-    assert(Math.min(d,c.max-c.min-d) > 4.2);
+    const sameCircuit = c.min === other.min && c.max === other.max;
+    assert((sameCircuit ? Math.min(d,c.max-c.min-d) : d) > 4.2);
   }
   for (const p of traffic.parts) {
-    assert.equal(p.mesh.count,11*p.multiplier);
+    assert.equal(p.mesh.count,6*p.multiplier);
     assert(p.mesh.instanceMatrix.array.every(Number.isFinite));
   }
 }
@@ -59,7 +66,7 @@ traffic.update(0,23,ctx);
 const snapshot = traffic.parts.map(p => p.mesh.instanceMatrix.array.slice());
 traffic.update(0,999,ctx); traffic.update(0,23,ctx);
 traffic.parts.forEach((p,i) => assert.deepEqual(p.mesh.instanceMatrix.array,snapshot[i]));
-ctx.params.delete('memlife'); crowd.value = 0;
+ctx.params.delete('memlife'); delete ctx.memory.floodNow; crowd.value = 0;
 traffic.update(0,23,ctx); assert(!traffic.group.visible);
 assert(traffic.parts.every(p => p.mesh.count === 0));
 crowd.value = 1; ctx.params.set('memlife','1'); traffic.update(0,23,ctx);
@@ -83,4 +90,4 @@ for (const Builder of [WGSLNodeBuilder, GLSLNodeBuilder]) {
 }
 traffic.dispose(ctx); assert.equal(ctx.scene.children.length,0); assert(!ctx.api.traffic);
 gltf.scene.traverse(n => { if(n.isMesh) { n.geometry.dispose(); for(const m of [n.material].flat()) m.dispose(); } });
-console.log('PASS 11 cars, 4 parked / 7 moving, 4 batches, 8-minute routes/headway, direction, seek, memory gate and disposal');
+console.log('PASS 6 cars, 2 parked / 4 moving, 4 batches, 8-minute routes/headway, direction, seek, memory gate and disposal');

@@ -4,11 +4,13 @@ import { memoryMask, memoryMaskCPU } from '../../materials/memory.js';
 
 // Per-system uniforms keep ?only=traffic independent of ghosts initialization.
 export function lifeState() { return { debug: uniform(0), flood: uniform(0), crowd: uniform(1) }; }
+export const fullFlood = ctx => (ctx.memory?.floodNow ?? ctx.memory?.flood ?? 0) > .5;
 export function syncLife(state, ctx, population) {
   state.debug.value = ctx.params?.get('memlife') === '1' ? 1 : 0;
-  state.flood.value = THREE.MathUtils.clamp(ctx.memory?.flood ?? 0, 0, 1);
-  state.crowd.value = population;
-  return state.debug.value > 0 || (population > 0 && (state.flood.value > 0 || (ctx.memory?.strength > 0 && ctx.memory?.range > 0)));
+  // floodNow also includes the robot's automatic surge, not just story flood.
+  state.flood.value = fullFlood(ctx) ? 1 : THREE.MathUtils.clamp(ctx.memory?.floodNow ?? ctx.memory?.flood ?? 0, 0, 1);
+  state.crowd.value = fullFlood(ctx) ? 1 : population;
+  return state.debug.value > 0 || (state.crowd.value > 0 && (state.flood.value > 0 || (ctx.memory?.strength > 0 && ctx.memory?.range > 0)));
 }
 export function lifeMask(state, at = positionWorld) {
   return memoryMask(at).max(state.flood).mul(state.crowd).max(state.debug);

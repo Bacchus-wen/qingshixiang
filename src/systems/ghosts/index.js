@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { lifeState, syncLife, inMemory, streetTint } from './life.js';
+import { lifeState, syncLife, fullFlood, inMemory, streetTint } from './life.js';
 import { loadCrowd, MemoryOutfit } from './vat.js';
 import legacyTemplate from './legacy.js';
 import { crowd } from './state.js';
@@ -10,9 +10,9 @@ export { pose } from './routes.js';
 const wrap = (value, length) => ((value % length) + length) % length;
 export const nearFade = distance => THREE.MathUtils.smoothstep(distance, 3.5, 5.5);
 
-export function makePeople(variants) {
+export function makePeople(variants, facades = []) {
   const slots = new Uint8Array(variants.length);
-  return population().map((p, i) => {
+  return population(facades).map((p, i) => {
     const type = i % variants.length, meta = variants[type].meta;
     return { ...p, type, slot: slots[type]++, scale: p.height / meta.height, umbrella: meta.umbrella };
   });
@@ -27,7 +27,7 @@ export default {
     this.life = lifeState();
     try {
       const variants = await this.loadCrowd();
-      this.people = makePeople(variants);
+      this.people = makePeople(variants, ctx.api.street?.facades);
       for (let type = 0; type < variants.length; type++) {
         const count = this.people.filter(p => p.type === type).length;
         this.outfits.push(new MemoryOutfit(variants[type], this.life, count));
@@ -53,7 +53,7 @@ export default {
     this.broad = { origin: new THREE.Vector3(), dir: new THREE.Vector3(), strength: 1, angle: 0, range: 0 };
     ctx.api.ghosts = {
       count: this.people.length, source: 'cybercity-vat', sceneDraws: this.meshes.length,
-      umbrellaCount: this.people.filter(p => p.umbrella).length, waitingCount: 0, childCount: 0,
+      umbrellaCount: this.people.filter(p => p.umbrella).length, waitingCount: this.people.filter(p => p.waiting).length, childCount: 0,
       visibleCount: 0, animationRange: 40, animatedCount: 0, crossingCount: 8, warmupFrames: 30, assetBytes: this.outfits.reduce((n, o) => n + o.meta.bytes, 0),
     };
     this._frames = 0;
@@ -73,14 +73,14 @@ export default {
       pose(p, t);
       this.center.copy(p.position); this.center.y += .9 * p.scale;
       const distance = Math.hypot(p.position.x - this.cameraPosition.x, p.position.z - this.cameraPosition.z);
-      const fade = nearFade(distance);
+      const fade = fullFlood(ctx) ? 1 : nearFade(distance);
       const visible = enabled && fade > 0 && inMemory(this.center, meta.radius * p.scale, ctx, this.life, this.broad);
       if (!visible && !warmup) {
         outfit.hide(p.slot);
         this.visible[i] = 0;
         continue;
       }
-      const animated = distance <= 40;
+      const animated = !p.waiting && distance <= 40;
       // Match distance travelled to the authored gait speed, instead of skating
       // a full-speed walk clip along a slow route. Each pedestrian has a phase.
       const cycles = (animated ? t * p.speed / (meta.speed * p.scale * meta.duration) : 0) + p.phase;

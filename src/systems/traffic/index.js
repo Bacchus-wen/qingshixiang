@@ -3,27 +3,25 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { attribute, uv, float, smoothstep } from 'three/tsl';
 import { crowd } from '../ghosts/index.js';
-import { lifeState, syncLife, lifeMask, inMemory, silhouette, coverage, streetTint } from '../ghosts/life.js';
+import { lifeState, syncLife, fullFlood, lifeMask, inMemory, silhouette, coverage, streetTint } from '../ghosts/life.js';
 
-const COUNT = 11;
+const COUNT = 6;
 const UP = new THREE.Vector3(0, 1, 0);
 const wrap = (n, span) => ((n % span) + span) % span;
 
 export function makeCars() {
-  // Four parked bodies along the right kerb, away from the wreck at z=-18.
-  // Three moving cars share the opposite lane; four more use the cross street.
-  // Main-lane memories dissolve before the zebra; cross traffic never crosses
-  // their route. One batch per part, including the parked headlights.
-  const cars = [-8.5, -26, -31, -52].map(offset => ({
-    axis: 'z', fixed: 2.3, direction: 1, speed: 0, offset, min: -68, max: -6,
+  // Two parked, two main-lane cars, two cross-street cars. The far circuit
+  // reaches the alley end; separate circuits avoid driving through cross traffic.
+  const cars = [-26, -60].map(offset => ({
+    axis: 'z', fixed: 2.3, direction: 1, speed: 0, offset, min: -70, max: -6,
   }));
-  for (let i = 0; i < 3; i++) cars.push({
+  for (const [min, max] of [[-32, -6], [-70, -52]]) cars.push({
     axis: 'z', fixed: -1.65, direction: -1, speed: 1.35,
-    offset: 5 + i * 26 / 3, min: -32, max: -6,
+    offset: 5, min, max,
   });
-  for (const direction of [-1, 1]) for (let i = 0; i < 2; i++) cars.push({
+  for (const direction of [-1, 1]) cars.push({
     axis: 'x', fixed: -42 + direction * 2, direction, speed: 1.6,
-    offset: 5 + i * 24 + (direction > 0 ? 9 : 0), min: -24, max: 24,
+    offset: 5 + (direction > 0 ? 9 : 0), min: -24, max: 24,
   });
   return cars.map(car => ({ ...car, position: new THREE.Vector3(), travel: 0 }));
 }
@@ -198,7 +196,7 @@ export default {
       this.group.add(part.mesh);
     }
     ctx.scene.add(this.group);
-    ctx.api.traffic = { count: COUNT, visibleCount: 0, source: 'glb', sceneDraws: 4, parkedCount: 4, movingCount: 7 };
+    ctx.api.traffic = { count: COUNT, visibleCount: 0, source: 'glb', sceneDraws: 4, parkedCount: 2, movingCount: 4 };
     this.frames = 0; this.update(0,0,ctx); this.frames = 0;
   },
   update(dt,t,ctx) {
@@ -215,12 +213,12 @@ export default {
       this.rotation.setFromAxisAngle(UP, car.axis === 'x' ? car.direction * Math.PI / 2 : car.direction > 0 ? 0 : Math.PI);
       this.rootMatrix.compose(car.position,this.rotation,this.scale);
       streetTint(ctx,car.position,this.tint);
-      // Dissolve at the route boundaries before wrapping; never teleport a lit
-      // car/reflection across the remembered street. Debug shows every slot.
-      // and never through the lens: cars dissolve within ~6 m of the camera (over-the-shoulder shots sit by the kerb)
+      // Regular memories dissolve at loop boundaries and within 8-11 m of the
+      // camera. Full flood deliberately keeps all six bodies/lamps/pools visible,
+      // including at loop boundaries and beside the over-the-shoulder camera.
       const camD = Math.hypot(car.position.x - this.camPos.x, car.position.z - this.camPos.z);
       const along = car.axis === 'x' ? car.position.x : car.position.z;
-      const presence = (this.life.debug.value || !car.speed ? 1
+      const presence = fullFlood(ctx) ? 1 : (this.life.debug.value || !car.speed ? 1
         : THREE.MathUtils.smoothstep(along, car.min, car.min+2)
           * (1-THREE.MathUtils.smoothstep(along, car.max-2, car.max))) * THREE.MathUtils.smoothstep(camD, 8, 11);
       for (const part of this.parts) for (let j=0; j<part.multiplier; j++) {

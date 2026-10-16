@@ -13,7 +13,7 @@ registerHooks({ resolve(specifier, context, next) {
 const THREE = await import('three/webgpu');
 const { mrt, output, velocity } = await import('three/tsl');
 const { default: ghostsTemplate, crowd, pose, nearFade } = await import('./index.js');
-const { routeLength } = await import('./routes.js');
+const { routeLength, population } = await import('./routes.js');
 const { decodeVAT } = await import('./vat.js');
 const { default: legacyTemplate } = await import('./legacy.js');
 const { memoryMaskCPU } = await import('../../materials/memory.js');
@@ -52,6 +52,15 @@ const totalBytes = (await Promise.all(files.map(f => stat(new URL(`assets/models
 assert(totalBytes <= 8_000_000);
 console.log(`PASS asset budget: ${totalBytes} bytes including metadata/credits`);
 
+const shops = [-1,1].flatMap(side => [-11,-27,-54,-67].map(z => ({side,z,shop:true,frontX:side*5.2})));
+const anchored = population(shops).filter(p => p.waiting);
+assert.equal(anchored.length,8);
+for(const p of anchored) {
+  pose(p,0); const before=p.position.clone(); pose(p,480);
+  assert(p.position.equals(before));
+  assert(Math.abs(Math.abs(p.position.x)-5.68)<1e-6);
+  assert(shops.some(f => f.side===p.side && f.z===p.position.z));
+}
 const context = (q = '') => ({ params: new URLSearchParams(q), scene: new THREE.Scene(), camera: new THREE.PerspectiveCamera(), api: {}, memory: {
   origin: new THREE.Vector3(-4.4, 1, -13.6), dir: new THREE.Vector3(1, 0, -.2).normalize(), angle: .36, range: 40, strength: 0,
 } });
@@ -64,8 +73,8 @@ assert.equal(ctx.api.ghosts.umbrellaCount, 33);
 assert.equal(ghosts.meshes.length, 4);
 assert(ghosts.meshes.every(m => m.geometry.isInstancedBufferGeometry && m.geometry.groups.length === 0 && !Array.isArray(m.material)));
 for (const side of [-1, 1]) {
-  assert.equal(ghosts.people.filter(p => p.side === side && p.route.axis === 'z').length, 18);
-  assert.equal(ghosts.people.filter(p => p.side === side && p.route.axis === 'z').map(p => p.route).filter((r,i,a) => a.indexOf(r) === i).length, 3);
+  assert.equal(ghosts.people.filter(p => p.side === side && p.route.axis === 'z').length, 12);
+  assert.equal(ghosts.people.filter(p => p.side === side && p.route.axis === 'z').map(p => p.route).filter((r,i,a) => a.indexOf(r) === i).length, 5);
 }
 for (let f = 0; f < 30; f++) {
   ghosts.update(1/60, f/60, ctx);
@@ -74,20 +83,41 @@ for (let f = 0; f < 30; f++) {
 }
 ghosts.update(1/60, .5, ctx);
 assert(!ghosts.group.visible && ghosts.meshes.every(m => !m.visible));
-ctx.memory.flood = 1;
+assert.equal(ctx.api.ghosts.waitingCount, 8);
+assert.equal(ghosts.people.filter(p => p.route.crossing).length, 8);
+assert.equal(ghosts.people.filter(p => p.route.axis === 'x' && !p.route.crossing).length, 4);
+const waiting = ghosts.people.filter(p => p.waiting).map(p => p.position.clone());
+// Actual robot floodNow must work without a story flood or a live cone, even
+// when the door fragment's crowd multiplier is zero and the camera is nearby.
+ctx.memory.floodNow = .501; crowd.value = 0;
 for (let t = 0; t <= 480; t += .25) {
   ghosts.update(.25, t, ctx);
   assert.equal(ctx.api.ghosts.visibleCount, 44, 'Flood covers both pavements');
-  assert(ghosts.people.every(p => p.route.axis === 'z'
-    ? Math.abs(p.position.x) >= 3.65 && Math.abs(p.position.x) <= 4.75 && p.position.z > -33 && p.position.z < -7
-    : Math.abs(p.position.x) <= 4.65 && p.position.z >= -36 && p.position.z <= -35));
+  assert.equal(ghosts.life.flood.value, 1);
+  assert.equal(ghosts.life.crowd.value, 1);
+  assert(ghosts.outfits.every(o => o.tint.array.every((v,i) => i%4 !== 3 || v === 1)));
+  assert(ghosts.people.every(p => {
+    const { x, y, z } = p.position;
+    if (p.waiting) return Math.abs(x) >= 5 && y === .14 && z >= -70;
+    if (p.route.axis === 'z') return Math.abs(x) >= 3.65 && Math.abs(x) <= 4.75
+      && z >= -70 && z < -7 && (z > -34 || z < -50);
+    if (p.route.crossing) return Math.abs(x) <= 4.65
+      && (z >= -36 && z <= -35 || z >= -49 && z <= -48);
+    return Math.abs(x) >= 6.6 && Math.abs(x) <= 22.4 && y === 0 && z > -46.5 && z < -37.5;
+  }));
+  assert(ghosts.people.some(p => p.position.z < -64), 'Alley end stays populated');
+  for (const side of [-1,1]) assert(ghosts.people.some(p => p.position.x * side > 7), 'Both junction arms stay populated');
   for (let i = 0; i < ghosts.people.length; i++) for (let j = i + 1; j < ghosts.people.length; j++) {
     assert(ghosts.people[i].position.distanceTo(ghosts.people[j].position) > .75, `Crowd overlap at ${t}: ${i}/${j}`);
   }
   assert(ghosts.outfits.every(o => o.attributes.every(a => a.array.every(Number.isFinite))));
 }
+ghosts.people.filter(p => p.waiting).forEach((p,i) => assert(p.position.equals(waiting[i])));
+ctx.camera.position.copy(ghosts.people[0].position);
+ghosts.update(0,480,ctx); assert.equal(ctx.api.ghosts.visibleCount,44);
+ctx.camera.position.set(0,0,0); delete ctx.memory.floodNow; crowd.value = 1; ctx.memory.flood = 1;
 // Continuous bounded-speed path, including both turns and the loop seam.
-for (const route of new Set(ghosts.people.map(p => p.route))) {
+for (const route of new Set(ghosts.people.filter(p => !p.waiting).map(p => p.route))) {
   const probe = { route, offset: 0, speed: 1, position: new THREE.Vector3() };
   for (let t = 0; t < routeLength(route) + .1; t += .013) {
     pose(probe,t); const before = probe.position.clone(), yaw = probe.yaw;
@@ -96,7 +126,7 @@ for (const route of new Set(ghosts.people.map(p => p.route))) {
     assert(Math.abs(Math.atan2(Math.sin(probe.yaw-yaw),Math.cos(probe.yaw-yaw))) < .003);
   }
 }
-assert.equal(ghosts.people.filter(p => p.route.axis === 'x').length, 8);
+assert.equal(ghosts.people.filter(p => p.route.axis === 'x').length, 12);
 // Stable slot identity + explicit prior-frame gait/transform for temporal AA.
 ghosts.update(0, 23, ctx);
 const snapshot = ghosts.outfits.map(o => o.pose.array.slice());
@@ -109,6 +139,7 @@ ctx.memory.flood = 0; ghosts.update(0, 999, ctx);
 ctx.memory.flood = 1; ghosts.update(0, 23, ctx);
 ghosts.outfits.forEach((o,i) => assert.deepEqual(o.pose.array, snapshot[i]));
 assert.equal(nearFade(0),0); assert.equal(nearFade(3.5),0); assert.equal(nearFade(4.5),.5); assert.equal(nearFade(5.5),1);
+ctx.memory.flood = .5; // Partial reveal keeps the regular camera fade.
 const first = ghosts.people[0], outfit = ghosts.outfits[first.type];
 for (const d of [0, 1, 3.49, 3.5, 4, 4.5, 5.5, 6]) {
   ctx.camera.position.copy(first.position); ctx.camera.position.x += d; ctx.camera.position.y = 1.6;
@@ -144,9 +175,9 @@ const frozen = ghosts.outfits.map(o => o.motion.array.slice());
 ghosts.update(1/60, 23+1/60, ctx);
 assert.equal(ctx.api.ghosts.animatedCount, 0);
 ghosts.outfits.forEach((o,i) => assert.deepEqual(o.motion.array, frozen[i]));
-ctx.camera.position.set(0, 1.6, 0);
+ctx.camera.position.set(0, 1.6, -40);
 ghosts.update(0, 23, ctx);
-assert.equal(ctx.api.ghosts.animatedCount, 44);
+assert.equal(ctx.api.ghosts.animatedCount, 36);
 ghosts.outfits.forEach(o => assert.deepEqual(o.previousMotion.array, o.motion.array));
 ctx.params.delete('memlife'); ctx.memory.strength = 0; ctx.memory.flood = 0;
 let writes = 0;
@@ -193,6 +224,11 @@ assert(fallback.meshes.length<=5 && fallback.people.length===44);
 fallbackCtx.camera.position.copy(fallback.people[0].position);
 fallback.update(0,0,fallbackCtx);
 assert.equal(fallback.meshes[0].geometry.attributes.lifeFade.getX(0),0);
+fallbackCtx.params.delete('memlife'); fallbackCtx.memory.floodNow = .501; crowd.value = 0;
+for(let i=0;i<31;i++) fallback.update(0,0,fallbackCtx);
+assert.equal(fallbackCtx.api.ghosts.visibleCount,44);
+assert.equal(fallbackCtx.api.ghosts.waitingCount,8);
+assert(fallback.meshes.every(m => m.geometry.attributes.lifeFade.array.every(v => v === 1)));
 fallback.dispose(fallbackCtx); assert.equal(fallbackCtx.scene.children.length,0);
 legacyTemplate.loadPeople=loadPeople; crowd.value=1;
 console.log('PASS resource disposal and load-error fallback. GPU execution / screenshots remain Claude external acceptance gates.');

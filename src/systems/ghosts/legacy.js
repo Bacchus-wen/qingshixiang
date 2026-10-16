@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { attribute, positionLocal } from 'three/tsl';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { lifeState, syncLife, inMemory, silhouette, streetTint, coverage } from './life.js';
+import { lifeState, syncLife, fullFlood, inMemory, silhouette, streetTint, coverage } from './life.js';
 import { loadPeople } from './people.js';
 import { population, pose as routePose } from './routes.js';
 
@@ -9,9 +9,9 @@ const TAU = Math.PI * 2;
 const X_AXIS = new THREE.Vector3(1, 0, 0);
 const UP = new THREE.Vector3(0, 1, 0);
 
-function makePeople() {
-  return population().map((p, i) => ({ ...p, width: .88 + (i % 3) * .06,
-    umbrella: i % 4 !== 3, waiting: false, partner: -1, bob: 0, stride: 0,
+function makePeople(facades) {
+  return population(facades).map((p, i) => ({ ...p, width: .88 + (i % 3) * .06,
+    umbrella: i % 4 !== 3, partner: -1, bob: 0, stride: 0,
   }));
 }
 
@@ -62,7 +62,7 @@ export default {
   name: 'ghosts',
   loadPeople,
   async init(ctx) {
-    this.people = makePeople();
+    this.people = makePeople(ctx.api.street?.facades);
     const count = this.people.length;
     // Stable per-person slots are shared across all five joint batches.
     this.rigs = null;
@@ -247,7 +247,7 @@ export default {
         this.drawPerson(p, i); last = i; visibleCount++;
         if (p.umbrella) lastUmbrella = Math.max(lastUmbrella, p.umbrellaIndex);
         streetTint(ctx, p.position, this.tint);
-        const fade = THREE.MathUtils.smoothstep(Math.hypot(p.position.x - ctx.camera.position.x, p.position.z - ctx.camera.position.z), 2.5, 3.5);
+        const fade = fullFlood(ctx) ? 1 : THREE.MathUtils.smoothstep(Math.hypot(p.position.x - ctx.camera.position.x, p.position.z - ctx.camera.position.z), 2.5, 3.5);
         for (const mesh of this.meshes) {
           if (mesh === this.limbs) for (let j = 0; j < 6; j++) mesh.geometry.attributes.lifeFade.setX(i * 6 + j, fade);
           else if (mesh === this.canopies || mesh === this.shafts) { if (p.umbrella) mesh.geometry.attributes.lifeFade.setX(p.umbrellaIndex, fade); }
