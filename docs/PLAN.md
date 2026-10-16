@@ -6,7 +6,7 @@
 ## 阶段 0:方向(并行,约 1 小时)
 - [x] r0-refs(Grok):参考调研 + 三个差异化美术方向
 - [x] r0-story(Codex):三个剧情方案 + 光锥双状态技术风险
-- [x] Claude 综合,写 `docs/art-direction.md` 和 `docs/story.md`,必要时发起一轮互评
+- [x] Claude 综合,写 `docs/art-direction.md`(剧情并入其中与 story-options-codex.md,未单独写 story.md),互评五轮
 
 ## 阶段 1:荒凉的基调(约 3 小时)
 - [x] 街道布局:一条街 + 一个路口,程序化楼体、店面、卷帘门、积水低洼(Claude)
@@ -24,8 +24,8 @@
 
 ## 阶段 3:光锥记忆(约 3 小时)
 - [x] `ctx.memory` 光锥 uniform 与 TSL 判定函数 `src/materials/memory.js`(Claude)
-- [x] 双状态:招牌、卷帘门、车辆、植物(Claude)
-- [x] 只存在于过去的全息体:行人、行驶的车(派 Codex)
+- [~] 双状态:招牌、卷帘门、窗灯、砖墙、通知与拆字已做;**车辆、植物的过去状态没做**(Claude)
+- [~] 只存在于过去的全息体:行人已做(Codex);**行驶的车没做**
 - [x] 记忆失真:电量越低越破碎(Claude)
 
 ## 阶段 4:叙事与收尾(约 2 小时)
