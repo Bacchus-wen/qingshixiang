@@ -84,7 +84,9 @@ export default {
       if (it.vol) it.vol.visible = it.t >= 0 || this.frames < 30;
       if (it.t < 0) {
         it.dwell = lit > 0.4 ? it.dwell + dt : Math.max(0, it.dwell - dt);
-        if (it.dwell > 1.5 && !it.done) it.t = 0;
+        // after the door's marks (and during the last breath) no new small memory may start: the climax is the end
+        const closed = ctx.api.fragment?.state === 'done' || ['fade', 'end'].includes(ctx.api.director?.phase);
+        if (it.dwell > 1.5 && !it.done && !closed) it.t = 0;
         continue;
       }
       it.t += dt;

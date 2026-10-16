@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { vec3, float, uv, uniform, smoothstep, length, vec2, max } from 'three/tsl';
+import { vec3, float, uv, uniform, smoothstep, length, vec2, max, exp, positionView } from 'three/tsl';
 import { LANE } from './index.js';
 import { loadProp } from './props.js';
 
@@ -18,24 +18,27 @@ export async function setupPassingCar(ctx, root) {
   // flat on the ground, uv.x running along local +Z (ahead of the car) from 0 at the bumper to 1
   const poolGeo = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2).rotateY(-Math.PI / 2).translate(0, 0, 0.5);
   const pool = new THREE.Mesh(poolGeo, new THREE.MeshBasicNodeMaterial({
-    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: true,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false,
   }));
+  // additive light must not pick up fog colour (the black quad edges would turn into a grey rectangle):
+  // fog off, and the glow is dimmed by an approximate fog transmittance instead
+  const through = exp(length(positionView).mul(-0.03));
   {
     const p = uv().sub(vec2(0.0, 0.5)).mul(vec2(1, 2.2)); // u = 0 at the bumper, runs ahead
     const d = length(p);
     const fall = float(1).sub(smoothstep(0.0, 1.0, d)).mul(smoothstep(0.0, 0.08, uv().x));
-    pool.material.colorNode = vec3(0.95, 0.96, 1.0).mul(fall.mul(fall)).mul(glow).mul(2.4);
+    pool.material.colorNode = vec3(0.95, 0.96, 1.0).mul(fall.mul(fall)).mul(glow).mul(1.3).mul(through);
   }
   pool.scale.set(4.2, 1, 11); pool.position.set(0, 0.02, 2.1); pool.renderOrder = 3;
   group.add(pool);
 
   // headlight glares (camera-facing): a hot core and a wide wet halo
-  const glareMat = new THREE.SpriteNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+  const glareMat = new THREE.SpriteNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false });
   {
     const d = length(uv().sub(0.5)).mul(2);
     const core = float(1).sub(smoothstep(0.0, 0.18, d)).mul(6);
     const halo = max(float(0), float(1).sub(d)).pow(3).mul(1.4);
-    glareMat.colorNode = vec3(1).mul(core.add(halo)).mul(glow);
+    glareMat.colorNode = vec3(1).mul(core.add(halo)).mul(glow).mul(through);
   }
   const glares = [0, 1].map(() => { const s = new THREE.Sprite(glareMat); s.scale.setScalar(2.2); group.add(s); return s; });
 
@@ -47,7 +50,9 @@ export async function setupPassingCar(ctx, root) {
     body.traverse((o) => { if (o.isMesh) { o.material = dark; o.castShadow = false; o.userData.dynamic = true; } });
     group.add(body);
   } catch (e) { console.warn('[passing-car] no body', e); }
-  group.traverse((o) => { o.userData.dynamic = true; });
+  // warm-up: draw everything (unculled) for the first frames so the first real pass does not compile on screen
+  group.traverse((o) => { o.userData.dynamic = true; o.userData.culled = o.frustumCulled; o.frustumCulled = false; });
+  let warm = true;
 
   const dbg = ctx.params.has('passcar');
   const state = { t: dbg ? 2 : 80 + Math.random() * 30, active: false, x: 0, dir: 1, z: 0, frames: 0 };
@@ -62,6 +67,7 @@ export async function setupPassingCar(ctx, root) {
 
   return function update(dt) {
     state.frames++;
+    if (warm && state.frames >= 30) { warm = false; group.traverse((o) => { o.frustumCulled = o.userData.culled ?? true; }); }
     if (ctx.isShot) {
       // deterministic: parked mid-junction only when asked, otherwise out of sight
       const on = dbg;
