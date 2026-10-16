@@ -185,10 +185,15 @@ export default {
     scene.add(spot, spot.target);
     // a faint cold rim from behind and above (the street's ambient bounce): reads the shell, scratches and oil
     // in the dark. Constant intensity: lights are never toggled at runtime (recompiles everything).
-    const rim = new THREE.SpotLight(0xc8d2dc, 6, 4, 0.5, 0.9, 2);
+    const rim = new THREE.SpotLight(0xc8d2dc, 16, 5, 0.55, 0.9, 2); // v3: the wet shell must read against the dark
     rim.position.copy(ROBOT_POS).add(new THREE.Vector3(-0.6, 1.9, 0.9));
     rim.target.position.copy(ROBOT_POS).add(new THREE.Vector3(0.2, 0.8, 0));
     scene.add(rim, rim.target);
+    // v3: a surviving sign just out of frame up the street throws a weak magenta edge on the robot and its puddle
+    // (it trips with the street's mains like every surviving light)
+    this.signKey = new THREE.PointLight(0xff4fb4, 0, 7, 2);
+    this.signKey.position.copy(ROBOT_POS).add(new THREE.Vector3(1.6, 3.2, -2.6));
+    scene.add(this.signKey);
     this.beamVol = ctx.api.atmo?.volume(new THREE.Vector3(0.3, 3, -14), new THREE.Vector3(11, 6, 18), 0.0, [spot]);
 
     // state
@@ -294,6 +299,7 @@ export default {
       this.gobo.draw(o, mode, fq); this.goboT = t; this._lastGobo = o; this._lastMode = mode; this._lastFlood = fq;
     }
 
+    if (this.signKey) this.signKey.intensity = 6 * (ctx.world.mains ?? 1);
     // ---- publish the memory cone
     const m = ctx.memory;
     m.origin.copy(this._v); m.dir.copy(this._d);
