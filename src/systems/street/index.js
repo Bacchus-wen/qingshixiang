@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { makeSurface } from '../../materials/surface.js';
 import { syncWet } from '../../materials/wet.js';
-import { memoryMaskCPU, amberNode } from '../../materials/memory.js';
+import { mains, memoryMaskCPU, amberNode } from '../../materials/memory.js';
 import { buildDetails } from './details.js';
 import { setupPassingCar } from './passing.js';
 import { placeV2Props } from './v2props.js';
@@ -203,15 +203,31 @@ export default {
     // the near lamp fails now and then (the audio crackles on these drops); the vending panel flickers rarely
     const st = ctx.api.street;
     if (st && !ctx.isShot) { // shots stay deterministic
-      this.lampT = (this.lampT ?? 6) - dt;
-      if (this.lampT < 0) { this.lampFail = 0.25 + Math.random() * 0.9; this.lampT = 7 + Math.random() * 14; }
+      // Before the eye has ever opened, the wiring keeps tripping: every few seconds the whole street (lamps, surviving
+      // neon, vending machine, the last lit windows) stutters out for a moment. Once the eye opens, the power holds.
+      this.stable ||= (ctx.api.robot?.open ?? 0) > 0.9;
       let k = 1;
-      if (this.lampFail > 0) { this.lampFail -= dt; k = Math.sin(t * 57) * Math.sin(t * 23) > 0 ? 0.12 : 0.85; }
-      st.lamp.intensity = 650 * k;
+      if (!this.stable) {
+        this.tripT = (this.tripT ?? 5) - dt;
+        if (this.tripT < 0) { this.tripLen = 0.35 + Math.random() * 1.4; this.tripAge = 0; this.tripT = 3.5 + Math.random() * 6; }
+        if (this.tripAge !== undefined && this.tripAge < this.tripLen) {
+          this.tripAge += dt;
+          const a = this.tripAge / this.tripLen;
+          // drop, a couple of failed reconnects, then back
+          k = a < 0.08 ? 0.05 : Math.sin(t * 61) * Math.sin(t * 17 + 1.3) > 0.55 ? 0.7 : 0.02;
+          if (a > 0.85) k = 0.5 + 0.5 * Math.random();
+        }
+      }
+      mains.value += (k - mains.value) * Math.min(1, dt * 40);
+      ctx.world.mains = mains.value;
+      ctx.scene.environmentIntensity = 0.9 * (0.3 + 0.7 * mains.value); // the city glow on the clouds dips too
+      st.lamp.intensity = 650 * mains.value;
+      if (st.far) st.far.intensity = 450 * mains.value;
+      if (ctx.api.streetBulb) ctx.api.streetBulb.color.setRGB(9, 9.4, 10).multiplyScalar(Math.max(0.03, mains.value));
       this.vmT = (this.vmT ?? 11) - dt;
       if (this.vmT < 0) { this.vmFail = 0.15 + Math.random() * 0.2; this.vmT = 15 + Math.random() * 20; }
       const vk = (this.vmFail ?? 0) > 0 ? ((this.vmFail -= dt), 0.3) : 1;
-      st.vmLight.intensity = 14 * vk;
+      st.vmLight.intensity = 14 * vk * mains.value;
     }
     // the abandoned car: door shuts and lamps come on while lit; back to the present half a beat after
     const pc = ctx.api.pastCar;

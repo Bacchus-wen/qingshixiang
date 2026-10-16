@@ -11,6 +11,9 @@ function data(g, s) {
   const c = new THREE.Color(s.tint);
   constant(g, 'neonTint', [c.r, c.g, c.b]);
   constant(g, 'neonPower', [s.alive]);
+  constant(g, 'neonStyle', [s.kind === 'box' ? 1 : 0, s.broken]);
+  const paper = new THREE.Color(s.paper);
+  constant(g, 'neonPaper', [paper.r, paper.g, paper.b]);
   constant(g, 'neonAnchor', [s.x, s.y, s.z]);
   g.userData.sign = s;
   return g;
@@ -34,12 +37,16 @@ function batch(parts, material, name, animated = false) {
 export function buildMeshes(signs, atlas, materials) {
   const cabinets = [], faces = [], pools = [];
   for (const s of signs) {
-    const depth = s.kind === 'blade' ? 0.2 : 0.14;
-    cabinets.push(transform(new THREE.BoxGeometry(s.w + 0.1, s.h + 0.1, depth), s.yaw, s.x, s.y, s.z));
+    const depth = s.depth;
+    const round = s.kind === 'box' && s.shape === 'round';
+    const cabinet = round
+      ? new THREE.CylinderGeometry((s.w + 0.1) / 2, (s.w + 0.1) / 2, depth, 32).rotateX(Math.PI / 2)
+      : new THREE.BoxGeometry(s.w + 0.1, s.h + 0.1, depth);
+    cabinets.push(transform(cabinet, s.yaw, s.x, s.y, s.z));
     const rect = atlas.entries.get(artKey(s)).uv;
     // Explicit front and back faces: correct reading direction on both sides, one merged opaque draw.
     for (const back of s.kind === 'blade' ? [false, true] : [false]) {
-      const g = data(new THREE.PlaneGeometry(s.w, s.h), s);
+      const g = data(round ? new THREE.CircleGeometry(s.w / 2, 32) : new THREE.PlaneGeometry(s.w, s.h), s);
       g.setAttribute('neonUV', g.attributes.uv.clone());
       const u = g.attributes.uv;
       for (let i = 0; i < u.count; i++) u.setXY(i, rect[0] + u.getX(i) * rect[2], rect[1] + u.getY(i) * rect[3]);
@@ -52,6 +59,16 @@ export function buildMeshes(signs, atlas, materials) {
         const len = Math.abs(s.frontX - s.x) + 0.06;
         cabinets.push(new THREE.BoxGeometry(len, 0.075, 0.075).translate((s.frontX + s.x) / 2, s.y + dy, s.z));
       }
+    } else if (s.kind === 'hanger') {
+      // Two cantilever arms and short drops make the extra depth visibly supported.
+      for (const dz of [-s.w * 0.33, s.w * 0.33]) {
+        const len = Math.abs(s.frontX - s.x);
+        cabinets.push(new THREE.BoxGeometry(len, 0.065, 0.065).translate((s.frontX + s.x) / 2, s.y + s.h / 2 + 0.3, s.z + dz));
+        cabinets.push(new THREE.BoxGeometry(0.045, 0.3, 0.045).translate(s.x, s.y + s.h / 2 + 0.15, s.z + dz));
+      }
+    } else if (s.kind === 'box') {
+      const len = Math.abs(s.frontX - s.x);
+      cabinets.push(new THREE.BoxGeometry(len, 0.12, 0.12).translate((s.frontX + s.x) / 2, s.y, s.z));
     } else if (s.kind === 'roof') {
       for (const dz of [-s.w * 0.33, s.w * 0.33]) cabinets.push(new THREE.BoxGeometry(0.09, 1.3, 0.09).translate(s.x, s.y - 1.1, s.z + dz));
     }

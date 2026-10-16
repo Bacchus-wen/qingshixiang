@@ -6,7 +6,7 @@ import {
   vec2, vec3, float, floor, fract, mod, mix, min, max, abs, dot, cross,
   normalize, smoothstep, step, sin, select, transformNormalToView,
 } from 'three/tsl';
-import { memoryMask } from '../../materials/memory.js';
+import { mains, memoryMask } from '../../materials/memory.js';
 import { verticalWetLayer, wetUniforms } from '../../materials/wet.js';
 
 export async function loadBuildingTextures() {
@@ -102,7 +102,7 @@ export function createWindowMaterial(tex, params) {
   const mullion = smoothstep(float(0.018).sub(aa), float(0.018).add(aa), abs(p.x.sub(0.5)));
   const glass = opening.mul(mullion);
   const room = interiorRoom(tex.interior_atlas);
-  const now = vec3(0.48, 0.64, 0.88).mul(a.y).mul(0.16);
+  const now = vec3(0.48, 0.64, 0.88).mul(a.y).mul(0.16).mul(mains);
   const past = vec3(1.0, 0.73, 0.44).mul(a.w).mul(1.8);
   const illumination = mix(now, past, mask);
   // Reflective cold glass remains dark in the present; no material clone per window.

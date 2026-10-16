@@ -5,6 +5,11 @@ import {
 
 // The memory cone as TSL: where the robot's eye looks, the past shows through.
 // One set of uniforms, synced once per frame from ctx.memory (see syncMemory), read by every past/present material.
+// The street's mains: before the robot's eye first opens the old wiring keeps tripping (lamps, the few surviving
+// neon tubes, the vending machine and the last lit windows drop out in stuttering bursts); once the eye has opened
+// the power holds. 0..1, driven by systems/street. Multiply present-day emissives by it.
+export const mains = uniform(1);
+
 export const mem = {
   origin: uniform(new THREE.Vector3()),
   dir: uniform(new THREE.Vector3(0, 0, -1)),

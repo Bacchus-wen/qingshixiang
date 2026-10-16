@@ -26,6 +26,9 @@ export default {
     ctx.api.neon = {
       enabled: true, mode: this.mode, count: this.signs.length,
       surviving: this.signs.filter((s) => s.alive).length,
+      lightboxes: this.signs.filter((s) => s.kind === 'box').length,
+      hanging: this.signs.filter((s) => s.kind === 'hanger').length,
+      brokenInMemory: this.signs.filter((s) => s.broken).length,
       sceneDraws: this.meshes.length, occluderDraws: 2,
       atlasSize: [this.atlas.width, this.atlas.height], signs: this.signs,
     };

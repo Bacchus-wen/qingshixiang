@@ -4,7 +4,7 @@ import { artKey, random01 } from './layout.js';
 const FONT = '"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif';
 const canvas = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
 
-// RGBA are four independent linear masks: intact tube, broken tube, intact halo, broken halo.
+// Tube RGBA: intact tube, broken tube, intact halo, broken halo. Diffusers use R for ink only.
 // Alpha is DATA, not transparency. Shader faces remain opaque so depth/SSR see the sign.
 function drawCell(sign, w, h) {
   const intact = canvas(w, h), broken = canvas(w, h);
@@ -13,9 +13,22 @@ function drawCell(sign, w, h) {
   const chars = [...sign.text];
   g.strokeStyle = '#fff'; g.fillStyle = '#fff';
   g.lineJoin = 'round'; g.lineCap = 'round'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  if (sign.kind === 'box') {
+    // Filled ink on a solid white/yellow diffuser; no tube outline or halo.
+    const lines = chars.length > 2 ? [chars.slice(0, 2).join(''), chars.slice(2).join('')] : [sign.text];
+    g.font = `800 ${w * (lines.length > 1 ? 0.25 : 0.3)}px ${FONT}`;
+    lines.forEach((line, i) => g.fillText(line, w / 2, h * (lines.length > 1 ? 0.35 + i * 0.3 : 0.49), w * 0.7));
+    g.lineWidth = w * 0.018;
+    if (sign.shape === 'round') { g.beginPath(); g.arc(w / 2, h / 2, w * 0.43, 0, Math.PI * 2); g.stroke(); }
+    else g.strokeRect(w * 0.07, h * 0.07, w * 0.86, h * 0.86);
+    const ink = g.getImageData(0, 0, w, h).data;
+    const pixels = new Uint8Array(w * h * 4);
+    for (let j = 0; j < pixels.length; j += 4) pixels[j] = ink[j + 3];
+    return pixels;
+  }
   const size = vertical ? Math.min(w * 0.65, (h - 70) / chars.length * 0.84) : Math.min(h * 0.53, (w - 64) / chars.length * 0.95);
   g.font = `700 ${size}px ${FONT}`;
-  g.lineWidth = Math.max(1.1, size * 0.028);
+  g.lineWidth = Math.max(1.1, size * sign.stroke);
   if (vertical) chars.forEach((ch, i) => g.strokeText(ch, w / 2, 38 + (h - 76) * (i + 0.5) / chars.length));
   else g.strokeText(sign.text, w / 2, h * 0.49, w - 64);
   g.lineWidth = 1.8;
@@ -30,6 +43,16 @@ function drawCell(sign, w, h) {
     const x = 20 + random01(sign.seed * 31 + i * 7) * (w - 54);
     b.fillRect(x, y, 15 + random01(i + sign.seed) * 28, 4 + i % 4);
   }
+  // Guarantee a visible missing segment ON a glyph: random rectangles alone can all hit empty space.
+  const source = g.getImageData(0, 0, w, h).data;
+  const strokes = [];
+  for (let y = 36; y < h - 36; y++) for (let x = 30; x < w - 30; x++) {
+    if (source[(y * w + x) * 4 + 3] > 180) strokes.push([x, y]);
+  }
+  if (strokes.length) {
+    const [x, y] = strokes[Math.floor(random01(sign.seed * 331) * strokes.length)];
+    b.fillRect(x - 12, y - 5, 24, 10);
+  }
   const halo = (source) => {
     const c = canvas(w, h), p = c.getContext('2d', { willReadFrequently: true });
     p.shadowColor = '#fff'; p.shadowBlur = 10; p.globalAlpha = 0.65;
@@ -42,11 +65,13 @@ function drawCell(sign, w, h) {
   return pixels;
 }
 
-export async function buildAtlas(signs) {
-  // Only local OS fonts, no downloaded fonts, generated images or external requests.
-  if (document.fonts?.load) await document.fonts.load(`700 64px ${FONT}`, '粤港歌舞廳凉茶');
+export function planAtlas(signs) {
   const entries = new Map();
-  for (const s of signs) if (!entries.has(artKey(s))) entries.set(artKey(s), { sign: s, w: s.kind === 'blade' ? 128 : 512, h: s.kind === 'blade' ? 512 : 128 });
+  for (const s of signs) if (!entries.has(artKey(s))) entries.set(artKey(s), {
+    // Leave room for gutters: four horizontal cells / eight diffuser cells fit a 2048 px row.
+    sign: s, w: s.kind === 'box' ? 240 : s.kind === 'blade' ? 128 : 480,
+    h: s.kind === 'box' ? 240 : s.kind === 'blade' ? 512 : 128,
+  });
   const width = 2048, gap = 8;
   let x = gap, y = gap, row = 0;
   for (const e of [...entries.values()].sort((a, b) => b.h - a.h)) {
@@ -55,6 +80,13 @@ export async function buildAtlas(signs) {
   }
   const height = 2 ** Math.ceil(Math.log2(y + row + gap));
   if (height > 4096) throw new Error('[neon] atlas budget exceeded');
+  return { entries, width, height };
+}
+
+export async function buildAtlas(signs) {
+  // Only local OS fonts, no downloaded fonts, generated images or external requests.
+  if (document.fonts?.load) await document.fonts.load(`700 64px ${FONT}`, '粤港歌舞廳凉茶');
+  const { entries, width, height } = planAtlas(signs);
   const pixels = new Uint8Array(width * height * 4);
   for (const e of entries.values()) {
     const cell = drawCell(e.sign, e.w, e.h);
