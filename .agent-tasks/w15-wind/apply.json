@@ -1,0 +1,13 @@
+{
+ "state": "applied",
+ "files": [
+  "src/systems/index.js",
+  "src/systems/wind/index.js",
+  "src/systems/wind/verify.mjs"
+ ],
+ "created": [
+  "src/systems/wind/index.js",
+  "src/systems/wind/verify.mjs"
+ ],
+ "at": "2026-10-16 13:27:49"
+}

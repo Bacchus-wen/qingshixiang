@@ -139,6 +139,7 @@ function cable(parent, a, b, sag, mat, r = 0.012) {
   }
   const m = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, r, 4), mat);
   m.castShadow = true;
+  m.userData.dynamic = true; m.userData.cable = true; // wind sways it (systems/wind)
   parent.add(m);
 }
 
@@ -297,6 +298,7 @@ export async function buildDetails(ctx, root, facades, M, r) {
   setupPastPlants(placed.find((o) => o.userData.prop === 'props2/planters'));
   // notice board papers carry the relocation texts (and vanish in the past like the other notices)
   let pi = 0;
+  for (const o of placed) if (o.userData.prop === 'props2/laundry') o.traverse((m) => { if (m.isMesh) m.userData.dynamic = true; });
   for (const o of placed) o.traverse((m) => { if (m.isMesh && /paper/i.test(m.name)) { m.material = noticeMaterial(NOTICES[pi % NOTICES.length], pi + 7); m.renderOrder = 4; m.userData.dynamic = true; pi++; } });
   ctx.api.street = { lamp, far, vmLight, car };
 }
