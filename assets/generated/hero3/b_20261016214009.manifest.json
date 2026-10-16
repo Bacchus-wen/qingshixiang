@@ -1,0 +1,89 @@
+{
+  "batch_id": "b_20261016214009",
+  "tasks": 4,
+  "submitted": 4,
+  "failed": 0,
+  "total_images": 4,
+  "items": [
+    {
+      "index": 1,
+      "prompt": "Single isolated object for 3D reconstruction, three-quarter front view from slightly above, entire object visible and centred, plain light grey seamless background, soft even studio lighting, photorealistic, highly detailed, no text, no watermark, no people. Object: a busy 1990s Chinese street fruit stall: wooden crates and bamboo baskets heaped with oranges, apples, bananas and lychees, a small hand scale, a cardboard price sign, a striped umbrella frame",
+      "id": "img_43570",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43570/b659e902-d660-4e3a-9ec7-4d8d7be56c3b.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T21%3A40%3A03Z%2F3600%2F%2F49fe6e4ce2fa74ca799b6128853b7512667a1e6d058a17a9d87ff6c0ef9fcb36"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/hero3/img_43570/ai_generate_43570_1.png"
+      ]
+    },
+    {
+      "index": 2,
+      "prompt": "Single isolated object for 3D reconstruction, three-quarter front view from slightly above, entire object visible and centred, plain light grey seamless background, soft even studio lighting, photorealistic, highly detailed, no text, no watermark, no people. Object: a street-side noodle shop seating set: a low square folding table with red plastic stools around it, bowls of noodles with chopsticks, a teapot, a bottle of chili oil and a tissue box",
+      "id": "img_43571",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43571/0044aa28-9135-4d6a-b5ed-8c7eeea42bf2.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T21%3A39%3A53Z%2F3600%2F%2F40c684fd156dd99b09677b39966ba2a5975f13dd46b877ce4dee9d1367ca9d2c"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/hero3/img_43571/ai_generate_43571_1.png"
+      ]
+    },
+    {
+      "index": 3,
+      "prompt": "Single isolated object for 3D reconstruction, three-quarter front view from slightly above, entire object visible and centred, plain light grey seamless background, soft even studio lighting, photorealistic, highly detailed, no text, no watermark, no people. Object: a string of five round red Chinese paper lanterns with gold tassels hanging from a sagging wire, slightly weathered",
+      "id": "img_43572",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43572/64347d72-649d-4f32-8f93-bc8945552f05.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T21%3A39%3A41Z%2F3600%2F%2F513088a20fcc4119da501fe650f70bab3788c2002d7edf72a8c03285ecb2d5fd"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/hero3/img_43572/ai_generate_43572_1.png"
+      ]
+    },
+    {
+      "index": 4,
+      "prompt": "Single isolated object for 3D reconstruction, three-quarter front view from slightly above, entire object visible and centred, plain light grey seamless background, soft even studio lighting, photorealistic, highly detailed, no text, no watermark, no people. Object: a small 1990s Chinese newspaper and magazine kiosk: a green metal booth with a fold-out counter covered with newspapers, magazines clipped on strings, a small radio and a thermos",
+      "id": "img_43573",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43573/f8fa09b3-3883-4131-9cf9-9a586c6f5910.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T21%3A40%3A02Z%2F3600%2F%2Fa729e9500fc40988ad17149a2a52a8a473cc5200c285434fdafabddd48e7f93c"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/hero3/img_43573/ai_generate_43573_1.png"
+      ]
+    }
+  ],
+  "plan": {
+    "kind": "image",
+    "model": "gpt",
+    "version": "gpt-image-2.5-sunburst",
+    "count": 4,
+    "quota": {
+      "limit": 300,
+      "used": 20,
+      "remaining": 280,
+      "unit": "张",
+      "after": 24
+    },
+    "running": {
+      "limit": 20,
+      "current": 0
+    },
+    "allowed": true,
+    "blockers": [],
+    "cost": {
+      "amount": 0,
+      "currency": "USD",
+      "priced": false,
+      "estimated": false,
+      "note": null
+    },
+    "request": {
+      "batch": true,
+      "tasks": 4,
+      "total_images": 4,
+      "local_uploads": []
+    }
+  }
+}

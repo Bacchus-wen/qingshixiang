@@ -159,7 +159,7 @@ export default {
     const blur = varying(defocus, 'rainDefocus');
     const ribbon = float(1).sub(smoothstep(float(0.12).mul(float(1).sub(blur)), 0.5, uv().x.sub(0.5).abs())).pow(2);
     const taper = sin(uv().y.mul(Math.PI)).max(0);
-    streak.opacityNode = ribbon.mul(taper).mul(0.56).mul(u.rain).mul(streakLight.w)
+    streak.opacityNode = ribbon.mul(taper).mul(0.85).mul(u.rain).mul(streakLight.w)
       .mul(float(1).div(float(1).add(blur.mul(7))))
       .mul(varying(smoothstep(0.36, 4.0, distance2), 'rainNearFade')) // nothing closer than ~1 m to the lens
       .mul(smoothstep(0, 0.2, dropWorld.y))

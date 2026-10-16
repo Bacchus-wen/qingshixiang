@@ -1,6 +1,8 @@
 import * as THREE from 'three/webgpu';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { memoryMask } from '../../materials/memory.js';
+import { positionWorld } from 'three/tsl';
 
 // v3 facade modules: Tripo HD models made part by part (GPT Image 2.5 reference -> image-to-multiview ->
 // multiview-to-model, detailed geometry + HD PBR), decimated and aligned in headless Blender
@@ -13,7 +15,8 @@ const rand = (seed) => () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>
 export async function placeModules(ctx, root, windows, facades) {
   if (ctx.params.has('nomodules')) return;
   const kinds = {};
-  for (const k of ['balcony', 'balcony_open', 'window_ac', 'awning', 'watertank', 'stall', 'ac_cluster', 'roof_shack', 'cable_box', 'lightbox_wall', 'drainpipe']) {
+  const MEMORY_ONLY = new Set(['fruit_stall', 'noodle_table', 'lanterns', 'kiosk']); // the street's life: only inside the eye's light
+  for (const k of ['balcony', 'balcony_open', 'window_ac', 'awning', 'watertank', 'stall', 'ac_cluster', 'roof_shack', 'cable_box', 'lightbox_wall', 'drainpipe', ...MEMORY_ONLY]) {
     try { kinds[k] = (await loader.loadAsync(`/models/v2/m_${k}.glb`)).scene; } catch (e) { console.warn('[modules] missing', k, e); }
   }
   const r = rand(0x5eed17);
@@ -51,6 +54,14 @@ export async function placeModules(ctx, root, windows, facades) {
     }
     if (kinds.roof_shack && r() < 0.25) place.roof_shack.push({ x: f.frontX + f.side * (3.5 + r() * 2), y: f.h + 0.5, z: f.z + (r() - 0.5) * Math.max(0, f.w - 3.4), side: f.side, flip: r() < 0.5 });
   }
+  // remembered life on the pavement, next to the shops it belonged to
+  const W = 3.4 + 1.6;
+  const near = (name) => facades.find((f) => (f.signName || '').includes(name));
+  const noodle = near('面馆'), shop = near('副食') || near('粮油') || facades.find((f) => f.shop && f.side > 0 && !f.home);
+  if (kinds.noodle_table && noodle) for (const dz of [-1.2, 0.9]) place.noodle_table.push({ x: noodle.side * (W - 1.0), y: 0.14, z: noodle.z + dz, side: noodle.side, flip: dz > 0 });
+  if (kinds.fruit_stall && shop) place.fruit_stall.push({ x: shop.side * (W - 0.8), y: 0.14, z: shop.z, side: shop.side, flip: false });
+  if (kinds.kiosk) place.kiosk.push({ x: -(W - 0.9), y: 0.14, z: -37.5, side: -1, flip: false });
+  if (kinds.lanterns) for (const z of [-9, -19, -29]) place.lanterns.push({ x: 0, y: 4.4, z, side: 1, ry: 0, flip: false });
   if (kinds.stall) {
     const W = 3.4 + 1.6; // LANE.halfRoad + LANE.walk
     place.stall.push({ x: W - 0.2, y: 0.14, z: -29.6, side: 1, flip: false }, { x: -(W - 0.2), y: 0.14, z: -21.8, side: -1, flip: true });
@@ -62,7 +73,15 @@ export async function placeModules(ctx, root, windows, facades) {
     src.updateMatrixWorld(true);
     src.traverse((o) => {
       if (!o.isMesh) return;
-      const inst = new THREE.InstancedMesh(o.geometry, o.material, list.length);
+      let mat = o.material;
+      if (MEMORY_ONLY.has(kind)) {
+        // glTF gives a plain MeshStandardMaterial; maskNode needs the node version
+        const src0 = mat;
+        mat = new THREE.MeshStandardNodeMaterial({ map: src0.map, normalMap: src0.normalMap, roughnessMap: src0.roughnessMap,
+          metalnessMap: src0.metalnessMap, roughness: src0.roughness, metalness: src0.metalness, color: src0.color, side: src0.side });
+        mat.maskNode = memoryMask(positionWorld).greaterThan(0.3);
+      }
+      const inst = new THREE.InstancedMesh(o.geometry, mat, list.length);
       inst.castShadow = true; inst.receiveShadow = true; inst.userData.dynamic = true; inst.name = `module_${kind}_${o.name}`;
       list.forEach((L, i) => {
         p.set(L.x, L.y, L.z);
