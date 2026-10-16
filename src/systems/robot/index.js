@@ -17,9 +17,10 @@ function makePuddle() {
     pos.setXY(i, pos.getX(i) * r, pos.getY(i) * r);
   }
   g.rotateX(-Math.PI / 2);
-  const m = new THREE.MeshStandardNodeMaterial({ roughness: 0.03, metalness: 0 });
-  m.colorNode = vec3(0.008);
-  const rip = rippleNormal(positionWorld.xz).mul(wetUniforms.rain);
+  // not a mirror: some roughness and gentle ripples, so the reflection stays darker than the cat beside it
+  const m = new THREE.MeshStandardNodeMaterial({ roughness: 0.3, metalness: 0 });
+  m.colorNode = vec3(0.012);
+  const rip = rippleNormal(positionWorld.xz).mul(wetUniforms.rain).mul(0.25);
   m.normalNode = transformNormalToView(normalize(vec3(rip.x, float(1), rip.y)));
   const mesh = new THREE.Mesh(g, m);
   mesh.receiveShadow = true;
@@ -61,10 +62,9 @@ function makeGobo() {
       // a faint fill around the mark so the jamb reads
       g.fillStyle = 'rgba(255,255,255,0.07)'; g.beginPath(); g.ellipse(0, 0, 60, 50, 0, 0, 7); g.fill();
       // a short level mark, only as wide as the jamb and its pencil lines
-      const lg = g.createLinearGradient(-26, 0, 26, 0);
+      const lg = g.createLinearGradient(-12, 0, 12, 0);
       lg.addColorStop(0, 'rgba(255,255,255,0)'); lg.addColorStop(0.25, '#fff'); lg.addColorStop(0.75, '#fff'); lg.addColorStop(1, 'rgba(255,255,255,0)');
-      g.fillStyle = lg; g.fillRect(-26, -2, 52, 4);
-      g.fillStyle = 'rgba(255,255,255,0.12)'; g.fillRect(-20, 5, 40, 2);
+      g.fillStyle = lg; g.fillRect(-12, -1.5, 24, 3);
       tex.needsUpdate = true;
       return;
     }

@@ -42,7 +42,7 @@ export default {
     };
     // the past, inside the eye's cone: lit windows, lit shops (amber only)
     const mask = memoryMask();
-    M.glass.emissiveNode = amberNode().mul(mask).mul(ctx.params.get('noglow') !== null ? 1 : pastWindowGlow()).mul(0.7);
+    M.glass.emissiveNode = amberNode().mul(mask).mul(ctx.params.get('noglow') !== null ? 1 : pastWindowGlow()).mul(0.32); // well under the signs' brightness
     M.void.emissiveNode = amberNode().mul(mask).mul(0.9);
     M.brickSeal = makeSurface('brick_4', { scale: 1.4, tone: 0.75, metal: 0, streaks: 0.4 });
     M.brickSeal.maskNode = mask.lessThan(0.45); // dissolves (with the cone's grain) inside the memory

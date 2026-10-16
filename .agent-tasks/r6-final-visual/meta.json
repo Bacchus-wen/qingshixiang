@@ -5,5 +5,11 @@
  "write": false,
  "task_sha256": "bc2de53b45a6fe557cb37a776ccd3521e15b9ea61c832e25cb59bbed91fec319",
  "started": "2026-10-16T13:03:52+0800",
- "status": "running"
+ "status": "done",
+ "returncode": 0,
+ "session_id": "01a14318-61ab-79e3-9b9a-a034d12af267",
+ "turns": 13,
+ "reported_cost_usd": 0.18604324,
+ "stop_reason": "end_turn",
+ "seconds": 324.6
 }

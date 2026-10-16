@@ -5,7 +5,10 @@
  "title": "最终画面检查",
  "write": false,
  "paths": [],
- "status": "running",
+ "status": "done",
  "posted": "2026-10-16 13:03:52",
- "started": "2026-10-16 13:03:52"
+ "started": "2026-10-16 13:03:52",
+ "seconds": 324.6,
+ "finished": "2026-10-16 13:09:19",
+ "reason": null
 }

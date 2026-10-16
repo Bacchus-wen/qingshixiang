@@ -47,7 +47,7 @@ function rimMaterial(extraMask) {
   m.colorNode = vec3(0);
   const rim = pow(float(1).sub(abs(dot(normalView, positionViewDirection))), 6.0);
   const mask = memoryMask(positionWorld).mul(extraMask);
-  m.emissiveNode = amberNode().mul(rim.mul(2.4)).mul(mask); // a thin outline only: the body stays black
+  m.emissiveNode = amberNode().mul(rim.mul(1.1)).mul(mask); // a faint thin outline (as dim as the pencil marks)
   m.maskNode = mask.greaterThan(0.08);
   return m;
 }
@@ -119,7 +119,8 @@ export default {
       this.child = childFigure(childMat); this.childBaseH = 0.98;
     }
     // back against the marked jamb, facing the street
-    this.child.position.set(x - 0.05, FLOOR, z - hw + 0.16);
+    // inside the doorway, tight to the marked jamb: the frame crops the near half of the body
+    this.child.position.set(x + 0.04, FLOOR, z - hw + 0.07);
     this.child.rotation.y = -Math.PI / 2; // glTF front (+Z) -> faces the street (-X)
     g.add(this.child);
     // now: '已验收。此户已腾空。' pasted on the door, and the house number in chalk; neither exists in the memory
