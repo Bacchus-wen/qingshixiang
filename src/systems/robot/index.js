@@ -180,7 +180,7 @@ export default {
     this.gobo = makeGobo(); this.gobo.draw(0);
     const spot = this.spot = new THREE.SpotLight(eyeColor.value.clone(), 0, 45, 0.3, 0.65, 1.4);
     spot.map = this.gobo.tex;
-    spot.color.setRGB(1.0, 0.84, 0.7); // v2: a warm-white beam, so the neon inside the cone keeps its own colours
+    spot.color.setRGB(1.0, 0.74, 0.48); // v2: a warm-white beam, so the neon inside the cone keeps its own colours
     spot.castShadow = true; spot.shadow.mapSize.setScalar(ctx.quality === 'low' ? 512 : 1024); spot.shadow.camera.near = 0.2; spot.shadow.bias = -0.0005;
     scene.add(spot, spot.target);
     // a faint cold rim from behind and above (the street's ambient bounce): reads the shell, scratches and oil
@@ -194,7 +194,7 @@ export default {
     this.signKey = new THREE.PointLight(0xff4fb4, 0, 7, 2);
     this.signKey.position.copy(ROBOT_POS).add(new THREE.Vector3(1.6, 3.2, -2.6));
     scene.add(this.signKey);
-    this.beamVol = ctx.api.atmo?.volume(new THREE.Vector3(0.3, 3, -14), new THREE.Vector3(11, 6, 18), 0.0, [spot]);
+    this.beamVol = ctx.api.atmo?.volume(new THREE.Vector3(0.0, 3, -15), new THREE.Vector3(13, 6.5, 26), 0.0, [spot]);
 
     // state
     this.open = 0; this.target = 0; this.attempts = 0; this.failT = -1; this.holdT = 0;
@@ -292,7 +292,8 @@ export default {
     // frames (hidden by the black title) so its pipeline is compiled before the eye ever opens.
     this.frames = (this.frames ?? 0) + 1;
     this.spot.shadow.autoUpdate = o > 0.005 || this.frames < 30;
-    if (this.beamVol) { this.beamVol.material.userData.density.value = 0.35 * o; this.beamVol.visible = o > 0.01 || this.frames < 30; }
+    // v3: the amber cone is the protagonist of the memory shots (targets/memory.jpg)
+    if (this.beamVol) { this.beamVol.material.userData.density.value = 0.9 * o; this.beamVol.visible = o > 0.01 || this.frames < 30; }
     const mode = ctx.memory.goboMode;
     const fq = Math.round(flood * 10) / 10;
     if (mode !== this._lastMode || fq !== this._lastFlood || (mode !== 'line' && t - this.goboT > 1 / 15 && Math.abs(o - (this._lastGobo ?? -1)) > 0.01)) {

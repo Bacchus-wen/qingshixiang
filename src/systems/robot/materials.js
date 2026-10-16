@@ -37,20 +37,24 @@ export function robotMaterial(name) {
   const n = name.toLowerCase();
   const m = new THREE.MeshStandardNodeMaterial();
   if (n.includes('shell_ceramic')) {
-    // v2 (kestrel shells): once-white ceramic, years in the rain. Yellowed, rust tears running down from every seam
-    // and fastener, the lower body caked with road grime, chips through to the dark primer.
+    // v3 (reviews): once-white ceramic, years in the rain -- grey-white base, rust only running down vertical faces from
+    // seams, road grime from the ground up, chips through to dark metal, and a wet clearcoat on everything facing up
     const P = positionWorld;
-    const tears = smoothstep(0.56, 0.72, mx_noise_float(vec3(P.x.mul(45), P.y.mul(2.5), P.z.mul(45)).add(4.1)).mul(0.5).add(0.5)); // mx noise is ~[-1,1]
-    const low = smoothstep(0.9, 0.2, P.y);                                         // road grime from the ground up
-    const chips = smoothstep(0.78, 0.86, mx_fractal_noise_float(P.mul(26).add(9.3), 2, 2.0, 0.5).mul(0.5).add(0.5));
-    let c = grime(vec3(0.34, 0.32, 0.28)).mul(mix(float(1), float(0.62), oil()));
-    // rust tears run down vertical faces only (on the helmet top they read as camouflage blotches)
-    c = mix(c, vec3(0.12, 0.065, 0.03), tears.mul(0.75).mul(float(1).sub(smoothstep(0.35, 0.8, normalWorldGeometry.y.abs()))));
-    c = mix(c, vec3(0.06, 0.055, 0.045), low.mul(0.6));
-    c = mix(c, vec3(0.035), chips);
-    m.colorNode = c.add(scratches().mul(0.12));
-    m.roughnessNode = mix(wetRough(0.42), float(0.2), oil().mul(0.6));
-    m.metalnessNode = float(0);
+    const vertical = float(1).sub(smoothstep(0.25, 0.6, normalWorldGeometry.y.abs()));
+    const tears = smoothstep(0.58, 0.74, mx_noise_float(vec3(P.x.mul(45), P.y.mul(2.5), P.z.mul(45)).add(4.1)).mul(0.5).add(0.5)).mul(vertical);
+    const low = smoothstep(0.75, 0.15, P.y);
+    const chips = smoothstep(0.8, 0.87, mx_fractal_noise_float(P.mul(26).add(9.3), 2, 2.0, 0.5).mul(0.5).add(0.5));
+    let c = grime(vec3(0.6, 0.57, 0.51)).mul(mix(float(1), float(0.75), oil()));
+    c = mix(c, vec3(0.13, 0.07, 0.035), tears.mul(0.55));
+    c = mix(c, vec3(0.07, 0.065, 0.055), low.mul(0.5));
+    c = mix(c, vec3(0.045, 0.045, 0.05), chips);
+    const pm = new THREE.MeshPhysicalNodeMaterial();
+    pm.colorNode = c.add(scratches().mul(0.1));
+    pm.roughnessNode = mix(mix(wetRough(0.45), float(0.3), chips), float(0.6), tears.mul(0.5));
+    pm.metalnessNode = chips.mul(0.85);
+    pm.clearcoatNode = smoothstep(0.3, 0.8, normalWorldGeometry.y).mul(0.6).add(0.15);
+    pm.clearcoatRoughnessNode = float(0.12);
+    return pm;
   } else if (n.includes('shell_dark')) {
     m.colorNode = vec3(grime(float(0.07)));
     m.roughnessNode = wetRough(0.5);
@@ -86,7 +90,7 @@ export function robotMaterial(name) {
   } else if (n.includes('lens')) {
     // smoked glass: mostly see-through so the iris and the core behind it read; a faint glow of its own
     m.transparent = true; m.depthWrite = false;
-    m.opacityNode = float(0.35);
+    m.opacityNode = float(0.6);
     m.colorNode = vec3(0.01);
     m.roughnessNode = float(0.05);
     m.metalnessNode = float(0);
@@ -95,7 +99,7 @@ export function robotMaterial(name) {
     m.colorNode = vec3(0.02);
     // dim ember when closed, bright when open; slow breathing so it reads as "not quite dead"
     const breathe = mx_noise_float(vec3(time.mul(0.35), 0, 0)).mul(0.5).add(0.5);
-    m.emissiveNode = color(eyeColor).mul(float(0.04).add(breathe.mul(0.03)).add(eyeGlow.mul(eyeGlow).mul(7))); // v2 review: a pupil of light, the metal rings around it stay readable
+    m.emissiveNode = color(eyeColor).mul(float(0.04).add(breathe.mul(0.03)).add(eyeGlow.mul(eyeGlow).mul(2.2))); // v3 review: a pupil of light; the rings and glass around it stay readable
   } else if (n.includes('chest_core')) {
     // status light: a very slow, faint breath. Never coloured, never bright.
     m.colorNode = vec3(0.02);
