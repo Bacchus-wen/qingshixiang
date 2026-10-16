@@ -1,0 +1,137 @@
+{
+  "batch_id": "b_20261016075012",
+  "tasks": 8,
+  "submitted": 8,
+  "failed": 0,
+  "total_images": 8,
+  "items": [
+    {
+      "index": 1,
+      "prompt": "单个物体的产品参考图,三分之四俯视角,完整入画不裁切,纯浅灰色无缝背景,柔和均匀的影棚光,无阴影杂物,无文字水印。写实照片质感,真实比例。物体:中国南方老街常见的人力货运三轮车,深蓝色铁架有锈迹,后面木板车斗,车斗上盖着旧帆布,轮胎磨损",
+      "id": "img_43230",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43230/c6ae1645-43fa-409a-963a-85b961145bad.jpg?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T07%3A49%3A15Z%2F3600%2F%2Fb9a8fd1a5063b8d91ac4654b219bac778a67df6019b11865ca31ac166315f8c4"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/refs/img_43230/ai_generate_43230_1.png"
+      ]
+    },
+    {
+      "index": 2,
+      "prompt": "单个物体的产品参考图,三分之四俯视角,完整入画不裁切,纯浅灰色无缝背景,柔和均匀的影棚光,无阴影杂物,无文字水印。写实照片质感,真实比例。物体:小卖部门口的老式白色卧式冰柜,玻璃推拉盖,外壳发黄有划痕和贴纸残留,底部有锈",
+      "id": "img_43231",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43231/4a743598-baa1-46c0-affc-9dbb9575d9c3.jpg?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T07%3A49%3A15Z%2F3600%2F%2F79f3a2f55fd85bd06347e0baf93688a0f7aaaafa55731007a1aa021a860a1104"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/refs/img_43231/ai_generate_43231_1.png"
+      ]
+    },
+    {
+      "index": 3,
+      "prompt": "单个物体的产品参考图,三分之四俯视角,完整入画不裁切,纯浅灰色无缝背景,柔和均匀的影棚光,无阴影杂物,无文字水印。写实照片质感,真实比例。物体:2000年代中国常见的旧踏板摩托车,红色车壳褪色开裂,后座绑着纸箱,车把挂着塑料袋",
+      "id": "img_43232",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43232/3afde3e4-373d-4823-ae9f-887c1746a3be.jpg?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T07%3A49%3A15Z%2F3600%2F%2F69e56aef67ee3e592a0fad88e0e8f6a42427bbaca907708cb618a85301b4e7a6"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/refs/img_43232/ai_generate_43232_1.png"
+      ]
+    },
+    {
+      "index": 4,
+      "prompt": "单个物体的产品参考图,三分之四俯视角,完整入画不裁切,纯浅灰色无缝背景,柔和均匀的影棚光,无阴影杂物,无文字水印。写实照片质感,真实比例。物体:两个中国家用液化气钢瓶,一个蓝灰色一个红褐色,瓶身掉漆生锈,带阀门",
+      "id": "img_43233",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43233/e068bb9a-4d9d-43f4-8865-76eb5e546b2c.jpg?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T07%3A49%3A15Z%2F3600%2F%2F85591a1b16229816fb84911a943bbf517a017d86da8ed386f9cf540e2409f601"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/refs/img_43233/ai_generate_43233_1.png"
+      ]
+    },
+    {
+      "index": 5,
+      "prompt": "单个物体的产品参考图,三分之四俯视角,完整入画不裁切,纯浅灰色无缝背景,柔和均匀的影棚光,无阴影杂物,无文字水印。写实照片质感,真实比例。物体:一摞六个红色塑料方凳,旁边单独一个倒放的,表面磨花发白",
+      "id": "img_43234",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43234/7bb340d6-4fc1-4bd7-92e8-2b7573948b66.jpg?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T07%3A49%3A38Z%2F3600%2F%2Fa1a54cba519f61fc5e3b830425f05b61ce3470ff8088adb98cde2c62e1e21a14"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/refs/img_43234/ai_generate_43234_1.png"
+      ]
+    },
+    {
+      "index": 6,
+      "prompt": "单个物体的产品参考图,三分之四俯视角,完整入画不裁切,纯浅灰色无缝背景,柔和均匀的影棚光,无阴影杂物,无文字水印。写实照片质感,真实比例。物体:两个中国城市街边的绿色塑料带盖垃圾桶(带轮子),一个盖子半开,桶身脏污",
+      "id": "img_43235",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43235/488d3a83-2e49-4bb8-bab3-a1af844bf8db.jpg?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T07%3A50%3A12Z%2F3600%2F%2F5fe29d1af7461d56b04ce5ba369f227a257ab3af53ec0bbd7a0a7e245c33ee8d"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/refs/img_43235/ai_generate_43235_1.png"
+      ]
+    },
+    {
+      "index": 7,
+      "prompt": "单个物体的产品参考图,三分之四俯视角,完整入画不裁切,纯浅灰色无缝背景,柔和均匀的影棚光,无阴影杂物,无文字水印。写实照片质感,真实比例。物体:老式蜂窝煤炉,铁皮外壳生锈,上面放着一个变形的铝制烧水壶,旁边两块蜂窝煤",
+      "id": "img_43236",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43236/892c1fd0-045d-4c56-ae54-9f540a83f7d0.jpg?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T07%3A50%3A06Z%2F3600%2F%2Fe884d89f2a64938aa0f4efe5e12612760e29d4554d0edc0953a638a1717489ca"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/refs/img_43236/ai_generate_43236_1.png"
+      ]
+    },
+    {
+      "index": 8,
+      "prompt": "单个物体的产品参考图,三分之四俯视角,完整入画不裁切,纯浅灰色无缝背景,柔和均匀的影棚光,无阴影杂物,无文字水印。写实照片质感,真实比例。物体:老旧居民楼外墙上的一组灰色铁皮电表箱(三个连在一起),有锈斑和小广告残迹,底部垂着电线",
+      "id": "img_43237",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43237/19e7d4e4-d9a1-4d0e-ba41-b796df0b639a.jpg?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T07%3A50%3A06Z%2F3600%2F%2Fab0b9e64d5c9fccb6078d1fa5004fa212dc34b0c03e3d2e5ec1af61fa98f2b96"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/refs/img_43237/ai_generate_43237_1.png"
+      ]
+    }
+  ],
+  "plan": {
+    "kind": "image",
+    "model": "seedream",
+    "version": "seedream-5-0",
+    "count": 8,
+    "quota": {
+      "limit": 300,
+      "used": 0,
+      "remaining": 300,
+      "unit": "张",
+      "after": 8
+    },
+    "running": {
+      "limit": 20,
+      "current": 0
+    },
+    "allowed": true,
+    "blockers": [],
+    "cost": {
+      "amount": 1.76,
+      "currency": "CNY",
+      "priced": true,
+      "estimated": true,
+      "note": null
+    },
+    "request": {
+      "batch": true,
+      "tasks": 8,
+      "total_images": 8,
+      "local_uploads": []
+    }
+  }
+}
