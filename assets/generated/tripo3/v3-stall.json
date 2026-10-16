@@ -1,0 +1,19 @@
+{
+ "op": "v3-stall",
+ "steps": {
+  "multiview": {
+   "state": "submitted",
+   "task_id": "47ab5439-f9fa-463c-ae10-91f7695f6d8c",
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "e7ef068d-0c51-476f-96d4-57d758d4ce3d",
+   "status": "success"
+  }
+ },
+ "file_token": "file_cb62a20f-b0ae-46cc-ad2d-75f75379088d",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/hero/named/stall.png",
+ "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo3/v3-stall.glb",
+ "glb_sha256": "106058be6f4bb261227a14530443738961e124f1ab1190f7b2a94b217f491b05"
+}

@@ -1,0 +1,19 @@
+{
+ "op": "v3-balcony",
+ "steps": {
+  "multiview": {
+   "state": "submitted",
+   "task_id": "5814deaf-0cdc-40c5-9ae3-5dffb9117916",
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "38e309f7-eef2-4947-8aae-08b28b5c908d",
+   "status": "success"
+  }
+ },
+ "file_token": "file_5fc2d10c-50d2-4946-aafd-a9bf106131e8",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/hero/named/balcony.png",
+ "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo3/v3-balcony.glb",
+ "glb_sha256": "cd47a6c184718f765534459ec1db2e399c4581e6593e98410ad47ea8c7fb46b1"
+}

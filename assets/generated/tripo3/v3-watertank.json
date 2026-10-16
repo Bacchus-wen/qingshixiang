@@ -1,0 +1,19 @@
+{
+ "op": "v3-watertank",
+ "steps": {
+  "multiview": {
+   "state": "submitted",
+   "task_id": "cebcc00e-801d-41a7-abb9-10cc36a81fea",
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "a79046d8-33c5-439f-9a7c-7a4781161616",
+   "status": "success"
+  }
+ },
+ "file_token": "file_6b6e4d18-6aa0-472e-91ec-2d823355394b",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/hero/named/watertank.png",
+ "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo3/v3-watertank.glb",
+ "glb_sha256": "077b19ac5dd19c287420a7189d91f6f0bdbead97ca7d5f43c0b81dabf3c44a71"
+}

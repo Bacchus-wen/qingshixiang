@@ -1,0 +1,19 @@
+{
+ "op": "v3-awning",
+ "steps": {
+  "multiview": {
+   "state": "submitted",
+   "task_id": "6040d011-d2ef-4c3d-8bc8-63b74ed00a27",
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "5ddd01d5-b0b7-48c4-81bb-9924e71351ff",
+   "status": "success"
+  }
+ },
+ "file_token": "file_ef422c02-0201-4092-a4e0-d643de625f50",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/hero/named/awning.png",
+ "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo3/v3-awning.glb",
+ "glb_sha256": "cecc7d69ab4fa6515aedcbbd8e906f1ee96a8160887c66245c7d95bb90e381ed"
+}

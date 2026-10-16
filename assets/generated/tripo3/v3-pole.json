@@ -1,0 +1,19 @@
+{
+ "op": "v3-pole",
+ "steps": {
+  "multiview": {
+   "state": "submitted",
+   "task_id": "1f45a9b2-8a18-46d5-b9a9-49155035d3fa",
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "5626e198-9f94-4d28-80db-f9579e2dc7d4",
+   "status": "success"
+  }
+ },
+ "file_token": "file_193e83c3-b1cb-449f-8921-fba3de9ee251",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/hero/named/pole.png",
+ "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo3/v3-pole.glb",
+ "glb_sha256": "93b028248bbada3379e67dd7e6dc6a5393861b21bebed34cc093d7c426e6c00a"
+}

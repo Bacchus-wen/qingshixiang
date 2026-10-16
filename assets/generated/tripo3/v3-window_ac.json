@@ -1,0 +1,19 @@
+{
+ "op": "v3-window_ac",
+ "steps": {
+  "multiview": {
+   "state": "submitted",
+   "task_id": "6580bd73-6249-42f5-b9ba-452c6b65b16a",
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "a03b9dec-3469-45e3-92c6-0f8ed439305e",
+   "status": "success"
+  }
+ },
+ "file_token": "file_81c2d500-0c43-40b3-867b-59c17506e065",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/hero/named/window_ac.png",
+ "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo3/v3-window_ac.glb",
+ "glb_sha256": "c3b93dd47f09cecb0aba2de0bad03b4698c7d340dfd24d50c55ed3e03558c30e"
+}
