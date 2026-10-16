@@ -30,6 +30,18 @@ export async function placeV2Props(ctx, root) {
     ['meterbox', -(W - 0.18), 1.5, -12.6, 0],
     ['bins', -(W - 0.6), c, -35.0, Math.PI / 2 + 0.2],
     ['stools', W - 0.5, c, -24.0, -0.4],
+    // batch 2
+    ['sedan', 2.0, 0, -37.5, 0.12],
+    ['bottlecrates', W - 0.45, c, -25.3, 0.2],
+    ['bicycle', -(W - 0.4), c, -27.2, 0.05],
+    ['planters', -(W - 0.55), c, -7.4, Math.PI / 2],
+    ['cardboard', W - 0.5, c, -11.0, 0.7],
+    ['lightbox', -(W - 1.0), c, -30.2, Math.PI / 2],
+    ['lightbox', W - 1.0, c, -27.4, -Math.PI / 2],
+    ['acunit', -(W - 0.3), 3.6, -18.0, Math.PI / 2],
+    ['acunit', W - 0.3, 4.4, -26.0, -Math.PI / 2],
+    ['acunit', -(W - 0.3), 6.7, -24.5, Math.PI / 2],
+    ['waterdispenser', W - 0.5, c, -19.7, -Math.PI / 2],
   ];
   const cache = new Map();
   const out = [];

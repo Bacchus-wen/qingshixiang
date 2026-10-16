@@ -44,6 +44,7 @@ export const SHOTS = {
   'past-traffic': { pos: [-4.9, 1.5, -13.2], look: [2, 0.8, -26], fov: 50, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.aimAt = new ctx.THREE.Vector3(1.5, 0.8, -24); } },
   'flood': { pos: [-4.9, 1.6, -13.0], look: [3, 1.6, -20], fov: 62, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.flood = 1; } },
   'props-left': { pos: [-1.2, 1.5, -14.5], look: [-4.6, 0.6, -21], fov: 50 },
+  'props-deep': { pos: [0.3, 1.6, -18], look: [0.5, 1.0, -36], fov: 55 },
   'props-right': { pos: [2.2, 1.5, -12.5], look: [4.6, 0.6, -20], fov: 50 },
   'junction': { pos: [-2.6, 1.45, -12], look: [0, 1.0, -42], fov: 38 }, // add &passcar to park the passing car mid-junction
   'beam-street': { pos: [-4.0, 1.7, -10.5], look: [3, 1.2, -17], fov: 50, setup: (ctx) => { ctx.memory.forceOpen = true; } },
