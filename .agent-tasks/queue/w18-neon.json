@@ -1,0 +1,29 @@
+{
+ "id": "w18-neon",
+ "from": "claude",
+ "to": "codex",
+ "title": "霓虹招牌层:现在残存、记忆满街",
+ "write": true,
+ "paths": [
+  "src/systems/neon/**",
+  "src/systems/index.js",
+  "assets/textures/neon/**"
+ ],
+ "status": "done",
+ "posted": "2026-10-16 15:46:24",
+ "started": "2026-10-16 15:46:27",
+ "seconds": 509.3,
+ "touched": [
+  "src/systems/index.js",
+  "src/systems/neon/atlas.js",
+  "src/systems/neon/check-shaders.mjs",
+  "src/systems/neon/geometry.js",
+  "src/systems/neon/index.js",
+  "src/systems/neon/layout.js",
+  "src/systems/neon/materials.js",
+  "src/systems/neon/neon.test.mjs"
+ ],
+ "applied": 8,
+ "finished": "2026-10-16 15:54:57",
+ "reason": null
+}

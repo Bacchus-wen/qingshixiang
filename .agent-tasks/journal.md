@@ -76,3 +76,5 @@
 - 2026-10-16 15:15:28 | grok | 未完成（timeout）：找免费高质量模型（r11-assets）
 - 2026-10-16 15:26:51 | codex | 未完成（out_of_scope）：移植 cybercity 楼体:贴图集墙面+内部映射窗户+店内（w19-buildings）｜改了声明范围之外的文件：result.md。改动没有带回项目，副本保留在 /Users/wenbin/.local/share/agent-team/work/新游戏--53fa3746--w19-buildings
 - 2026-10-16 15:29:53 | grok | 完成：扒参考作品和同类作品的素材来源（r12-scrape）
+- 2026-10-16 15:46:24 | claude | 派给 codex：霓虹招牌层:现在残存、记忆满街（w18-neon，可写 src/systems/neon/**,src/systems/index.js,assets/textures/neon/**）
+- 2026-10-16 15:54:57 | codex | 完成：霓虹招牌层:现在残存、记忆满街（w18-neon）
