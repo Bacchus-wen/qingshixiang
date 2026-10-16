@@ -94,10 +94,13 @@ export default {
         break;
       }
       case 'look': {
-        // over the shoulder: behind and above the head, looking along the beam
-        this.cam.pos.set(ROBOT.x - 0.55, 1.45, ROBOT.z + 0.45).addScaledVector(m.dir, -0.15);
-        this.cam.look.copy(eyePos).addScaledVector(m.dir, 8);
-        this.cam.fov = 50;
+        // over the shoulder, close: the helmet's dark silhouette in the near foreground (soft, out of focus), the
+        // beam leaving the lens across the frame. The camera rides the gaze direction, so it drifts with the head.
+        this._w.set(m.dir.z, 0, -m.dir.x).normalize(); // screen-left of the gaze, on the street side
+        this.cam.pos.copy(eyePos).addScaledVector(m.dir, -1.05).addScaledVector(this._w, -0.48);
+        this.cam.pos.y = eyePos.y + 0.32;
+        this.cam.look.copy(eyePos).addScaledVector(m.dir, 9);
+        this.cam.fov = 46;
         // the door memory gets its own slow push-in toward the doorway, then eases back
         const fr = ctx.api.fragment;
         if (fr && fr.state === 'playing') {
