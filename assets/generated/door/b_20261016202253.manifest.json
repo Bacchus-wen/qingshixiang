@@ -1,0 +1,53 @@
+{
+  "batch_id": "b_20261016202253",
+  "tasks": 1,
+  "submitted": 1,
+  "failed": 0,
+  "total_images": 1,
+  "items": [
+    {
+      "index": 1,
+      "prompt": "Orthographic straight-on front view texture of a single old wooden apartment door from 1990s southern China, filling the whole frame edge to edge, no frame, no wall, no perspective: vertical wooden planks with peeling dark green paint showing brown wood underneath, a faded red diamond-shaped 福 paper sticker, torn faded red spring-couplet paper remnants near the edges, a rusty keyhole and a round metal handle, scratches, a small faded sticker of a cartoon at child height, rain damp streaks at the bottom, flat even lighting, photorealistic texture, no shadows",
+      "id": "img_43567",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43567/c4d82556-9511-4fc9-ba83-e98b2340a2c7.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T20%3A22%3A46Z%2F3600%2F%2F24b7f98d289779f717aa5e910a3d8a756326b3d2895cbad1679d57450d900051"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/door/img_43567/ai_generate_43567_1.png"
+      ]
+    }
+  ],
+  "plan": {
+    "kind": "image",
+    "model": "gpt",
+    "version": "gpt-image-2.5-sunburst",
+    "count": 1,
+    "quota": {
+      "limit": 300,
+      "used": 17,
+      "remaining": 283,
+      "unit": "张",
+      "after": 18
+    },
+    "running": {
+      "limit": 20,
+      "current": 0
+    },
+    "allowed": true,
+    "blockers": [],
+    "cost": {
+      "amount": 0,
+      "currency": "USD",
+      "priced": false,
+      "estimated": false,
+      "note": null
+    },
+    "request": {
+      "batch": true,
+      "tasks": 1,
+      "total_images": 1,
+      "local_uploads": []
+    }
+  }
+}

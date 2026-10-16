@@ -76,9 +76,13 @@ export default {
   async init(ctx) {
     const { scene } = ctx;
     const wood = new THREE.MeshStandardNodeMaterial({ color: 0x1b1a19, roughness: 0.6 });
-    const doorMat = new THREE.MeshStandardNodeMaterial({ color: 0x0a0a0a, roughness: 0.45 });
+    // v3: the door itself (GPT Image 2.5 texture): peeling green planks, a faded 福, couplet remnants -- and a cartoon
+    // sticker at a child's height
+    const leafTex = new THREE.TextureLoader().load('/textures/door_leaf.jpg'); leafTex.colorSpace = THREE.SRGBColorSpace; leafTex.anisotropy = 8;
+    const doorMat = new THREE.MeshStandardNodeMaterial({ roughness: 0.62 });
+    doorMat.colorNode = texture(leafTex).rgb.mul(0.75);
     // inside the memory the door leaf takes a little amber, so the dark child has something to stand against
-    doorMat.emissiveNode = amberNode().mul(memoryMask(positionWorld)).mul(0.4);
+    doorMat.emissiveNode = texture(leafTex).rgb.mul(amberNode()).mul(memoryMask(positionWorld)).mul(0.9); // the remembered door, warmly lit
     const g = this.group = new THREE.Group();
     const box = (w, h, d, mat, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); o.position.set(x, y, z); o.castShadow = o.receiveShadow = true; o.layers.enable(1); g.add(o); return o; };
     const x = DOOR.x, z = DOOR.z, hw = DOOR.w / 2;
