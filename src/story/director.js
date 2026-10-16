@@ -36,7 +36,7 @@ export default {
     this.focus = 10; this.bokeh = 0;
     ctx.api.director = this;
     if (this.phase === 'title') this.film.title(true);
-    else this.film.phase(this.phase);
+    else { this.film.phase(this.phase); this.film.title(false); } // (?phase=... skips the title: hide the cursor too)
   },
 
   // cut = jump the camera instead of easing (a hard cut to the eye reads stronger than a slide)
