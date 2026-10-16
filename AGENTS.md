@@ -11,7 +11,8 @@
 - 可以在本地 `git commit` 做存档点,**不要 push**,不要建远程仓库。
 
 ## 硬性禁止
-- 不用 Tripo,不调用任何付费生成(生图、生模型、生视频、生音乐、TTS)。
+- 2026-10-16 15:20 用户改为允许:公司素材中台(vmc,生图/贴图)和 Tripo(生 3D 模型)可以用;每次生成都要有明确用途,不要批量乱生成。ChatGPT 的任何功能仍然禁止。
+- 用户授权:本项目是公司内部展示,可以使用 reference/ 下别人的作品素材(cybercity、kestrel-k1 等),但每个素材来源都要记进 CREDITS.md。
 - 不把参考 A(xikhar/cybercity,无许可)的代码或素材复制进本项目,只学思路。
 - 参考 B(thtbee/waggles,CC BY-NC 4.0)原则上只学思路;如确需改编,必须在 `CREDITS.md` 署名。
 - 风格必须和参考不同:不要满屏霓虹赛博、不要体素风(Cloudpunk / Nivalis Nights)、不要白色影棚展示风(Kestrel)。

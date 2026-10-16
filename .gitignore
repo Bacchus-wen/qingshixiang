@@ -6,3 +6,7 @@ renders/
 *.blend1
 .agent-tasks/*/raw.log
 docs/*.wav
+reference/cybercity/
+reference/waggles/
+reference/scraped/
+reference/img2threejs/
