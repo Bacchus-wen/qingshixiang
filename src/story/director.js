@@ -97,8 +97,9 @@ export default {
         // over the shoulder, close: the helmet's dark silhouette in the near foreground (soft, out of focus), the
         // beam leaving the lens across the frame. The camera rides the gaze direction, so it drifts with the head.
         this._w.set(m.dir.z, 0, -m.dir.x).normalize(); // screen-left of the gaze, on the street side
-        this.cam.pos.copy(eyePos).addScaledVector(m.dir, -1.05).addScaledVector(this._w, -0.48);
-        this.cam.pos.y = eyePos.y + 0.32;
+        // high over the shoulder: the lamp-lit helmet top stays just under the frame, the beam rises out of it
+        this.cam.pos.copy(eyePos).addScaledVector(m.dir, -0.95).addScaledVector(this._w, -0.4);
+        this.cam.pos.y = eyePos.y + 0.7;
         this.cam.look.copy(eyePos).addScaledVector(m.dir, 9);
         this.cam.fov = 46;
         // the door memory gets its own slow push-in toward the doorway, then eases back
