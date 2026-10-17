@@ -21,6 +21,7 @@ export const SHOTS = {
   'shop-rev': { scene: 'shop', pos: [1.9, 1.55, -1.6], look: [-1.2, 0.8, 1.2], fov: 55 },
   'shop-rev2': { scene: 'shop', pos: [-2.6, 1.6, -1.9], look: [1.0, 0.7, 1.4], fov: 60 },
   'shop-top': { scene: 'shop', pos: [0.0, 2.9, 0.2], look: [-0.2, 0.0, 0.0], fov: 85 },
+  'shop-broom': { scene: 'shop', pos: [0.2, 1.25, 2.15], look: [-2.2, 0.55, 1.55], fov: 45 },
   'shop-iso': { scene: 'shop', pos: [5.5, 6.0, 7.5], look: [0, 0.6, 0], fov: 32 },
   'street-eye': { pos: [0.6, 1.55, 10], look: [0, 1.8, -30], fov: 42 },
   'street-low': { pos: [-1.2, 0.25, 4], look: [0.5, 1.0, -25], fov: 35 },

@@ -28,7 +28,7 @@ fixed = [
  {"name": "soldering_iron", "glb": "soldering_iron.glb", "pos": [-1.85, 0, 1.1], "ry": 15, "on": "workbench"},
  {"name": "enamel_mug", "glb": "enamel_mug.glb", "pos": [-2.25, 0, 1.15], "ry": 30, "on": "workbench"},
  {"name": "robot", "glb": "robot.glb", "pos": [-0.5, 0, 1.2], "ry": -40},
- {"name": "broom", "type": "proc", "kind": "broom", "pos": [-2.22, 0, 1.72], "ry": 0, "roll": -13.7, "on": "floor"},
+ {"name": "broom", "type": "proc", "kind": "broom", "pos": [-1.98, 0, 1.45], "ry": 0, "roll": -16.4, "on": "floor"},
  {"name": "aframe", "type": "proc", "kind": "aframe", "pos": [0.78, 0, 1.92], "ry": -12, "on": "floor"},
  {"name": "toolbox", "glb": "toolbox.glb", "pos": [-1.55, 0, 1.7], "ry": 14},
  {"name": "back_door", "glb": "back_door.glb", "pos": [1.75, 0, 0], "wall": "back"},
