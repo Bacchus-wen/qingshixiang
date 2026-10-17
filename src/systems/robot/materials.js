@@ -48,7 +48,7 @@ export function robotMaterial(name) {
     const zone = smoothstep(0.45, 0.75, mx_noise_float(P.mul(2.3).add(1.7)).mul(0.5).add(0.5));
     const jitter = mx_noise_float(P.mul(3.1).add(7.7)).mul(5.0);
     const runs = mx_noise_float(vec3(P.x.mul(31).add(jitter), P.y.mul(1.6), P.z.mul(31).add(jitter))).mul(0.5).add(0.5);
-    const tears = smoothstep(0.52, 0.76, runs).mul(vertical.mul(0.7).add(0.3)).mul(zone.mul(0.85).add(0.15));
+    const tears = smoothstep(0.52, 0.76, runs).mul(vertical.mul(0.7).add(0.3)).mul(zone.mul(0.85).add(0.15)).mul(float(1).sub(smoothstep(0.1, 0.3, curv))); // not on thin curved limbs (they made rings)
     const low = smoothstep(0.75, 0.15, P.y);
     const chipN = mx_fractal_noise_float(P.mul(55).add(9.3), 3, 2.0, 0.5).mul(0.5).add(0.5);
     const chips = smoothstep(0.86, 0.9, chipN.add(curv.mul(0.22)).add(zone.mul(0.06)));
