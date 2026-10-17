@@ -26,6 +26,7 @@ export const SHOTS = {
   'shop-marks': { scene: 'shop', pos: [1.0, 1.45, -1.0], look: [1.05, 1.2, -2.25], fov: 50 },
   'shop-chassis': { scene: 'shop', pos: [-1.2, 1.25, 1.75], look: [-1.38, 0.92, 0.7], fov: 38 },
   'shop-frontin': { scene: 'shop', pos: [1.6, 1.5, -1.2], look: [-1.8, 1.0, 2.2], fov: 60 },
+  'shop-est3': { scene: 'shop', pos: [-0.5, 1.42, 4.5], look: [-0.62, 1.05, -1.0], fov: 52 },
   'shop-iso': { scene: 'shop', pos: [5.5, 6.0, 7.5], look: [0, 0.6, 0], fov: 32 },
   'street-eye': { pos: [0.6, 1.55, 10], look: [0, 1.8, -30], fov: 42 },
   'street-low': { pos: [-1.2, 0.25, 4], look: [0.5, 1.0, -25], fov: 35 },

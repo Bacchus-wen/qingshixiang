@@ -651,11 +651,35 @@ export default {
       const go = (name) => { const v = SHOTS[name]; if (!v) return; cam.position.set(...v.pos); cam.fov = v.fov ?? 50; cam.updateProjectionMatrix(); oc.target.set(...v.look); oc.update(); };
       go('shop-establish');
       addEventListener('keydown', (e) => { const k = Number(e.key); if (k >= 1 && k <= KEYS.length) go(KEYS[k - 1]); });
+      // double-click a model: the camera glides to a 3/4 view of it and orbits around it; its name and triangle
+      // count show bottom-left (every placed model here was generated with Tripo)
+      const NAMES = { 'robot.glb': '机器人', 'workbench.glb': '工作台', 'desk_lamp.glb': '台灯', 'tube_radio_open.glb': '拆开的电子管收音机', 'tube_radio_closed.glb': '电子管收音机',
+        'crt_tv.glb': '显像管电视', 'desk_fan.glb': '台式电风扇', 'cassette_recorder.glb': '收录机', 'alarm_clock.glb': '闹钟', 'thermos.glb': '暖水瓶', 'enamel_mug.glb': '搪瓷杯',
+        'magnifier.glb': '放大镜', 'soldering_iron.glb': '电烙铁', 'toolbox.glb': '铁皮工具箱', 'stool.glb': '木凳', 'parts_cabinet.glb': '零件抽屉柜', 'wall_clock.glb': '摆钟',
+        'back_door.glb': '后屋门', 'bicycle.glb': '二八自行车', 'spare_arm.glb': '备用手臂', 'spare_leg.glb': '备用腿', 'spare_torso.glb': '备用躯干', '../v2/meterbox.glb': '电表箱', '../v2/cardboard.glb': '压扁的纸箱' };
+      const pick = new THREE.Raycaster(), ndc = new THREE.Vector2(), fly = this.fly = { t: 1 };
+      const info = document.createElement('div');
+      Object.assign(info.style, { position: 'fixed', left: '16px', bottom: '36px', font: '15px/1.4 -apple-system, "PingFang SC", sans-serif', color: 'rgba(245,238,224,0.92)', textShadow: '0 1px 3px rgba(0,0,0,0.85)', pointerEvents: 'none', transition: 'opacity 0.6s', opacity: '0' });
+      document.getElementById('ui')?.appendChild(info);
+      ctx.renderer.domElement.addEventListener('dblclick', (ev) => {
+        const r = ctx.renderer.domElement.getBoundingClientRect();
+        ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+        pick.setFromCamera(ndc, cam);
+        const hit = pick.intersectObjects(Object.values(placed), true)[0]; if (!hit) return;
+        let o = hit.object; while (o && !o.userData?.layout) o = o.parent;
+        if (!o || !o.userData.layout.glb) return;
+        const b = new THREE.Box3().setFromObject(o, true), c = b.getCenter(new THREE.Vector3()), rad = b.getSize(new THREE.Vector3()).length() / 2;
+        const dir = cam.position.clone().sub(c).setY(0).normalize().multiplyScalar(0.8).add(new THREE.Vector3(0, 0.45, 0)).normalize();
+        Object.assign(fly, { t: 0, p0: cam.position.clone(), q0: oc.target.clone(), p1: c.clone().addScaledVector(dir, Math.max(0.45, rad * 2.6)), q1: c });
+        let tris = 0; o.traverse((m) => { if (m.isMesh) tris += (m.geometry.index ? m.geometry.index.count : m.geometry.attributes.position.count) / 3; });
+        info.textContent = `${NAMES[o.userData.layout.glb] || o.userData.layout.glb} · ${(tris / 1000).toFixed(1)} 千三角面 · Tripo 生成`;
+        info.style.opacity = '1'; clearTimeout(this._infoT); this._infoT = setTimeout(() => (info.style.opacity = '0'), 7000);
+      });
       // a small, quiet hint for reviewers (bottom-left); fades after a while, any key brings it back
       const ui = document.getElementById('ui');
       if (ui) {
         const hint = document.createElement('div');
-        hint.textContent = '拖动旋转 · 右键平移 · 滚轮缩放 · 数字键 1–8 切换机位';
+        hint.textContent = '拖动旋转 · 右键平移 · 滚轮缩放 · 双击模型看近景 · 数字键 1–8 切换机位';
         Object.assign(hint.style, { position: 'fixed', left: '16px', bottom: '14px', font: '13px/1.4 -apple-system, "PingFang SC", sans-serif', color: 'rgba(235,228,214,0.78)', letterSpacing: '0.04em', textShadow: '0 1px 3px rgba(0,0,0,0.8)', pointerEvents: 'none', transition: 'opacity 1.2s', opacity: '1' });
         ui.appendChild(hint);
         let t = setTimeout(() => (hint.style.opacity = '0'), 9000);
@@ -665,6 +689,8 @@ export default {
   },
   update(dt, t, ctx) {
     const oc = this.controls; if (!oc) return;
+    const f = this.fly;
+    if (f && f.t < 1) { f.t = Math.min(1, f.t + dt / 0.9); const k = f.t * f.t * (3 - 2 * f.t); ctx.camera.position.lerpVectors(f.p0, f.p1, k); oc.target.lerpVectors(f.q0, f.q1, k); }
     oc.update();
     const p = ctx.camera.position, R = ROOM, wallZ0 = R.d / 2 - 0.12, wallZ1 = R.d / 2 + 0.25 + 0.12;
     if (p.z < wallZ0) { p.x = Math.max(-R.w / 2 + 0.12, Math.min(R.w / 2 - 0.12, p.x)); p.z = Math.max(-R.d / 2 + 0.12, p.z); p.y = Math.max(0.15, Math.min(R.h - 0.12, p.y)); }
