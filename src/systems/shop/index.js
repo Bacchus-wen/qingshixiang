@@ -232,6 +232,9 @@ export default {
   name: 'shop',
   async init(ctx) {
     const { scene } = ctx;
+    // post chain for an interior: no depth of field, no rain-air scatter, no SSR (env-map reflections instead).
+    // Measured on the establishing shot (GPU timestamps): 66.9 -> 28.3 with no visible difference. ?ssr=1 restores SSR.
+    { const pf = (ctx.params.get('pfx') || '').split(',').filter(Boolean); pf.push('nodof', 'noscatter'); if (ctx.params.get('ssr') === null) pf.push('nossr'); ctx.params.set('pfx', pf.join(',')); }
     // KTX2 (Basis) textures for the room and the models: transcoded to the GPU's native compressed format
     const ktx2 = new KTX2Loader().setTranscoderPath(`${import.meta.env.BASE_URL}basis/`).detectSupport(ctx.renderer);
     const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).setKTX2Loader(ktx2);
