@@ -77,7 +77,7 @@ function wetMaterial(name, ctx, { albedo, roughness, xy, T, B, coverage = 0, por
   m.emissiveNode = vec3(w.albedo).mul(neonLightAt()); // v3: coloured pools of sign light on the road
   // Already world-space: do not apply transformNormalToView's model normal matrix a second time.
   m.normalNode = normalize(cameraViewMatrix.mul(vec4(worldNormal, 0)).xyz);
-  m.roughnessNode = mix(max(w.roughness, 0.65), w.roughness, up).clamp(0.015, 1);
+  m.roughnessNode = mix(max(w.roughness, 0.65), w.roughness, up).clamp(0.03, 1);
   m.metalnessNode = float(metal);
   if (planar) {
     // v3 (Grok r16, after Threejs-Punk): the road is a plane -- a half-resolution planar reflection, broken by the
@@ -153,7 +153,7 @@ export function groundRoad(textures, ctx, lane = DEFAULT_GROUND_LANE) {
     planar.target.rotateX(-Math.PI / 2); planar.target.position.y = 0.001;
     ctx.scene.add(planar.target);
   }
-  return wetMaterial('cc_ground_road', ctx, { planar, albedo, roughness, xy, ...frame, coverage: 0.75, porosity: 0.7,
+  return wetMaterial('cc_ground_road', ctx, { planar, albedo, roughness, xy, ...frame, coverage: 0.5, porosity: 0.7,
     wetness, ...roadWaterProfile(P.x, L.halfRoad) });
 }
 

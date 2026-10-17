@@ -59,7 +59,7 @@ export function wetLayer({ albedo, roughness, porosity = 0.6, puddle = float(0),
   // vertical rain streaks: thin wet runs darken and smooth the wall
   const streak = smoothstep(0.55, 0.8, mx_noise_float(vec3(worldPos.x.mul(9), worldPos.y.mul(0.35).sub(time.mul(0.25)), worldPos.z.mul(9)))).mul(vertical).mul(w);
   const a2 = a1.mul(float(1).sub(max(puddle.mul(0.5), streak.mul(0.27))));
-  const r2 = mix(mix(r1, r1.mul(0.5), streak), float(0.015), puddle);
+  const r2 = mix(mix(r1, r1.mul(0.5), streak), float(0.035), puddle); // r19: broken water, not a black mirror
   const nxy = ripple.mul(mix(float(0.25), float(1), puddle)).mul(w);
   return { albedo: a2, roughness: r2, puddle, nxy };
 }
