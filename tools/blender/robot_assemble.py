@@ -79,6 +79,22 @@ head.data.update()
 head.location = pivot - Vector((0, 0, SINK))  # sink the neck stub into the torso so the neck stays short
 print('HEAD scale', round(sw, 3), 'pivot', tuple(round(x, 3) for x in pivot))
 
+# optional: the separately generated, sharper torso laid over the body's own torso (covers it slightly larger)
+TORSO = arg('--torso')
+torso = None
+if TORSO:
+    z0, z1 = float(arg('--torso-z0', '0.48')), float(arg('--torso-z1', '0.72')); xr = float(arg('--torso-x', '0.15'))
+    band = [c for c in [v.co for v in body.data.vertices] if z0 <= c.z <= z1 and abs(c.x) < xr]
+    tlo = Vector((min(c[i] for c in band) for i in range(3))); thi = Vector((max(c[i] for c in band) for i in range(3)))
+    torso = load(TORSO, float(arg('--torso-rotz', '-90'))); torso.name = 'robot_torso'
+    a, b = bounds(torso)
+    st = (thi.x - tlo.x) / (b.x - a.x) * float(arg('--torso-mul', '1.08'))
+    torso.data.transform(Matrix.Scale(st, 4) @ Matrix.Translation(-(a + b) / 2))
+    torso.data.update()
+    torso.location = (tlo + thi) / 2 + Vector((0, float(arg('--torso-dy', '0')), float(arg('--torso-dz', '0'))))
+    bpy.context.view_layer.objects.active = torso
+    print('TORSO band', tuple(round(x, 3) for x in tlo), tuple(round(x, 3) for x in thi), 'scale', round(st, 3))
+
 def decimate(o, tris):
     n = sum(len(p.vertices) - 2 for p in o.data.polygons)
     r = max(0.002, min(1, tris / n))
@@ -89,6 +105,7 @@ def decimate(o, tris):
     print('DEC', o.name, n, '->', sum(len(p.vertices) - 2 for p in o.data.polygons))
 for o in bpy.context.scene.objects: o.select_set(False)
 decimate(body, BT); decimate(head, HT)
+if torso: decimate(torso, int(arg('--torso-tris', '20000')))
 for img in bpy.data.images:
     if img.size[0] > TEX: img.scale(TEX, max(1, round(img.size[1] * TEX / img.size[0])))
 bpy.ops.export_scene.gltf(filepath=arg('--out'), export_format='GLB', export_apply=True, export_yup=True,

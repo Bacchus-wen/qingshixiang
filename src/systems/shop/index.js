@@ -94,8 +94,8 @@ export default {
     // rolling shutter, half open: corrugated slats from the lintel down to 1.25 m
     {
       const slats = new THREE.Group(); const sm = new THREE.MeshStandardNodeMaterial({ color: 0x5e6266, roughness: 0.55, metalness: 0.6 });
-      for (let y = 2.55; y > 1.25; y -= 0.075) { const s = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.07, 0.02), sm); s.position.set(0, y, d / 2 + 0.05); s.castShadow = true; slats.add(s); }
-      const bar = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.05, 0.05), sm); bar.position.set(0, 1.23, d / 2 + 0.05); slats.add(bar);
+      for (let y = 2.55; y > 2.05; y -= 0.075) { const s = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.07, 0.02), sm); s.position.set(0, y, d / 2 + 0.05); s.castShadow = true; slats.add(s); }
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.05, 0.05), sm); bar.position.set(0, 2.03, d / 2 + 0.05); slats.add(bar);
       root.add(slats);
     }
     // review lighting: warm desk lamp key, cold dusk from the street, a weak bounce so models read

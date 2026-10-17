@@ -43,9 +43,11 @@ DIRS = {'fq': (0.75, -1.0, 0.45), 'front': (0, -1, 0.15), 'side': (1, 0, 0.15), 
 outs = []
 for i, v in enumerate(VIEWS):
     d = Vector(DIRS[v]).normalized()
-    dist = R / math.tan(cam.data.angle / 2) * 1.08
-    cam.location = ctr + d * dist
-    cam.rotation_euler = (ctr - cam.location).to_track_quat('-Z', 'Y').to_euler()
+    dist = R / math.tan(cam.data.angle / 2) * 1.08 * float(arg('--zoom', '1'))
+    tgt = ctr.copy(); tz = arg('--tz')
+    if tz is not None: tgt.z = lo.z + float(tz) * dims.z
+    cam.location = tgt + d * dist
+    cam.rotation_euler = (tgt - cam.location).to_track_quat('-Z', 'Y').to_euler()
     f = f'/tmp/_rv_{os.getpid()}_{i}.png'; sc.render.filepath = f; bpy.ops.render.render(write_still=True); outs.append(f)
 ins = []
 ref = arg('--ref')
