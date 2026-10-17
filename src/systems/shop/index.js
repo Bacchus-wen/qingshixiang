@@ -605,15 +605,15 @@ export default {
       // two staggered rows of real screwdrivers across the board (the photo stays in the gaps), slightly askew
       const rnd = (k) => { const x = Math.sin(k * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
       let k = 0; const tools = new THREE.Group();
-      for (const [row, y0, n] of [[0, 0.2, 14], [1, -0.08, 10]]) for (let i = 0; i < n; i++, k++) {
-        const dx = -0.54 + (i + (row ? 0.5 : 0)) * (row ? 0.11 : 0.078) + (rnd(k) - 0.5) * 0.02;
-        if (row === 1 && Math.abs(dx - 0.05) < 0.14) continue; // leave the copper coil's hook clear
+      // the printed board (pegboard2: left 40% bare holes and empty hooks) leaves its left part to these real tools
+      for (const [row, y0, n] of [[0, 0.2, 8], [1, -0.07, 6]]) for (let i = 0; i < n; i++, k++) {
+        const dx = -0.53 + (i + (row ? 0.4 : 0)) * (row ? 0.075 : 0.058) + (rnd(k) - 0.5) * 0.015;
         const sd = procItem('screwdriver', k); sd.rotation.z = -Math.PI / 2 + (rnd(k + 9) - 0.5) * 0.12; sd.scale.setScalar(0.85 + rnd(k + 3) * 0.3);
         sd.position.set(pegX + dx, pegY + y0 + (rnd(k + 5) - 0.5) * 0.03, pegZ + 0.016); tools.add(sd);
       }
       root.add(mergeByMaterial(tools)); // ~90 small meshes -> one per material
       const coil = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.009, 8, 32), new THREE.MeshStandardNodeMaterial({ color: 0x8a4a22, roughness: 0.35, metalness: 0.8 }));
-      coil.position.set(pegX + 0.05, pegY - 0.02, pegZ + 0.02); coil.castShadow = true; root.add(coil);
+      coil.position.set(pegX - 0.24, pegY - 0.27, pegZ + 0.02); coil.castShadow = true; root.add(coil);
     }
     // the robot's head droops forward and to one side while it is asleep (rest pose; the beam phases animate it later)
     const head = placed.robot?.getObjectByName('robot_head');
