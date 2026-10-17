@@ -33,6 +33,8 @@ fixed = [
  {"name": "queue_tv", "glb": "crt_tv.glb", "pos": [2.68, 0, 0.42], "ry": -104, "on": "queue_carton"},
  {"name": "queue_fan", "glb": "desk_fan.glb", "pos": [2.72, 0, 1.0], "ry": -120},
  {"name": "queue_radio", "glb": "tube_radio_closed.glb", "pos": [2.75, 0, 1.55], "ry": -80},
+ {"name": "stool_tv", "glb": "stool.glb", "pos": [0.45, 0, -1.05], "ry": -18},
+ {"name": "tv_on_stool", "glb": "crt_tv.glb", "pos": [0.45, 0, -1.05], "ry": 32, "on": "stool_tv", "scale": 0.82, "tint": [0.62, 0.64, 0.66]},
  {"name": "thermos_floor", "glb": "thermos.glb", "pos": [1.25, 0, 0.55], "ry": 40, "on": "stool_2"},
  {"name": "bicycle", "glb": "bicycle.glb", "pos": [2.35, 0, 2.95], "yaw0": 35.7, "ry": 183, "roll": 10, "scale": 0.84},
 ]
@@ -97,7 +99,7 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
                             "on": shelf, "level": lv, "scale": 0.95})
             x += w + random.uniform(0.005, 0.025); k += 1
 # back shelf: x from -1.13 to 0.93, board z from -2.21 (back) to -1.72 (front)
-fill('shelf_back', 'x', -1.1, 0.9, -2.21, -1.72, 5, 0, [0.58, 0.58, 0.58, 0.58, 0.9])
+fill('shelf_back', 'x', -1.1, 0.9, -2.21, -1.72, 5, 0, [0.58, 0.58, 0.58, 0.58, 0.45])  # top board 2.51 m: 0.49 m to the ceiling
 # left shelf (rotated 90 deg: its local x runs along -z of the room... tags use shelf-local x): board x from -2.96 to -2.47
 fill('shelf_left', 'z', -1.85, -0.25, -2.96, -2.47, 4, 90, [0.66, 0.66, 0.66, 0.9])
 fill('shelf_left2', 'z', 0.6, 1.85, -2.95, -2.5, 4, 90, [0.56, 0.56, 0.56, 0.9])

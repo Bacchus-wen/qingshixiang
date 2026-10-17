@@ -397,6 +397,56 @@ export default {
         o.name = it.name; o.userData.layout = it; placed[it.name] = o;
       } catch (e) { console.warn('[shop] model failed', it.glb || it.name, e.message); }
     }
+    // wiring and small dressing that makes the place look used (procedural: too thin for image-to-3D):
+    // the tube's conduit to a switch, the robot's own power cable to a wall socket, cords hanging off shelf
+    // appliances, screwdrivers hanging on the pegboard. One merged mesh per material.
+    {
+      const cables = [], conduits = [], plastic = [];
+      const tube = (pts, r, arr, closed = false, tension = 0.5) => {
+        const c = new THREE.CatmullRomCurve3(pts.map((p) => new THREE.Vector3(...p)), closed, 'catmullrom', tension);
+        arr.push(new THREE.TubeGeometry(c, Math.max(8, pts.length * 10), r, 6, closed));
+      };
+      const pipe = (pts, r) => { // straight runs with clips (conduit)
+        for (let i = 0; i < pts.length - 1; i++) {
+          const a = new THREE.Vector3(...pts[i]), b = new THREE.Vector3(...pts[i + 1]), L = a.distanceTo(b);
+          const g = new THREE.CylinderGeometry(r, r, L, 8); g.translate(0, L / 2, 0);
+          const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize());
+          g.applyQuaternion(q).translate(a.x, a.y, a.z); conduits.push(g);
+          for (let t = 0.25; t < L; t += 0.6) { const c = a.clone().lerp(b, t / L); conduits.push(new THREE.BoxGeometry(0.03, 0.03, 0.03).translate(c.x, c.y, c.z)); }
+        }
+      };
+      // conduit: tube fixture -> along the ceiling -> down the right wall to a switch box at 1.45 m
+      pipe([[0.72, h - 0.03, -0.55], [0.72, h - 0.03, 0.3], [w / 2 - 0.03, h - 0.03, 0.3], [w / 2 - 0.03, 1.5, 0.3]], 0.011);
+      plastic.push(new THREE.BoxGeometry(0.03, 0.12, 0.085).translate(w / 2 - 0.015, 1.45, 0.3));
+      // the robot's power cable: from its back, down to the floor, behind the bench to a socket on the back wall
+      if (placed.robot) {
+        const r = placed.robot, f = new THREE.Vector3(0, 0, 1).applyQuaternion(r.quaternion), b = f.clone().negate(), P = r.position;
+        const at = (dx, y, k = 0) => [P.x + b.x * dx + f.z * k, y, P.z + b.z * dx - f.x * k];
+        const sx = -1.27, sz = -d / 2;
+        tube([at(0.16, 0.5), at(0.24, 0.32), at(0.3, 0.07), at(0.36, 0.006), [P.x + 0.1, 0.006, P.z - 0.9], [-0.75, 0.006, -1.0], [-1.05, 0.006, -1.75], [sx, 0.006, sz + 0.12], [sx, 0.12, sz + 0.03], [sx, 0.24, sz + 0.035]], 0.0055, cables);
+        plastic.push(new THREE.BoxGeometry(0.085, 0.085, 0.022).translate(sx, 0.3, sz + 0.011)); // socket
+        plastic.push(new THREE.BoxGeometry(0.04, 0.05, 0.03).translate(sx, 0.27, sz + 0.035));    // plug
+      }
+      // cords off a few shelf appliances: over the board's front edge, hanging, plug at the end
+      const shelfItems = Object.values(placed).filter((o) => o.userData.layout.on === 'shelf_back' && /fan|tv|radio/.test(o.userData.layout.glb || '') && o.userData.layout.level >= 1);
+      for (const o of shelfItems.filter((_, i) => i % 3 === 1).slice(0, 4)) {
+        const bb = new THREE.Box3().setFromObject(o, true), x = (bb.min.x + bb.max.x) / 2 + 0.08, y0 = bb.min.y + 0.01, fz = -1.72 + 0.008;
+        const drop = 0.18 + ((o.id * 37) % 10) / 40;
+        tube([[x, y0, bb.max.z - 0.05], [x + 0.02, y0 + 0.006, fz - 0.01], [x + 0.03, y0 - 0.02, fz + 0.012], [x + 0.025, y0 - drop * 0.6, fz + 0.02], [x + 0.03, y0 - drop, fz + 0.016]], 0.004, cables);
+        plastic.push(new THREE.BoxGeometry(0.025, 0.04, 0.018).translate(x + 0.03, y0 - drop - 0.025, fz + 0.016));
+      }
+      const mk = (arr, mat) => { if (!arr.length) return; const m = new THREE.Mesh(mergeGeometries(arr.map((g) => g.index ? g.toNonIndexed() : g)), mat); m.castShadow = m.receiveShadow = true; root.add(m); };
+      mk(cables, new THREE.MeshStandardNodeMaterial({ color: 0x101010, roughness: 0.55 }));
+      mk(conduits, new THREE.MeshStandardNodeMaterial({ color: 0xc9c3b4, roughness: 0.7 }));
+      mk(plastic, new THREE.MeshStandardNodeMaterial({ color: 0xd8d0bc, roughness: 0.5 }));
+      // screwdrivers and a wire coil hanging on the pegboard (in front of the printed board: real depth and shadows)
+      const pegX = -1.83, pegY = 1.72, pegZ = -d / 2 + 0.012;
+      [[-0.5, 0.18], [-0.44, 0.17], [-0.38, 0.19], [0.36, 0.2], [0.42, 0.18]].forEach(([dx, dy], i) => {
+        const sd = procItem('screwdriver', i); sd.rotation.z = -Math.PI / 2; sd.position.set(pegX + dx, pegY + dy, pegZ + 0.016); root.add(sd);
+      });
+      const coil = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.009, 8, 32), new THREE.MeshStandardNodeMaterial({ color: 0x8a4a22, roughness: 0.35, metalness: 0.8 }));
+      coil.position.set(pegX + 0.05, pegY - 0.02, pegZ + 0.02); coil.castShadow = true; root.add(coil);
+    }
     // the robot's head droops forward and to one side while it is asleep (rest pose; the beam phases animate it later)
     const head = placed.robot?.getObjectByName('robot_head');
     if (head) {
