@@ -18,7 +18,7 @@ export const ROOM = { w: 6.0, d: 4.5, h: 3.0 };
 // in world space so walls and floor line up without UV work. All are loaded up front (init awaits them).
 const TEX = {};
 const TEX_NAMES = ['floor_terrazzo', 'wall_upper', 'wall_dado', 'ceiling', 'facade', 'pavement', 'shutter', 'cardboard', 'pegboard',
-  'poster', 'calendar', 'price_list', 'slogan', 'sign_main', 'sign_side', 'tags', 'box_a', 'box_b', 'box_c', 'box_d', 'tv_poster', 'notice', 'street_backdrop', 'sign_aframe', 'height_marks'];
+  'poster', 'calendar', 'price_list', 'slogan', 'sign_main', 'sign_side', 'tags', 'box_a', 'box_b', 'box_c', 'box_d', 'tv_poster', 'notice', 'street_backdrop', 'sign_aframe', 'height_marks', 'sign_vertical'];
 async function loadTextures(ktx2) {
   await Promise.all(TEX_NAMES.map(async (n) => {
     try {
@@ -393,7 +393,17 @@ export default {
       root.add(onWall(pm, 'back', 1.235 - W / 2, 0.55 + H / 2, 0.003));
     }
     root.add(onWall(decal('sign_main', 2.4, 1.2, { rough: 0.6 }), 'front-out', 0, 3.42, 0.01));
-    root.add(onWall(decal('sign_side', 0.82, 1.64, { rough: 0.6 }), 'front-out', -2.24, 1.62, 0.01)); // close to the opening: reads whole from the street
+    root.add(onWall(decal('sign_side', 0.82, 1.64, { rough: 0.6 }), 'front-out', -2.62, 1.55, 0.01));
+    { // the vertical 家电维修 board right at the opening's edge: narrow, so it reads whole in the establishing shot
+      const vt = tex('sign_vertical'); vt.wrapS = vt.wrapT = THREE.ClampToEdgeWrapping;
+      const u0 = 0.347, u1 = 0.652, H = 1.5, W = H * ((u1 - u0) * 1024) / 1536;
+      const vm = new THREE.MeshStandardNodeMaterial({ roughness: 0.6 });
+      vm.colorNode = texture(vt, uv().mul(vec2(u1 - u0, 1)).add(vec2(u0, 0))).rgb;
+      const vb = new THREE.Mesh(new THREE.BoxGeometry(W + 0.02, H + 0.02, 0.025), PM.signBack ??= new THREE.MeshStandardNodeMaterial({ color: 0x3a2e24, roughness: 0.8 }));
+      const vf = new THREE.Mesh(new THREE.PlaneGeometry(W, H), vm); vf.position.z = 0.0131;
+      const grp = new THREE.Group(); grp.add(vb, vf); vb.castShadow = true;
+      root.add(onWall(grp, 'front-out', -1.8 - W / 2 - 0.025, 1.58, 0.0125));
+    }
     // review lighting: warm desk lamp key, cold dusk from the street, a weak bounce so models read
     scene.add(new THREE.HemisphereLight(0x8a94a8, 0x403428, 0.7));
     const dusk = new THREE.DirectionalLight(0x9db4d6, 1.4); dusk.position.set(1.5, 2.2, 8); dusk.target.position.set(-0.5, 0, -1);

@@ -23,4 +23,6 @@ e1 street_backdrop street_backdrop 2048x1024
 ua sign_aframe sign_aframe 512x1024
 # pencil height marks beside the back door (drawn as a multiply decal, so only the marks show)
 ua height_marks height_marks 512x1024
+# vertical 家电维修 board on the left pillar (the photo's grey surround is cropped by UVs)
+ua sign_vertical sign_vertical 512x1024
 ls -la $OUT/*.ktx2 | awk '{s+=$5} END {print "total", s}'

@@ -1,0 +1,53 @@
+{
+  "batch_id": "b_20261017224203",
+  "tasks": 1,
+  "submitted": 1,
+  "failed": 0,
+  "total_images": 1,
+  "items": [
+    {
+      "index": 1,
+      "prompt": "Perfectly flat orthographic front view, no perspective, even lighting, photographic: a tall narrow weathered vertical shop sign board of an old Chinese appliance repair shop, painted cream white on wood with a thin dark border, four large red brush-painted Chinese characters 家 电 维 修 stacked vertically one under another filling the board, rust stains and peeling paint, the narrow sign stands centered in the frame and fills the full height of the image, plain dark grey background on both sides.",
+      "id": "img_43741",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43741/be055e85-a367-4512-a3d4-b67765264e6a.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T22%3A42%3A02Z%2F3600%2F%2Fe2f6d25613d42f542a1726587fefe5df76042b000b2d2364a2f4d6b6a33d11e2"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/vsign/img_43741/ai_generate_43741_1.png"
+      ]
+    }
+  ],
+  "plan": {
+    "kind": "image",
+    "model": "gpt",
+    "version": "gpt-image-2.5-sunburst",
+    "count": 1,
+    "quota": {
+      "limit": 300,
+      "used": 79,
+      "remaining": 221,
+      "unit": "张",
+      "after": 80
+    },
+    "running": {
+      "limit": 20,
+      "current": 0
+    },
+    "allowed": true,
+    "blockers": [],
+    "cost": {
+      "amount": 0,
+      "currency": "USD",
+      "priced": false,
+      "estimated": false,
+      "note": null
+    },
+    "request": {
+      "batch": true,
+      "tasks": 1,
+      "total_images": 1,
+      "local_uploads": []
+    }
+  }
+}

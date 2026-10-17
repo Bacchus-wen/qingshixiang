@@ -27,9 +27,9 @@ fixed = [
  {"name": "magnifier", "glb": "magnifier.glb", "pos": [-1.02, 0, 0.97], "ry": -30, "on": "workbench"},
  {"name": "soldering_iron", "glb": "soldering_iron.glb", "pos": [-1.85, 0, 1.1], "ry": 15, "on": "workbench"},
  {"name": "enamel_mug", "glb": "enamel_mug.glb", "pos": [-2.25, 0, 1.15], "ry": 30, "on": "workbench"},
- {"name": "robot", "glb": "robot.glb", "pos": [-0.52, 0, 1.18], "ry": -47},
+ {"name": "robot", "glb": "robot.glb", "pos": [-0.55, 0, 1.16], "ry": -51},
  {"name": "broom", "type": "proc", "kind": "broom", "pos": [-1.98, 0, 1.45], "ry": 0, "roll": -16.4, "on": "floor"},
- {"name": "aframe", "type": "proc", "kind": "aframe", "pos": [0.95, 0, 1.95], "ry": -16, "scale": 0.8, "on": "floor"},
+ {"name": "aframe", "type": "proc", "kind": "aframe", "pos": [1.32, 0, 1.98], "ry": -28, "scale": 0.7, "on": "floor"},
  {"name": "toolbox", "glb": "toolbox.glb", "pos": [-1.55, 0, 1.7], "ry": 14},
  {"name": "back_door", "glb": "back_door.glb", "pos": [1.75, 0, 0], "wall": "back"},
  {"name": "wall_clock", "glb": "wall_clock.glb", "pos": [2.63, 1.78, 0], "wall": "back"},
@@ -41,9 +41,9 @@ fixed = [
  {"name": "queue_radio", "glb": "tube_radio_closed.glb", "pos": [2.75, 0, 1.42], "ry": -84},
  {"name": "meter_box", "glb": "../v2/meterbox.glb", "pos": [2.42, 1.72, 0], "ry": -90, "wall": "front-out"},
  {"name": "flat_cartons", "glb": "../v2/cardboard.glb", "pos": [2.42, 0, 1.95], "ry": 4, "scale": 0.6},
- {"name": "spare_arm", "glb": "spare_arm.glb", "pos": [2.9, 1.42, -0.88], "ry": -90, "wall": "right"},
+ {"name": "spare_arm", "glb": "spare_arm.glb", "pos": [2.9, 1.42, -0.88], "ry": -112, "wall": "right"},
  {"name": "spare_torso", "glb": "spare_torso.glb", "pos": [-1.02, 0, 1.78], "ry": 150},
- {"name": "spare_leg", "glb": "spare_leg.glb", "pos": [2.9, 1.12, -0.42], "ry": -90, "wall": "right"},
+ {"name": "spare_leg", "glb": "spare_leg.glb", "pos": [2.9, 1.12, -0.42], "ry": -68, "wall": "right"},
  {"name": "drop_carton_a", "type": "carton", "front": "box_b", "size": [0.4, 0.46, 0.34], "pos": [1.45, 0, 1.62], "ry": -14},
  {"name": "drop_carton_b", "type": "carton", "front": "box_a", "size": [0.42, 0.36, 0.38], "pos": [1.97, 0, 1.4], "ry": 8},
  {"name": "drop_fan", "glb": "desk_fan.glb", "pos": [1.97, 0, 1.4], "ry": -150, "on": "drop_carton_b", "tint": [0.95, 0.9, 0.78]},
@@ -81,13 +81,17 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
         while True:
             if lv == 0 or (lv == levels - 1 and clear[lv] < 0.5 and random.random() < 0.35 and x < x0 + 0.6) or (0 < lv < levels - 1 and random.random() < 0.18):
                 fitk = [k_ for k_ in CART if CART[k_][1] * 0.85 <= clear[lv] - 0.02]
-                key = random.choice(fitk); w, h, dd = CART[key]
-                sc = round(min(random.uniform(0.85, 1.0), (clear[lv] - 0.02) / h), 2); w *= sc; dd *= sc
+                key = random.choice(fitk); w0, h, d0 = CART[key]
+                sc = round(min(random.uniform(0.85, 1.0), (clear[lv] - 0.02) / h), 2); w0 *= sc; d0 *= sc
+                cyaw = random.uniform(-3, 3) if lv == 0 else random.uniform(-16, 16)
+                ca = math.radians(cyaw)
+                w = w0 * abs(math.cos(ca)) + d0 * abs(math.sin(ca)); dd = w0 * abs(math.sin(ca)) + d0 * abs(math.cos(ca))
+                if dd > abs(front - back) - 0.02: cyaw = 0; w = w0; dd = d0
                 if x + w > x1: break
                 cx = x + w / 2; c = back + sgn * (dd / 2 + 0.01)
                 pos = [cx, 0, c] if along == 'x' else [c, 0, cx]
-                out.append({"name": f"{shelf}_{lv}_{k}", "type": "carton", "front": key, "size": [round(w, 3), round(h * sc, 3), round(dd, 3)],
-                            "pos": [round(pos[0], 3), 0, round(pos[2], 3)], "ry": ry + random.uniform(-3, 3), "on": shelf, "level": lv})
+                out.append({"name": f"{shelf}_{lv}_{k}", "type": "carton", "front": key, "size": [round(w0, 3), round(h * sc, 3), round(d0, 3)],
+                            "pos": [round(pos[0], 3), 0, round(pos[2], 3)], "ry": ry + cyaw, "on": shelf, "level": lv})
                 x += w + random.uniform(0.01, 0.03); k += 1; continue
             cands = [g for g in BIG if H[g] <= clear[lv] and g != last]
             g = random.choice(cands); last = g
@@ -110,7 +114,7 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
             t = tint_for(g)
             if t: it["tint"] = t
             out.append(it)
-            if random.random() < 0.28:
+            if random.random() < 0.16:
                 tags.append([round(cx - (x0 + x1) / 2 + random.uniform(-0.08, 0.08), 3) * (1 if along == 'x' else -1), lv,
                              random.choice(range(10)) if random.random() < 0.8 else random.choice([10, 11])])
             # sometimes a small thing stacked on top (clock on a radio), when it clears the board above
