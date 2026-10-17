@@ -504,6 +504,12 @@ export default {
     }
     // the robot's badges (chrome "上海" on the face, "人民电器" plate on the chest) are geometry inside robot.glb
     // (tools/blender/robot_badges.py), parented to the head/body so they move with them
+    // review fill on the hero (the street's dusk spilling in): soft, unshadowed, so the robot's parts read
+    if (placed.robot) {
+      const rf = new THREE.SpotLight(0xd8dcef, 7, 6, 0.42, 1, 1.5); rf.castShadow = false;
+      const rp = placed.robot.position; rf.position.set(rp.x + 1.1, 1.9, rp.z + 1.6); rf.target.position.set(rp.x, 0.62, rp.z);
+      scene.add(rf, rf.target); this.robotFill = rf;
+    }
     // the desk lamp, if placed, drives the warm key light
     const lampObj = placed.desk_lamp;
     if (lampObj) { _box.setFromObject(lampObj); this.lamp.position.set((_box.min.x + _box.max.x) / 2 + 0.1, _box.max.y - 0.05, (_box.min.z + _box.max.z) / 2); this.lamp.target.position.set(this.lamp.position.x + 0.3, 0.8, this.lamp.position.z + 0.2); }
