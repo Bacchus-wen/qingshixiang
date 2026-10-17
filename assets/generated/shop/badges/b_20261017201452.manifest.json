@@ -1,0 +1,65 @@
+{
+  "batch_id": "b_20261017201452",
+  "tasks": 2,
+  "submitted": 2,
+  "failed": 0,
+  "total_images": 2,
+  "items": [
+    {
+      "index": 1,
+      "prompt": "Perfectly flat orthographic front view, a small old chrome-plated metal brand badge from a 1970s Chinese radio, the two Chinese characters 上海 in flowing cursive script, raised chrome letters, slightly scratched and tarnished, isolated on a transparent background, no shadow, photographic product shot.",
+      "id": "img_43731",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43731/5a6cf79f-6c50-4dc6-bdb0-88252443d214.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T20%3A14%3A44Z%2F3600%2F%2Fe6c2cbc1fbc4f4992aee59885b2bca57af0538678beff3d46900b0c7c87d19eb"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/badges/img_43731/ai_generate_43731_1.png"
+      ]
+    },
+    {
+      "index": 2,
+      "prompt": "Perfectly flat orthographic front view filling the entire frame edge to edge, no perspective, no background, even lighting, photographic: a small old red enamel metal nameplate riveted to a machine, white Chinese characters 人民电器 in bold block letters, thin raised border, four corner rivets, chipped enamel at the edges, scratches and grime.",
+      "id": "img_43732",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43732/2654d5f5-6cdb-4067-ad07-3a6282d2c91b.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T20%3A14%3A50Z%2F3600%2F%2F32e3fed629c73d712bda50112faf20c63abb9dd0c8281691c87e07ce111ba87d"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/badges/img_43732/ai_generate_43732_1.png"
+      ]
+    }
+  ],
+  "plan": {
+    "kind": "image",
+    "model": "gpt",
+    "version": "gpt-image-2.5-sunburst",
+    "count": 2,
+    "quota": {
+      "limit": 300,
+      "used": 69,
+      "remaining": 231,
+      "unit": "张",
+      "after": 71
+    },
+    "running": {
+      "limit": 20,
+      "current": 0
+    },
+    "allowed": true,
+    "blockers": [],
+    "cost": {
+      "amount": 0,
+      "currency": "USD",
+      "priced": false,
+      "estimated": false,
+      "note": null
+    },
+    "request": {
+      "batch": true,
+      "tasks": 2,
+      "total_images": 2,
+      "local_uploads": []
+    }
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "batch_id": "b_20261017202449",
+  "tasks": 3,
+  "submitted": 3,
+  "failed": 0,
+  "total_images": 3,
+  "items": [
+    {
+      "index": 1,
+      "prompt": "Perfectly flat orthographic front view filling the entire frame edge to edge, no perspective, no background, even lighting, photographic: an old framed Chinese business licence certificate from 1990 hanging in a small shop, a thin dark wooden frame with glass, inside a yellowed official form with a red border pattern, the title 营业执照 at the top, small printed text lines and a round red seal, dust on the glass.",
+      "id": "img_43733",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43733/7c3fb5a1-4da5-4dc2-9d9c-48c4c1dcce94.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T20%3A24%3A23Z%2F3600%2F%2F9c0d028b95b45df3a26cb51f50caf0ded306240417e6cfcf182903c3b0445616"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/wall2/img_43733/ai_generate_43733_1.png"
+      ]
+    },
+    {
+      "index": 2,
+      "prompt": "Perfectly flat orthographic front view filling the entire frame edge to edge, no perspective, no background, even lighting, photographic: a faded late-1980s Chinese television advertisement poster, a color TV set with a smiling female presenter on screen, the brand name 长虹 and the words 彩色电视机 in bold red, torn corners, pin holes, sun-faded colors, slightly wrinkled paper.",
+      "id": "img_43734",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43734/16784180-905f-4642-9ab9-b2cf057e7443.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T20%3A24%3A37Z%2F3600%2F%2F683ab5998106a307120b91557690f2fbcd4c6dbdfb96a02f0ff7f88234268860"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/wall2/img_43734/ai_generate_43734_1.png"
+      ]
+    },
+    {
+      "index": 3,
+      "prompt": "Perfectly flat orthographic front view filling the entire frame edge to edge, no perspective, no background, even lighting, photographic: a hand-written notice on an old sheet of red paper taped to a shop wall, black brush calligraphy in three lines reading 取件请凭单 / 本店概不赊欠 / 修理保用三个月, faded red paper, yellowed tape at the corners, creases.",
+      "id": "img_43735",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43735/d60ee71a-8ab7-4393-913c-15d528376107.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T20%3A24%3A47Z%2F3600%2F%2F242859b2c8f0acb45f3d057098a9bb177bc401f16fb80317f9dc755b19e29a93"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/wall2/img_43735/ai_generate_43735_1.png"
+      ]
+    }
+  ],
+  "plan": {
+    "kind": "image",
+    "model": "gpt",
+    "version": "gpt-image-2.5-sunburst",
+    "count": 3,
+    "quota": {
+      "limit": 300,
+      "used": 71,
+      "remaining": 229,
+      "unit": "张",
+      "after": 74
+    },
+    "running": {
+      "limit": 20,
+      "current": 2
+    },
+    "allowed": true,
+    "blockers": [],
+    "cost": {
+      "amount": 0,
+      "currency": "USD",
+      "priced": false,
+      "estimated": false,
+      "note": null
+    },
+    "request": {
+      "batch": true,
+      "tasks": 3,
+      "total_images": 3,
+      "local_uploads": []
+    }
+  }
+}

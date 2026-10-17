@@ -75,3 +75,8 @@
 - cardboard(1024x1024,img_43730):Seamless tileable texture, perfectly flat orthographic view with no perspective and no lighting gradient, plain old brown corrugated cardboard surface from a storage box, scuffs, water stains, faded areas, a strip of old yellowed packing tape crossing it, even soft lighting, no printing, no text, high detail photographic material.
 - 处理:四张可平铺贴图(墙/墙裙/地面/天花)+外立面+纸箱用 tools/blender/tex_prep.py 做"错位羽化"消接缝;全部经 tools/tex-ktx2.sh 转 KTX2(粗糙平铺与图片 ETC1S,地面与带字的 UASTC+zstd),按左下原点编码。
 - 机器人贴图调色:tools/blender/robot_grade.py(粉/铜偏色去饱和,机身锈色降到 60%),不重新生成。
+
+## 05:45 对面街景(1 张,gpt-image-2.5-sunburst,max;批次 b_20261017214316)
+- street_backdrop(1536x1024,img_43736):Realistic photograph, straight-on frontal view across a narrow old Chinese street in a demolition district at dusk, blue hour: the opposite side of the street is a continuous row of weathered two-storey brick and plaster shophouses with closed rusty rolling shutters, a few small warm-lit windows upstairs, peeling posters, a big red character 拆 in a circle painted on one wall, tangled overhead electric wires and a concrete power pole, a few old bicycles leaning on the walls, deep blue evening sky with a faint orange glow low on the horizon, no people, no cars, wide shot, the ground line at the very bottom of the frame.
+## 04:30 机器人徽章(2 张)与墙面第二批(3 张,营业执照未使用:带国徽)
+- 见 assets/generated/shop/badges、wall2 的 manifest;提示词同目录 manifest 原文。
