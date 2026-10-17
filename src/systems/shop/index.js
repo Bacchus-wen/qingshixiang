@@ -35,7 +35,11 @@ function terrazzo() {
   const P = positionWorld;
   const T = texture(tex('floor_terrazzo'), P.xz.div(0.75));
   const grime = smoothstep(0.35, 0.85, mx_noise_float(vec3(P.x.mul(0.7), 0, P.z.mul(0.7)).add(2.0)).mul(0.5).add(0.5));
-  m.colorNode = T.rgb.mul(mix(float(1.0), float(0.7), grime));
+  // the trodden path: shutter -> bench -> back door, darker with ground-in dirt (distance to two segments)
+  const seg = (ax, az, bx, bz) => { const pa = vec2(P.x.sub(ax), P.z.sub(az)), ba = vec2(bx - ax, bz - az); const h = pa.dot(ba).div(ba.dot(ba)).clamp(0, 1); return pa.sub(ba.mul(h)).length(); };
+  const dPath = seg(0.1, 2.3, -0.2, 0.3).min(seg(-0.2, 0.3, 1.2, -1.7));
+  const trod = smoothstep(0.75, 0.15, dPath).mul(mx_noise_float(vec3(P.x.mul(2.2), 3, P.z.mul(2.2))).mul(0.3).add(0.7));
+  m.colorNode = T.rgb.mul(mix(float(1.0), float(0.7), grime)).mul(mix(float(1), float(0.78), trod));
   m.roughnessNode = mix(float(0.32), float(0.7), grime);  // polished where nobody walks, dull along the paths
   return m;
 }
