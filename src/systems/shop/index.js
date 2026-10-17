@@ -689,6 +689,32 @@ export default {
     const lampObj = placed.desk_lamp;
     if (lampObj) { _box.setFromObject(lampObj); this.lamp.position.set((_box.min.x + _box.max.x) / 2 + 0.1, _box.max.y - 0.05, (_box.min.z + _box.max.z) / 2); this.lamp.target.position.set(this.lamp.position.x + 0.3, 0.8, this.lamp.position.z + 0.2); }
     else { this.lamp.position.set(-1.6, 1.45, 0.1); this.lamp.target.position.set(-1.2, 0.8, 0.2); }
+    // repeated generated models are drawn instanced: one draw per mesh per model type instead of one per copy
+    // (the placed copies stay, hidden, for picking and the audit). Tints become per-instance colours.
+    {
+      const groups = new Map();
+      for (const o of Object.values(placed)) { const L = o.userData.layout; if (!L.glb || L.glb === 'robot.glb') continue; (groups.get(L.glb) ?? groups.set(L.glb, []).get(L.glb)).push(o); }
+      root.updateMatrixWorld(true);
+      const inv = root.matrixWorld.clone().invert(), col = new THREE.Color();
+      for (const [glb, objs] of groups) {
+        if (objs.length < 3) continue;
+        const tpl = (await templates.get(glb))?.scene; if (!tpl) continue;
+        const tplMeshes = []; tpl.traverse((m) => { if (m.isMesh) tplMeshes.push(m); });
+        const per = objs.map((o) => { const ms = []; o.traverse((m) => { if (m.isMesh) ms.push(m); }); return ms; });
+        if (per.some((ms) => ms.length !== tplMeshes.length)) continue;
+        tplMeshes.forEach((tm, mi) => {
+          const im = new THREE.InstancedMesh(tm.geometry, tm.material, objs.length);
+          objs.forEach((o, k) => {
+            im.setMatrixAt(k, inv.clone().multiply(per[k][mi].matrixWorld));
+            const t = o.userData.layout.tint; im.setColorAt(k, t ? col.setRGB(t[0], t[1], t[2]) : col.setRGB(1, 1, 1));
+          });
+          im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true;
+          im.castShadow = im.receiveShadow = true; im.computeBoundingSphere(); im.name = `inst:${glb}:${mi}`;
+          root.add(im);
+        });
+        for (const o of objs) o.visible = false;
+      }
+    }
     ctx.api.shop = { root, placed, ROOM };
     // review viewer (this phase has no story camera yet): orbit/zoom/pan with the mouse, number keys jump to the
     // review shots, the camera is kept inside the room (or out on the street in front of it)
