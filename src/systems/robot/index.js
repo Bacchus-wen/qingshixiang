@@ -7,7 +7,7 @@ import { LANE } from '../street/index.js';
 import { syncMemory } from '../../materials/memory.js';
 import { rippleNormal, wetUniforms } from '../../materials/wet.js';
 import {
-  abs, atan, cameraPosition, color, cross, dot, float, Fn, Loop, max, min, mx_noise_float, normalWorld, normalize, positionGeometry, positionWorld, smoothstep, time, transformNormalToView, uniform, vec3,
+  abs, atan, cameraPosition, color, cross, dot, float, Fn, Loop, max, min, mx_noise_float, normalWorld, normalize, positionGeometry, positionWorld, smoothstep, time, transformNormalToView, uniform, uv, vec3,
 } from 'three/tsl';
 
 // The robot has sat here long enough for water to pool around it: an irregular, mirror-dark puddle.
@@ -35,6 +35,7 @@ function makePuddle() {
 // Publishes ctx.memory (origin, dir, angle, range, strength) every frame for every "past/present" consumer.
 const AXIS_Z = new THREE.Vector3(0, 0, 1);
 const _DOWN = new THREE.Vector3(0, -1, 0);
+const _toCam = new THREE.Vector3();
 const ROBOT_POS = new THREE.Vector3(-(LANE.halfRoad + LANE.walk) + 0.42, LANE.curb, -13.5);
 
 // Gobo: a low-frequency mask projected by the eye (cracked lens + 8-blade aperture), not a picture.
@@ -262,6 +263,16 @@ export default {
       this.cone = new THREE.Mesh(g, mat); this.cone.frustumCulled = false; this.cone.renderOrder = 8; this.coneL = L;
       scene.add(this.cone);
     }
+    // r19 (review6): the beam needs a visible source -- a soft camera-facing halo on the lens, strongest when the eye
+    // looks toward the camera, so the shaft starts at a point of light
+    {
+      const hm = new THREE.SpriteNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+      const r = uv().sub(0.5).length().mul(2);
+      this.haloK = uniform(0);
+      hm.colorNode = color(eyeColor).mul(float(1).sub(smoothstep(0.0, 1.0, r)).pow(4).mul(0.55).add(float(1).sub(smoothstep(0, 0.14, r)).mul(1.4))).mul(this.haloK);
+      this.halo = new THREE.Sprite(hm); this.halo.scale.setScalar(0.13); this.halo.renderOrder = 9; this.halo.frustumCulled = false;
+      scene.add(this.halo);
+    }
     // state
     this.open = 0; this.target = 0; this.attempts = 0; this.failT = -1; this.holdT = 0;
     this.look = new THREE.Vector2(0, 0); this.lookCur = new THREE.Vector2(0, 0);
@@ -387,6 +398,12 @@ export default {
       // r18: the beam stays in the flood and the last breath (it only thins a little while the whole street is lit)
       this.coneK.value = o * (1 - 0.35 * flood) * (ctx.memory.goboMode === 'line' ? 0.15 : 1) * Number(ctx.params?.get('cone') ?? 1);
       this.cone.visible = (o > 0.01 || (this.frames ?? 0) < 30) && ctx.params?.get('cone') !== 'off';
+      if (this.halo) {
+        this.halo.position.copy(this._v).addScaledVector(this._d, 0.04);
+        _toCam.copy(ctx.camera.position).sub(this._v).normalize();
+        this.haloK.value = o * (0.25 + 0.75 * Math.max(0, _toCam.dot(this._d)) ** 2);
+        this.halo.visible = o > 0.01 || (this.frames ?? 0) < 30;
+      }
     }
     // ---- publish the memory cone
     const m = ctx.memory;
