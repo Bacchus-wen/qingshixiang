@@ -1,6 +1,6 @@
 """Writes assets/models/shop/layout.json: fixed hero placements + seeded shelf fill (no overlaps, items sit on boards).
   python3 tools/shop_layout.py"""
-import json, random
+import json, math, random
 random.seed(7)
 W = {'tube_radio_closed.glb': 0.5, 'crt_tv.glb': 0.5, 'desk_fan.glb': 0.37, 'cassette_recorder.glb': 0.5,
      'alarm_clock.glb': 0.13, 'thermos.glb': 0.17, 'toolbox.glb': 0.5, 'tube_radio_open.glb': 0.55, 'enamel_mug.glb': 0.1}
@@ -77,11 +77,15 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
             cands = [g for g in BIG if H[g] <= clear[lv] and g != last]
             g = random.choice(cands); last = g
             sc = round(random.uniform(0.78, 0.92) if g == 'crt_tv.glb' and random.random() < 0.5 else random.uniform(0.92, 1.0), 2)  # 14-inch and 18-inch sets
-            w = W[g] * sc
+            yaw = random.uniform(-12, 12) if random.random() < 0.6 else random.uniform(-4, 4)   # not a shop display: some are askew
+            a = math.radians(yaw)
+            w = (W[g] * abs(math.cos(a)) + D[g] * abs(math.sin(a))) * sc      # rotated footprint along the shelf
+            dep = (W[g] * abs(math.sin(a)) + D[g] * abs(math.cos(a))) * sc    # ... and across it
             if x + w > x1: break
-            cx = x + w / 2; c = back + sgn * (D[g] * sc / 2 + 0.012)
+            cx = x + w / 2; c = back + sgn * (dep / 2 + 0.012)
+            if dep > abs(front - back) - 0.01: yaw = 0; a = 0; dep = D[g] * sc; w = W[g] * sc; c = back + sgn * (dep / 2 + 0.012)
             pos = [cx, 0, c] if along == 'x' else [c, 0, cx]
-            it = {"name": f"{shelf}_{lv}_{k}", "glb": g, "pos": [round(pos[0], 3), 0, round(pos[2], 3)], "ry": ry + random.uniform(-5, 5),
+            it = {"name": f"{shelf}_{lv}_{k}", "glb": g, "pos": [round(pos[0], 3), 0, round(pos[2], 3)], "ry": ry + yaw,
                   "on": shelf, "level": lv, "scale": sc}
             t = tint_for(g)
             if t: it["tint"] = t
@@ -89,7 +93,11 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
             if random.random() < 0.5:
                 tags.append([round(cx - (x0 + x1) / 2 + random.uniform(-0.08, 0.08), 3) * (1 if along == 'x' else -1), lv,
                              random.choice(range(10)) if random.random() < 0.8 else random.choice([10, 11])])
-            room = abs(front - back) - D[g] * sc - 0.03   # free depth in front of the big item
+            # sometimes a small thing stacked on top (clock on a radio), when it clears the board above
+            if g == 'tube_radio_closed.glb' and random.random() < 0.45 and H[g] * sc + 0.17 < clear[lv] - 0.02:
+                out.append({"name": f"{shelf}_{lv}_{k}t", "glb": random.choice(['alarm_clock.glb', 'enamel_mug.glb']), "pos": [round(pos[0], 3), 0, round(pos[2], 3)],
+                            "ry": ry + random.uniform(-30, 30), "on": f"{shelf}_{lv}_{k}", "scale": 0.95})
+            room = abs(front - back) - dep - 0.03   # free depth in front of the big item
             fits = [x for x in SMALL if D[x] * 0.95 <= room]
             if fits and random.random() < 0.7:
                 sg = random.choice(fits); fz = front - sgn * (D[sg] / 2 + 0.006)

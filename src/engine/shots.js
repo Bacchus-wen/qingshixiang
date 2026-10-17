@@ -16,6 +16,7 @@ export const SHOTS = {
   'shop-sign': { scene: 'shop', pos: [0.4, 1.6, 8.5], look: [0, 2.6, 2.5], fov: 55 },
   'shop-robotfull': { scene: 'shop', pos: [0.65, 0.95, 2.75], look: [-0.5, 0.55, 1.15], fov: 40 },
   'shop-robotface': { scene: 'shop', pos: [0.1, 0.98, 1.95], look: [-0.5, 0.8, 1.15], fov: 32 },
+  'shop-peg': { scene: 'shop', pos: [-1.6, 1.6, -0.9], look: [-1.83, 1.68, -2.25], fov: 45 },
   'shop-iso': { scene: 'shop', pos: [5.5, 6.0, 7.5], look: [0, 0.6, 0], fov: 32 },
   'street-eye': { pos: [0.6, 1.55, 10], look: [0, 1.8, -30], fov: 42 },
   'street-low': { pos: [-1.2, 0.25, 4], look: [0.5, 1.0, -25], fov: 35 },

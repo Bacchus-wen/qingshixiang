@@ -282,7 +282,11 @@ export default {
       root.add(slats);
     }
     // printed things on the walls (generated with the company platform, docs/gen-log.md)
-    root.add(onWall(decal('pegboard', 1.2, 0.8), 'back', -1.83, 1.72, 0.012));
+    root.add(onWall(decal('pegboard', 1.2, 0.8), 'back', -1.83, 1.72, 0.0145));
+    { // the pegboard is a real 6 mm board on spacers, not a sticker: its edges catch light and cast a thin shadow
+      const pb = new THREE.Mesh(new THREE.BoxGeometry(1.205, 0.805, 0.006), new THREE.MeshStandardNodeMaterial({ color: 0x6b4526, roughness: 0.8 }));
+      pb.position.set(-1.83, 1.72, -d / 2 + 0.0135 - 0.0032); pb.castShadow = pb.receiveShadow = true; root.add(pb);
+    }
     root.add(onWall(decal('poster', 0.46, 0.69, { curl: 0.012 }), 'left', 0.12, 1.86));
     root.add(onWall(decal('calendar', 0.34, 0.51, { curl: 0.01 }), 'back', 2.63, 1.4));
     root.add(onWall(decal('price_list', 0.4, 0.6, { curl: 0.01 }), 'right', -1.42, 1.78));
