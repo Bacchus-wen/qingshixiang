@@ -97,9 +97,10 @@ def cmd_views(op, image, wait=900):
     o = r.get('output') or {}
     if r['status'] == 'success':
         vd = BASE / op / 'views'; vd.mkdir(parents=True, exist_ok=True)
+        src = o.get('generate_multiview_image') if isinstance(o.get('generate_multiview_image'), dict) else o
         for v in ('front', 'left', 'back', 'right'):
-            url = o.get(f'{v}_view_url') or o.get(v)
-            if url:
+            url = src.get(f'{v}_view_url') or src.get(v)
+            if isinstance(url, str):
                 (vd / f'{v}.png').write_bytes(fetch(c, url))
     print(json.dumps({'op': op, 'step': 'views', 'status': r['status'], 'keys': sorted(o.keys())}))
 
@@ -148,6 +149,8 @@ def cmd_decimate(op, faces, wait=1200):
 def cmd_status(op):
     rec = ledger(op); c = client()
     for name, st in rec['steps'].items():
+        if name == 'views' and st.get('status') == 'success' and not (BASE / op / 'views' / 'front.png').exists():
+            cmd_views(op, rec['image']); continue
         if st.get('task_id') and st.get('status') != 'success' and not st.get('glb'):
             if name == 'views':
                 cmd_views(op, rec['image']); continue

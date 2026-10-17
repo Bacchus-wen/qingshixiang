@@ -4,6 +4,13 @@ export const SHOTS = {
   sandbox: { scene: 'lookdev', pos: [0, 1.6, 8], look: [0, 1, 0], fov: 50 },
   lookdev: { scene: 'lookdev', pos: [1.5, 1.4, 9], look: [0, 1.6, -8], fov: 45 },
   'lookdev-low': { scene: 'lookdev', pos: [-1, 0.35, 7], look: [2, 1.2, -10], fov: 38 },
+  // v4 repair shop: the key-art framing (assets/generated/shop/keyart/img_43683 #2), plus close reviews
+  'shop-establish': { scene: 'shop', pos: [0.15, 1.3, 4.6], look: [-0.2, 1.05, -1.2], fov: 46 },
+  'shop-bench': { scene: 'shop', pos: [-0.3, 1.45, 1.9], look: [-1.7, 0.9, -0.1], fov: 40 },
+  'shop-robot': { scene: 'shop', pos: [0.6, 1.1, 1.6], look: [-0.4, 0.75, 0.1], fov: 38 },
+  'shop-back': { scene: 'shop', pos: [-0.8, 1.5, 1.8], look: [1.6, 1.2, -2.2], fov: 46 },
+  'shop-probe': { scene: 'shop', pos: [0.0, 0.9, 3.0], look: [0, 0.2, 1.5], fov: 35 },
+  'shop-iso': { scene: 'shop', pos: [5.5, 6.0, 7.5], look: [0, 0.6, 0], fov: 32 },
   'street-eye': { pos: [0.6, 1.55, 10], look: [0, 1.8, -30], fov: 42 },
   'street-low': { pos: [-1.2, 0.25, 4], look: [0.5, 1.0, -25], fov: 35 },
   'street-high': { pos: [2.5, 9, 12], look: [0, 0, -20], fov: 50 },

@@ -11,11 +11,13 @@ import atmo from './systems/atmo/index.js';
 import robot from './systems/robot/index.js';
 import cat from './systems/cat/index.js';
 import ghosts from './systems/ghosts/index.js';
+import shop from './systems/shop/index.js';
 
 // Scene selection: ?scene=lookdev runs the look-dev bench; default is the street.
 const q = new URLSearchParams(location.search);
 const scene = q.get('scene') || SHOTS[q.get('shot')]?.scene || 'street';
-const list = scene === 'lookdev' ? SYSTEMS : [street, atmo, robot, cat, ghosts, ...SYSTEMS.filter((s) => s.name !== 'lookdev')];
+const list = scene === 'lookdev' ? SYSTEMS : scene === 'shop' ? [shop] // v4: the repair shop (models + layout phase)
+  : [street, atmo, robot, cat, ghosts, ...SYSTEMS.filter((s) => s.name !== 'lookdev')];
 
 const loading = document.getElementById('loading');
 const engine = new Engine(document.getElementById('app'));

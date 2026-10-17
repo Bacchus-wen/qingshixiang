@@ -1,0 +1,102 @@
+[
+ {
+  "name": "shelf_back",
+  "type": "shelf",
+  "pos": [
+   0.1,
+   0,
+   -1.98
+  ],
+  "w": 2.0,
+  "d": 0.5,
+  "h": 2.5,
+  "levels": 5
+ },
+ {
+  "name": "workbench",
+  "glb": "workbench.glb",
+  "pos": [
+   -1.75,
+   0,
+   0.15
+  ],
+  "ry": 0
+ },
+ {
+  "name": "desk_lamp",
+  "glb": "desk_lamp.glb",
+  "pos": [
+   -2.25,
+   0,
+   0.05
+  ],
+  "ry": 35,
+  "on": "workbench"
+ },
+ {
+  "name": "tube_radio_open",
+  "glb": "tube_radio_open.glb",
+  "pos": [
+   -1.55,
+   0,
+   0.0
+  ],
+  "ry": 10,
+  "on": "workbench"
+ },
+ {
+  "name": "robot",
+  "glb": "robot.glb",
+  "pos": [
+   -0.5,
+   0,
+   0.6
+  ],
+  "ry": -28
+ },
+ {
+  "name": "crt_tv_1",
+  "glb": "crt_tv.glb",
+  "pos": [
+   -0.45,
+   0,
+   -1.95
+  ],
+  "ry": 4,
+  "on": "shelf_back",
+  "lift": 0,
+  "level": 3
+ },
+ {
+  "name": "desk_fan_1",
+  "glb": "desk_fan.glb",
+  "pos": [
+   0.45,
+   0,
+   -1.95
+  ],
+  "ry": -12,
+  "on": "shelf_back",
+  "level": 2
+ },
+ {
+  "name": "wall_clock",
+  "glb": "wall_clock.glb",
+  "pos": [
+   2.45,
+   1.55,
+   0
+  ],
+  "wall": "back"
+ },
+ {
+  "name": "stool_2",
+  "glb": "stool.glb",
+  "pos": [
+   1.2,
+   0,
+   0.4
+  ],
+  "ry": 12
+ }
+]
