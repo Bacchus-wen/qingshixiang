@@ -409,7 +409,7 @@ export default {
       root.add(onWall(grp, 'front-out', -1.8 - W / 2 - 0.025, 1.58, 0.0125));
     }
     // review lighting: warm desk lamp key, cold dusk from the street, a weak bounce so models read
-    scene.add(new THREE.HemisphereLight(0x8a94a8, 0x403428, 0.7));
+    scene.add(new THREE.HemisphereLight(0x8a94a8, 0x403428, 0.45));
     const dusk = new THREE.DirectionalLight(0x9db4d6, 1.4); dusk.position.set(1.5, 2.2, 8); dusk.target.position.set(-0.5, 0, -1);
     dusk.castShadow = true; dusk.shadow.mapSize.setScalar(2048); dusk.shadow.camera.left = -5; dusk.shadow.camera.right = 5; dusk.shadow.camera.top = 5; dusk.shadow.camera.bottom = -5; dusk.shadow.bias = -0.0004;
     scene.add(dusk, dusk.target);
