@@ -37,6 +37,8 @@ export const SHOTS = {
   'traces-lit': { pos: [1.2, 1.2, -12.0], look: [3.8, 0.6, -15.5], fov: 45 },
   'fragment-marks': { pos: [3.2, 1.45, -14.9], look: [4.95, 1.35, -14.75], fov: 38, setup: (ctx) => {
     const f = ctx.api.fragment; if (f && f.state === 'idle') { f.state = 'playing'; f.t = 8; } ctx.memory.forceOpen = true; } },
+  'fragment-late': { pos: [3.2, 1.45, -14.9], look: [4.95, 1.35, -14.75], fov: 38, setup: (ctx) => {
+    const f = ctx.api.fragment; if (f && f.state === 'idle') { f.state = 'playing'; f.t = 3 + 7 * 2.2 + 2.5 + 5.8; } ctx.memory.forceOpen = true; } },
   'micro-photo': { pos: [-4.9, 1.5, -13.2], look: [4, 1.2, -8], fov: 46, setup: (ctx) => {
     const it = ctx.api.micro?.items.find((i) => i.name === 'photo'); if (!it) return;
     ctx.memory.forceOpen = true; ctx.memory.aimAt = it.center;

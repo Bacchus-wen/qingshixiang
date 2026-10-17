@@ -123,7 +123,7 @@ export default {
       const wood0 = frameMat.colorNode, glow0 = frameMat.emissiveNode;
       frameMat.colorNode = mix(wood0, vec3(0.035, 0.033, 0.03), ink.mul(0.9));
       frameMat.roughnessNode = mix(float(0.7), float(0.62), ink);
-      frameMat.emissiveNode = glow0.mul(float(1).sub(ink)).add(amberNode().mul(ink).mul(memoryMask(positionWorld)).mul(0.04));
+      frameMat.emissiveNode = glow0.mul(float(1).sub(ink)); // graphite never glows (it read as light lines once the porch light died)
     }
     // the child, standing against the marked jamb
     this.childVis = uniform(0);
