@@ -131,7 +131,7 @@ export default {
         // once the marks have been read the eye never leaves the door again: no second shop after the climax
         if (frag?.state === 'done') m.lookOverride = { x: 0, y: 0 };
         // after the door memory the eye has nothing left: power runs out within ~14 s
-        if (frag?.state === 'done') this.power = Math.max(0, this.power - dt / 14);
+        if (frag?.state === "done") this.power = Math.max(0, this.power - dt / 7); // r20: ~7 s (14 s read as a long black stretch)
         else if (robot && robot.open > 0.2 && frag?.state !== 'playing') this.power = Math.max(0, this.power - dt / 150);
         m.power = this.power;
         if (this.power <= 0.0) this.set('fade');

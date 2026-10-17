@@ -403,7 +403,7 @@ export default {
       this.coneK.value = o * (1 - 0.35 * flood) * (ctx.memory.goboMode === 'line' ? 0.15 : 1) * Number(ctx.params?.get('cone') ?? 1);
       this.cone.visible = (o > 0.01 || (this.frames ?? 0) < 30) && ctx.params?.get('cone') !== 'off';
       if (this.halo) {
-        this.halo.position.copy(this._v).addScaledVector(this._d, 0.04);
+        this.halo.position.copy(this._v).addScaledVector(this._d, 0.005);
         _toCam.copy(ctx.camera.position).sub(this._v).normalize();
         this.haloK.value = o * (0.25 + 0.75 * Math.max(0, _toCam.dot(this._d)) ** 2);
         this.halo.visible = o > 0.01 || (this.frames ?? 0) < 30;

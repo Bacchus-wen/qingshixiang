@@ -58,8 +58,8 @@ export function robotMaterial(name) {
     c = mix(c, vec3(0.3, 0.14, 0.06), chips); // chipped through to rust (review6)
     const pm = new THREE.MeshPhysicalNodeMaterial();
     pm.colorNode = c.add(scratches().mul(0.1)).mul(shellDim);
-    pm.roughnessNode = mix(mix(wetRough(0.45), float(0.3), chips), float(0.6), tears.mul(0.5));
-    pm.metalnessNode = chips.mul(0.85);
+    pm.roughnessNode = mix(mix(wetRough(0.45), float(0.8), chips), float(0.6), tears.mul(0.5));
+    pm.metalnessNode = float(0); // r20: metallic chips rendered as black mirrors; they are rust
     // rain on the shell: beads on everything facing up, thin rivulets running down the sides (a bump, so the
     // clearcoat catches every light in them)
     const up = smoothstep(0.25, 0.8, normalWorldGeometry.y);

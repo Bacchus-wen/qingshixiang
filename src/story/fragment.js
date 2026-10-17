@@ -22,7 +22,7 @@ function marksTexture(count) {
   const draw = (n) => {
     g.fillStyle = '#000'; g.fillRect(0, 0, 256, 1024);
     // v3 (critique r4): a pencil and a child's handwriting, not HUD type
-    g.strokeStyle = '#fff'; g.fillStyle = '#fff'; g.lineWidth = 7; g.lineCap = 'round';
+    g.strokeStyle = '#fff'; g.fillStyle = '#fff'; g.lineWidth = 4.5; g.lineCap = 'round';
     g.font = '400 26px "Kaiti SC","STKaiti","KaiTi","PingFang SC",serif';
     if (n > 0) { // the name, written once up the jamb in the same hand
       g.save(); g.globalAlpha = 0.5; g.translate(30, 1024 - (1.78 / 2.12) * 1024); g.font = '400 28px "Kaiti SC","STKaiti","KaiTi",serif';
@@ -33,8 +33,10 @@ function marksTexture(count) {
       const cur = i === n - 1;
       // pencil: two slightly offset light passes per line, every year still legible (review5), this year darkest
       g.globalAlpha = cur ? 0.9 : 0.7;
-      g.beginPath(); g.moveTo(14, y); g.lineTo(118, y + (i % 2 ? 3 : -2)); g.stroke();
-      g.globalAlpha *= 0.5; g.beginPath(); g.moveTo(18, y + 1.5); g.lineTo(112, y + 1 + (i % 2 ? 3 : -2)); g.stroke();
+      // r20: hand-drawn, not a barcode: each year's line a different length and start
+      const x0 = 14 + ((i * 37) % 13) - 6, x1 = 70 + ((i * 53) % 46);
+      g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y + (i % 2 ? 3 : -2)); g.stroke();
+      g.globalAlpha *= 0.45; g.beginPath(); g.moveTo(x0 + 4, y + 1.5); g.lineTo(x1 - 6, y + 1 + (i % 2 ? 3 : -2)); g.stroke();
       g.globalAlpha = cur ? 1 : 0.7;
       g.font = cur ? '400 38px "Kaiti SC","STKaiti","KaiTi","PingFang SC",serif' : '400 24px "Kaiti SC","STKaiti","KaiTi","PingFang SC",serif';
       g.fillText(m.label, 124, y + (cur ? 12 : 8));
@@ -88,10 +90,10 @@ export default {
     {
       const P = positionWorld;
       const grain = mx_noise_float(vec3(P.z.mul(90), P.y.mul(2.5), P.x.mul(90))).mul(0.5).add(0.5);
-      const worn = smoothstep(0.5, 0.62, mx_noise_float(P.mul(vec3(9, 2.2, 9)).add(3.3)).mul(0.5).add(0.5));
+      const worn = smoothstep(0.5, 0.62, mx_noise_float(P.mul(vec3(30, 8, 30)).add(3.3)).mul(0.5).add(0.5));
       const paint = vec3(0.34, 0.3, 0.24).mul(grain.mul(0.3).add(0.8));
       const bare = vec3(0.16, 0.13, 0.1).mul(grain.mul(0.6).add(0.55));
-      frameMat.colorNode = mix(paint, bare, worn.mul(0.8));
+      frameMat.colorNode = mix(paint, bare, worn.mul(0.35));
       frameMat.emissiveNode = frameMat.colorNode.mul(amberNode()).mul(memoryMask(positionWorld)).mul(0.08);
     }
     // v3: the door itself (GPT Image 2.5 texture): peeling green planks, a faded 福, couplet remnants -- and a cartoon
@@ -121,7 +123,7 @@ export default {
       const onBoard = u.greaterThan(0).and(u.lessThan(1)).and(normalWorld.x.lessThan(-0.5)).and(P.x.lessThan(x - 0.13));
       const ink = onBoard.select(texture(this.marks.tex, vec2(u, v)).r, float(0));
       const wood0 = frameMat.colorNode, glow0 = frameMat.emissiveNode;
-      frameMat.colorNode = mix(wood0, vec3(0.035, 0.033, 0.03), ink.mul(0.9));
+      frameMat.colorNode = mix(wood0, vec3(0.035, 0.033, 0.03), ink.mul(0.75));
       frameMat.roughnessNode = mix(float(0.7), float(0.62), ink);
       frameMat.emissiveNode = glow0.mul(float(1).sub(ink)); // graphite never glows (it read as light lines once the porch light died)
     }
@@ -163,6 +165,7 @@ export default {
     // now: '已验收。此户已腾空。' pasted on the door, and the house number in chalk; neither exists in the memory
     const notice = new THREE.Mesh(new THREE.PlaneGeometry(0.36, 0.5), noticeMaterial(NOTICES[2], 4));
     notice.position.set(x + 0.025, 1.5, z + 0.1); notice.rotation.y = -Math.PI / 2; notice.rotation.z = 0.04; notice.renderOrder = 4;
+    notice.material.colorNode = notice.material.colorNode.mul(0.5); // r20: it was the brightest thing after the light died
     g.add(notice); this.notice = notice; // hidden while the memory plays: it would be the brightest thing in the close-up
     const nc = document.createElement('canvas'); nc.width = 256; nc.height = 96;
     const ng = nc.getContext('2d'); ng.fillStyle = '#000'; ng.fillRect(0, 0, 256, 96);
@@ -221,7 +224,7 @@ export default {
       // closed-loop aim: nudge the head until the eye's axis points at the current mark (no guessed constants)
       this.aim ??= { x: 0, y: 0.1 };
       this._want ??= new THREE.Vector3();
-      this._want.set(DOOR.x - 0.1, target.y, DOOR.z - DOOR.w / 2 - 0.05).sub(m.origin).normalize();
+      this._want.set(DOOR.x - 0.1, target.y - 0.005, DOOR.z - DOOR.w / 2 - 0.3).sub(m.origin).normalize(); // r20: onto the pencil line, not its label
       const yawErr = Math.atan2(this._want.z, this._want.x) - Math.atan2(m.dir.z, m.dir.x);
       const pitchErr = Math.asin(this._want.y) - Math.asin(m.dir.y);
       this.aim.x += yawErr * dt * 2.2;     // +look.x turns the head toward +z in world (verified by the probe)
