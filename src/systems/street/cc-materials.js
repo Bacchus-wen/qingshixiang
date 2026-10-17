@@ -2,7 +2,7 @@
 // No license supplied upstream; internal company demonstration only (see CREDITS.md).
 import * as THREE from 'three/webgpu';
 import {
-  abs, attribute, cameraPosition, cross, dot, float, floor, fract, max, min, mix, mod, normalWorldGeometry, normalize, positionWorld, select, sin, smoothstep, step, texture, time, transformNormalToView, uv, vec2, vec3,
+  abs, attribute, cameraPosition, cross, dot, float, floor, fract, max, min, mix, mod, mx_fractal_noise_float, mx_noise_float, normalWorldGeometry, normalize, positionWorld, select, sin, smoothstep, step, texture, time, transformNormalToView, uv, vec2, vec3,
 } from 'three/tsl';
 import { mains, memoryMask } from '../../materials/memory.js';
 import { neonLightAt } from '../../materials/neonlight.js';
@@ -52,7 +52,16 @@ export function createWallMaterial(tex, params) {
   const albedo = texture(tex.atlas_albedo, at).grad(dx, dy).rgb;
   const nt = texture(tex.atlas_normal, at).grad(dx, dy).xyz.mul(2).sub(1);
   const dirt = sin(positionWorld.y.mul(0.45).add(a.w)).mul(sin(positionWorld.x.add(positionWorld.z).mul(0.63))).mul(0.055).add(0.945);
-  const wet = verticalWetLayer({ albedo: albedo.mul(a.z).mul(dirt), roughness: float(0.88), worldPos: positionWorld });
+  // r19: decades of rain on the walls -- dark streaks running down under sills and ledges (stretched noise, only on
+  // some stretches of wall), a darker splash band at the foot, broad stained patches. Vertical faces only.
+  const P = positionWorld, along = select(useX, P.z, P.x);
+  const streakN = mx_noise_float(vec3(along.mul(5.5), P.y.mul(0.22), a.w)).mul(0.5).add(0.5);
+  const streakZone = smoothstep(0.35, 0.75, mx_noise_float(vec3(along.mul(0.5), P.y.mul(0.35), a.w.add(3.7))).mul(0.5).add(0.5));
+  const streaks = smoothstep(0.56, 0.84, streakN).mul(streakZone);
+  const splash = float(1).sub(smoothstep(0.15, 0.95, P.y));
+  const patch = mx_fractal_noise_float(P.mul(0.32).add(a.w), 3, 2.0, 0.5).mul(0.5).add(0.5);
+  const weather = select(useY, float(1), float(1).sub(streaks.mul(0.34)).sub(splash.mul(0.24)).mul(mix(float(0.8), float(1.06), patch)));
+  const wet = verticalWetLayer({ albedo: albedo.mul(a.z).mul(dirt).mul(weather), roughness: float(0.88), worldPos: positionWorld });
   m.colorNode = wet.albedo;
   m.emissiveNode = wet.albedo.mul(neonLightAt()); // v3: the signs light the walls
   m.roughnessNode = mix(wet.roughness, float(0.42), smoothstep(0.65, 0.95, n.y).mul(wetUniforms.wetness));
