@@ -91,6 +91,8 @@ export function setupPastCar(ctx, car) {
 // dead plants come back into leaf inside the cone (the leaves simply are not there in the present)
 function setupPastPlants(planters) {
   if (!planters) return;
+  // r19: the leaf shadows were the biggest shape on the marked door frame during the climax
+  planters.traverse((o) => { o.castShadow = false; });
   const leafMat = new THREE.MeshStandardNodeMaterial({ color: 0x3a3a38, roughness: 0.65, side: THREE.DoubleSide });
   if (new URLSearchParams(location.search).get('leafdbg') === null) leafMat.maskNode = memoryMask().greaterThan(0.3);
   // pot centres and heights from tools/blender/props2.py (Blender (x, y, h) -> glTF (x, h, -y))
@@ -103,7 +105,7 @@ function setupPastPlants(planters) {
       leaves.push(g);
     }
     const m = new THREE.Mesh(mergeGeometries(leaves), leafMat);
-    m.userData.dynamic = true; m.castShadow = true;
+    m.userData.dynamic = true; m.castShadow = false; // (r19: no leaf shadows on the marked frame)
     planters.add(m);
   }
 }

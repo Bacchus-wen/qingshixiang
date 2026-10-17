@@ -22,7 +22,7 @@ export function createMaterials(atlas, mode) {
   const tubeSurface = vec3(0.025, 0.03, 0.032).mul(dirt).mul(edge.mul(0.6).add(0.4)).add(vec3(0.085).mul(masks.r));
   const diffuser = mix(paper, tint.mul(0.72), masks.r);
   face.colorNode = mix(mix(tubeSurface, diffuser.mul(0.22).mul(dirt), style.x), vec3(0.12), isAccent);
-  const now = faded.mul(masks.g.mul(2.6).add(masks.a.mul(0.3))).mul(power).mul(mains); // the surviving tubes trip with the street
+  const now = faded.mul(masks.g.mul(1.7).add(masks.a.mul(0.25))).mul(power).mul(mains); // the surviving tubes trip with the street
   // in memory the street is whole again: every sign intact (broken strokes belong to the present only)
   const tube = masks.r;
   const halo = masks.b;

@@ -189,7 +189,7 @@ export default {
     this.gobo = makeGobo(); this.gobo.draw(0);
     const spot = this.spot = new THREE.SpotLight(eyeColor.value.clone(), 0, 45, 0.3, 0.65, 1.4);
     spot.map = this.gobo.tex;
-    spot.color.setRGB(1.0, 0.74, 0.48); // v2: a warm-white beam, so the neon inside the cone keeps its own colours
+    spot.color.setRGB(1.0, 0.84, 0.68); // r19: whiter still, so the neon inside the cone keeps its own colours
     spot.castShadow = true; spot.shadow.mapSize.setScalar(ctx.quality === 'low' ? 512 : 1024); spot.shadow.camera.near = 0.2; spot.shadow.bias = -0.0005;
     scene.add(spot, spot.target);
     // a faint cold rim from behind and above (the street's ambient bounce): reads the shell, scratches and oil
@@ -246,7 +246,8 @@ export default {
           const along = dot(q, axis);
           const rad = q.sub(axis.mul(along)).length();
           const edgeR = along.max(0.001).mul(tanA);
-          const inside = float(1).sub(smoothstep(edgeR.mul(0.8), edgeR, rad)).mul(float(1).sub(smoothstep(0, edgeR.mul(0.8), rad)).mul(0.55).add(0.45)).mul(smoothstep(0.0, 0.2, along));
+          // r19: dense at the edge, clear inside -- an outline of light you look through into the past
+          const inside = float(1).sub(smoothstep(edgeR.mul(0.88), edgeR, rad)).mul(smoothstep(edgeR.mul(0.4), edgeR.mul(0.88), rad).mul(0.85).add(0.15)).mul(smoothstep(0.0, 0.2, along));
           const fall = float(1).div(along.mul(along).mul(0.12).add(0.6)).mul(float(1).sub(smoothstep(10.0, 15.0, along))); // ~1/d^2: path grows with d, so the shaft is brightest at the lens and fades along
           const camNear = smoothstep(0.2, 0.8, p.sub(cameraPosition).length()); // no haze smeared over the lens when the camera rides next to the eye
           // shafts: the cracked lens and the aperture blades throw streaks along the beam (angular noise around the axis)
@@ -255,7 +256,7 @@ export default {
           const dust = mx_noise_float(p.mul(1.9).add(vec3(0, time.mul(-0.5), 0))).mul(0.3).add(0.85).mul(streak);
           acc.addAssign(inside.mul(fall).mul(camNear).mul(dust));
         });
-        return color(eyeColor).mul(acc.mul(dt)).mul(this.coneK).mul(0.2);
+        return color(eyeColor).mul(acc.mul(dt)).mul(this.coneK).mul(0.16);
       })();
       if (ctx.params?.get('conedebug')) { mat.colorNode = vec3(0.05, 0.02, 0.0); mat.wireframe = true; }
       this.cone = new THREE.Mesh(g, mat); this.cone.frustumCulled = false; this.cone.renderOrder = 8; this.coneL = L;
@@ -334,7 +335,12 @@ export default {
     this._d.set(0, 0, 1).transformDirection(this.eye.matrixWorld).normalize();
     this.spot.position.copy(this._v).addScaledVector(this._d, 0.03);
     this.spot.target.position.copy(this._v).addScaledVector(this._d, 10);
-    this.spot.intensity = 70 * o * o; // v2: the street inside the beam stays readable (260 blew the centre to white)
+    // r19 (both critics): inside the beam the past must read as neon and people, not amber fog. The look-phase key is
+    // dimmer and whiter; the door and the flood keep the full beam.
+    const fullBeam = ctx.api.fragment?.state === 'playing' || (ctx.memory.flood ?? 0) > 0.3 || (this.floodT !== undefined && this.floodT < 2.4);
+    const spotTarget = ctx.memory.goboMode === 'line' ? 0.35 : fullBeam ? 1 : 0.42; // the level line must not burn out the pencil
+    this.spotK = (this.spotK ?? 1) + (spotTarget - (this.spotK ?? 1)) * Math.min(1, dt * 1.5);
+    this.spot.intensity = 70 * o * o * this.spotK; // v2: the street inside the beam stays readable (260 blew the centre to white)
     // the surveyor's level mark is a tight beam (thin and short on the jamb), but the past it reveals keeps the
     // full cone: light and memory are separate here
     let coneAngle = 0.12 + 0.24 * o;
@@ -359,7 +365,7 @@ export default {
     this.spot.shadow.autoUpdate = o > 0.005 || this.frames < 30;
     // v3: the amber cone is the protagonist of the memory shots (targets/memory.jpg)
     // the visible cone carries the beam now; the raymarched box keeps the gobo and occlusion
-    if (this.beamVol) { this.beamVol.material.userData.density.value = 0.12 * o * Number(ctx.params?.get('bvol') ?? 1); this.beamVol.visible = o > 0.01 || this.frames < 30; }
+    if (this.beamVol) { this.beamVol.material.userData.density.value = 0.04 * o * Number(ctx.params?.get('bvol') ?? 1); this.beamVol.visible = o > 0.01 || this.frames < 30; }
     const mode = ctx.memory.goboMode;
     const fq = Math.round(flood * 10) / 10;
     if (mode !== this._lastMode || fq !== this._lastFlood || (mode !== 'line' && t - this.goboT > 1 / 15 && Math.abs(o - (this._lastGobo ?? -1)) > 0.01)) {

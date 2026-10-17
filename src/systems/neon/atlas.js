@@ -27,7 +27,9 @@ function drawCell(sign, w, h) {
     return pixels;
   }
   const size = vertical ? Math.min(w * 0.65, (h - 70) / chars.length * 0.84) : Math.min(h * 0.53, (w - 64) / chars.length * 0.95);
-  g.font = `700 ${size}px ${FONT}`;
+  // r19 (critique, third report): outlining a weight-700 glyph drew every stroke as a hollow double line that blurred to
+  // mush. A light glyph's outline collapses into one tube per stroke, and a filled pass keeps its core solid.
+  g.font = `300 ${size}px ${FONT}`;
   // Coverage encodes the tube cross-section: soft coloured rim, hot white centre.
   const stroke = (width, draw) => {
     for (const [scale, alpha] of [[1, 0.35], [0.6, 0.7], [0.3, 1]]) {
@@ -40,6 +42,8 @@ function drawCell(sign, w, h) {
     if (vertical) chars.forEach((ch, i) => g.strokeText(ch, w / 2, 38 + (h - 76) * (i + 0.5) / chars.length));
     else g.strokeText(sign.text, w / 2, h * 0.49, w - 64);
   });
+  if (vertical) chars.forEach((ch, i) => g.fillText(ch, w / 2, 38 + (h - 76) * (i + 0.5) / chars.length));
+  else g.fillText(sign.text, w / 2, h * 0.49, w - 64);
   stroke(3.4, () => {
     g.strokeRect(17, 17, w - 34, h - 34);
     // A short second rule gives the rectangular fascia a period-appropriate tube frame.

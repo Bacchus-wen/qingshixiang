@@ -22,7 +22,7 @@ function marksTexture(count) {
   const draw = (n) => {
     g.fillStyle = '#000'; g.fillRect(0, 0, 256, 1024);
     // v3 (critique r4): a pencil and a child's handwriting, not HUD type
-    g.strokeStyle = '#fff'; g.fillStyle = '#fff'; g.lineWidth = 4; g.lineCap = 'round';
+    g.strokeStyle = '#fff'; g.fillStyle = '#fff'; g.lineWidth = 7; g.lineCap = 'round';
     g.font = '400 26px "Kaiti SC","STKaiti","KaiTi","PingFang SC",serif';
     if (n > 0) { // the name, written once up the jamb in the same hand
       g.save(); g.globalAlpha = 0.5; g.translate(30, 1024 - (1.78 / 2.12) * 1024); g.font = '400 28px "Kaiti SC","STKaiti","KaiTi",serif';
@@ -32,12 +32,12 @@ function marksTexture(count) {
       const y = 1024 - (m.y / 2.12) * 1024;
       const cur = i === n - 1;
       // pencil: two slightly offset light passes per line, every year still legible (review5), this year darkest
-      g.globalAlpha = cur ? 0.85 : 0.5;
+      g.globalAlpha = cur ? 0.9 : 0.7;
       g.beginPath(); g.moveTo(14, y); g.lineTo(118, y + (i % 2 ? 3 : -2)); g.stroke();
       g.globalAlpha *= 0.5; g.beginPath(); g.moveTo(18, y + 1.5); g.lineTo(112, y + 1 + (i % 2 ? 3 : -2)); g.stroke();
-      g.globalAlpha = cur ? 1 : 0.42;
-      g.font = cur ? '400 26px "Kaiti SC","STKaiti","KaiTi","PingFang SC",serif' : '400 19px "Kaiti SC","STKaiti","KaiTi","PingFang SC",serif';
-      g.fillText(m.label, 122, y + (cur ? 8 : 6));
+      g.globalAlpha = cur ? 1 : 0.7;
+      g.font = cur ? '400 38px "Kaiti SC","STKaiti","KaiTi","PingFang SC",serif' : '400 24px "Kaiti SC","STKaiti","KaiTi","PingFang SC",serif';
+      g.fillText(m.label, 124, y + (cur ? 12 : 8));
     });
     g.globalAlpha = 1; tex.needsUpdate = true;
   };

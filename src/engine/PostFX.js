@@ -36,7 +36,7 @@ export class PostFX {
       blackPoint: uniform(0.02),
       lift: uniform(new THREE.Vector3(0.004, 0.006, 0.009)),
       // film: amber halation hugging warm highlights, gate weave (sub-pixel frame drift), density flicker
-      halation: uniform(0.55), aoStrength: uniform(0.85), scatter: uniform(0.16), streak: uniform(0.08), weave: uniform(new THREE.Vector2()), flicker: uniform(0),
+      halation: uniform(0.35), aoStrength: uniform(0.85), scatter: uniform(0.16), streak: uniform(0.08), weave: uniform(new THREE.Vector2()), flicker: uniform(0),
       ssrIntensity: uniform(1.0),
       // depth of field, driven by the director (bokeh 0 = off)
       focus: uniform(10), focalRange: uniform(6), bokeh: uniform(0),
