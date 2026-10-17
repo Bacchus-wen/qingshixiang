@@ -2,7 +2,7 @@
 // Source/permission and packed RG normal + B height convention: see CREDITS.md.
 import * as THREE from 'three/webgpu';
 import {
-  abs, attribute, cameraPosition, cameraViewMatrix, cos, dot, float, floor, fract, fwidth, hash, max, metalness, mix, mrt, mx_noise_float, normalWorldGeometry, normalize, positionWorld, reflector, roughness, select, sin, smoothstep, texture, uv, vec2, vec3, vec4,
+  abs, attribute, cameraPosition, cameraViewMatrix, cos, dot, float, floor, fract, fwidth, hash, max, metalness, mix, mrt, mx_fractal_noise_float, mx_noise_float, normalWorldGeometry, normalize, positionWorld, reflector, roughness, select, sin, smoothstep, texture, uv, vec2, vec3, vec4,
 } from 'three/tsl';
 import { wetLayer, wetUniforms, wetFbm, puddleMask, rippleNormal } from './wet.js';
 import { groundLayout, DEFAULT_GROUND_LANE } from './ground-layout.js';
@@ -162,8 +162,12 @@ export function groundWalk(textures, ctx) {
   // Source contains eight 30 cm square tiles per repeat (running bond); preserve the photographed joints.
   const S = pair(textures, 'sidewalk_tiles', frame.p.div(2.4));
   const dirt = mx_noise_float(vec3(frame.p.mul(0.17), 5.4)).mul(0.08).add(0.92);
+  // r20: decades of foot traffic and rain -- broad stains and a darker band along the wall, so the tiles stop reading
+  // as a clean showroom floor in the near foreground
+  const stain = mx_fractal_noise_float(vec3(frame.p.mul(0.9), 2.1), 3, 2.0, 0.5).mul(0.5).add(0.5);
+  const grime = mix(float(1.0), float(0.62), smoothstep(0.45, 0.8, stain));
   return wetMaterial('cc_ground_walk', ctx, {
-    albedo: S.a.mul(0.66).mul(dirt), roughness: mix(float(0.9), float(0.76), S.h),
+    albedo: S.a.mul(0.58).mul(dirt).mul(grime), roughness: mix(float(0.9), float(0.76), S.h),
     xy: S.xy.mul(0.48), ...frame, coverage: 0.25, porosity: 0.6,
   });
 }
