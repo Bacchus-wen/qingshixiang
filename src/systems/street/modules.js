@@ -61,7 +61,7 @@ export async function placeModules(ctx, root, windows, facades) {
   if (kinds.noodle_table && noodle) for (const dz of [-1.2, 0.9]) place.noodle_table.push({ x: noodle.side * (W - 1.0), y: 0.14, z: noodle.z + dz, side: noodle.side, flip: dz > 0 });
   if (kinds.fruit_stall && shop) place.fruit_stall.push({ x: shop.side * (W - 0.8), y: 0.14, z: shop.z, side: shop.side, flip: false });
   if (kinds.kiosk) place.kiosk.push({ x: -(W - 0.9), y: 0.14, z: -37.5, side: -1, flip: false });
-  if (kinds.lanterns) for (const z of [-9, -19, -29]) place.lanterns.push({ x: 0, y: 4.4, z, side: 1, ry: 0, flip: false });
+  if (kinds.lanterns) for (const [z, y] of [[-9, 4.4], [-13.6, 3.9], [-19, 4.4], [-29, 4.4]]) place.lanterns.push({ x: 0, y, z, side: 1, ry: 0, flip: false }); // r20: one string across the beam's usual path
   if (kinds.stall) {
     const W = 3.4 + 1.6; // LANE.halfRoad + LANE.walk
     place.stall.push({ x: W - 0.2, y: 0.14, z: -29.6, side: 1, flip: false }, { x: -(W - 0.2), y: 0.14, z: -21.8, side: -1, flip: true });
