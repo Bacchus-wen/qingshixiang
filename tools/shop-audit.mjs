@@ -2,7 +2,7 @@
 //  FLOAT    an item's bottom is not resting on what is under it (median gap of its lowest vertices > 1.2 cm)
 //  SHELF    a shelf item pokes through the board above, past the uprights, or off the board front/back
 //  ROOM     an item crosses a wall, the ceiling, or the front wall (pillars / lintel) — street items excepted
-//  OVERLAP  two items' precise boxes interpenetrate by > 3 cm on every axis (candidates: check visually)
+//  CLIP     two items really interpenetrate (vertices of one inside the other, ray parity); NEAR = boxes overlap only
 import { chromium } from 'playwright';
 const browser = await chromium.launch({ channel: 'chromium', args: ['--enable-unsafe-webgpu', '--use-angle=metal'] });
 const page = await browser.newPage({ viewport: { width: 640, height: 360 } });
@@ -67,7 +67,25 @@ const res = await page.evaluate(() => {
     const La = P[a].userData.layout || {}, Lc = P[c].userData.layout || {};
     if (La.on === c || Lc.on === a || La.type === 'shelf' || Lc.type === 'shelf') continue;
     const ox = Math.min(A.max.x, B.max.x) - Math.max(A.min.x, B.min.x), oy = Math.min(A.max.y, B.max.y) - Math.max(A.min.y, B.min.y), oz = Math.min(A.max.z, B.max.z) - Math.max(A.min.z, B.min.z);
-    if (ox > 0.03 && oy > 0.03 && oz > 0.03) out.push({ kind: 'OVERLAP', a, b: c, ox: f3(ox), oy: f3(oy), oz: f3(oz) });
+    if (ox > 0.03 && oy > 0.03 && oz > 0.03) {
+      // box overlap is only a candidate: count how many of each one's vertices lie INSIDE the other (ray parity,
+      // double-sided) within the shared box. A few % inside = real interpenetration (CLIP); ~0 = just near.
+      const inside = (X, Y) => {
+        const share = A.clone().intersect(B); const pts = [];
+        X.traverse((m) => { if (!m.isMesh) return; const p = m.geometry.attributes.position, st = Math.max(1, Math.floor(p.count / 3000));
+          for (let i = 0; i < p.count; i += st) { v.fromBufferAttribute(p, i).applyMatrix4(m.matrixWorld); if (share.containsPoint(v)) pts.push(v.clone()); } });
+        if (!pts.length) return [0, 0];
+        const sides = []; Y.traverse((m) => { if (m.isMesh) { sides.push([m.material, m.material.side]); m.material.side = THREE.DoubleSide; } });
+        let n = 0; const dir = new THREE.Vector3(0.577, 0.577, 0.577), rc = new THREE.Raycaster(); rc.far = 5;
+        const sample = pts.filter((_, i) => i % Math.max(1, Math.floor(pts.length / 200)) === 0);
+        for (const q of sample) { rc.set(q, dir); if (rc.intersectObject(Y, true).length % 2 === 1) n++; }
+        for (const [mm, sd] of sides) mm.side = sd;
+        return [n, sample.length];
+      };
+      const [n1, t1] = inside(P[a], P[c]), [n2, t2] = inside(P[c], P[a]);
+      const frac = (n1 + n2) / Math.max(1, t1 + t2);
+      out.push({ kind: frac > 0.02 ? 'CLIP' : 'NEAR', a, b: c, inside: `${n1}/${t1} + ${n2}/${t2}`, box: [f3(ox), f3(oy), f3(oz)] });
+    }
   }
   return { out, count: names.length };
 });

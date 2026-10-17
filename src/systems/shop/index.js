@@ -16,7 +16,7 @@ export const ROOM = { w: 6.0, d: 4.5, h: 3.0 };
 // in world space so walls and floor line up without UV work. All are loaded up front (init awaits them).
 const TEX = {};
 const TEX_NAMES = ['floor_terrazzo', 'wall_upper', 'wall_dado', 'ceiling', 'facade', 'pavement', 'shutter', 'cardboard', 'pegboard',
-  'poster', 'calendar', 'price_list', 'slogan', 'sign_main', 'sign_side', 'tags', 'box_a', 'box_b'];
+  'poster', 'calendar', 'price_list', 'slogan', 'sign_main', 'sign_side', 'tags', 'box_a', 'box_b', 'tv_poster', 'notice'];
 async function loadTextures(ktx2) {
   await Promise.all(TEX_NAMES.map(async (n) => {
     const t = await ktx2.loadAsync(`${import.meta.env.BASE_URL}textures/shop/${n}.ktx2`);
@@ -277,10 +277,12 @@ export default {
     root.add(onWall(decal('calendar', 0.34, 0.51, { curl: 0.01 }), 'back', 2.63, 1.4));
     root.add(onWall(decal('price_list', 0.4, 0.6, { curl: 0.01 }), 'right', -1.42, 1.78));
     root.add(onWall(decal('slogan', 0.96, 0.64), 'right', -0.5, 2.38, 0.015));
+    root.add(onWall(decal('tv_poster', 0.4, 0.6, { curl: 0.012 }), 'left', 1.22, 2.36));
+    root.add(onWall(decal('notice', 0.36, 0.54, { curl: 0.008 }), 'right', -1.98, 1.72));
     root.add(onWall(decal('sign_main', 2.4, 1.2, { rough: 0.6 }), 'front-out', 0, 3.42, 0.01));
     root.add(onWall(decal('sign_side', 0.82, 1.64, { rough: 0.6 }), 'front-out', -2.4, 1.62, 0.01));
     // review lighting: warm desk lamp key, cold dusk from the street, a weak bounce so models read
-    scene.add(new THREE.HemisphereLight(0x8090a8, 0x3a3228, 0.55));
+    scene.add(new THREE.HemisphereLight(0x8a94a8, 0x403428, 0.7));
     const dusk = new THREE.DirectionalLight(0x9db4d6, 1.4); dusk.position.set(1.5, 2.2, 8); dusk.target.position.set(-0.5, 0, -1);
     dusk.castShadow = true; dusk.shadow.mapSize.setScalar(2048); dusk.shadow.camera.left = -5; dusk.shadow.camera.right = 5; dusk.shadow.camera.top = 5; dusk.shadow.camera.bottom = -5; dusk.shadow.bias = -0.0004;
     scene.add(dusk, dusk.target);
@@ -288,6 +290,20 @@ export default {
     scene.add(this.lamp, this.lamp.target);
     const fill = new THREE.PointLight(0xffd9a8, 3, 7, 1.5); fill.position.set(0, 2.7, 0); scene.add(fill);
 
+    // environment for reflections (PBR metals read black without one): the room itself, coarsely -- warm dim walls,
+    // the fluorescent tube, the dusk-blue shop opening, the desk lamp's hot spot -- baked once into a PMREM
+    {
+      const env = new THREE.Scene();
+      const bm = (c, k = 1) => new THREE.MeshBasicMaterial({ color: new THREE.Color(c).multiplyScalar(k), side: THREE.BackSide });
+      const room = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), bm(0x4a4236, 0.9)); room.position.y = h / 2; env.add(room);
+      const fl = new THREE.Mesh(new THREE.PlaneGeometry(w, d).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x2c2822 })); fl.position.y = 0.01; env.add(fl);
+      const tube = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.05, 0.1), new THREE.MeshBasicMaterial({ color: new THREE.Color(0xfff8ee).multiplyScalar(6) })); tube.position.set(0.1, h - 0.08, -0.55); env.add(tube);
+      const door = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 2.6), new THREE.MeshBasicMaterial({ color: new THREE.Color(0x6f86ad).multiplyScalar(1.6), side: THREE.DoubleSide })); door.position.set(0, 1.3, d / 2 - 0.01); env.add(door);
+      const hot = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 8), new THREE.MeshBasicMaterial({ color: new THREE.Color(0xffc27a).multiplyScalar(8) })); hot.position.set(-1.7, 1.2, 0.0); env.add(hot);
+      const pm = new THREE.PMREMGenerator(ctx.renderer);
+      scene.environment = pm.fromScene(env, 0.04).texture; scene.environmentIntensity = 0.55;
+      pm.dispose();
+    }
     // ceiling fluorescent tube over the middle of the shop (fixture + glowing tube + its light)
     {
       const fx = new THREE.Group(); fx.position.set(0.1, h - 0.02, -0.55);
@@ -297,17 +313,17 @@ export default {
       const tb = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 1.2, 12).rotateZ(Math.PI / 2), tubeM); tb.position.y = -0.06; fx.add(tb);
       for (const sx of [-0.62, 0.62]) { const cap = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.05, 0.05), body.material); cap.position.set(sx, -0.055, 0); fx.add(cap); }
       root.add(fx);
-      const tl = new THREE.PointLight(0xe6eeff, 2.2, 7, 1.6); tl.position.set(0.1, h - 0.15, -0.55); scene.add(tl);
+      const tl = new THREE.PointLight(0xf2f0e6, 5.5, 8, 1.5); tl.position.set(0.1, h - 0.15, -0.55); scene.add(tl);
     }
     // models from the layout manifest; each is grounded on its support (floor, or a named surface)
     const placed = this.placed = {};
     const ray = new THREE.Raycaster(); const down = new THREE.Vector3(0, -1, 0); const v = new THREE.Vector3();
-    const supportsOf = (name) => (name && placed[name] ? [placed[name]] : [floor, street, ...Object.values(placed)]);
+    const supportsOf = (name) => (name === 'floor' ? [floor] : name && placed[name] ? [placed[name]] : [floor, street, ...Object.values(placed)]);
     // drop test: the item falls straight down until the first of its bottom points touches something. Start it above
     // every support whose box overlaps its footprint, cast from its lowest vertices (the bottom 2.5 cm), lower it by the
     // smallest gap. (The old "highest surface under five footprint points" rule left things hovering on a corner.)
     const sb = new THREE.Box3();
-    const dropY = (o, targets) => {
+    const dropY = (o, targets, under = false) => { // under: the item may sit beneath its neighbours (only the floor counts)
       _box.setFromObject(o, true); // precise: a rotated/rolled item's loose box can sit far below its real lowest point
       const near = targets.filter((t) => { sb.setFromObject(t); return sb.max.x > _box.min.x && sb.min.x < _box.max.x && sb.max.z > _box.min.z && sb.min.z < _box.max.z; });
       let top = 0; for (const t of near) { sb.setFromObject(t); if (t !== floor && t !== street) top = Math.max(top, sb.max.y); }
@@ -364,7 +380,7 @@ export default {
             const hit = ray.intersectObject(sup, true)[0]; o.position.y = (hit ? hit.point.y : 0) + (it.y || 0);
           } else if (sl?.type === 'shelf' && it.level != null) { // a given shelf board (0 = bottom)
             const n = sl.levels || 5, H = sl.h || 2.4; o.position.y += 0.08 + it.level * (H - 0.12) / (n - 1) + 0.006 - _box.min.y;
-          } else dropY(o, supportsOf(it.on));
+          } else dropY(o, supportsOf(it.on), it.on === 'floor');
           o.position.y += it.lift || 0;
         }
         o.updateMatrixWorld(true);
@@ -377,7 +393,7 @@ export default {
       this.head = head; head.rotation.set(0.14, 0.32, -0.06); // dozing, but turned a little toward the door/street
       // the camera-lens eye: the texture's bright orange core becomes emissive (dim "asleep" glow for now)
       head.traverse((m) => {
-        if (!m.isMesh) return;
+        if (!m.isMesh || /badge/i.test(m.name) || /badge/i.test(m.material?.name || '')) return;
         const src = m.material, nm = new THREE.MeshStandardNodeMaterial();
         for (const k of ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap', 'roughness', 'metalness', 'aoMapIntensity']) if (src[k] !== undefined) nm[k] = src[k];
         if (src.normalScale) nm.normalScale.copy(src.normalScale);
@@ -387,6 +403,8 @@ export default {
         m.material = nm;
       });
     }
+    // the robot's badges (chrome "上海" on the face, "人民电器" plate on the chest) are geometry inside robot.glb
+    // (tools/blender/robot_badges.py), parented to the head/body so they move with them
     // the desk lamp, if placed, drives the warm key light
     const lampObj = placed.desk_lamp;
     if (lampObj) { _box.setFromObject(lampObj); this.lamp.position.set((_box.min.x + _box.max.x) / 2 + 0.1, _box.max.y - 0.05, (_box.min.z + _box.max.z) / 2); this.lamp.target.position.set(this.lamp.position.x + 0.3, 0.8, this.lamp.position.z + 0.2); }

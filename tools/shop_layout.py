@@ -18,7 +18,7 @@ fixed = [
  {"name": "screwdriver_b", "type": "proc", "kind": "screwdriver", "seed": 0, "pos": [-1.42, 0, 0.47], "ry": -25, "on": "workbench"},
  {"name": "screw_tin", "type": "proc", "kind": "tin", "pos": [-1.32, 0, 0.36], "on": "workbench"},
  {"name": "rag", "type": "proc", "kind": "rag", "pos": [-1.96, 0, 0.515], "on": "workbench", "noDrop": True, "y": 0.0},
- {"name": "flex_coil", "type": "proc", "kind": "coil", "pos": [-0.95, 0, 1.3]},
+ {"name": "flex_coil", "type": "proc", "kind": "coil", "pos": [-1.62, 0, 0.12], "on": "floor"},
  {"name": "desk_lamp", "glb": "desk_lamp.glb", "pos": [-1.93, 0, -0.02], "ry": 40, "on": "workbench"},
  {"name": "tube_radio_open", "glb": "tube_radio_open.glb", "pos": [-1.38, 0, 0.0], "ry": 8, "on": "workbench"},
  {"name": "magnifier", "glb": "magnifier.glb", "pos": [-1.02, 0, 0.27], "ry": -30, "on": "workbench"},
@@ -75,7 +75,7 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
                 x += w + random.uniform(0.01, 0.03); k += 1; continue
             cands = [g for g in BIG if H[g] <= clear[lv] and g != last]
             g = random.choice(cands); last = g
-            sc = round(random.uniform(0.92, 1.0), 2)
+            sc = round(random.uniform(0.78, 0.92) if g == 'crt_tv.glb' and random.random() < 0.5 else random.uniform(0.92, 1.0), 2)  # 14-inch and 18-inch sets
             w = W[g] * sc
             if x + w > x1: break
             cx = x + w / 2; c = back + sgn * (D[g] * sc / 2 + 0.012)
@@ -88,13 +88,15 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
             if random.random() < 0.5:
                 tags.append([round(cx - (x0 + x1) / 2 + random.uniform(-0.08, 0.08), 3) * (1 if along == 'x' else -1), lv,
                              random.choice(range(10)) if random.random() < 0.8 else random.choice([10, 11])])
-            if random.random() < 0.45:
-                sg = random.choice(SMALL); fz = front - sgn * (D[sg] / 2 + 0.006)
+            room = abs(front - back) - D[g] * sc - 0.03   # free depth in front of the big item
+            fits = [x for x in SMALL if D[x] * 0.95 <= room]
+            if fits and random.random() < 0.7:
+                sg = random.choice(fits); fz = front - sgn * (D[sg] / 2 + 0.006)
                 fx = cx + random.uniform(-w / 3, w / 3)
                 fpos = [fx, 0, fz] if along == 'x' else [fz, 0, fx]
                 out.append({"name": f"{shelf}_{lv}_{k}s", "glb": sg, "pos": [round(fpos[0], 3), 0, round(fpos[2], 3)], "ry": ry + random.uniform(-35, 35),
                             "on": shelf, "level": lv, "scale": 0.95})
-            x += w + random.uniform(0.02, 0.05); k += 1
+            x += w + random.uniform(0.005, 0.025); k += 1
 # back shelf: x from -1.13 to 0.93, board z from -2.21 (back) to -1.72 (front)
 fill('shelf_back', 'x', -1.1, 0.9, -2.21, -1.72, 5, 0, [0.58, 0.58, 0.58, 0.58, 0.9])
 # left shelf (rotated 90 deg: its local x runs along -z of the room... tags use shelf-local x): board x from -2.96 to -2.47

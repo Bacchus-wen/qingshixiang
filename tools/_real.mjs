@@ -1,0 +1,16 @@
+import { createServer } from 'vite';
+import { chromium } from 'playwright';
+const server = await createServer({ root: process.cwd(), logLevel: 'error', server: { port: 0 } });
+await server.listen();
+const browser = await chromium.launch({ channel: 'chromium', args: ['--enable-unsafe-webgpu'] });
+const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+await page.goto(`http://localhost:${server.httpServer.address().port}/?phase=wait`);
+await page.waitForFunction(() => document.getElementById('loading')?.classList.contains('done'), null, { timeout: 240000 });
+await page.mouse.move(640, 360); await page.waitForTimeout(7000);
+await page.screenshot({ path: 'renders/real-wait.png' });
+await page.keyboard.down('Space'); await page.waitForTimeout(700); await page.keyboard.up('Space'); await page.waitForTimeout(1200);
+await page.keyboard.down('Space'); await page.waitForTimeout(2600);
+await page.screenshot({ path: 'renders/real-waking.png' });
+await page.waitForTimeout(6000);
+await page.screenshot({ path: 'renders/real-look.png' });
+await browser.close(); await server.close(); process.exit(0);

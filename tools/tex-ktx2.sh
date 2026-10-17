@@ -12,4 +12,9 @@ e1 wall_upper wall_upper; e1 wall_dado wall_dado; e1 ceiling ceiling; e1 facade 
 ua floor_terrazzo floor_terrazzo
 e1 pegboard pegboard 1024x512; e1 poster poster 512x1024; e1 box_a box_a 512x512; e1 box_b box_b 512x512
 ua calendar calendar 512x1024; ua price_list price_list 512x1024; ua slogan slogan 1024x512; ua sign_main sign_main 1024x512; ua sign_side sign_side 512x1024; ua tags tags 1024x1024
-ls -la $OUT/*.ktx2 | awk '{s+=$5; print $5, $9} END {print "total", s}'
+
+# robot badges (chrome script logo with alpha, red enamel plate)
+ua badge_shanghai badge_shanghai 512x256; ua badge_plaque badge_plaque 512x256
+# second wall batch (the business licence was generated but is not used: it carries the state emblem)
+e1 tv_poster tv_poster 512x1024; ua notice notice 512x1024
+ls -la $OUT/*.ktx2 | awk '{s+=$5} END {print "total", s}'
