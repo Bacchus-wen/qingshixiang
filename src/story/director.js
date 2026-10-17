@@ -170,6 +170,12 @@ export default {
       ctx.camera.getWorldDirection(this._f);
       focusT = Math.max(0.5, this._hit.sub(ctx.camera.position).dot(this._f)); bokehT = 1.6;
     } else if (this.phase === 'wait') { focusT = this.curPos.distanceTo(this._w.set(ROBOT.x, 0.75, ROBOT.z)); bokehT = 1.0; }
+    // r19: while the marks play, focus sits on the pencil on the casing board (the beam hit landed on the door leaf
+    // or beyond, and the close-up blurred the marks)
+    if (ctx.api.fragment?.state === 'playing') {
+      ctx.camera.getWorldDirection(this._f);
+      focusT = Math.max(0.5, this._hit.set(4.85, 1.45, -14.85).sub(ctx.camera.position).dot(this._f)); bokehT = Math.min(bokehT, 1.0);
+    }
     this.focus += (focusT - this.focus) * Math.min(1, dt * 0.9);
     this.bokeh += (bokehT - this.bokeh) * Math.min(1, dt * 0.8);
     const pp = ctx.postfx.params;
