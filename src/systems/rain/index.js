@@ -52,7 +52,7 @@ export default {
       camera: uniform(new THREE.Vector3()), lightning: uniform(0),
     };
     this.neon = createNeonState(THREE, params.get('raincolor') !== '0');
-    this.lights = ['lamp', 'far'].map(name => ({
+    this.lights = ['lamp', 'far', 'eye'].map(name => ({
       name, position: uniform(new THREE.Vector3()), direction: uniform(new THREE.Vector3(0, -1, 0)),
       outer: uniform(0), inner: uniform(1), range: uniform(1), intensity: uniform(0),
       color: uniform(new THREE.Color()),
@@ -119,8 +119,10 @@ export default {
       const sign = coloredRain ? neonLight(this.neon, p, mask).mul(0.4).toVar() : vec3(0);
       // No ambient floor: incident lamp/sign/beam/flash energy owns visibility.
       // Compute the gate before the HDR beam boost, preserving its exact x3.
-      const incident = lit[0].add(lit[1]).mul(0.95)
-        .add(amber.mul(mask).mul(0.35)) // v3 (Grok r17): memory rain is lit by the beam, not painted orange
+      // r19: the drops crossing the eye's beam are lit by the beam itself (its spot is the third light): streaks of
+      // light inside the cone, the classic look of a lamp in rain
+      const incident = lit[0].add(lit[1]).mul(0.95).add(lit[2].mul(1.6))
+        .add(amber.mul(mask).mul(0.12)) // v3 (Grok r17): memory rain is lit by the beam, not painted orange
         .add(vec3(0.65, 0.72, 0.8).mul(u.lightning).mul(flash)).toVar();
       const energy = incident.add(sign).toVar();
       const brightness = energy.dot(vec3(0.2126, 0.7152, 0.0722));
@@ -222,7 +224,7 @@ export default {
     u.lightning.value = Math.max(0, Math.min(1, ctx.world?.lightning ?? 0));
     u.wind.value.copy(ctx.world?.wind ?? { x: 0, y: 0 });
     for (const light of this.lights) {
-      const source = ctx.api.street?.[light.name];
+      const source = light.name === 'eye' ? ctx.api.robot?.spot : ctx.api.street?.[light.name];
       light.intensity.value = source?.visible ? Math.max(0, source.intensity) : 0;
       if (!source) continue;
       source.getWorldPosition(light.position.value);
