@@ -127,7 +127,7 @@ function litter(system, ctx) {
         kind ? 0.19 * Math.cos(x * Math.PI) * Math.cos(y * Math.PI) : 0.035 * Math.sin(x * 12 + y * 9));
     }
     g.computeVertexNormals(); g.computeBoundingBox();
-    const m = new THREE.MeshStandardNodeMaterial({ color: kind ? 0x666666 : 0x777570,
+    const m = new THREE.MeshStandardNodeMaterial({ color: kind ? 0x666666 : 0x4c4a46, // r20: soaked paper is dark, it glowed on the road
       roughness: kind ? 0.3 : 0.82, side: THREE.DoubleSide,
       transparent: !!kind, opacity: kind ? 0.48 : 1, depthWrite: !kind, forceSinglePass: true });
     if (kind) {
