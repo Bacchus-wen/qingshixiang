@@ -253,7 +253,11 @@ function shelfUnit(it) {
     const wear = smoothstep(0.55, 0.8, mx_fractal_noise_float(P.mul(7), 3, 2, 0.5).mul(0.5).add(0.5));
     steelMat.colorNode = mix(vec3(0.27, 0.31, 0.28), vec3(0.32, 0.22, 0.14), wear.mul(0.7));
     boardMat = new THREE.MeshStandardNodeMaterial({ roughness: 0.7, metalness: 0.35 });
-    boardMat.colorNode = mix(vec3(0.3, 0.33, 0.3), vec3(0.24, 0.17, 0.11), smoothstep(0.5, 0.85, mx_noise_float(P.mul(3.3)).mul(0.5).add(0.5)).mul(0.6));
+    const bc = mix(vec3(0.3, 0.33, 0.3), vec3(0.24, 0.17, 0.11), smoothstep(0.5, 0.85, mx_noise_float(P.mul(3.3)).mul(0.5).add(0.5)).mul(0.6));
+    // years of dust on the up-facing board tops: pale, patchy, thicker towards the back
+    const dust = smoothstep(0.6, 0.95, normalWorldGeometry.y).mul(smoothstep(0.3, 0.75, mx_fractal_noise_float(P.mul(9), 3, 2, 0.5).mul(0.5).add(0.5))).mul(0.55);
+    boardMat.colorNode = mix(bc, vec3(0.42, 0.4, 0.36), dust);
+    boardMat.roughnessNode = mix(float(0.7), float(0.95), dust);
   }
   const steel = [], boards = [], tags = [];
   const box = (arr, w, h, d, x, y, z) => arr.push(new THREE.BoxGeometry(w, h, d).translate(x, y, z));
