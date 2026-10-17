@@ -18,7 +18,7 @@ export const ROOM = { w: 6.0, d: 4.5, h: 3.0 };
 // in world space so walls and floor line up without UV work. All are loaded up front (init awaits them).
 const TEX = {};
 const TEX_NAMES = ['floor_terrazzo', 'wall_upper', 'wall_dado', 'ceiling', 'facade', 'pavement', 'shutter', 'cardboard', 'pegboard',
-  'poster', 'calendar', 'price_list', 'slogan', 'sign_main', 'sign_side', 'tags', 'box_a', 'box_b', 'tv_poster', 'notice', 'street_backdrop', 'sign_aframe'];
+  'poster', 'calendar', 'price_list', 'slogan', 'sign_main', 'sign_side', 'tags', 'box_a', 'box_b', 'box_c', 'box_d', 'tv_poster', 'notice', 'street_backdrop', 'sign_aframe'];
 async function loadTextures(ktx2) {
   await Promise.all(TEX_NAMES.map(async (n) => {
     try {
@@ -80,6 +80,8 @@ function streetMat() {
   m.roughnessNode = float(0.8);
   return m;
 }
+let railMat = null;
+const rail0 = () => (railMat ??= new THREE.MeshStandardNodeMaterial({ color: 0x4a4d4f, roughness: 0.55, metalness: 0.6 }));
 function shutterMat() {
   const m = new THREE.MeshStandardNodeMaterial({ roughness: 0.6, metalness: 0.35 });
   const P = positionWorld;
@@ -308,10 +310,16 @@ export default {
     // rolling shutter, half open: corrugated slats from the lintel down to 1.25 m
     {
       const slats = new THREE.Group(); const sm = shutterMat();
-      for (let y = 2.55; y > 2.02; y -= 0.075) { const s = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.07, 0.02), sm); s.position.set(0, y, d / 2 + 0.05); s.castShadow = true; slats.add(s); }
-      const bar = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.05, 0.05), sm); bar.position.set(0, 1.99, d / 2 + 0.05); slats.add(bar);
+      let si = 0;
+      for (let y = 2.55; y > 2.02; y -= 0.075, si++) { // slats a little out of line: dented, one bowed
+        const s = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.07, 0.02, 12, 1, 1), sm); const p = s.geometry.attributes.position;
+        for (let i = 0; i < p.count; i++) { const x = p.getX(i); p.setZ(i, p.getZ(i) + Math.sin(x * 1.7 + si * 2.1) * 0.006 + (si === 3 ? Math.cos(x * 0.8) * 0.012 : 0)); }
+        s.geometry.computeVertexNormals(); s.position.set(0, y, d / 2 + 0.05); s.rotation.x = Math.sin(si * 7.3) * 0.05; s.castShadow = true; slats.add(s);
+      }
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(3.62, 0.06, 0.06), sm); bar.position.set(0, 1.99, d / 2 + 0.05); bar.castShadow = true; slats.add(bar);
+      const lip = new THREE.Mesh(new THREE.BoxGeometry(3.62, 0.006, 0.07), rail0()); lip.position.set(0, 1.957, d / 2 + 0.05); slats.add(lip); // bottom angle iron
       // guide channels the shutter runs in: U-section steel on both jambs, floor to lintel
-      const rail = new THREE.MeshStandardNodeMaterial({ color: 0x4a4d4f, roughness: 0.55, metalness: 0.6 });
+      const rail = rail0();
       for (const sx of [-1, 1]) {
         const x = sx * (1.8 - 0.03);
         for (const [w, dz] of [[0.06, -0.035], [0.06, 0.035]]) { const f = new THREE.Mesh(new THREE.BoxGeometry(w, 2.6, 0.008), rail); f.position.set(x, 1.3, d / 2 + 0.05 + dz); f.castShadow = true; slats.add(f); }
@@ -342,7 +350,7 @@ export default {
     root.add(onWall(decal('tv_poster', 0.4, 0.6, { curl: 0.012 }), 'left', 1.22, 2.36));
     root.add(onWall(decal('notice', 0.36, 0.54, { curl: 0.008 }), 'right', -1.98, 1.72));
     root.add(onWall(decal('sign_main', 2.4, 1.2, { rough: 0.6 }), 'front-out', 0, 3.42, 0.01));
-    root.add(onWall(decal('sign_side', 0.82, 1.64, { rough: 0.6 }), 'front-out', -2.4, 1.62, 0.01));
+    root.add(onWall(decal('sign_side', 0.82, 1.64, { rough: 0.6 }), 'front-out', -2.24, 1.62, 0.01)); // close to the opening: reads whole from the street
     // review lighting: warm desk lamp key, cold dusk from the street, a weak bounce so models read
     scene.add(new THREE.HemisphereLight(0x8a94a8, 0x403428, 0.7));
     const dusk = new THREE.DirectionalLight(0x9db4d6, 1.4); dusk.position.set(1.5, 2.2, 8); dusk.target.position.set(-0.5, 0, -1);
@@ -500,6 +508,24 @@ export default {
       mk(cables, new THREE.MeshStandardNodeMaterial({ color: 0x101010, roughness: 0.55 }));
       mk(conduits, new THREE.MeshStandardNodeMaterial({ color: 0xc9c3b4, roughness: 0.7 }));
       mk(plastic, new THREE.MeshStandardNodeMaterial({ color: 0xd8d0bc, roughness: 0.5 }));
+      // the litter of a repair in progress on the bench top: screws, nuts, cut wire ends, a few solder blobs
+      if (placed.workbench) {
+        const bits = new THREE.Group(), wb = placed.workbench, rr = (k) => { const x = Math.sin(k * 91.7 + 13.1) * 43758.5453; return x - Math.floor(x); };
+        const steelB = PM.bits ??= new THREE.MeshStandardNodeMaterial({ color: 0x9c9a94, roughness: 0.35, metalness: 1 });
+        const brass = PM.brass ??= new THREE.MeshStandardNodeMaterial({ color: 0xb08a3c, roughness: 0.3, metalness: 1 });
+        const wireB = PM.wireBits ??= new THREE.MeshStandardNodeMaterial({ color: 0xa83a24, roughness: 0.5 });
+        for (let k = 0; k < 46; k++) {
+          const x = -1.62 + rr(k) * 0.62, z = 0.95 + rr(k + 50) * 0.22;
+          ray.set(v.set(x, 2, z), down); ray.far = 3; const hit = ray.intersectObject(wb, true)[0]; if (!hit || hit.point.y < 0.7) continue;
+          const kind = k % 4; let m;
+          if (kind === 0) { m = new THREE.Mesh(new THREE.CylinderGeometry(0.0022, 0.0022, 0.012, 6).rotateZ(Math.PI / 2), steelB); m.position.y = 0.0022; }           // screw
+          else if (kind === 1) { m = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.003, 6), brass); m.position.y = 0.0015; }                              // nut
+          else if (kind === 2) { m = new THREE.Mesh(new THREE.CylinderGeometry(0.0009, 0.0009, 0.03, 4).rotateZ(Math.PI / 2), wireB); m.position.y = 0.001; }         // wire end
+          else { m = new THREE.Mesh(new THREE.SphereGeometry(0.0025, 6, 4), steelB); m.scale.y = 0.5; m.position.y = 0.001; }                                        // solder blob
+          const w0 = new THREE.Group(); w0.position.copy(hit.point); w0.rotation.y = rr(k + 7) * Math.PI * 2; w0.add(m); bits.add(w0);
+        }
+        root.add(mergeByMaterial(bits));
+      }
       // spare limbs hang on wall hooks: a plate on the wall and a bent rod through the top joint
       for (const part of [placed.spare_arm, placed.spare_leg]) {
         if (!part || part.userData.layout.wall !== 'right') continue;
@@ -529,7 +555,7 @@ export default {
     // the robot's head droops forward and to one side while it is asleep (rest pose; the beam phases animate it later)
     const head = placed.robot?.getObjectByName('robot_head');
     if (head) {
-      this.head = head; head.rotation.set(0.14, 0.32, -0.06); // dozing, but turned a little toward the door/street
+      this.head = head; head.rotation.set(0.3, 0.3, -0.05); // head bowed over its hands, turned a little toward the street
       // the camera-lens eye: the texture's bright orange core becomes emissive (dim "asleep" glow for now)
       head.traverse((m) => {
         if (!m.isMesh || /badge/i.test(m.name) || /badge/i.test(m.material?.name || '')) return;

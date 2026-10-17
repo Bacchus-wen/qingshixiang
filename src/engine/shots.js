@@ -10,7 +10,7 @@ export const SHOTS = {
   'shop-front': { scene: 'shop', pos: [0.1, 1.45, 6.6], look: [-0.3, 1.2, -1.0], fov: 44 },
   'shop-inside': { scene: 'shop', pos: [0.35, 1.32, 4.1], look: [-0.35, 1.0, -1.0], fov: 50 },
   'shop-left': { scene: 'shop', pos: [1.2, 1.45, 1.2], look: [-2.6, 1.2, -1.1], fov: 46 },
-  'shop-bench': { scene: 'shop', pos: [-0.2, 1.45, 2.35], look: [-1.7, 0.9, 0.6], fov: 42 },
+  'shop-bench': { scene: 'shop', pos: [-0.85, 1.5, 2.5], look: [-1.75, 0.85, 0.75], fov: 42 },
   'shop-robot': { scene: 'shop', pos: [0.7, 1.1, 2.3], look: [-0.5, 0.75, 1.05], fov: 38 },
   'shop-back': { scene: 'shop', pos: [-0.8, 1.5, 1.8], look: [1.6, 1.2, -2.2], fov: 46 },
   'shop-probe': { scene: 'shop', pos: [0.0, 0.9, 3.0], look: [0, 0.2, 1.5], fov: 35 },

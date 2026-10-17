@@ -27,9 +27,9 @@ fixed = [
  {"name": "magnifier", "glb": "magnifier.glb", "pos": [-1.02, 0, 0.97], "ry": -30, "on": "workbench"},
  {"name": "soldering_iron", "glb": "soldering_iron.glb", "pos": [-1.85, 0, 1.1], "ry": 15, "on": "workbench"},
  {"name": "enamel_mug", "glb": "enamel_mug.glb", "pos": [-2.25, 0, 1.15], "ry": 30, "on": "workbench"},
- {"name": "robot", "glb": "robot.glb", "pos": [-0.5, 0, 1.2], "ry": -40},
+ {"name": "robot", "glb": "robot.glb", "pos": [-0.52, 0, 1.18], "ry": -56},
  {"name": "broom", "type": "proc", "kind": "broom", "pos": [-1.98, 0, 1.45], "ry": 0, "roll": -16.4, "on": "floor"},
- {"name": "aframe", "type": "proc", "kind": "aframe", "pos": [0.78, 0, 1.92], "ry": -12, "on": "floor"},
+ {"name": "aframe", "type": "proc", "kind": "aframe", "pos": [0.95, 0, 1.95], "ry": -16, "scale": 0.8, "on": "floor"},
  {"name": "toolbox", "glb": "toolbox.glb", "pos": [-1.55, 0, 1.7], "ry": 14},
  {"name": "back_door", "glb": "back_door.glb", "pos": [1.75, 0, 0], "wall": "back"},
  {"name": "wall_clock", "glb": "wall_clock.glb", "pos": [2.63, 1.78, 0], "wall": "back"},
@@ -59,7 +59,7 @@ BIG = ['tube_radio_closed.glb', 'crt_tv.glb', 'desk_fan.glb', 'cassette_recorder
 SMALL = ['alarm_clock.glb', 'thermos.glb', 'enamel_mug.glb']
 D = {'tube_radio_closed.glb': 0.281, 'crt_tv.glb': 0.33, 'desk_fan.glb': 0.338, 'cassette_recorder.glb': 0.175,
      'alarm_clock.glb': 0.079, 'thermos.glb': 0.136, 'enamel_mug.glb': 0.081}
-CART = {'box_a': (0.46, 0.4, 0.4), 'box_b': (0.4, 0.46, 0.34)}
+CART = {'box_a': (0.46, 0.4, 0.4), 'box_b': (0.4, 0.46, 0.34), 'box_c': (0.34, 0.26, 0.3), 'box_d': (0.5, 0.34, 0.26)}
 # colour variants per model: multiplier on the base colour (None = as generated)
 TINT = {'cassette_recorder.glb': [None, [0.32, 0.32, 0.34], [0.55, 0.5, 0.46], [0.85, 0.42, 0.36]],
         'crt_tv.glb': [None, [0.62, 0.64, 0.66], [0.75, 0.6, 0.5]],
@@ -79,9 +79,10 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
     for lv in range(levels):
         x = x0 + random.uniform(0.01, 0.04); k = 0; last = None
         while True:
-            if lv == 0 or (lv == levels - 1 and clear[lv] < 0.5 and random.random() < 0.35 and x < x0 + 0.6):
-                key = random.choice(list(CART)); w, h, dd = CART[key]
-                sc = round(random.uniform(0.85, 1.0), 2); w *= sc; dd *= sc
+            if lv == 0 or (lv == levels - 1 and clear[lv] < 0.5 and random.random() < 0.35 and x < x0 + 0.6) or (0 < lv < levels - 1 and random.random() < 0.18):
+                fitk = [k_ for k_ in CART if CART[k_][1] * 0.85 <= clear[lv] - 0.02]
+                key = random.choice(fitk); w, h, dd = CART[key]
+                sc = round(min(random.uniform(0.85, 1.0), (clear[lv] - 0.02) / h), 2); w *= sc; dd *= sc
                 if x + w > x1: break
                 cx = x + w / 2; c = back + sgn * (dd / 2 + 0.01)
                 pos = [cx, 0, c] if along == 'x' else [c, 0, cx]
@@ -91,21 +92,25 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
             cands = [g for g in BIG if H[g] <= clear[lv] and g != last]
             g = random.choice(cands); last = g
             sc = round(random.uniform(0.78, 0.92) if g == 'crt_tv.glb' and random.random() < 0.5 else random.uniform(0.92, 1.0), 2)  # 14-inch and 18-inch sets
-            yaw = random.uniform(-12, 12) if random.random() < 0.6 else random.uniform(-4, 4)   # not a shop display: some are askew
+            r = random.random()   # not a shop display: most askew, some turned well round, a few side-on
+            yaw = random.uniform(-4, 4) if r < 0.25 else random.uniform(-14, 14) if r < 0.7 else random.uniform(-32, 32) if r < 0.9 else random.choice([-1, 1]) * random.uniform(60, 90)
             if g == 'crt_tv.glb' and random.random() < 0.18: yaw += 180   # a set turned round: back cover off, under repair
             a = math.radians(yaw)
             w = (W[g] * abs(math.cos(a)) + D[g] * abs(math.sin(a))) * sc      # rotated footprint along the shelf
             dep = (W[g] * abs(math.sin(a)) + D[g] * abs(math.cos(a))) * sc    # ... and across it
             if x + w > x1: break
             cx = x + w / 2; c = back + sgn * (dep / 2 + 0.012)
-            if dep > abs(front - back) - 0.01: yaw = 0; a = 0; dep = D[g] * sc; w = W[g] * sc; c = back + sgn * (dep / 2 + 0.012)
+            if dep > abs(front - back) - 0.01:   # too deep turned like that for this board: stand it square
+                yaw = random.uniform(-4, 4); dep = D[g] * sc; w = W[g] * sc
+                if x + w > x1: break
+                cx = x + w / 2; c = back + sgn * (dep / 2 + 0.012)
             pos = [cx, 0, c] if along == 'x' else [c, 0, cx]
             it = {"name": f"{shelf}_{lv}_{k}", "glb": g, "pos": [round(pos[0], 3), 0, round(pos[2], 3)], "ry": ry + yaw,
                   "on": shelf, "level": lv, "scale": sc}
             t = tint_for(g)
             if t: it["tint"] = t
             out.append(it)
-            if random.random() < 0.5:
+            if random.random() < 0.28:
                 tags.append([round(cx - (x0 + x1) / 2 + random.uniform(-0.08, 0.08), 3) * (1 if along == 'x' else -1), lv,
                              random.choice(range(10)) if random.random() < 0.8 else random.choice([10, 11])])
             # sometimes a small thing stacked on top (clock on a radio), when it clears the board above
@@ -114,7 +119,7 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
                             "ry": ry + random.uniform(-30, 30), "on": f"{shelf}_{lv}_{k}", "scale": 0.95})
             room = abs(front - back) - dep - 0.03   # free depth in front of the big item
             fits = [x for x in SMALL if D[x] * 0.95 <= room]
-            if fits and random.random() < 0.7:
+            if fits and random.random() < 0.45:
                 sg = random.choice(fits); fz = front - sgn * (D[sg] / 2 + 0.006)
                 fx = cx + random.uniform(-w / 3, w / 3)
                 fpos = [fx, 0, fz] if along == 'x' else [fz, 0, fx]
