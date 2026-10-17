@@ -8,7 +8,7 @@ export class Film {
       <div class="film-hint"></div>
       <div class="film-black"></div>
       <div class="film-title"><h1>青 石 巷</h1><p>请戴上耳机</p><small>点击画面开始</small><small class="film-credit">现场录音来自 Freesound 与 Wikimedia Commons(CC0);远处的狗叫:YleArkisto,CC BY 4.0。出处见 CREDITS.md</small></div>
-      <div class="film-card"><p>刻度停在十一岁。</p><p>灯灭了,门还是那么高。</p><small class="film-replay">点击画面重看</small></div>`;
+      <div class="film-card"><p>刻度停在十一岁。</p><p>灯灭了，门还是那么高。</p><small class="film-replay">点击画面重看</small></div>`;
     this.el = root;
     this.frameEl = root.querySelector('.fe-frame');
     this.hintEl = root.querySelector('.film-hint');
