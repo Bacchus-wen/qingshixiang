@@ -59,7 +59,7 @@ BIG = ['tube_radio_closed.glb', 'crt_tv.glb', 'desk_fan.glb', 'cassette_recorder
 SMALL = ['alarm_clock.glb', 'thermos.glb', 'enamel_mug.glb']
 D = {'tube_radio_closed.glb': 0.281, 'crt_tv.glb': 0.33, 'desk_fan.glb': 0.338, 'cassette_recorder.glb': 0.175,
      'alarm_clock.glb': 0.079, 'thermos.glb': 0.136, 'enamel_mug.glb': 0.081}
-CART = {'box_a': (0.46, 0.4, 0.4), 'box_b': (0.4, 0.46, 0.34), 'box_c': (0.34, 0.26, 0.3), 'box_d': (0.5, 0.34, 0.26)}
+CART = {'box_a': (0.46, 0.4, 0.4), 'box_b': (0.4, 0.46, 0.34), 'box_c': (0.32, 0.3, 0.26), 'box_d': (0.42, 0.4, 0.26)}
 # colour variants per model: multiplier on the base colour (None = as generated)
 TINT = {'cassette_recorder.glb': [None, [0.32, 0.32, 0.34], [0.55, 0.5, 0.46], [0.85, 0.42, 0.36]],
         'crt_tv.glb': [None, [0.62, 0.64, 0.66], [0.75, 0.6, 0.5]],

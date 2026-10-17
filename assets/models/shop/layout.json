@@ -75,14 +75,14 @@
   "levels": 4,
   "tags": [
    [
-    0.389,
-    1,
-    0
+    0.052,
+    2,
+    8
    ],
    [
-    -0.13,
+    0.458,
     3,
-    7
+    3
    ]
   ]
  },
@@ -632,12 +632,12 @@
   "type": "carton",
   "front": "box_d",
   "size": [
-   0.43,
-   0.292,
+   0.361,
+   0.344,
    0.224
   ],
   "pos": [
-   0.37,
+   0.335,
    0,
    -2.088
   ],
@@ -898,12 +898,12 @@
   "type": "carton",
   "front": "box_d",
   "size": [
-   0.5,
-   0.34,
+   0.42,
+   0.4,
    0.26
   ],
   "pos": [
-   0.139,
+   0.099,
    0,
    -2.07
   ],
@@ -921,7 +921,7 @@
    0.384
   ],
   "pos": [
-   0.63,
+   0.55,
    0,
    -2.008
   ],
@@ -934,14 +934,14 @@
   "type": "carton",
   "front": "box_c",
   "size": [
-   0.34,
-   0.26,
-   0.3
+   0.32,
+   0.3,
+   0.26
   ],
   "pos": [
-   -0.904,
+   -0.914,
    0,
-   -2.05
+   -2.07
   ],
   "ry": 2.179950181738013,
   "on": "shelf_back",
@@ -952,14 +952,14 @@
   "type": "carton",
   "front": "box_c",
   "size": [
-   0.337,
-   0.257,
-   0.297
+   0.317,
+   0.297,
+   0.257
   ],
   "pos": [
-   -0.541,
+   -0.571,
    0,
-   -2.051
+   -2.071
   ],
   "ry": -0.865822981062327,
   "on": "shelf_back",
@@ -969,7 +969,7 @@
   "name": "shelf_back_4_2",
   "glb": "cassette_recorder.glb",
   "pos": [
-   -0.107,
+   -0.147,
    0,
    -2.08
   ],
@@ -987,7 +987,7 @@
   "name": "shelf_back_4_3",
   "glb": "tube_radio_closed.glb",
   "pos": [
-   0.411,
+   0.371,
    0,
    -2.049
   ],
@@ -1273,30 +1273,102 @@
   "type": "carton",
   "front": "box_d",
   "size": [
-   0.49,
-   0.333,
+   0.412,
+   0.392,
    0.255
   ],
   "pos": [
    -2.813,
    0,
-   1.292
+   1.252
   ],
   "ry": 87.97677102639696,
   "on": "shelf_left2",
   "level": 0
  },
  {
+  "name": "shelf_left2_0_2",
+  "type": "carton",
+  "front": "box_b",
+  "size": [
+   0.348,
+   0.4,
+   0.296
+  ],
+  "pos": [
+   -2.792,
+   0,
+   1.656
+  ],
+  "ry": 89.58913090798583,
+  "on": "shelf_left2",
+  "level": 0
+ },
+ {
   "name": "shelf_left2_1_0",
+  "type": "carton",
+  "front": "box_c",
+  "size": [
+   0.272,
+   0.255,
+   0.221
+  ],
+  "pos": [
+   -2.83,
+   0,
+   0.757
+  ],
+  "ry": 90.32430148684996,
+  "on": "shelf_left2",
+  "level": 1
+ },
+ {
+  "name": "shelf_left2_1_1",
+  "type": "carton",
+  "front": "box_c",
+  "size": [
+   0.298,
+   0.279,
+   0.242
+  ],
+  "pos": [
+   -2.819,
+   0,
+   1.06
+  ],
+  "ry": 88.77272466624956,
+  "on": "shelf_left2",
+  "level": 1
+ },
+ {
+  "name": "shelf_left2_1_2",
+  "type": "carton",
+  "front": "box_b",
+  "size": [
+   0.4,
+   0.46,
+   0.34
+  ],
+  "pos": [
+   -2.77,
+   0,
+   1.438
+  ],
+  "ry": 87.62867756563699,
+  "on": "shelf_left2",
+  "level": 1
+ },
+ {
+  "name": "shelf_left2_2_0",
   "glb": "desk_fan.glb",
   "pos": [
-   -2.746,
+   -2.776,
    0,
-   0.827
+   0.791
   ],
-  "ry": 78.58143273160027,
+  "ry": 90.41391333920254,
   "on": "shelf_left2",
-  "level": 1,
+  "level": 2,
   "scale": 0.95,
   "tint": [
    0.95,
@@ -1305,17 +1377,68 @@
   ]
  },
  {
-  "name": "shelf_left2_1_1",
+  "name": "shelf_left2_2_0s",
+  "glb": "alarm_clock.glb",
+  "pos": [
+   -2.546,
+   0,
+   0.861
+  ],
+  "ry": 80.50032096176975,
+  "on": "shelf_left2",
+  "level": 2,
+  "scale": 0.95
+ },
+ {
+  "name": "shelf_left2_2_1",
+  "glb": "tube_radio_closed.glb",
+  "pos": [
+   -2.802,
+   0,
+   1.233
+  ],
+  "ry": 92.8498290909772,
+  "on": "shelf_left2",
+  "level": 2,
+  "scale": 0.97
+ },
+ {
+  "name": "shelf_left2_2_1t",
+  "glb": "enamel_mug.glb",
+  "pos": [
+   -2.802,
+   0,
+   1.233
+  ],
+  "ry": 97.30220725948726,
+  "on": "shelf_left2_2_1",
+  "scale": 0.95
+ },
+ {
+  "name": "shelf_left2_2_1s",
+  "glb": "enamel_mug.glb",
+  "pos": [
+   -2.546,
+   0,
+   1.149
+  ],
+  "ry": 78.28354395237852,
+  "on": "shelf_left2",
+  "level": 2,
+  "scale": 0.95
+ },
+ {
+  "name": "shelf_left2_3_0",
   "glb": "crt_tv.glb",
   "pos": [
-   -2.785,
+   -2.793,
    0,
-   1.276
+   0.844
   ],
-  "ry": 88.12451417874816,
+  "ry": 268.77600817702285,
   "on": "shelf_left2",
-  "level": 1,
-  "scale": 0.93,
+  "level": 3,
+  "scale": 0.85,
   "tint": [
    0.75,
    0.6,
@@ -1323,87 +1446,17 @@
   ]
  },
  {
-  "name": "shelf_left2_1_1s",
-  "glb": "alarm_clock.glb",
-  "pos": [
-   -2.546,
-   0,
-   1.375
-  ],
-  "ry": 100.48763481782686,
-  "on": "shelf_left2",
-  "level": 1,
-  "scale": 0.95
- },
- {
-  "name": "shelf_left2_2_0",
-  "type": "carton",
-  "front": "box_b",
-  "size": [
-   0.364,
-   0.419,
-   0.309
-  ],
-  "pos": [
-   -2.785,
-   0,
-   0.795
-  ],
-  "ry": 87.43448456833914,
-  "on": "shelf_left2",
-  "level": 2
- },
- {
-  "name": "shelf_left2_2_1",
+  "name": "shelf_left2_3_1",
   "glb": "desk_fan.glb",
   "pos": [
-   -2.719,
+   -2.768,
    0,
-   1.231
+   1.253
   ],
-  "ry": 62.26384223196553,
+  "ry": 85.65936549020263,
   "on": "shelf_left2",
-  "level": 2,
+  "level": 3,
   "scale": 0.93
- },
- {
-  "name": "shelf_left2_3_0",
-  "glb": "crt_tv.glb",
-  "pos": [
-   -2.778,
-   0,
-   0.838
-  ],
-  "ry": 97.26595113995971,
-  "on": "shelf_left2",
-  "level": 3,
-  "scale": 0.82
- },
- {
-  "name": "shelf_left2_3_0s",
-  "glb": "alarm_clock.glb",
-  "pos": [
-   -2.546,
-   0,
-   0.984
-  ],
-  "ry": 76.10848054632831,
-  "on": "shelf_left2",
-  "level": 3,
-  "scale": 0.95
- },
- {
-  "name": "shelf_left2_3_1",
-  "glb": "cassette_recorder.glb",
-  "pos": [
-   -2.853,
-   0,
-   1.304
-  ],
-  "ry": 89.79808510814188,
-  "on": "shelf_left2",
-  "level": 3,
-  "scale": 0.96
  },
  {
   "name": "floor_carton_0",
