@@ -55,7 +55,7 @@ function drawCell(sign, w, h) {
   for (let i = 0; i < 8; i++) {
     const y = 26 + random01(sign.seed * 97 + i * 5) * (h - 52);
     const x = 20 + random01(sign.seed * 31 + i * 7) * (w - 54);
-    b.fillRect(x, y, 15 + random01(i + sign.seed) * 28, 4 + i % 4);
+    b.fillRect(x, y, 8 + random01(i + sign.seed) * 12, 3 + i % 3); // r20: short gaps, the characters stay legible
   }
   // Guarantee a visible missing segment ON a glyph: random rectangles alone can all hit empty space.
   const source = g.getImageData(0, 0, w, h).data;
@@ -65,7 +65,7 @@ function drawCell(sign, w, h) {
   }
   if (strokes.length) {
     const [x, y] = strokes[Math.floor(random01(sign.seed * 331) * strokes.length)];
-    b.fillRect(x - 18, y - 8, 36, 15);
+    b.fillRect(x - 7, y - 4, 14, 8);
   }
   const halo = (source) => {
     const c = canvas(w, h), p = c.getContext('2d', { willReadFrequently: true });
