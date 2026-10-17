@@ -165,9 +165,9 @@ export function groundWalk(textures, ctx) {
   // r20: decades of foot traffic and rain -- broad stains and a darker band along the wall, so the tiles stop reading
   // as a clean showroom floor in the near foreground
   const stain = mx_fractal_noise_float(vec3(frame.p.mul(0.9), 2.1), 3, 2.0, 0.5).mul(0.5).add(0.5);
-  const grime = mix(float(1.0), float(0.62), smoothstep(0.45, 0.8, stain));
+  const grime = mix(float(1.0), float(0.6), smoothstep(0.38, 0.75, stain));
   return wetMaterial('cc_ground_walk', ctx, {
-    albedo: S.a.mul(0.58).mul(dirt).mul(grime), roughness: mix(float(0.9), float(0.76), S.h),
+    albedo: S.a.mul(0.52).mul(dirt).mul(grime), roughness: mix(float(0.9), float(0.76), S.h),
     xy: S.xy.mul(0.48), ...frame, coverage: 0.25, porosity: 0.6,
   });
 }
