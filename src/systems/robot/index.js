@@ -338,7 +338,10 @@ export default {
     this.lookCur.lerp(this.look.multiplyScalar(0.25 + this.open * 0.75), k);
     const jitter = this.open > 0.05 ? Math.sin(t * 31) * 0.004 * this.open : 0;
     // waking lifts the drooped head toward level; the pointer then pitches it further up/down
-    this._e.set(-this.lookCur.y * 0.9 - this.open * 0.32 + jitter, -this.lookCur.x * 1.1, 0);
+    // r19 (review6): asleep, the head rests turned a little toward the street end we arrive from, so the dead lens is
+    // seen in the waiting shot; it swings to its gaze as the eye opens
+    const restYaw = Number(ctx.params?.get('restyaw') ?? 0.42) * (1 - this.open);
+    this._e.set(-this.lookCur.y * 0.9 - this.open * 0.32 + jitter, -this.lookCur.x * 1.1 + restYaw, 0);
     this.head.quaternion.copy(this.headRest).multiply(this._q.setFromEuler(this._e));
 
     // ---- eye light follows the eye's forward axis
