@@ -46,3 +46,8 @@
 - 道具第二批(M2):desk_lamp、workbench、stool、crt_tv、desk_fan、wall_clock。
 - 道具第三批(M2):parts_cabinet、toolbox、bicycle、thermos、enamel_mug、alarm_clock、cassette_recorder、soldering_iron、magnifier、back_door、tube_radio_closed、crt_tv_small。
 - 参数:model v3.1-20260211、geometry_quality detailed、texture v3.5-20260815 detailed、PBR、delight。
+
+## 03:00 Tripo API 余额用完
+- 账户查询 /v3/account/balance:balance 0.00。本次按账本估算用了约 1730 积分(25 个任务 × 60–70)。
+- 已完成 23 个模型(机器人整体/头/躯干/手臂/腿、收音机 ×3 种方法、台灯、工作台、木凳、电视、风扇、摆钟、零件柜、工具箱、自行车、暖水瓶、搪瓷杯、闹钟、录音机、电烙铁、放大镜、后屋门、关着的收音机)。
+- 未完成:小电视 crt_tv_small(提交时 403/2010,余额不足)。之后的模型重做只能等充值或改用其它来源;Blender 内的减面、贴图、组合与摆放照常进行。
