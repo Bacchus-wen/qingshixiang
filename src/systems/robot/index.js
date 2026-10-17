@@ -371,7 +371,7 @@ export default {
     this.rimK = (this.rimK ?? 1) + ((overShoulder ? 0.12 : 1) - (this.rimK ?? 1)) * Math.min(1, dt * 2);
     if (this.rim) this.rim.intensity = 9 * this.rimK;
     shellDim.value = 0.3 + 0.7 * this.rimK;
-    if (this.signKey) this.signKey.intensity = 1.2 * (ctx.world.mains ?? 1) * (0.25 + 0.75 * this.rimK); // (Grok r17: the shell went purple)
+    if (this.signKey) this.signKey.intensity = 1.2 * (ctx.world.mains ?? 1) * this.rimK * this.rimK; // r18: no magenta specks on the helmet over the shoulder // (Grok r17: the shell went purple)
     if (this.cone) {
       this.cone.position.copy(this._v);
       this.cone.quaternion.setFromUnitVectors(_DOWN, this._d);
