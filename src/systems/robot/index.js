@@ -349,7 +349,7 @@ export default {
     // r19 (both critics): inside the beam the past must read as neon and people, not amber fog. The look-phase key is
     // dimmer and whiter; the door and the flood keep the full beam.
     const fullBeam = ctx.api.fragment?.state === 'playing' || (ctx.memory.flood ?? 0) > 0.3 || (this.floodT !== undefined && this.floodT < 2.4);
-    const spotTarget = ctx.memory.goboMode === 'line' ? 0.35 : fullBeam ? 1 : 0.42; // the level line must not burn out the pencil
+    const spotTarget = ctx.memory.goboMode === 'line' ? 0.18 : fullBeam ? 1 : 0.42; // the level line must not burn out the pencil
     this.spotK = (this.spotK ?? 1) + (spotTarget - (this.spotK ?? 1)) * Math.min(1, dt * 1.5);
     this.spot.intensity = 70 * o * o * this.spotK; // v2: the street inside the beam stays readable (260 blew the centre to white)
     // the surveyor's level mark is a tight beam (thin and short on the jamb), but the past it reveals keeps the
