@@ -284,6 +284,24 @@ export async function buildDetails(ctx, root, facades, M, r) {
   vmLight.position.set(vmX + 0.9, L.curb + 1.2, vmZ);
   root.add(vmLight);
 
+  // r19: a dying fluorescent tube on the wall above the robot's corner -- the waiting shot was half pure black.
+  // Cold, stuttering every few seconds, it trips with the mains like the rest of the street.
+  {
+    const fx = -(L.halfRoad + L.walk), fz = -16.4, fy = 3.05;
+    const tubeK = uniform(1);
+    const tm = new THREE.MeshBasicNodeMaterial(); tm.colorNode = vec3(0.85, 0.95, 1.0).mul(tubeK).mul(2.4);
+    const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 1.0, 10), tm);
+    tube.rotation.x = Math.PI / 2; tube.position.set(fx + 0.11, fy, fz);
+    const bracket = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.05, 1.1), dark); bracket.position.set(fx + 0.04, fy + 0.045, fz);
+    root.add(tube, bracket);
+    ctx.lightPool?.add({ pos: new THREE.Vector3(fx + 0.45, fy - 0.15, fz), color: new THREE.Color(0.78, 0.9, 1.0), intensity: 6, distance: 7.5,
+      alive: 1, importance: 1.5, power: () => {
+        const t = performance.now() / 1000, ph = t % 6.7;
+        const k = ph < 0.7 ? (Math.sin(t * 53) * Math.sin(t * 17.3) > 0.15 ? 1 : 0.08) : 0.92 + 0.08 * Math.sin(t * 120);
+        tubeK.value = k * mains.value; return k;
+      } });
+  }
+
   // traffic light at the crossing, still cycling for nobody (its colour is the one exception, kept tiny)
   const tlx = L.halfRoad + 0.6, tlz = L.crossZ + L.crossHalf + 0.6;
   add(root, new THREE.CylinderGeometry(0.07, 0.07, 4.2, 8), dark, tlx, 2.1, tlz);
