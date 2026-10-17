@@ -10,22 +10,21 @@ fixed = [
  {"name": "shelf_back", "type": "shelf", "pos": [-0.1, 0, -1.97], "w": 2.1, "d": 0.5, "h": 2.55, "levels": 5},
  {"name": "shelf_left", "type": "shelf", "pos": [-2.72, 0, -1.05], "ry": 90, "w": 1.7, "d": 0.5, "h": 2.3, "levels": 4},
  {"name": "shelf_left2", "type": "shelf", "pos": [-2.72, 0, 1.225], "ry": 90, "w": 1.35, "d": 0.45, "h": 1.9, "levels": 4},
- {"name": "workbench", "glb": "workbench.glb", "pos": [-1.6, 0, 0.2], "ry": 0},
- {"name": "bench_clock", "glb": "alarm_clock.glb", "pos": [-1.0, 0, -0.1], "ry": 24, "on": "workbench"},
- {"name": "spool_a", "type": "proc", "kind": "spool", "seed": 0, "pos": [-1.08, 0, 0.12], "on": "workbench"},
- {"name": "spool_b", "type": "proc", "kind": "spool", "seed": 1, "pos": [-2.22, 0, 0.32], "on": "workbench"},
- {"name": "screwdriver_a", "type": "proc", "kind": "screwdriver", "seed": 1, "pos": [-1.6, 0, 0.42], "ry": 18, "on": "workbench"},
- {"name": "screwdriver_b", "type": "proc", "kind": "screwdriver", "seed": 0, "pos": [-1.42, 0, 0.47], "ry": -25, "on": "workbench"},
- {"name": "screw_tin", "type": "proc", "kind": "tin", "pos": [-1.32, 0, 0.36], "on": "workbench"},
- {"name": "rag", "type": "proc", "kind": "rag", "pos": [-1.96, 0, 0.515], "on": "workbench", "noDrop": True, "y": 0.0},
- {"name": "flex_coil", "type": "proc", "kind": "coil", "pos": [-1.62, 0, 0.12], "on": "floor"},
- {"name": "desk_lamp", "glb": "desk_lamp.glb", "pos": [-1.93, 0, -0.02], "ry": 40, "on": "workbench"},
- {"name": "tube_radio_open", "glb": "tube_radio_open.glb", "pos": [-1.38, 0, 0.0], "ry": 8, "on": "workbench"},
- {"name": "magnifier", "glb": "magnifier.glb", "pos": [-1.02, 0, 0.27], "ry": -30, "on": "workbench"},
- {"name": "soldering_iron", "glb": "soldering_iron.glb", "pos": [-1.85, 0, 0.4], "ry": 15, "on": "workbench"},
- {"name": "enamel_mug", "glb": "enamel_mug.glb", "pos": [-2.25, 0, 0.45], "ry": 30, "on": "workbench"},
- {"name": "robot", "glb": "robot.glb", "pos": [-0.5, 0, 0.5], "ry": -40},
- {"name": "toolbox", "glb": "toolbox.glb", "pos": [-1.55, 0, 1.0], "ry": 14},
+ {"name": "workbench", "glb": "workbench.glb", "pos": [-1.6, 0, 0.9], "ry": 0},
+ {"name": "bench_clock", "glb": "alarm_clock.glb", "pos": [-1.0, 0, 0.6], "ry": 24, "on": "workbench"},
+ {"name": "spool_a", "type": "proc", "kind": "spool", "seed": 0, "pos": [-1.08, 0, 0.82], "on": "workbench"},
+ {"name": "spool_b", "type": "proc", "kind": "spool", "seed": 1, "pos": [-2.22, 0, 1.02], "on": "workbench"},
+ {"name": "screwdriver_a", "type": "proc", "kind": "screwdriver", "seed": 1, "pos": [-1.6, 0, 1.12], "ry": 18, "on": "workbench"},
+ {"name": "screwdriver_b", "type": "proc", "kind": "screwdriver", "seed": 0, "pos": [-1.42, 0, 1.17], "ry": -25, "on": "workbench"},
+ {"name": "screw_tin", "type": "proc", "kind": "tin", "pos": [-1.32, 0, 1.06], "on": "workbench"},
+ {"name": "rag", "type": "proc", "kind": "rag", "pos": [-1.96, 0, 1.215], "on": "workbench", "noDrop": True, "y": 0.0},
+ {"name": "desk_lamp", "glb": "desk_lamp.glb", "pos": [-1.93, 0, 0.68], "ry": 40, "on": "workbench"},
+ {"name": "tube_radio_open", "glb": "tube_radio_open.glb", "pos": [-1.38, 0, 0.7], "ry": 8, "on": "workbench"},
+ {"name": "magnifier", "glb": "magnifier.glb", "pos": [-1.02, 0, 0.97], "ry": -30, "on": "workbench"},
+ {"name": "soldering_iron", "glb": "soldering_iron.glb", "pos": [-1.85, 0, 1.1], "ry": 15, "on": "workbench"},
+ {"name": "enamel_mug", "glb": "enamel_mug.glb", "pos": [-2.25, 0, 1.15], "ry": 30, "on": "workbench"},
+ {"name": "robot", "glb": "robot.glb", "pos": [-0.5, 0, 1.2], "ry": -40},
+ {"name": "toolbox", "glb": "toolbox.glb", "pos": [-1.55, 0, 1.7], "ry": 14},
  {"name": "back_door", "glb": "back_door.glb", "pos": [1.75, 0, 0], "wall": "back"},
  {"name": "wall_clock", "glb": "wall_clock.glb", "pos": [2.63, 1.78, 0], "wall": "back"},
  {"name": "parts_cabinet", "glb": "parts_cabinet.glb", "pos": [2.62, 0, -0.6], "ry": -90},
@@ -105,7 +104,7 @@ fill('shelf_left2', 'z', 0.6, 1.85, -2.95, -2.5, 4, 90, [0.56, 0.56, 0.56, 0.9])
 for f in fixed:
     if f['name'] in shelf_tags: f['tags'] = shelf_tags[f['name']]
 # cartons on the floor: a stack in the back-right corner by the door, two under the bench end
-for i, (key, x, z, ry, lvl) in enumerate([('box_a', 0.98, -1.2, 6, 0), ('box_b', 0.99, -1.2, -3, 1), ('box_b', -2.05, 1.55, 18, 0)]):
+for i, (key, x, z, ry, lvl) in enumerate([('box_a', 0.98, -1.2, 6, 0), ('box_b', 0.99, -1.2, -3, 1), ('box_b', -2.1, 1.93, 18, 0)]):
     w, h, dd = CART[key]
     it = {"name": f"floor_carton_{i}", "type": "carton", "front": key, "size": [w, h, dd], "pos": [x, 0, z], "ry": ry}
     out.append(it)

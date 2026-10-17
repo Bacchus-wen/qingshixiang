@@ -31,7 +31,9 @@ for (const { key, name } of list) {
     const dist = Math.max(0.35, r / Math.tan((cam.fov * Math.PI / 180) / 2) * 1.15);
     const p = c.clone().addScaledVector(d, dist);
     // keep the camera inside the room (or on the street for street items)
-    if (c.z < R.d / 2) { p.x = Math.max(-R.w / 2 + 0.1, Math.min(R.w / 2 - 0.1, p.x)); p.z = Math.max(-R.d / 2 + 0.1, Math.min(R.d / 2 + 3, p.z)); p.y = Math.max(0.15, Math.min(R.h - 0.1, p.y)); }
+    if (c.z < R.d / 2) { // interior item: camera stays inside the room, in front of it
+      p.x = Math.max(-R.w / 2 + 0.15, Math.min(R.w / 2 - 0.15, p.x)); p.z = Math.max(-R.d / 2 + 0.15, Math.min(R.d / 2 - 0.1, p.z)); p.y = Math.max(0.2, Math.min(R.h - 0.15, p.y));
+    } else { p.z = Math.max(p.z, c.z + 1.2); p.y = Math.max(p.y, 0.6); } // street item: from the street
     cam.position.copy(p); cam.lookAt(c);
     for (let i = 0; i < 6; i++) e.postfx.render(1 / 60);
   }, { name });

@@ -140,11 +140,19 @@ function procItem(kind, seed = 1) {
     add(new THREE.CylinderGeometry(0.032, 0.032, 0.006, 24), flange, 0, 0.003, 0);
     add(new THREE.CylinderGeometry(0.026, 0.026, 0.036, 24), wire, 0, 0.024, 0);
     add(new THREE.CylinderGeometry(0.032, 0.032, 0.006, 24), flange, 0, 0.045, 0);
-  } else if (kind === 'screwdriver') { // lying on the bench: handle + shaft along x
-    const handle = pmat('handle' + (seed % 2), { color: seed % 2 ? 0xb8241c : 0xd9a520, roughness: 0.4 });
-    const steel = pmat('steel', { color: 0xb8b8b8, roughness: 0.25, metalness: 1 });
-    add(new THREE.CylinderGeometry(0.012, 0.014, 0.1, 12).rotateZ(Math.PI / 2), handle, -0.05, 0.014, 0);
-    add(new THREE.CylinderGeometry(0.0035, 0.0035, 0.12, 8).rotateZ(Math.PI / 2), steel, 0.06, 0.014, 0);
+  } else if (kind === 'screwdriver') { // lying on the bench: fluted, grubby handle + ferrule + shaft along x
+    const handle = PM['handle' + (seed % 2)] ??= (() => {
+      const m = new THREE.MeshStandardNodeMaterial({ roughness: 0.55 });
+      const base = seed % 2 ? vec3(0.32, 0.035, 0.025) : vec3(0.42, 0.26, 0.03); // worn red / amber (linear)
+      const grime = smoothstep(0.4, 0.9, mx_fractal_noise_float(positionWorld.mul(90), 2, 2, 0.5).mul(0.5).add(0.5));
+      m.colorNode = mix(base, base.mul(0.35), grime.mul(0.8)); return m;
+    })();
+    const steel = pmat('steel', { color: 0x8c8c88, roughness: 0.4, metalness: 1 });
+    const hg = new THREE.CylinderGeometry(0.0105, 0.0125, 0.09, 8).rotateZ(Math.PI / 2); // octagonal: reads as fluted
+    add(hg, handle, -0.045, 0.0125, 0);
+    add(new THREE.CylinderGeometry(0.006, 0.0075, 0.012, 12).rotateZ(Math.PI / 2), steel, 0.005, 0.0125, 0);
+    add(new THREE.CylinderGeometry(0.003, 0.003, 0.11, 8).rotateZ(Math.PI / 2), steel, 0.065, 0.0125, 0);
+    add(new THREE.BoxGeometry(0.008, 0.0012, 0.006), steel, 0.123, 0.0125, 0); // flat tip
   } else if (kind === 'tin') { // round screw tin, lid leaning against it
     const tinM = pmat('tin', { color: 0x6e7b6a, roughness: 0.45, metalness: 0.7 });
     const dark = pmat('tinIn', { color: 0x1c1a17, roughness: 0.8 });
