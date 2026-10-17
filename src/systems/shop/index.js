@@ -586,6 +586,26 @@ export default {
         const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.032, 16, 12), new THREE.MeshStandardNodeMaterial({ color: 0xf2efe6, roughness: 0.15, transparent: true, opacity: 0.85 }));
         bulb.position.set(bx, h - drop - 0.085, bz); root.add(bulb);
       }
+      // floor mess that a working shop has and a showroom doesn't: offcuts of wire, two crumpled notes, a few screws
+      {
+        const mess = new THREE.Group(), rr = (k) => { const x = Math.sin(k * 78.233 + 4.1) * 43758.5453; return x - Math.floor(x); };
+        const wireM = [PM.wireMess0 ??= new THREE.MeshStandardNodeMaterial({ color: 0x8a2a1a, roughness: 0.5 }), PM.wireMess1 ??= new THREE.MeshStandardNodeMaterial({ color: 0x1b1b1b, roughness: 0.5 }), PM.wireMess2 ??= new THREE.MeshStandardNodeMaterial({ color: 0xb87333, roughness: 0.35, metalness: 0.9 })];
+        const spots = [[-1.2, 1.38], [-0.25, 1.62], [-1.75, 1.32], [-0.05, 0.92], [-2.05, 0.35]];
+        spots.forEach(([x0, z0], k) => { // a loose curl of wire, lying flat
+          const pts = []; let a = rr(k) * 6.28, x = x0, z = z0;
+          for (let i = 0; i < 9; i++) { a += (rr(k * 9 + i) - 0.5) * 1.6; x += Math.cos(a) * 0.035; z += Math.sin(a) * 0.035; pts.push(new THREE.Vector3(x, 0.0025, z)); }
+          mess.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, 0.0018, 5), wireM[k % 3]));
+        });
+        const paperM = PM.paper ??= new THREE.MeshStandardNodeMaterial({ color: 0xd9d2bf, roughness: 0.95 });
+        [[-0.32, 1.95], [0.55, 1.1]].forEach(([x, z], k) => { // crumpled paper
+          const g = new THREE.IcosahedronGeometry(0.032, 1), p = g.attributes.position;
+          for (let i = 0; i < p.count; i++) { const f = 0.75 + rr(i * 3 + k * 50) * 0.45; p.setXYZ(i, p.getX(i) * f, p.getY(i) * f * 0.85, p.getZ(i) * f); }
+          g.computeVertexNormals(); const m = new THREE.Mesh(g, paperM); m.position.set(x, 0.025, z); m.rotation.set(rr(k) * 3, rr(k + 1) * 3, 0); mess.add(m);
+        });
+        const steelS = PM.bits ??= new THREE.MeshStandardNodeMaterial({ color: 0x9c9a94, roughness: 0.35, metalness: 1 });
+        for (let k = 0; k < 9; k++) { const m = new THREE.Mesh(new THREE.CylinderGeometry(0.0022, 0.0022, 0.012, 6).rotateZ(Math.PI / 2), steelS); m.position.set(-1.45 + rr(k + 20) * 1.0, 0.0022, 1.3 + rr(k + 40) * 0.5); m.rotation.y = rr(k + 60) * 6; mess.add(m); }
+        root.add(mergeByMaterial(mess));
+      }
       // spare limbs hang on wall hooks: a plate on the wall and a bent rod through the top joint
       for (const part of [placed.spare_arm, placed.spare_leg]) {
         if (!part || part.userData.layout.wall !== 'right') continue;
