@@ -1,0 +1,34 @@
+{
+ "op": "back_door",
+ "steps": {
+  "views": {
+   "state": "submitted",
+   "task_id": "923c6191-88bc-4e74-bd6b-164b83cbc93f",
+   "path": "/generation/image-to-multiview",
+   "payload": {
+    "model": "v3.1-20260211"
+   },
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "e662a139-2daf-4b54-9757-276adfbe9afa",
+   "path": "/generation/multiview-to-model",
+   "payload": {
+    "model": "v3.1-20260211",
+    "geometry_quality": "detailed",
+    "texture": true,
+    "pbr": true,
+    "texture_version": "v3.5-20260815",
+    "texture_quality": "detailed",
+    "delight": true
+   },
+   "status": "success",
+   "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo4/back_door/model.glb",
+   "sha256": "7dfc8bbcf0610690cdf67062a8be3fdb4bbf61824fcaf0c61aae8de9d8d4770a"
+  }
+ },
+ "credits": 70,
+ "file_token": "file_cf04dd03-8f4b-419b-bc4c-43542da73960",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/back_door.png"
+}

@@ -1,0 +1,34 @@
+{
+ "op": "robot_leg",
+ "steps": {
+  "views": {
+   "state": "submitted",
+   "task_id": "e0804471-4db5-4b73-b832-9a7f9227cc14",
+   "path": "/generation/image-to-multiview",
+   "payload": {
+    "model": "v3.1-20260211"
+   },
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "f668de39-0e4c-4e15-91bd-065e5265d41c",
+   "path": "/generation/multiview-to-model",
+   "payload": {
+    "model": "v3.1-20260211",
+    "geometry_quality": "detailed",
+    "texture": true,
+    "pbr": true,
+    "texture_version": "v3.5-20260815",
+    "texture_quality": "detailed",
+    "delight": true
+   },
+   "status": "success",
+   "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo4/robot_leg/model.glb",
+   "sha256": "454c9388c24205efa497f566a07cd4edf161841e03ee6b496e49a67d98ee7de2"
+  }
+ },
+ "credits": 70,
+ "file_token": "file_6a8a7b3d-6cec-4c36-b277-983a0e94ff14",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/robot_leg.png"
+}

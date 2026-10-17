@@ -1,0 +1,34 @@
+{
+ "op": "magnifier",
+ "steps": {
+  "views": {
+   "state": "submitted",
+   "task_id": "7fcb0cd2-e453-491e-a328-c54dfbf9d844",
+   "path": "/generation/image-to-multiview",
+   "payload": {
+    "model": "v3.1-20260211"
+   },
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "ef438e71-7b01-449c-8d77-6478a9e9ee2f",
+   "path": "/generation/multiview-to-model",
+   "payload": {
+    "model": "v3.1-20260211",
+    "geometry_quality": "detailed",
+    "texture": true,
+    "pbr": true,
+    "texture_version": "v3.5-20260815",
+    "texture_quality": "detailed",
+    "delight": true
+   },
+   "status": "success",
+   "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo4/magnifier/model.glb",
+   "sha256": "035080ad374c985f65703a5bc79f8440b0477ba3118588ac70b9748d77c663c7"
+  }
+ },
+ "credits": 70,
+ "file_token": "file_e726262c-a83c-479f-9e45-3264d0acf147",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/magnifier.png"
+}

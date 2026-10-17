@@ -1,0 +1,34 @@
+{
+ "op": "wall_clock",
+ "steps": {
+  "views": {
+   "state": "submitted",
+   "task_id": "b069062e-b9dd-4bcd-a766-88260216e3f4",
+   "path": "/generation/image-to-multiview",
+   "payload": {
+    "model": "v3.1-20260211"
+   },
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "f98d0d8a-b6c7-4ca6-b30a-c50647a1f0c8",
+   "path": "/generation/multiview-to-model",
+   "payload": {
+    "model": "v3.1-20260211",
+    "geometry_quality": "detailed",
+    "texture": true,
+    "pbr": true,
+    "texture_version": "v3.5-20260815",
+    "texture_quality": "detailed",
+    "delight": true
+   },
+   "status": "success",
+   "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo4/wall_clock/model.glb",
+   "sha256": "6b213a4f6c1a6bd2ab36519295ea57aa0132e1d9fa85f5de18a72c6a1ab91699"
+  }
+ },
+ "credits": 70,
+ "file_token": "file_60b9cf1e-b58d-4c65-a2a3-59c861b1b9ad",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/wall_clock.png"
+}

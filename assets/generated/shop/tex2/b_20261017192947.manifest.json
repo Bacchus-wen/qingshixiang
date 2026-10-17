@@ -1,0 +1,113 @@
+{
+  "batch_id": "b_20261017192947",
+  "tasks": 6,
+  "submitted": 6,
+  "failed": 0,
+  "total_images": 6,
+  "items": [
+    {
+      "index": 1,
+      "prompt": "Perfectly flat orthographic top-down view filling the entire frame, a neat 4 columns by 3 rows grid of twelve small separate hand-written paper shelf tags on a plain dark grey background, each tag is a slightly yellowed rectangular card with a tiny torn corner, written with black marker pen in casual Chinese handwriting, two lines per tag: row 1: '长虹 C372', '熊猫 B-802', '红灯 711', '牡丹 TC-483'; row 2: '春兰 电风扇', '美多 28A', '凯歌 4K11', '红梅 L-610'; row 3: '上海 J212', '华生 FS-40', '待修', '已修好 取件'. Each tag clearly separated with equal gaps, even soft lighting, no shadows, photographic, realistic paper texture.",
+      "id": "img_43725",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43725/22bcf00f-289f-4fad-b37e-94b05ced6168.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T19%3A27%3A42Z%2F3600%2F%2F670a8d45df7e344330b8811b08ca61f0feaf67565407365bde0d9e270e6dd6a1"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/tex2/img_43725/ai_generate_43725_1.png"
+      ]
+    },
+    {
+      "index": 2,
+      "prompt": "Perfectly flat orthographic front view filling the entire frame edge to edge, no perspective, no background, even lighting, photographic: an old hand-painted wooden sign board from a 1990s Chinese appliance repair shop, cream paint on wood with a thin dark brown frame, red and black brush calligraphy reading '修好一台电器 多一份信任' in two lines, worn edges, small paint chips, faded and slightly dirty.",
+      "id": "img_43726",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43726/035901ff-1ca4-4f48-8e5e-c56c5765cb10.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T19%3A28%3A56Z%2F3600%2F%2Fe4b2f23032ec342afbdde1ed4ab852a38eb25899adb1250b61ca6526d6aec0b8"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/tex2/img_43726/ai_generate_43726_1.png"
+      ]
+    },
+    {
+      "index": 3,
+      "prompt": "Seamless tileable texture, perfectly flat orthographic view with no perspective and no lighting gradient, weathered exterior wall of an old Chinese street shop: grey cement render with dark vertical rain grime streaks, patches of peeled whitewash, hairline cracks, faint traces of old torn paper notices, even soft lighting, no objects, no text, high detail photographic material.",
+      "id": "img_43727",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43727/10389189-ac4b-4043-a2c2-498da9903eeb.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T19%3A29%3A26Z%2F3600%2F%2F75f399b906ad5bfcf0d7d7b85195b9011a85b5fd7c8dce78087938818ce2fbd2"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/tex2/img_43727/ai_generate_43727_1.png"
+      ]
+    },
+    {
+      "index": 4,
+      "prompt": "Seamless tileable texture, perfectly flat orthographic top-down view with no perspective and no lighting gradient, old worn concrete pavement of a Chinese back street: square cast concrete slabs about 50 cm with dark joints, cracks, oil stains, embedded grit, slightly damp, even soft lighting, no objects, no text, high detail photographic material.",
+      "id": "img_43728",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43728/19d4e97b-8b18-4a05-afdc-cbfbe7fe3514.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T19%3A29%3A45Z%2F3600%2F%2F6d9e547398514c69d12d3cbb74012dd0dc143eda46af0c207409f9054776e324"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/tex2/img_43728/ai_generate_43728_1.png"
+      ]
+    },
+    {
+      "index": 5,
+      "prompt": "Seamless tileable texture, perfectly flat orthographic front view with no perspective and no lighting gradient, an old rolling steel shop shutter, horizontal corrugated slats painted grey-blue, heavy rust streaks and flaking paint, dents, dirt, even soft lighting, no objects, no text, high detail photographic material.",
+      "id": "img_43729",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43729/2a361ef4-9d44-4da3-af07-d4543bcfa8c6.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T19%3A28%3A19Z%2F3600%2F%2Ffce4c5f65b03dc00a697cf2bde403761b1c6cc8f916da33b2c71670063d7472c"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/tex2/img_43729/ai_generate_43729_1.png"
+      ]
+    },
+    {
+      "index": 6,
+      "prompt": "Seamless tileable texture, perfectly flat orthographic view with no perspective and no lighting gradient, plain old brown corrugated cardboard surface from a storage box, scuffs, water stains, faded areas, a strip of old yellowed packing tape crossing it, even soft lighting, no printing, no text, high detail photographic material.",
+      "id": "img_43730",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43730/f387c5a8-e884-457a-9aea-221f6dfca77e.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T19%3A28%3A56Z%2F3600%2F%2F140c9fa06f080de32b89bee246ec26382cf01d86982cb922b54a3b94222b7070"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/tex2/img_43730/ai_generate_43730_1.png"
+      ]
+    }
+  ],
+  "plan": {
+    "kind": "image",
+    "model": "gpt",
+    "version": "gpt-image-2.5-sunburst",
+    "count": 6,
+    "quota": {
+      "limit": 300,
+      "used": 63,
+      "remaining": 237,
+      "unit": "张",
+      "after": 69
+    },
+    "running": {
+      "limit": 20,
+      "current": 0
+    },
+    "allowed": true,
+    "blockers": [],
+    "cost": {
+      "amount": 0,
+      "currency": "USD",
+      "priced": false,
+      "estimated": false,
+      "note": null
+    },
+    "request": {
+      "batch": true,
+      "tasks": 6,
+      "total_images": 6,
+      "local_uploads": []
+    }
+  }
+}

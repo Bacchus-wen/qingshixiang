@@ -2,7 +2,7 @@ import * as THREE from 'three/webgpu';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
-import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorld, smoothstep, vec3, mx_worley_noise_float } from 'three/tsl';
+import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorld, smoothstep, vec2, vec3, mx_worley_noise_float, texture, normalWorldGeometry, abs, step, uniform } from 'three/tsl';
 
 // v4: the closed-down home-appliance repair shop (docs/scene-shop.md). This phase is models + layout only:
 // a simple room shell, the Tripo models placed from /models/shop/layout.json (every item is grounded on its
@@ -10,40 +10,117 @@ import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorl
 // Room: x in [-3, 3], z in [-2.25, 2.25] (front/shutter at +z), floor y = 0, ceiling 3.0.
 export const ROOM = { w: 6.0, d: 4.5, h: 3.0 };
 
+// room surfaces: photographic textures generated with the company platform (gpt-image-2.5, docs/gen-log.md), mapped in
+// world space (1 m tiles on the floor, 1.5 m on the walls) so every wall and the floor line up without UV work
+const TEXL = new THREE.TextureLoader();
+function tex(name) {
+  const t = TEXL.load(`${import.meta.env.BASE_URL}textures/shop/${name}.jpg`);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  return t;
+}
 function terrazzo() {
-  const m = new THREE.MeshStandardNodeMaterial({ roughness: 0.55 });
+  const m = new THREE.MeshStandardNodeMaterial();
   const P = positionWorld;
-  const chips = smoothstep(0.08, 0.02, mx_worley_noise_float(P.xz.mul(38)));
-  const chips2 = smoothstep(0.06, 0.015, mx_worley_noise_float(P.xz.mul(61).add(3.1)));
-  const base = vec3(0.56, 0.54, 0.5).mul(mx_fractal_noise_float(vec3(P.x.mul(1.5), 0, P.z.mul(1.5)), 3, 2, 0.5).mul(0.12).add(0.92));
-  let c = mix(base, vec3(0.22, 0.21, 0.2), chips.mul(0.8));
-  c = mix(c, vec3(0.72, 0.68, 0.6), chips2.mul(0.7));
-  const grime = smoothstep(0.3, 0.8, mx_noise_float(vec3(P.x.mul(0.8), 0, P.z.mul(0.8)).add(2.0)).mul(0.5).add(0.5));
-  m.colorNode = c.mul(mix(float(1), float(0.72), grime));
-  m.roughnessNode = mix(float(0.35), float(0.7), grime);
+  const T = texture(tex('floor_terrazzo'), P.xz.div(0.75));
+  const grime = smoothstep(0.35, 0.85, mx_noise_float(vec3(P.x.mul(0.7), 0, P.z.mul(0.7)).add(2.0)).mul(0.5).add(0.5));
+  m.colorNode = T.rgb.mul(mix(float(1.0), float(0.7), grime));
+  m.roughnessNode = mix(float(0.32), float(0.7), grime);  // polished where nobody walks, dull along the paths
+  return m;
+}
+function wallMat() {
+  // yellowed lime plaster above, dark green gloss dado below 1.2 m with a thin darker stripe on top
+  const m = new THREE.MeshStandardNodeMaterial();
+  const P = positionWorld, N = normalWorldGeometry;
+  const u = abs(N.x).greaterThan(0.5).select(P.z, P.x);
+  const uv = vec2(u.div(2.2), P.y.div(2.2).add(abs(N.x).mul(0.37)));
+  const upper = texture(tex('wall_upper'), uv).rgb;
+  const dado = texture(tex('wall_dado'), uv).rgb;
+  const isDado = float(1).sub(step(1.2, P.y));
+  const stripe = smoothstep(1.2, 1.205, P.y).mul(float(1).sub(smoothstep(1.225, 1.23, P.y)));
+  let c = mix(upper, dado, isDado);
+  c = mix(c, vec3(0.06, 0.12, 0.08), stripe);
+  const floorDirt = smoothstep(0.35, 0.0, P.y).mul(0.35);
+  const broad = mx_noise_float(vec3(u.mul(0.45), P.y.mul(0.6), 1.7)).mul(0.12);  // breaks the tile repeat
+  m.colorNode = c.mul(float(1).sub(floorDirt)).mul(float(1).add(broad));
+  m.roughnessNode = mix(float(0.88), float(0.38), isDado);
+  return m;
+}
+function ceilingMat() {
+  const m = new THREE.MeshStandardNodeMaterial({ roughness: 0.95 });
+  m.colorNode = texture(tex('ceiling'), positionWorld.xz.div(2.0)).rgb.mul(0.85);
   return m;
 }
 
-function wallMat() {
-  // green gloss paint dado to 1.2 m, yellowed lime above; worn, stained, scuffed near the floor
+function facadeMat() {
+  const m = new THREE.MeshStandardNodeMaterial({ roughness: 0.92 });
+  const P = positionWorld, N = normalWorldGeometry;
+  const u = abs(N.x).greaterThan(0.5).select(P.z, P.x);
+  const v = abs(N.y).greaterThan(0.5).select(P.z, P.y); // horizontal faces (sill, lintel underside) map x/z
+  m.colorNode = texture(tex('facade'), vec2(u.div(2.0), v.div(2.0))).rgb.mul(0.9);
+  return m;
+}
+function streetMat() {
   const m = new THREE.MeshStandardNodeMaterial();
   const P = positionWorld;
-  const dado = smoothstep(1.21, 1.19, P.y);
-  const n = mx_fractal_noise_float(P.mul(2.2), 4, 2, 0.5).mul(0.5).add(0.5);
-  const stain = smoothstep(0.55, 0.85, mx_noise_float(vec3(P.x.mul(0.9).add(P.z.mul(0.9)), P.y.mul(0.35), 4.0)).mul(0.5).add(0.5));
-  const chip = smoothstep(0.78, 0.84, mx_fractal_noise_float(P.mul(9), 3, 2, 0.5).mul(0.5).add(0.5)).mul(dado);
-  const green = vec3(0.17, 0.27, 0.2).mul(n.mul(0.25).add(0.85));
-  const lime = vec3(0.72, 0.68, 0.56).mul(n.mul(0.2).add(0.85));
-  let c = mix(lime, green, dado);
-  c = mix(c, vec3(0.5, 0.47, 0.4), chip);
-  c = c.mul(mix(float(1), float(0.78), stain));
-  c = c.mul(mix(float(1), float(0.7), smoothstep(0.25, 0.0, P.y)));
-  m.colorNode = c;
-  m.roughnessNode = mix(float(0.85), float(0.45), dado);
+  m.colorNode = texture(tex('pavement'), P.xz.div(1.6)).rgb.mul(0.8);
+  m.roughnessNode = float(0.8);
+  return m;
+}
+function shutterMat() {
+  const m = new THREE.MeshStandardNodeMaterial({ roughness: 0.6, metalness: 0.35 });
+  const P = positionWorld;
+  m.colorNode = texture(tex('shutter'), vec2(P.x.div(1.2), P.y.div(1.2))).rgb;
   return m;
 }
 
 const _box = new THREE.Box3();
+
+// flat printed things on the walls (pegboard, calendar, price list, poster, signs): a textured plane a few mm off the wall
+function decal(name, W, H, opts = {}) {
+  const m = new THREE.MeshStandardNodeMaterial({ map: tex(name), roughness: opts.rough ?? 0.85 });
+  m.map.wrapS = m.map.wrapT = THREE.ClampToEdgeWrapping;
+  const g = new THREE.PlaneGeometry(W, H);
+  if (opts.curl) { // paper hangs slightly away from the wall at the bottom
+    const p = g.attributes.position; for (let i = 0; i < p.count; i++) { const t = (H / 2 - p.getY(i)) / H; p.setZ(i, opts.curl * t * t); }
+    g.computeVertexNormals();
+  }
+  const o = new THREE.Mesh(g, m); o.receiveShadow = true; o.name = name;
+  return o;
+}
+// put a decal on a wall: wall 'back' | 'left' | 'right' | 'front-out' (street face of the front wall); (a, y) = along-wall
+// coordinate (x for back/front, z for the side walls) and centre height
+function onWall(o, wall, a, y, off = 0.004) {
+  const { w, d } = ROOM;
+  if (wall === 'back') { o.position.set(a, y, -d / 2 + off); }
+  if (wall === 'left') { o.position.set(-w / 2 + off, y, a); o.rotation.y = Math.PI / 2; }
+  if (wall === 'right') { o.position.set(w / 2 - off, y, a); o.rotation.y = -Math.PI / 2; }
+  if (wall === 'front-out') { o.position.set(a, y, d / 2 + 0.25 + off); }
+  return o;
+}
+let cardboardMat = null;
+// cardboard carton with a printed front (box_a / box_b) and plain sides
+function carton(front, W, H, D) {
+  cardboardMat ??= new THREE.MeshStandardNodeMaterial({ map: tex('cardboard'), roughness: 0.92 });
+  const side = cardboardMat;
+  const f = new THREE.MeshStandardNodeMaterial({ map: tex(front), roughness: 0.9 });
+  const mats = [side, side, side, side, f, f];
+  const o = new THREE.Mesh(new THREE.BoxGeometry(W, H, D, 4, 2, 4), mats); o.castShadow = o.receiveShadow = true;
+  o.geometry.translate(0, H / 2, 0);
+  return o;
+}
+
+// hand-written shelf tags (brand + model number, "待修", "已修好 取件"): one generated sheet, 12 cards (docs/gen-log.md)
+const TAG_RECTS = [[0.0293, 0.6875, 0.2409, 0.9199], [0.2747, 0.6875, 0.4837, 0.9209], [0.5169, 0.6885, 0.7246, 0.9209], [0.7604, 0.6865, 0.9701, 0.9209], [0.0299, 0.3828, 0.2402, 0.627], [0.2741, 0.3818, 0.4831, 0.627], [0.5182, 0.3818, 0.7253, 0.627], [0.7604, 0.3818, 0.9714, 0.626], [0.0293, 0.082, 0.2389, 0.3223], [0.2741, 0.082, 0.4831, 0.3232], [0.5182, 0.082, 0.7246, 0.3242], [0.7604, 0.0801, 0.972, 0.3232]];
+let tagMat = null;
+function tagMesh(i) {
+  tagMat ??= new THREE.MeshStandardNodeMaterial({ map: tex('tags'), roughness: 0.9 });
+  const [u0, v0, u1, v1] = TAG_RECTS[i % 12];
+  const W = 0.085, H = W * ((v1 - v0) * 1024) / ((u1 - u0) * 1536);
+  const g = new THREE.PlaneGeometry(W, H); const uv = g.attributes.uv;
+  uv.setXY(0, u0, v1); uv.setXY(1, u1, v1); uv.setXY(2, u0, v0); uv.setXY(3, u1, v0);
+  const o = new THREE.Mesh(g, tagMat); o.receiveShadow = true;
+  return o;
+}
 
 // slotted angle-iron shelving (thin repeated steel: procedural, not generated): uprights, boards, worn grey-green paint
 function shelfUnit(it) {
@@ -66,6 +143,11 @@ function shelfUnit(it) {
     const b = new THREE.Mesh(new THREE.BoxGeometry(W - 0.01, 0.012, D - 0.01), board); b.position.set(0, y, 0); g.add(b);
     const lip = new THREE.Mesh(new THREE.BoxGeometry(W, 0.035, 0.004), steel); lip.position.set(0, y - 0.012, D / 2 - 0.002); g.add(lip);
   }
+  // tags taped to the front lip of a board: [x along the shelf, level, card index]
+  for (const [x, lv, i] of it.tags || []) {
+    const y = 0.08 + lv * (H - 0.12) / (n - 1);
+    const t = tagMesh(i); t.position.set(x, y - 0.03, D / 2 + 0.0015); t.rotation.z = Math.sin(x * 91 + lv * 7) * 0.06; g.add(t);
+  }
   g.name = it.name;
   return g;
 }
@@ -78,26 +160,42 @@ export default {
     scene.add(root);
     const { w, d, h } = ROOM;
     // shell: floor, ceiling, back/left/right walls, front wall pieces around the shutter opening (2.8 m wide)
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(w, d + 3).rotateX(-Math.PI / 2), terrazzo());
-    floor.position.z = 1.5; floor.receiveShadow = true; root.add(floor);
+    // shop floor (one step above the street: the front wall's sill line), the street pavement outside
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(w, d + 0.25).rotateX(-Math.PI / 2), terrazzo());
+    floor.position.z = 0.125; floor.receiveShadow = true; root.add(floor);
+    const STEP = 0.14;
+    const street = new THREE.Mesh(new THREE.PlaneGeometry(14, 9).rotateX(-Math.PI / 2), streetMat());
+    street.position.set(0, -STEP, d / 2 + 0.25 + 4.5); street.receiveShadow = true; root.add(street);
+    const sill = new THREE.Mesh(new THREE.BoxGeometry(w + 0.3, STEP, 0.3), facadeMat()); sill.position.set(0, -STEP / 2, d / 2 + 0.25 + 0.15 - 0.15); sill.receiveShadow = true; root.add(sill);
     const wm = wallMat();
     const wall = (W, H, x, y, z, ry) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(W, H), wm); m.position.set(x, y, z); m.rotation.y = ry; m.receiveShadow = true; root.add(m); return m; };
     wall(w, h, 0, h / 2, -d / 2, 0);
     wall(d, h, -w / 2, h / 2, 0, Math.PI / 2);
     wall(d, h, w / 2, h / 2, 0, -Math.PI / 2);
-    const ceil = new THREE.Mesh(new THREE.PlaneGeometry(w, d).rotateX(Math.PI / 2), new THREE.MeshStandardNodeMaterial({ color: 0x8c877c, roughness: 0.9 }));
+    const ceil = new THREE.Mesh(new THREE.PlaneGeometry(w, d).rotateX(Math.PI / 2), ceilingMat());
     ceil.position.y = h; root.add(ceil);
     // front wall with the shutter opening, seen from inside as dark masonry
-    const front = new THREE.MeshStandardNodeMaterial({ color: 0x6f6a60, roughness: 0.9 });
-    const fw = (W, H, x, y) => { const m = new THREE.Mesh(new THREE.BoxGeometry(W, H, 0.25), front); m.position.set(x, y, d / 2 + 0.125); root.add(m); };
-    fw((w - 3.6) / 2, h, -w / 2 + (w - 3.6) / 4, h / 2); fw((w - 3.6) / 2, h, w / 2 - (w - 3.6) / 4, h / 2); fw(3.6, h - 2.6, 0, 2.6 + (h - 2.6) / 2);
+    // front wall: pillars either side of the 3.6 m opening and the facade above it (up to 4.2 m: the sign board)
+    const front = facadeMat(), FH = 4.2;
+    const fw = (W, H, x, y) => { const m = new THREE.Mesh(new THREE.BoxGeometry(W, H, 0.25), front); m.position.set(x, y, d / 2 + 0.125); m.castShadow = m.receiveShadow = true; root.add(m); };
+    fw((w - 3.6) / 2, FH, -w / 2 + (w - 3.6) / 4, FH / 2); fw((w - 3.6) / 2, FH, w / 2 - (w - 3.6) / 4, FH / 2); fw(3.6, FH - 2.6, 0, 2.6 + (FH - 2.6) / 2);
+    // shutter housing (the rolled-up shutter's box) on the street face of the lintel
+    { const hb = new THREE.Mesh(new THREE.BoxGeometry(3.75, 0.3, 0.26), shutterMat()); hb.position.set(0, 2.6 + 0.15, d / 2 + 0.25 + 0.13); hb.castShadow = true; root.add(hb); }
     // rolling shutter, half open: corrugated slats from the lintel down to 1.25 m
     {
-      const slats = new THREE.Group(); const sm = new THREE.MeshStandardNodeMaterial({ color: 0x5e6266, roughness: 0.55, metalness: 0.6 });
-      for (let y = 2.55; y > 2.05; y -= 0.075) { const s = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.07, 0.02), sm); s.position.set(0, y, d / 2 + 0.05); s.castShadow = true; slats.add(s); }
-      const bar = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.05, 0.05), sm); bar.position.set(0, 2.03, d / 2 + 0.05); slats.add(bar);
+      const slats = new THREE.Group(); const sm = shutterMat();
+      for (let y = 2.55; y > 2.3; y -= 0.075) { const s = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.07, 0.02), sm); s.position.set(0, y, d / 2 + 0.05); s.castShadow = true; slats.add(s); }
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.05, 0.05), sm); bar.position.set(0, 2.27, d / 2 + 0.05); slats.add(bar);
       root.add(slats);
     }
+    // printed things on the walls (generated with the company platform, docs/gen-log.md)
+    root.add(onWall(decal('pegboard', 1.2, 0.8), 'back', -1.83, 1.72, 0.012));
+    root.add(onWall(decal('poster', 0.46, 0.69, { curl: 0.012 }), 'left', 0.12, 1.86));
+    root.add(onWall(decal('calendar', 0.34, 0.51, { curl: 0.01 }), 'back', 2.63, 1.4));
+    root.add(onWall(decal('price_list', 0.4, 0.6, { curl: 0.01 }), 'right', -1.42, 1.78));
+    root.add(onWall(decal('slogan', 0.96, 0.64), 'right', -0.5, 2.38, 0.015));
+    root.add(onWall(decal('sign_main', 2.4, 1.2, { rough: 0.6 }), 'front-out', 0, 3.42, 0.01));
+    root.add(onWall(decal('sign_side', 0.82, 1.64, { rough: 0.6 }), 'front-out', -2.4, 1.62, 0.01));
     // review lighting: warm desk lamp key, cold dusk from the street, a weak bounce so models read
     scene.add(new THREE.HemisphereLight(0x8090a8, 0x3a3228, 0.55));
     const dusk = new THREE.DirectionalLight(0x9db4d6, 1.4); dusk.position.set(1.5, 2.2, 8); dusk.target.position.set(-0.5, 0, -1);
@@ -107,6 +205,17 @@ export default {
     scene.add(this.lamp, this.lamp.target);
     const fill = new THREE.PointLight(0xffd9a8, 3, 7, 1.5); fill.position.set(0, 2.7, 0); scene.add(fill);
 
+    // ceiling fluorescent tube over the middle of the shop (fixture + glowing tube + its light)
+    {
+      const fx = new THREE.Group(); fx.position.set(0.1, h - 0.02, -0.55);
+      const body = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.04, 0.09), new THREE.MeshStandardNodeMaterial({ color: 0xb9b4a6, roughness: 0.6, metalness: 0.3 }));
+      body.position.y = -0.02; fx.add(body);
+      const tubeM = new THREE.MeshStandardNodeMaterial({ color: 0xffffff, roughness: 0.3 }); tubeM.emissiveNode = vec3(1.0, 1.03, 0.95).mul(2.2);
+      const tb = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 1.2, 12).rotateZ(Math.PI / 2), tubeM); tb.position.y = -0.06; fx.add(tb);
+      for (const sx of [-0.62, 0.62]) { const cap = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.05, 0.05), body.material); cap.position.set(sx, -0.055, 0); fx.add(cap); }
+      root.add(fx);
+      const tl = new THREE.PointLight(0xe6eeff, 2.2, 7, 1.6); tl.position.set(0.1, h - 0.15, -0.55); scene.add(tl);
+    }
     // models from the layout manifest; each is grounded on its support (floor, or a named surface)
     // KTX2 (Basis) textures: ETC1S colour/ORM, UASTC normals -- transcoded to the GPU's native compressed format
     const ktx2 = new KTX2Loader().setTranscoderPath(`${import.meta.env.BASE_URL}basis/`).detectSupport(ctx.renderer);
@@ -115,26 +224,40 @@ export default {
     try { layout = await (await fetch(`${import.meta.env.BASE_URL}models/shop/layout.json`, { cache: 'no-store' })).json(); } catch { layout = []; }
     const placed = this.placed = {};
     const ray = new THREE.Raycaster(); const down = new THREE.Vector3(0, -1, 0); const v = new THREE.Vector3();
-    const supportsOf = (name) => (name && placed[name] ? [placed[name]] : [floor, ...Object.values(placed)]);
+    const supportsOf = (name) => (name && placed[name] ? [placed[name]] : [floor, street, ...Object.values(placed)]);
     // highest surface under the item's footprint (centre + four corners shrunk to 70%): the item rests on it
-    const surfaceUnder = (box, targets) => {
-      let best = -Infinity;
-      const cx = (box.min.x + box.max.x) / 2, cz = (box.min.z + box.max.z) / 2, hx = (box.max.x - box.min.x) * 0.35, hz = (box.max.z - box.min.z) * 0.35;
-      for (const [dx, dz] of [[0, 0], [-hx, -hz], [hx, -hz], [-hx, hz], [hx, hz]]) {
-        ray.set(v.set(cx + dx, box.max.y + 3, cz + dz), down); ray.far = 10;
-        const hit = ray.intersectObjects(targets, true)[0];
-        if (hit) best = Math.max(best, hit.point.y);
+    // drop test: the item falls straight down until the first of its bottom points touches something. Start it above
+    // every support whose box overlaps its footprint, cast from its lowest vertices (the bottom 2.5 cm), lower it by the
+    // smallest gap. (The old "highest surface under five footprint points" rule left things hovering on a corner.)
+    const sb = new THREE.Box3();
+    const dropY = (o, targets) => {
+      _box.setFromObject(o);
+      const near = targets.filter((t) => { sb.setFromObject(t); return sb.max.x > _box.min.x && sb.min.x < _box.max.x && sb.max.z > _box.min.z && sb.min.z < _box.max.z; });
+      let top = 0; for (const t of near) { sb.setFromObject(t); if (t !== floor && t !== street) top = Math.max(top, sb.max.y); }
+      o.position.y += top + 0.01 - _box.min.y; o.updateMatrixWorld(true); _box.setFromObject(o);
+      const cut = _box.min.y + 0.025, pts = [];
+      o.traverse((m) => {
+        if (!m.isMesh) return; const p = m.geometry.attributes.position, st = Math.max(1, Math.floor(p.count / 6000));
+        for (let i = 0; i < p.count; i += st) { v.fromBufferAttribute(p, i).applyMatrix4(m.matrixWorld); if (v.y <= cut) pts.push(v.clone()); }
+      });
+      const k = Math.max(1, Math.floor(pts.length / 40)); let gap = Infinity;
+      for (let i = 0; i < pts.length; i += k) {
+        ray.set(pts[i], down); ray.far = 4;
+        const h = ray.intersectObjects(near.length ? near : [floor], true)[0];
+        if (h) gap = Math.min(gap, pts[i].y - h.point.y);
       }
-      return best === -Infinity ? 0 : best;
+      if (gap === Infinity) gap = _box.min.y; // nothing under it: rest on y = 0
+      o.position.y -= gap; o.updateMatrixWorld(true);
     };
     for (const it of layout) {
       try {
         let o;
         if (it.type === 'shelf') o = shelfUnit(it);
+        else if (it.type === 'carton') o = carton(it.front, ...it.size);
         else { const g = await loader.loadAsync(`${import.meta.env.BASE_URL}models/shop/${it.glb}`); o = g.scene; }
         o.traverse((m) => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
         if (it.scale) o.scale.setScalar(it.scale);
-        o.rotation.y = (it.ry || 0) * Math.PI / 180;
+        o.rotation.order = 'YXZ'; o.rotation.y = (it.ry || 0) * Math.PI / 180; o.rotation.x = (it.roll || 0) * Math.PI / 180; // roll: lean about the item's own long (x) axis
         o.position.set(it.pos[0], 0, it.pos[2]);
         root.add(o); o.updateMatrixWorld(true);
         _box.setFromObject(o);
@@ -149,12 +272,11 @@ export default {
           // grounded: lowest point onto the highest surface under its footprint (floor, bench top, shelf board...)
           const sup = it.on && placed[it.on];
           const sl = sup?.userData.layout;
-          let y;
-          if (it.type === 'shelf') y = 0;
+          if (it.type === 'shelf') o.position.y = 0;
           else if (sl?.type === 'shelf' && it.level != null) { // a given shelf board (0 = bottom)
-            const n = sl.levels || 5, H = sl.h || 2.4; y = 0.08 + it.level * (H - 0.12) / (n - 1) + 0.006;
-          } else y = surfaceUnder(_box, supportsOf(it.on));
-          o.position.y += y - _box.min.y + (it.lift || 0);
+            const n = sl.levels || 5, H = sl.h || 2.4; o.position.y += 0.08 + it.level * (H - 0.12) / (n - 1) + 0.006 - _box.min.y;
+          } else dropY(o, supportsOf(it.on));
+          o.position.y += it.lift || 0;
         }
         o.updateMatrixWorld(true);
         o.name = it.name; o.userData.layout = it; placed[it.name] = o;
@@ -162,7 +284,20 @@ export default {
     }
     // the robot's head droops forward and to one side while it is asleep (rest pose; the beam phases animate it later)
     const head = placed.robot?.getObjectByName('robot_head');
-    if (head) { this.head = head; head.rotation.set(0.32, 0, -0.12); }
+    if (head) {
+      this.head = head; head.rotation.set(0.16, 0.12, -0.07);
+      // the camera-lens eye: the texture's bright orange core becomes emissive (dim "asleep" glow for now)
+      head.traverse((m) => {
+        if (!m.isMesh) return;
+        const src = m.material, nm = new THREE.MeshStandardNodeMaterial();
+        for (const k of ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap', 'roughness', 'metalness', 'aoMapIntensity']) if (src[k] !== undefined) nm[k] = src[k];
+        if (src.normalScale) nm.normalScale.copy(src.normalScale);
+        const c = texture(src.map).rgb;
+        const core = smoothstep(0.7, 0.9, c.r).mul(smoothstep(0.3, 0.5, c.g)).mul(float(1).sub(smoothstep(0.28, 0.45, c.b)));
+        nm.emissiveNode = c.mul(core).mul(this.eyeGlow = uniform(1.6));
+        m.material = nm;
+      });
+    }
     // the desk lamp, if placed, drives the warm key light
     const lampObj = placed.desk_lamp;
     if (lampObj) { _box.setFromObject(lampObj); this.lamp.position.set((_box.min.x + _box.max.x) / 2 + 0.1, _box.max.y - 0.05, (_box.min.z + _box.max.z) / 2); this.lamp.target.position.set(this.lamp.position.x + 0.3, 0.8, this.lamp.position.z + 0.2); }

@@ -1,0 +1,34 @@
+{
+ "op": "parts_cabinet",
+ "steps": {
+  "views": {
+   "state": "submitted",
+   "task_id": "f5041909-8663-43e8-b13e-835819fc1968",
+   "path": "/generation/image-to-multiview",
+   "payload": {
+    "model": "v3.1-20260211"
+   },
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "391f90e8-73df-4e91-8ed6-c6f018f24fde",
+   "path": "/generation/multiview-to-model",
+   "payload": {
+    "model": "v3.1-20260211",
+    "geometry_quality": "detailed",
+    "texture": true,
+    "pbr": true,
+    "texture_version": "v3.5-20260815",
+    "texture_quality": "detailed",
+    "delight": true
+   },
+   "status": "success",
+   "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo4/parts_cabinet/model.glb",
+   "sha256": "1dfbcb42a6bbb61ce352376c37f6613a656e89aa50d203e87f4c595a9b5af44e"
+  }
+ },
+ "credits": 70,
+ "file_token": "file_83c5e17d-ab3e-42ca-9058-bc040f73155d",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/parts_cabinet.png"
+}

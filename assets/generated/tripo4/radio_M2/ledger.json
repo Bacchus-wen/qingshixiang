@@ -1,0 +1,34 @@
+{
+ "op": "radio_M2",
+ "steps": {
+  "views": {
+   "state": "submitted",
+   "task_id": "0bde1689-88b9-4a90-aa73-6a008f8ece58",
+   "path": "/generation/image-to-multiview",
+   "payload": {
+    "model": "v3.1-20260211"
+   },
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "05497525-f56f-40fe-bb83-5e4f40680bde",
+   "path": "/generation/multiview-to-model",
+   "payload": {
+    "model": "v3.1-20260211",
+    "geometry_quality": "detailed",
+    "texture": true,
+    "pbr": true,
+    "texture_version": "v3.5-20260815",
+    "texture_quality": "detailed",
+    "delight": true
+   },
+   "status": "success",
+   "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo4/radio_M2/model.glb",
+   "sha256": "25c4b8ff69384ca92f659d3cf9164b773e495120329718f92f0b8409588127ee"
+  }
+ },
+ "credits": 70,
+ "file_token": "file_d804bf41-0650-408a-824f-576ed122b124",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/tube_radio_open.png"
+}

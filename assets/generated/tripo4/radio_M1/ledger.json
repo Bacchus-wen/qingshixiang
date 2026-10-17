@@ -1,0 +1,25 @@
+{
+ "op": "radio_M1",
+ "steps": {
+  "single": {
+   "state": "submitted",
+   "task_id": "ee06500f-5947-435e-8bca-2ea7a1293e18",
+   "path": "/generation/image-to-model",
+   "payload": {
+    "model": "v3.1-20260211",
+    "geometry_quality": "detailed",
+    "texture": true,
+    "pbr": true,
+    "texture_version": "v3.5-20260815",
+    "texture_quality": "detailed",
+    "delight": true
+   },
+   "status": "success",
+   "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo4/radio_M1/single.glb",
+   "sha256": "c7a936729718f119aa5079036ce472a302e4d31b0253de91900a7576537c05fe"
+  }
+ },
+ "credits": 60,
+ "file_token": "file_02a0730a-016b-469b-bb68-867da4527f01",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/tube_radio_open.png"
+}

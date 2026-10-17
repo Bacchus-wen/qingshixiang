@@ -1,0 +1,35 @@
+{
+ "op": "radio_M3",
+ "steps": {
+  "model": {
+   "state": "submitted",
+   "task_id": "f98fd680-aeff-4c61-b18e-a75f7ae70e63",
+   "path": "/generation/multiview-to-model",
+   "payload": {
+    "model": "v3.1-20260211",
+    "geometry_quality": "detailed",
+    "texture": true,
+    "pbr": true,
+    "texture_version": "v3.5-20260815",
+    "texture_quality": "detailed",
+    "delight": true
+   },
+   "status": "success",
+   "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo4/radio_M3/model.glb",
+   "sha256": "e776bb83c96634f82ecb48683091d5fd29e5f97dfc92583ab9dab73902028af1"
+  }
+ },
+ "credits": 60,
+ "view_tokens": [
+  "file_18c8b9ec-ff3b-4b04-bd03-3c35aa1cfcac",
+  "file_b22bfeaf-b39f-4a89-a01b-72ee51699ee3",
+  "file_d823b006-e5aa-4722-b3b8-658a7739ad38",
+  "file_fc3cd6d3-d7f3-4fe0-a541-d74e86a1ba94"
+ ],
+ "views": [
+  "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/radio_sheet/front.png",
+  "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/radio_sheet/left.png",
+  "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/radio_sheet/back.png",
+  "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/radio_sheet/right.png"
+ ]
+}

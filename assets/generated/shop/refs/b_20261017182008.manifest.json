@@ -1,0 +1,199 @@
+{
+  "batch_id": "b_20261017182008",
+  "tasks": 13,
+  "submitted": 13,
+  "failed": 0,
+  "total_images": 13,
+  "items": [
+    {
+      "index": 1,
+      "prompt": "A highly detailed photorealistic product render of the small handmade robot assistant from the reference image, built from salvaged 1980s Chinese home appliance parts: a vintage wooden tube radio casing as its head with a speaker grille and a single old camera lens as its eye, a dented sheet-metal chassis torso with an exposed desk-fan motor and coiled cables, pipe arms and legs with brass water-tap joints and coil springs, chunky worn boots, sitting upright on a low wooden stool with its hands resting on its knees, the stool included. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43686",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43686/2fb13a86-079e-428c-a40d-bc2cb7763f9b.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A17%3A26Z%2F3600%2F%2F8a629fdb65e75057bb375ced2c263d5dcdbb2a43c72d4d845e7264c96130de7f"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43686/ai_generate_43686_1.png"
+      ]
+    },
+    {
+      "index": 2,
+      "prompt": "A highly detailed photorealistic product render of only the head of the robot from the reference image: a vintage wooden tube radio casing as its head with a speaker grille and a single old camera lens as its eye, a dented sheet-metal chassis torso with an exposed desk-fan motor and coiled cables, pipe arms and legs with brass water-tap joints and coil springs, chunky worn boots — just the radio-casing head with its camera-lens eye and a short neck of braided cables, nothing else. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43687",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43687/96a7845d-9606-47c7-967d-a0f584f90f8d.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A17%3A26Z%2F3600%2F%2F58d5e3ebb352c3019ec7912b3a2f2f61064e80ded699e0c2d1dfa5e5b3eea2cf"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43687/ai_generate_43687_1.png"
+      ]
+    },
+    {
+      "index": 3,
+      "prompt": "A highly detailed photorealistic product render of only the torso of the robot from the reference image: a dented sheet-metal chassis box with an exposed desk-fan motor, ventilation louvres, rivets, coiled cables and pipe stubs at the shoulders and hips, no head, no arms, no legs. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43688",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43688/7509e256-1e6b-46a9-ac45-7635cc8241ce.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A17%3A26Z%2F3600%2F%2Fa610759df52a6add8a0b955c2b679ced9e5057eae681ab32ca5186537fc66afd"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43688/ai_generate_43688_1.png"
+      ]
+    },
+    {
+      "index": 4,
+      "prompt": "A highly detailed photorealistic product render of one arm of the robot from the reference image: a pipe upper arm, a brass water-tap elbow joint, a pipe forearm wrapped with cables, and a mechanical three-finger gripper hand. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43689",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43689/61fa8a37-f5af-4a01-a735-e5c51b07dd70.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A17%3A26Z%2F3600%2F%2F20e2e7148fafd81400b5c7e81ed407eeafde657e6cdaab08d15c8cf9308a678f"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43689/ai_generate_43689_1.png"
+      ]
+    },
+    {
+      "index": 5,
+      "prompt": "A highly detailed photorealistic product render of one leg of the robot from the reference image: a pipe thigh, a coil-spring knee, a pipe shin and a chunky worn boot-shaped foot. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43690",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43690/5103d3b4-9710-4b08-b5b2-9784b3b0e2a9.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A17%3A26Z%2F3600%2F%2F026b31516b56cd0b6b38534a4564970fd7091a683427172efd694e032aec36f4"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43690/ai_generate_43690_1.png"
+      ]
+    },
+    {
+      "index": 6,
+      "prompt": "A highly detailed photorealistic product render of a 1970s Chinese wooden tube radio opened up for repair: the back panel removed showing glowing-free vacuum tubes, a metal chassis, capacitors, a speaker and dangling wires, cloth speaker grille and dial on the front. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43691",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43691/8c5561df-5f2d-44c3-bc6b-544f7508f3c0.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A17%3A26Z%2F3600%2F%2F8e06b1fab091975c423225d501bb53f8a9dc80a48a8114d2fe3a4fe90b42b1c1"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43691/ai_generate_43691_1.png"
+      ]
+    },
+    {
+      "index": 7,
+      "prompt": "A product turnaround sheet in a 2x2 grid of the same 1970s Chinese wooden tube radio opened up for repair (back panel removed showing vacuum tubes, metal chassis, capacitors, speaker and wires; cloth grille and tuning dial on the front): top-left front view, top-right left side view, bottom-left back view, bottom-right right side view; orthographic, identical scale and centering in each cell, plain light grey background, soft even studio lighting, no shadows, no text, photorealistic.",
+      "id": "img_43692",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43692/0124a210-3893-4377-877a-9f05af1e9967.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A17%3A26Z%2F3600%2F%2Fcc8777ee491cf80788cb3798377edd6235e472b2a7eff069e7d56687f356c4e9"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43692/ai_generate_43692_1.png"
+      ]
+    },
+    {
+      "index": 8,
+      "prompt": "A highly detailed photorealistic product render of a 1970s Chinese green enamel adjustable desk lamp with a heavy round cast-iron base, a jointed metal arm with springs and a deep green enamel shade with chipped edges, a fabric power cord. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43693",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43693/5917bb45-8f8c-4f91-a13d-7b430fab73e7.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A18%3A41Z%2F3600%2F%2Fe3ce68a81910bc82dad507c9b2f2e04ead73360fdb1f5684fdfa62366ebb3374"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43693/ai_generate_43693_1.png"
+      ]
+    },
+    {
+      "index": 9,
+      "prompt": "A highly detailed photorealistic product render of an old wooden repairman's workbench from a 1980s Chinese repair shop, a heavy scarred wooden top with burn marks and a small cast-iron bench vise, two banks of drawers with brass handles, worn green paint on the legs. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43694",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43694/7ade6fb4-6766-4d6e-95aa-65837334f176.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A17%3A26Z%2F3600%2F%2F76a22b80d255769708bd488644e07c9a9df70fd87d70b012dfd35a50b12e3d18"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43694/ai_generate_43694_1.png"
+      ]
+    },
+    {
+      "index": 10,
+      "prompt": "A highly detailed photorealistic product render of a low square wooden stool from 1980s China, worn varnish, scuffed edges, four slightly splayed legs with stretchers. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43695",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43695/8d863471-3b81-4d61-8c3f-ada6998386cc.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A17%3A26Z%2F3600%2F%2Ffdd2a7bdb4402a80137cd0d9575e4974c4c9fd79318991d669282974b9fb6076"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43695/ai_generate_43695_1.png"
+      ]
+    },
+    {
+      "index": 11,
+      "prompt": "A highly detailed photorealistic product render of a 1980s Chinese 14-inch CRT television with a wood-grain plastic cabinet, rotary channel knobs, a speaker grille and a V-shaped rabbit-ear antenna on top, dusty screen. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43696",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43696/8141ee98-726a-41ad-a149-487804b8361d.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A19%3A34Z%2F3600%2F%2Fd5ef56dc33be3d9f284d77cf1f5a5504bf0914d337ab0ecb8fc97e808c45d192"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43696/ai_generate_43696_1.png"
+      ]
+    },
+    {
+      "index": 12,
+      "prompt": "A highly detailed photorealistic product render of a 1980s Chinese desk fan with a pale green enamel motor housing, a round chrome wire cage, four metal blades and a round base with push buttons. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43697",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43697/c1e6432b-9d83-4e97-a772-97584975c269.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A20%3A08Z%2F3600%2F%2F7716876115de21f228cc34bd4202d572c9fcdb4e32a327566d68a0b872f9116f"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43697/ai_generate_43697_1.png"
+      ]
+    },
+    {
+      "index": 13,
+      "prompt": "A highly detailed photorealistic product render of an old Chinese pendulum wall clock in a dark wooden case with a glass door, a white dial with numbers and a brass pendulum. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43698",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43698/b714a5c5-b781-49b0-a074-99308f90dbb5.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A19%3A58Z%2F3600%2F%2Fa30ee4acb0cb19e367acbea78cbbfb564405075d292520996d58fb7cb8d98f78"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43698/ai_generate_43698_1.png"
+      ]
+    }
+  ],
+  "plan": {
+    "kind": "image",
+    "model": "gpt",
+    "version": "gpt-image-2.5-sunburst",
+    "count": 13,
+    "quota": {
+      "limit": 300,
+      "used": 24,
+      "remaining": 276,
+      "unit": "张",
+      "after": 37
+    },
+    "running": {
+      "limit": 20,
+      "current": 0
+    },
+    "allowed": true,
+    "blockers": [],
+    "cost": {
+      "amount": 0,
+      "currency": "USD",
+      "priced": false,
+      "estimated": false,
+      "note": null
+    },
+    "request": {
+      "batch": true,
+      "tasks": 13,
+      "total_images": 13,
+      "local_uploads": [
+        "assets/generated/shop/robot_design.png"
+      ]
+    }
+  }
+}

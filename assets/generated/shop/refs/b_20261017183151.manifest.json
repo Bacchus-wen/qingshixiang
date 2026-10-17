@@ -1,0 +1,209 @@
+{
+  "batch_id": "b_20261017183151",
+  "tasks": 14,
+  "submitted": 14,
+  "failed": 0,
+  "total_images": 14,
+  "items": [
+    {
+      "index": 1,
+      "prompt": "A highly detailed photorealistic product render of an old grey-green steel parts drawer cabinet from a 1980s Chinese repair shop, four columns of small pull-out drawers with brass label holders and handles, chipped paint, dents and rust at the base. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43699",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43699/4ecad573-cbc1-47a5-97a7-6968f9eb21a2.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A29%3A51Z%2F3600%2F%2F7735ffaa31cd5c96daf985453a1081e23281a49cde6a3c8ef6794ee0c00f6852"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43699/ai_generate_43699_1.png"
+      ]
+    },
+    {
+      "index": 2,
+      "prompt": "A highly detailed photorealistic product render of a worn dark green steel cantilever toolbox from 1980s China with a folding handle, chipped paint, dents and rusty latches, closed. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43700",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43700/e6b711cf-a5bd-4145-8a69-5a3d7145a52f.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A29%3A52Z%2F3600%2F%2F0b9f1905bc28361651145069d960c8b50db5c9b8c38b420956c5dc5ab88efbcf"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43700/ai_generate_43700_1.png"
+      ]
+    },
+    {
+      "index": 3,
+      "prompt": "A highly detailed photorealistic product render of an old black Chinese 28-inch roadster bicycle like a Flying Pigeon, rod brakes, a rear rack, a chain guard, a bell and a worn leather saddle, slightly rusty chrome, seen from the side at a slight angle. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43701",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43701/f7409cea-10bc-49d5-bc85-fba8183fe091.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A29%3A52Z%2F3600%2F%2Fe05b02277acc727e96206d78ec54e9267ba8edb1fb69e8854c73173c1662fde3"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43701/ai_generate_43701_1.png"
+      ]
+    },
+    {
+      "index": 4,
+      "prompt": "A highly detailed photorealistic product render of an old Chinese vacuum thermos flask with a painted tin body decorated with red peony flowers, a cork stopper and a pale blue cap, scratched and dented. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43702",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43702/f363213e-f393-40bf-8cdf-92912b156d51.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A29%3A52Z%2F3600%2F%2Fa6d68ab170355bbd08f9f6727e3f01626c1c9b162c75967493c16f084869c564"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43702/ai_generate_43702_1.png"
+      ]
+    },
+    {
+      "index": 5,
+      "prompt": "A highly detailed photorealistic product render of a white chipped enamel mug with a blue rim and a lid, from 1980s China, plain without text. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43703",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43703/128a3e1d-97aa-4c18-b785-68cc25cd36f9.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A29%3A52Z%2F3600%2F%2F90191d5089a49c55c4af9af9a57914693bf60f9af7fe9adf86d61e963af4d115"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43703/ai_generate_43703_1.png"
+      ]
+    },
+    {
+      "index": 6,
+      "prompt": "A highly detailed photorealistic product render of an old Chinese twin-bell mechanical alarm clock with a chrome case, two bells on top, a white dial and luminous hands, slightly tarnished. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43704",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43704/f7d5be2f-7f4f-4883-8c03-9a7403b48375.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A29%3A51Z%2F3600%2F%2Ffb409025b3e937b0e9f72268492483e35ad740cdbbea6b897579460c8a2e819c"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43704/ai_generate_43704_1.png"
+      ]
+    },
+    {
+      "index": 7,
+      "prompt": "A highly detailed photorealistic product render of a 1980s portable stereo cassette recorder boombox in silver and black plastic with two round speaker grilles, a cassette door, piano-key buttons and a carrying handle, scratched and dusty. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43705",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43705/c4de7493-2a43-4385-9b76-52419f5c3c70.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A29%3A52Z%2F3600%2F%2F63e1565440061a856cf3836c5a8d875ce2c5da510595470ff7d1a68fedc477cb"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43705/ai_generate_43705_1.png"
+      ]
+    },
+    {
+      "index": 8,
+      "prompt": "A highly detailed photorealistic product render of an old soldering iron resting in a coiled wire stand on a small cast-iron base with a damp sponge tray, a fabric power cord. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43706",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43706/975f3db5-c638-46e2-a231-bf721d8cfa83.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A29%3A52Z%2F3600%2F%2Fd2dbea5b6536c150d66f02601e4305eebd06488d3e0b9afdcaac39969d085f0a"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43706/ai_generate_43706_1.png"
+      ]
+    },
+    {
+      "index": 9,
+      "prompt": "A highly detailed photorealistic product render of an old desk magnifying glass on a heavy cast-iron base with an adjustable arm and a round glass lens in a brass rim. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43707",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43707/29fefebc-1f9f-4262-9da5-a0d35cad5255.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A29%3A59Z%2F3600%2F%2F4623601a6e297d4281cd1f21b187cd202371d385901d0f74228af16165b8847d"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43707/ai_generate_43707_1.png"
+      ]
+    },
+    {
+      "index": 10,
+      "prompt": "A highly detailed photorealistic product render of an old Chinese interior wooden door with a frosted glass upper panel and a brass handle, set in a pale worn painted wooden door frame with a threshold, dark varnished wood with scratches, the door closed. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43708",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43708/e3fe9fe2-dd5c-4ed4-8090-570a6689b502.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A29%3A52Z%2F3600%2F%2Fd9450608f35415fd2e2a3e4649533de5d3cad6fd9db8be096f5520072baa4281"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43708/ai_generate_43708_1.png"
+      ]
+    },
+    {
+      "index": 11,
+      "prompt": "A highly detailed photorealistic product render of a 1970s Chinese wooden tube radio with a cloth speaker grille, a horizontal tuning dial with Chinese station markings removed, three bakelite knobs and a row of piano-key buttons, worn veneer. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43709",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43709/09b2d7df-6fc8-48fc-93b4-76de9a670969.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A29%3A52Z%2F3600%2F%2F664eaba35b7f8d609cadaf7b33f7a66f39badcbeb3557b738d5e1cb712f95909"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43709/ai_generate_43709_1.png"
+      ]
+    },
+    {
+      "index": 12,
+      "prompt": "A highly detailed photorealistic product render of a small 1980s Chinese 9-inch black-and-white portable CRT television in cream plastic with a carrying handle, rotary knobs and a telescopic antenna. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43710",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43710/a05ad171-d73e-4b72-a7b7-f02220736e9a.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A30%3A49Z%2F3600%2F%2Fa99ef40c3ee08bcc5cc4822ee3a43fc4a5a512279f6ab3b32d6fab549bea91f2"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43710/ai_generate_43710_1.png"
+      ]
+    },
+    {
+      "index": 13,
+      "prompt": "A highly detailed photorealistic product render of a stack of three old worn cardboard appliance boxes of different sizes, tied with string, faded printing, torn corners. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43711",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43711/756bac30-6f8f-42e6-bc82-9ea3d6714544.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A31%3A30Z%2F3600%2F%2F4cece16a18fdee64aaa740c2ba8fe7d27c97bd8372fa7bf6354f661148cac52d"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43711/ai_generate_43711_1.png"
+      ]
+    },
+    {
+      "index": 14,
+      "prompt": "A highly detailed photorealistic product render of a wall-mounted wooden pegboard with old hand tools hanging on hooks: screwdrivers, pliers, wire cutters, wrenches, a hammer and coils of wire, seen from the front at a slight angle. Three-quarter front view from slightly above, the entire object fully in frame with generous margin, isolated on a plain light grey seamless studio background, soft even studio lighting, no cast shadows, no text, no logos, no people, sharp focus, realistic worn materials.",
+      "id": "img_43712",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43712/198a6efc-3cfd-4b4e-bd43-31d587a2cd3f.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A31%3A50Z%2F3600%2F%2Ffe4def9e6f6426d59d298ca9df4802d1c44dfb93fe698f2ddcfd805ee128cda2"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/img_43712/ai_generate_43712_1.png"
+      ]
+    }
+  ],
+  "plan": {
+    "kind": "image",
+    "model": "gpt",
+    "version": "gpt-image-2.5-sunburst",
+    "count": 14,
+    "quota": {
+      "limit": 300,
+      "used": 37,
+      "remaining": 263,
+      "unit": "张",
+      "after": 51
+    },
+    "running": {
+      "limit": 20,
+      "current": 0
+    },
+    "allowed": true,
+    "blockers": [],
+    "cost": {
+      "amount": 0,
+      "currency": "USD",
+      "priced": false,
+      "estimated": false,
+      "note": null
+    },
+    "request": {
+      "batch": true,
+      "tasks": 14,
+      "total_images": 14,
+      "local_uploads": []
+    }
+  }
+}

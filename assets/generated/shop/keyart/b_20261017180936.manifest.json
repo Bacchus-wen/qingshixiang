@@ -1,0 +1,87 @@
+{
+  "batch_id": "b_20261017180936",
+  "tasks": 3,
+  "submitted": 3,
+  "failed": 0,
+  "total_images": 8,
+  "items": [
+    {
+      "index": 1,
+      "prompt": "Cinematic film still, looking under a half-open rolling steel shutter into a small closed-down home appliance repair shop in an old Chinese street at dusk, 1990s China. Inside, a warm green enamel desk lamp lights a cluttered wooden workbench with a half-disassembled vintage tube radio, a soldering iron, a magnifying glass and a white enamel mug. Steel shelves up to the ceiling are crowded with old CRT televisions, tube radios, desk fans, alarm clocks and cassette players, each with a handwritten paper tag. A pegboard wall of tools, a terrazzo floor, green-painted lower walls and yellowed upper walls, a paper calendar and a pendulum wall clock beside a wooden back door with a pale door frame. A small handmade robot assistant built from old appliance parts sits slumped on a low stool beside the bench, covered in dust, still holding a screwdriver. Cold blue dusk light from the street spills under the shutter, dust floating in the lamp light, quiet and nostalgic, realistic materials, shot on 35mm film, shallow depth of field, photorealistic.",
+      "id": "img_43683",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43683/9b77d88e-cc39-44a1-a877-12f6902a69b9.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A04%3A04Z%2F3600%2F%2F18a812815ce4ef562a24e0dd1f6216a5db8315b5166516ff587daceaf4c5aa33",
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43683/29f1f304-14aa-4214-8811-a271e7335fd7.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A04%3A04Z%2F3600%2F%2F58072861e58a140c29ddb88c5bda3860136035843fafa31940183f1cd02a80f0"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/keyart/img_43683/ai_generate_43683_1.png",
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/keyart/img_43683/ai_generate_43683_2.png"
+      ]
+    },
+    {
+      "index": 2,
+      "prompt": "Cinematic photorealistic character portrait of a small handmade robot assistant built by an old Chinese repairman from salvaged 1980s home appliance parts: its head is the wooden casing of a vintage tube radio with a single old camera lens as its eye, its torso is a dented sheet-metal chassis with an exposed desk-fan motor and coiled cables, its arms and legs are made of pipes, brass water taps as joints and springs, its hands hold a screwdriver. It sits slumped on a low wooden stool beside a cluttered repair workbench under a warm green enamel desk lamp, covered in dust, the lens faintly glowing amber. Shelves of old radios and televisions softly blurred behind it. Lovingly crafted, believable engineering, worn paint, rust and scratches, tender and lonely mood, shot on 35mm film, shallow depth of field.",
+      "id": "img_43684",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43684/3876af48-7849-413d-ad5a-4e96a6b600fa.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A09%3A25Z%2F3600%2F%2F7379aeec71258203b94a9e456e1f4cd04399d1fc63c27c818a08170bede1bad1",
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43684/8c55c829-d71e-4cd2-a0a1-7f1d911d4441.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A09%3A25Z%2F3600%2F%2Fee9ef8225241608befe63271945691cbb7aa696d0215442316e39c750cb67f90",
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43684/ff5a6a97-1ad4-4511-870a-1c55545de8e4.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A09%3A25Z%2F3600%2F%2Fe6a7dcaf7c789104c9824621fbaf4900d14f6c4f37e02c811e4129f8937dd253",
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43684/28c929e4-430d-4193-b01b-712d933a0c85.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A09%3A25Z%2F3600%2F%2Fb1d42bf5988ee49a7c949d825b976ae8fd66e6346498936aa5654d6fe62d9daf"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/keyart/img_43684/ai_generate_43684_1.png",
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/keyart/img_43684/ai_generate_43684_2.png",
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/keyart/img_43684/ai_generate_43684_3.png",
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/keyart/img_43684/ai_generate_43684_4.png"
+      ]
+    },
+    {
+      "index": 3,
+      "prompt": "Isometric cutaway 3D diorama of a small old Chinese home appliance repair shop from the 1990s, one room on a square base like a miniature model, front wall removed. Steel shelves full of vintage tube radios, CRT televisions, desk fans and clocks on the left wall; a pegboard tool wall and a drawer cabinet on the right wall; a wooden workbench with a green enamel desk lamp and a disassembled radio in the middle; a small dusty robot made of old appliance parts sitting on a stool beside the bench; a wooden back door with a pale frame and pencil height marks on the back wall; a half-open rolling shutter at the front with an old black bicycle parked outside; terrazzo floor, green-painted lower walls. Warm lamp light and cool dusk light, clear readable layout, highly detailed realistic 3D render.",
+      "id": "img_43685",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43685/5c193b79-f60f-4a29-8669-3ad67aa5f987.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A07%3A23Z%2F3600%2F%2Fb602ef4c3364294afa66a3c88922fb93dd3c8df8b03ce939930830a9bf98ce30",
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43685/80e27248-190c-489e-b7d4-5a5a917030a4.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T18%3A07%3A23Z%2F3600%2F%2F47f10aeb97129df5370ea16493935ec3f5d3349a3b20af02ef8837e9a794d92f"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/keyart/img_43685/ai_generate_43685_1.png",
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/keyart/img_43685/ai_generate_43685_2.png"
+      ]
+    }
+  ],
+  "plan": {
+    "kind": "image",
+    "model": "gpt",
+    "version": "gpt-image-2.5-sunburst",
+    "count": 8,
+    "quota": {
+      "limit": 300,
+      "used": 16,
+      "remaining": 284,
+      "unit": "张",
+      "after": 24
+    },
+    "running": {
+      "limit": 20,
+      "current": 0
+    },
+    "allowed": true,
+    "blockers": [],
+    "cost": {
+      "amount": 0,
+      "currency": "USD",
+      "priced": false,
+      "estimated": false,
+      "note": null
+    },
+    "request": {
+      "batch": true,
+      "tasks": 3,
+      "total_images": 8,
+      "local_uploads": []
+    }
+  }
+}

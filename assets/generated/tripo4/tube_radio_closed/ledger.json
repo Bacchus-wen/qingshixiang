@@ -1,0 +1,34 @@
+{
+ "op": "tube_radio_closed",
+ "steps": {
+  "views": {
+   "state": "submitted",
+   "task_id": "c6083469-2ce8-472c-883b-d13cc183f210",
+   "path": "/generation/image-to-multiview",
+   "payload": {
+    "model": "v3.1-20260211"
+   },
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "00424ca6-cf82-4f20-8d56-766ac2f1c074",
+   "path": "/generation/multiview-to-model",
+   "payload": {
+    "model": "v3.1-20260211",
+    "geometry_quality": "detailed",
+    "texture": true,
+    "pbr": true,
+    "texture_version": "v3.5-20260815",
+    "texture_quality": "detailed",
+    "delight": true
+   },
+   "status": "success",
+   "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo4/tube_radio_closed/model.glb",
+   "sha256": "69001b6e789c4e216287113fae0cd4ac9ed4931cde35cc4f63cf294184a070cd"
+  }
+ },
+ "credits": 70,
+ "file_token": "file_8f0ba001-e241-4f29-bc25-a77715451232",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/tube_radio_closed.png"
+}

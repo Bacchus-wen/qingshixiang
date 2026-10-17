@@ -1,0 +1,34 @@
+{
+ "op": "robot_arm",
+ "steps": {
+  "views": {
+   "state": "submitted",
+   "task_id": "0aff1f1b-ae37-4d4e-9aa6-94bbdaf33feb",
+   "path": "/generation/image-to-multiview",
+   "payload": {
+    "model": "v3.1-20260211"
+   },
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "b0cc2259-92a4-4c9b-bdb3-6d97a47464d7",
+   "path": "/generation/multiview-to-model",
+   "payload": {
+    "model": "v3.1-20260211",
+    "geometry_quality": "detailed",
+    "texture": true,
+    "pbr": true,
+    "texture_version": "v3.5-20260815",
+    "texture_quality": "detailed",
+    "delight": true
+   },
+   "status": "success",
+   "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo4/robot_arm/model.glb",
+   "sha256": "747410ecb42ca863db7756e7ce45e767f1b6c82b6e7dc840c7a9e25282e14033"
+  }
+ },
+ "credits": 70,
+ "file_token": "file_5b4a5f61-4da7-46be-906f-c7c751ac1568",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/robot_arm.png"
+}

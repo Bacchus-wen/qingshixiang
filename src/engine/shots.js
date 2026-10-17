@@ -5,7 +5,10 @@ export const SHOTS = {
   lookdev: { scene: 'lookdev', pos: [1.5, 1.4, 9], look: [0, 1.6, -8], fov: 45 },
   'lookdev-low': { scene: 'lookdev', pos: [-1, 0.35, 7], look: [2, 1.2, -10], fov: 38 },
   // v4 repair shop: the key-art framing (assets/generated/shop/keyart/img_43683 #2), plus close reviews
-  'shop-establish': { scene: 'shop', pos: [0.35, 1.32, 4.1], look: [-0.35, 1.0, -1.0], fov: 50 },
+  'shop-establish': { scene: 'shop', pos: [-0.1, 1.45, 5.5], look: [-0.45, 1.08, -1.0], fov: 50 },
+  'shop-front': { scene: 'shop', pos: [0.1, 1.45, 6.6], look: [-0.3, 1.2, -1.0], fov: 44 },
+  'shop-inside': { scene: 'shop', pos: [0.35, 1.32, 4.1], look: [-0.35, 1.0, -1.0], fov: 50 },
+  'shop-left': { scene: 'shop', pos: [1.2, 1.45, 1.2], look: [-2.6, 1.2, -1.1], fov: 46 },
   'shop-bench': { scene: 'shop', pos: [-0.3, 1.45, 1.9], look: [-1.7, 0.9, -0.1], fov: 40 },
   'shop-robot': { scene: 'shop', pos: [0.6, 1.1, 1.6], look: [-0.4, 0.75, 0.1], fov: 38 },
   'shop-back': { scene: 'shop', pos: [-0.8, 1.5, 1.8], look: [1.6, 1.2, -2.2], fov: 46 },

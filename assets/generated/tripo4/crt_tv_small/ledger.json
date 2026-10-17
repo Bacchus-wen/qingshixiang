@@ -1,0 +1,13 @@
+{
+ "op": "crt_tv_small",
+ "steps": {
+  "views": {
+   "state": "rejected",
+   "error": "Tripo API rejected request (HTTP 403, code 2010).",
+   "path": "/generation/image-to-multiview"
+  }
+ },
+ "credits": 0,
+ "file_token": "file_88b12a7d-1a46-4dc7-b35c-06d65d0bb268",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/crt_tv_small.png"
+}

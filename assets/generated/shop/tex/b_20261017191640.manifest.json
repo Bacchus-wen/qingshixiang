@@ -1,0 +1,185 @@
+{
+  "batch_id": "b_20261017191640",
+  "tasks": 12,
+  "submitted": 12,
+  "failed": 0,
+  "total_images": 12,
+  "items": [
+    {
+      "index": 1,
+      "prompt": "Seamless tileable texture, perfectly flat orthographic view with no perspective and no lighting gradient, old yellowed lime-washed interior plaster wall from a 1990s Chinese shop, faint water stains, hairline cracks, small scuffs and fingerprints, subtle variation, even soft lighting, no objects, no text, high detail photographic material.",
+      "id": "img_43713",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43713/1d7bf5c5-0308-432c-9384-adc2dec0fa2d.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T19%3A13%3A19Z%2F3600%2F%2Fc28075bfc9abd8fb1f1fc1a2e31d3042222de667cc9488937c2c9f805e67aca5"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/tex/img_43713/ai_generate_43713_1.png"
+      ]
+    },
+    {
+      "index": 2,
+      "prompt": "Seamless tileable texture, perfectly flat orthographic view with no perspective and no lighting gradient, old dark green gloss oil-painted wall dado from a 1990s Chinese shop, small chipped spots showing pale plaster, scuffs, faint drips, slightly uneven sheen, even soft lighting, no objects, no text, high detail photographic material.",
+      "id": "img_43714",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43714/cee23aa0-89c0-4d0a-8bd1-9e716313faa7.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T19%3A13%3A19Z%2F3600%2F%2Fad5d41d5e32b8f7501df40a66acbe3baba5d3aaf650c0d4a8928223277cbc730"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/tex/img_43714/ai_generate_43714_1.png"
+      ]
+    },
+    {
+      "index": 3,
+      "prompt": "Seamless tileable texture, perfectly flat orthographic view with no perspective and no lighting gradient, top-down worn 1990s Chinese terrazzo floor, small white, grey, black and reddish stone chips set in grey cement, dirt and dust, faint scuffs, even soft lighting, no objects, no text, high detail photographic material.",
+      "id": "img_43715",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43715/c60ddb58-b69d-402d-947b-d8680da2f47d.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T19%3A13%3A19Z%2F3600%2F%2F83aaa0c8a7dac7d6e8c0362637b1cb243e6e7ec1cfa8c809304966f74a8a9fa2"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/tex/img_43715/ai_generate_43715_1.png"
+      ]
+    },
+    {
+      "index": 4,
+      "prompt": "Seamless tileable texture, perfectly flat orthographic view with no perspective and no lighting gradient, old whitewashed concrete ceiling, grey water stains and small peeling patches, even soft lighting, no objects, no text, high detail photographic material.",
+      "id": "img_43716",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43716/2f2c4728-4502-4055-abf2-d23183722013.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T19%3A13%3A19Z%2F3600%2F%2F36fc274d8cdcd0ee4683ddb0755f39531b7e7d10786b9f05df4639579857214d"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/tex/img_43716/ai_generate_43716_1.png"
+      ]
+    },
+    {
+      "index": 5,
+      "prompt": "Perfectly flat orthographic front view filling the entire frame edge to edge, no perspective, no background, no shadows, even lighting, photographic: a wall-mounted brown pegboard covered with old hand tools hanging on hooks: screwdrivers with red and yellow handles, pliers, wire cutters, wrenches, a hammer, coils of copper wire and a test meter, a cluttered repairman's tool wall",
+      "id": "img_43717",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43717/72bf9ad6-eaf9-44ae-b01d-008ed4233e11.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T19%3A13%3A19Z%2F3600%2F%2F702b2f7796a733a5025ee62039f6129269c2dc9e5bebb63b495749435a8a8f36"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/tex/img_43717/ai_generate_43717_1.png"
+      ]
+    },
+    {
+      "index": 6,
+      "prompt": "Perfectly flat orthographic front view filling the entire frame edge to edge, no perspective, no background, no shadows, even lighting, photographic: a 1993 Chinese paper wall calendar page, a traditional landscape painting of mountains and a river on the top half, a month date grid with Chinese numerals below, slightly yellowed paper with curled corners",
+      "id": "img_43718",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43718/02416d2d-7028-45c2-8b38-67a5f6146660.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T19%3A13%3A19Z%2F3600%2F%2F77f30ab2d6276c509cbde743d66b355749536c6b293aec8626298e9c2b405d34"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/tex/img_43718/ai_generate_43718_1.png"
+      ]
+    },
+    {
+      "index": 7,
+      "prompt": "Perfectly flat orthographic front view filling the entire frame edge to edge, no perspective, no background, no shadows, even lighting, photographic: a handwritten price list on yellowed paper for a small Chinese appliance repair shop, a red brush-written title 修理价目 and lines listing 收音机 电视机 电风扇 录音机 with prices in yuan, a pushpin at the top",
+      "id": "img_43719",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43719/23ddecc4-0e2b-4203-9ff1-0abf515d5849.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T19%3A13%3A59Z%2F3600%2F%2F2fe980fbf5ee2114067e06e422f871dce65f596c0cb23e9150bb87c8043efc2a"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/tex/img_43719/ai_generate_43719_1.png"
+      ]
+    },
+    {
+      "index": 8,
+      "prompt": "Perfectly flat orthographic front view filling the entire frame edge to edge, no perspective, no background, no shadows, even lighting, photographic: a weathered horizontal shop sign board with the red painted Chinese characters 家电维修 on a pale cream background, rust streaks and peeling paint",
+      "id": "img_43720",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43720/14cb00fc-1f03-432f-8b6f-f2050934ff85.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T19%3A13%3A19Z%2F3600%2F%2F70f1a8d9fae103894a3d89b70e468d478cbfd5ec71b80719946a15c6b96a78b3"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/tex/img_43720/ai_generate_43720_1.png"
+      ]
+    },
+    {
+      "index": 9,
+      "prompt": "Perfectly flat orthographic front view filling the entire frame edge to edge, no perspective, no background, no shadows, even lighting, photographic: a weathered tall vertical white sign board with red painted Chinese text listing services 收音机 电视机 电风扇 录音机 各种家电, peeling paint and rust streaks",
+      "id": "img_43721",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43721/bb243d3e-c8b3-4496-a662-800818c5aa6e.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T19%3A13%3A19Z%2F3600%2F%2F33ce50a67a1928a51a73a880942bfff2afe4e471f43fa2d106e0e1e3566307b1"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/tex/img_43721/ai_generate_43721_1.png"
+      ]
+    },
+    {
+      "index": 10,
+      "prompt": "Perfectly flat orthographic front view filling the entire frame edge to edge, no perspective, no background, no shadows, even lighting, photographic: an old 1980s Chinese advertising poster for a radio brand showing a happy family listening to a wooden tube radio at home, faded colors, torn corners, no slogans",
+      "id": "img_43722",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43722/5d435431-78a8-4d1a-b16d-aca9ec76b16e.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T19%3A14%3A19Z%2F3600%2F%2F192504ab0444b0fe9af3e0f901dc6391e2f95421da04990b26595a2d793a128e"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/tex/img_43722/ai_generate_43722_1.png"
+      ]
+    },
+    {
+      "index": 11,
+      "prompt": "Perfectly flat orthographic front view filling the entire frame edge to edge, no perspective, no background, no shadows, even lighting, photographic: the side of an old worn brown cardboard appliance box with faded red printed Chinese brand text and a simple television icon, torn corners and tape",
+      "id": "img_43723",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43723/8f1d2b3a-54ed-4389-8548-5858337f07e3.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T19%3A15%3A49Z%2F3600%2F%2F1b79a2734ababe785fe20de661e47438c1804c38041a50b59672a5fb3fdca3af"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/tex/img_43723/ai_generate_43723_1.png"
+      ]
+    },
+    {
+      "index": 12,
+      "prompt": "Perfectly flat orthographic front view filling the entire frame edge to edge, no perspective, no background, no shadows, even lighting, photographic: the side of an old worn brown cardboard box for an electric fan with faded blue printed Chinese text and a fan illustration, water stains",
+      "id": "img_43724",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43724/fcb5acb1-c96b-4819-bc9c-df5c33045cc9.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T19%3A16%3A38Z%2F3600%2F%2F2453a25cb8f712ca04d70961a507b9c646a02d7ba45c0d782baa2250dd8dddc5"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/tex/img_43724/ai_generate_43724_1.png"
+      ]
+    }
+  ],
+  "plan": {
+    "kind": "image",
+    "model": "gpt",
+    "version": "gpt-image-2.5-sunburst",
+    "count": 12,
+    "quota": {
+      "limit": 300,
+      "used": 51,
+      "remaining": 249,
+      "unit": "张",
+      "after": 63
+    },
+    "running": {
+      "limit": 20,
+      "current": 0
+    },
+    "allowed": true,
+    "blockers": [],
+    "cost": {
+      "amount": 0,
+      "currency": "USD",
+      "priced": false,
+      "estimated": false,
+      "note": null
+    },
+    "request": {
+      "batch": true,
+      "tasks": 12,
+      "total_images": 12,
+      "local_uploads": []
+    }
+  }
+}

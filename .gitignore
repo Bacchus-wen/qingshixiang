@@ -12,3 +12,8 @@ reference/scraped/
 reference/img2threejs/
 assets/generated/models/
 assets/generated/tripo3/*.glb
+# v4 shop: raw generations stay local (provenance JSON/manifests are committed)
+assets/generated/tripo4/**/*.glb
+assets/generated/tripo4/**/views/
+assets/generated/shop/**/*.png
+assets/generated/shop/**/*.glb

@@ -1,0 +1,34 @@
+{
+ "op": "soldering_iron",
+ "steps": {
+  "views": {
+   "state": "submitted",
+   "task_id": "c8f3cbf0-d851-4d77-8c03-1c6e2e191839",
+   "path": "/generation/image-to-multiview",
+   "payload": {
+    "model": "v3.1-20260211"
+   },
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "19f98261-d6af-4fa9-b9ab-2a1bfaea9b6e",
+   "path": "/generation/multiview-to-model",
+   "payload": {
+    "model": "v3.1-20260211",
+    "geometry_quality": "detailed",
+    "texture": true,
+    "pbr": true,
+    "texture_version": "v3.5-20260815",
+    "texture_quality": "detailed",
+    "delight": true
+   },
+   "status": "success",
+   "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo4/soldering_iron/model.glb",
+   "sha256": "0bbcb265f7eec6e2552bbb055dcf9ebb602eb74856fbd68d02fad885efc0a262"
+  }
+ },
+ "credits": 70,
+ "file_token": "file_9e98d727-596d-44fa-a8a3-07152ff444a9",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/soldering_iron.png"
+}
