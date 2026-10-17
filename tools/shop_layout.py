@@ -10,6 +10,10 @@ fixed = [
  {"name": "shelf_back", "type": "shelf", "pos": [-0.1, 0, -1.97], "w": 2.1, "d": 0.5, "h": 2.55, "levels": 5},
  {"name": "shelf_left", "type": "shelf", "pos": [-2.72, 0, -1.05], "ry": 90, "w": 1.7, "d": 0.5, "h": 2.3, "levels": 4},
  {"name": "shelf_left2", "type": "shelf", "pos": [-2.72, 0, 1.225], "ry": 90, "w": 1.35, "d": 0.45, "h": 1.9, "levels": 4},
+ {"name": "wall_plank", "type": "plank", "pos": [-1.83, 2.3, -2.25], "w": 1.15, "d": 0.24},
+ {"name": "plank_radio", "glb": "tube_radio_closed.glb", "pos": [-2.12, 0, -2.12], "ry": 6, "scale": 0.8, "on": "wall_plank", "tint": [0.72, 0.6, 0.5]},
+ {"name": "plank_clock", "glb": "alarm_clock.glb", "pos": [-1.78, 0, -2.13], "ry": -18, "on": "wall_plank"},
+ {"name": "plank_tv", "glb": "crt_tv.glb", "pos": [-1.5, 0, -2.12], "ry": -8, "scale": 0.6, "on": "wall_plank"},
  {"name": "workbench", "glb": "workbench.glb", "pos": [-1.6, 0, 0.9], "ry": 0},
  {"name": "bench_clock", "glb": "alarm_clock.glb", "pos": [-1.0, 0, 0.6], "ry": 24, "on": "workbench"},
  {"name": "spool_a", "type": "proc", "kind": "spool", "seed": 0, "pos": [-1.08, 0, 0.82], "on": "workbench"},
@@ -73,7 +77,7 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
     for lv in range(levels):
         x = x0 + random.uniform(0.01, 0.04); k = 0; last = None
         while True:
-            if lv == 0:
+            if lv == 0 or (lv == levels - 1 and clear[lv] < 0.5 and random.random() < 0.35 and x < x0 + 0.6):
                 key = random.choice(list(CART)); w, h, dd = CART[key]
                 sc = round(random.uniform(0.85, 1.0), 2); w *= sc; dd *= sc
                 if x + w > x1: break

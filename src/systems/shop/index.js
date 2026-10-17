@@ -18,11 +18,15 @@ export const ROOM = { w: 6.0, d: 4.5, h: 3.0 };
 // in world space so walls and floor line up without UV work. All are loaded up front (init awaits them).
 const TEX = {};
 const TEX_NAMES = ['floor_terrazzo', 'wall_upper', 'wall_dado', 'ceiling', 'facade', 'pavement', 'shutter', 'cardboard', 'pegboard',
-  'poster', 'calendar', 'price_list', 'slogan', 'sign_main', 'sign_side', 'tags', 'box_a', 'box_b', 'tv_poster', 'notice'];
+  'poster', 'calendar', 'price_list', 'slogan', 'sign_main', 'sign_side', 'tags', 'box_a', 'box_b', 'tv_poster', 'notice', 'street_backdrop'];
 async function loadTextures(ktx2) {
   await Promise.all(TEX_NAMES.map(async (n) => {
-    const t = await ktx2.loadAsync(`${import.meta.env.BASE_URL}textures/shop/${n}.ktx2`);
-    t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; TEX[n] = t;
+    try {
+      const t = await ktx2.loadAsync(`${import.meta.env.BASE_URL}textures/shop/${n}.ktx2`);
+      t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; TEX[n] = t;
+    } catch (e) { // a missing texture must not take the whole shop down: grey stand-in, logged
+      console.warn('[shop] texture missing', n); const t = new THREE.DataTexture(new Uint8Array([128, 128, 128, 255]), 1, 1); t.needsUpdate = true; TEX[n] = t;
+    }
   }));
 }
 const tex = (name) => TEX[name];
@@ -297,6 +301,15 @@ export default {
       }
       root.add(slats);
     }
+    // the other side of the street (seen through the shop opening from inside): a generated matte painting on a
+    // plane across the road, unlit (it carries its own dusk light), plus dark ground under it
+    {
+      const bd = new THREE.MeshBasicNodeMaterial(); const bt = tex('street_backdrop'); bt.wrapS = bt.wrapT = THREE.ClampToEdgeWrapping;
+      bd.colorNode = texture(bt).rgb.mul(0.55);
+      const BW = 16, BH = BW * 1024 / 1536;
+      const plane = new THREE.Mesh(new THREE.PlaneGeometry(BW, BH), bd); plane.rotation.y = Math.PI; // faces the shop (-z)
+      plane.position.set(0.4, -STEP + BH / 2 - 0.25, d / 2 + 0.25 + 8.5); root.add(plane);
+    }
     // printed things on the walls (generated with the company platform, docs/gen-log.md)
     root.add(onWall(decal('pegboard', 1.2, 0.8), 'back', -1.83, 1.72, 0.0145));
     { // the pegboard is a real 6 mm board on spacers, not a sticker: its edges catch light and cast a thin shadow
@@ -379,6 +392,13 @@ export default {
         if (it.type === 'shelf') o = shelfUnit(it);
         else if (it.type === 'carton') o = carton(it.front, ...it.size);
         else if (it.type === 'proc') o = procItem(it.kind, it.seed);
+        else if (it.type === 'plank') { // wall shelf: a worn plank on two angle brackets, back edge on the wall
+          o = new THREE.Group(); const wood = PM.plank ??= new THREE.MeshStandardNodeMaterial({ color: 0x5a3f28, roughness: 0.85 });
+          const pl = new THREE.Mesh(new THREE.BoxGeometry(it.w, 0.022, it.d), wood); pl.position.set(0, 0.011, it.d / 2); o.add(pl);
+          for (const sx of [-it.w / 2 + 0.12, it.w / 2 - 0.12]) { const br = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.16, 0.012), PM.hook ??= new THREE.MeshStandardNodeMaterial({ color: 0x2a2a28, roughness: 0.5, metalness: 0.8 })); br.position.set(sx, -0.08, 0.006); o.add(br);
+            const st = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.012, it.d * 0.8), br.material); st.position.set(sx, -0.006, it.d * 0.4); o.add(st); }
+          o.traverse((m) => { if (m.isMesh) { m.castShadow = m.receiveShadow = true; } });
+        }
         else {
           const g = await templates.get(it.glb); if (!g) continue; o = g.scene.clone(true);
           // yaw0: the generated model sits diagonally in its own frame (bicycle): pre-rotate it inside a pivot so the
@@ -406,6 +426,7 @@ export default {
           const sup = it.on && placed[it.on];
           const sl = sup?.userData.layout;
           if (it.type === 'shelf') o.position.y = 0;
+          else if (it.type === 'plank') { o.position.set(it.pos[0], it.pos[1], it.pos[2]); }
           else if (it.noDrop && sup) { // draped things (the rag): origin = the support's top surface just behind pos
             ray.set(v.set(it.pos[0], 5, it.pos[2] - 0.08), down); ray.far = 10;
             const hit = ray.intersectObject(sup, true)[0]; o.position.y = (hit ? hit.point.y : 0) + (it.y || 0);

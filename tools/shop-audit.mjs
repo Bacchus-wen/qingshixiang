@@ -21,7 +21,7 @@ const res = await page.evaluate(() => {
     const L = o.userData.layout || {}; const b = boxes[n];
     if (L.type === 'shelf') continue;
     // FLOAT (not for wall-mounted items)
-    if (!L.wall && !L.noDrop) {
+    if (!L.wall && !L.noDrop && L.type !== 'plank') {
       const band = Math.min(0.015, (b.max.y - b.min.y) * 0.2);
       const pts = []; o.updateMatrixWorld(true);
       o.traverse((m) => {
