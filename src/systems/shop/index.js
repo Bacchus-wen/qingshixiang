@@ -49,7 +49,9 @@ function wallMat() {
   c = mix(c, vec3(0.06, 0.12, 0.08), stripe);
   const floorDirt = smoothstep(0.35, 0.0, P.y).mul(0.35);
   const broad = mx_noise_float(vec3(u.mul(0.45), P.y.mul(0.6), 1.7)).mul(0.12);  // breaks the tile repeat
-  m.colorNode = c.mul(float(1).sub(floorDirt)).mul(float(1).add(broad));
+  // decades of soldering smoke and a coal stove: the plaster browns towards the ceiling, patchily
+  const soot = smoothstep(1.9, 3.0, P.y).mul(mx_noise_float(vec3(u.mul(1.3), P.y.mul(2.0), 4.2)).mul(0.25).add(0.75)).mul(0.42);
+  m.colorNode = c.mul(float(1).sub(floorDirt)).mul(float(1).add(broad)).mul(mix(vec3(1), vec3(0.62, 0.52, 0.4), soot));
   m.roughnessNode = mix(float(0.88), float(0.38), isDado);
   return m;
 }
@@ -77,7 +79,8 @@ function streetMat() {
 function shutterMat() {
   const m = new THREE.MeshStandardNodeMaterial({ roughness: 0.6, metalness: 0.35 });
   const P = positionWorld;
-  m.colorNode = texture(tex('shutter'), vec2(P.x.div(1.2), P.y.div(1.2))).rgb;
+  const c = texture(tex('shutter'), vec2(P.x.div(1.2), P.y.div(1.2))).rgb;
+  m.colorNode = mix(vec3(c.r.add(c.g).add(c.b).div(3)), c, 0.55).mul(0.72); // greyer, darker: the eye goes past it into the shop
   return m;
 }
 
