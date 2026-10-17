@@ -57,13 +57,13 @@ export default {
         // black, rain only (audio starts on this first gesture)
         m.forceOpen = false; this.power = 1; m.power = 1; this.film.endCardOff?.();
         ARRIVE.getPoint(0, this.cam.pos); this.cam.look.set(0, 1.4, -24);
-        this.film.fade(1);
+        this.film.fade(0.7); // r20: the rainy street shows faintly behind the title (first impression), not pure black
         // wasPressed('Pointer') latches the click: on a slow first frame (shader compile) press+release can fall between frames
         if (input.pointer.held || input.wasPressed('Pointer') || input.wasPressed('Space') || input.wasPressed('Enter')) { this.film.title(false); this.set('arrive'); }
         break;
       }
       case 'arrive': {
-        this.film.fade(Math.max(0, 1 - this.t / 6));
+        this.film.fade(Math.max(0, 0.7 * (1 - this.t / 6)));
         m.forceOpen = false;
         const u = ease(Math.min(1, this.t / 42));
         ARRIVE.getPoint(u, this.cam.pos);
