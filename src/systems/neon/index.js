@@ -35,7 +35,9 @@ export default {
         const area = Math.min(6, sg.w * sg.h);
         ctx.lightPool.add({ pos: new THREE.Vector3(sg.x + facing * (0.6 + 0.15 * sg.h), sg.y - 0.25 * sg.h, sg.z),
           color: C.set(sg.tint).clone(), intensity: (sg.kind === 'box' ? 6 : 9) * Math.sqrt(area) * 0.6,
-          distance: Math.min(7.5, 4 + sg.w), alive: sg.alive ? 1 : 0, power: () => sg.power ?? 1, importance: sg.kind === 'roof' ? 1.4 : 1 });
+          distance: Math.min(7.5, 4 + sg.w), alive: sg.alive ? 1 : 0, power: () => sg.power ?? 1, importance: sg.kind === 'roof' ? 1.4 : 1,
+          // the climax door keeps its own warm light: remembered signs near it hold back while the marks play
+          memScale: Math.hypot(sg.x - 5.0, sg.z + 14.2) < 8 ? () => (ctx.api.fragment?.state === 'playing' ? 0.12 : 1) : undefined });
       }
       for (const f of facades) if (f.shop && !f.home) {
         ctx.lightPool.add({ pos: new THREE.Vector3(f.frontX - f.side * 0.7, 2.6, f.z), color: new THREE.Color(1, 0.72, 0.45),
