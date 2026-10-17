@@ -14,7 +14,10 @@ await page.waitForFunction(() => window.__shotReady, null, { timeout: 120000 });
 const list = await page.evaluate(() => {
   const e = window.__engine, P = e.ctx.api.shop.placed, seen = new Set(), out = [];
   // prefer stand-alone instances (not on shelves) as the representative of each model
-  const items = Object.values(P).sort((a, b) => (a.userData.layout.level != null) - (b.userData.layout.level != null));
+  // representative instance per model: a named, free-standing one where it exists
+  const PREF = { 'tube_radio_closed.glb': 'queue_radio', 'crt_tv.glb': 'tv_on_stool', 'stool.glb': 'stool_2', 'desk_fan.glb': 'queue_fan', 'alarm_clock.glb': 'bench_clock', 'thermos.glb': 'thermos_floor' };
+  const rank = (o) => { const L = o.userData.layout; return (PREF[L.glb] === L.name ? -2 : 0) + (L.level != null ? 1 : 0) + (/plank|_t$/.test(L.name) || L.on === 'wall_plank' ? 1 : 0); };
+  const items = Object.values(P).sort((a, b) => rank(a) - rank(b));
   for (const o of items) {
     const L = o.userData.layout; const key = L.glb || (L.type === 'proc' ? 'proc_' + L.kind : null);
     if (!key || seen.has(key)) continue; seen.add(key); out.push({ key, name: L.name });
