@@ -25,6 +25,9 @@ const list = await page.evaluate(() => {
   return out;
 });
 const files = [];
+// warm-up: leave shot mode and present once, so the first tile is not the frozen shot frame
+await page.evaluate(() => { const e = window.__engine; e.shot = null; for (let i = 0; i < 4; i++) e.postfx.render(1 / 60); });
+await page.waitForTimeout(600);
 for (const { key, name } of list) {
   await page.evaluate(({ name }) => {
     const e = window.__engine, THREE = e.ctx.THREE, o = e.ctx.api.shop.placed[name], R = e.ctx.api.shop.ROOM;
