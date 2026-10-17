@@ -444,6 +444,16 @@ export default {
       mk(cables, new THREE.MeshStandardNodeMaterial({ color: 0x101010, roughness: 0.55 }));
       mk(conduits, new THREE.MeshStandardNodeMaterial({ color: 0xc9c3b4, roughness: 0.7 }));
       mk(plastic, new THREE.MeshStandardNodeMaterial({ color: 0xd8d0bc, roughness: 0.5 }));
+      // the spare arm hangs on a wall hook: a plate on the wall and a bent rod through its shoulder joint
+      if (placed.spare_arm) {
+        const bb = new THREE.Box3().setFromObject(placed.spare_arm, true), cz = (bb.min.z + bb.max.z) / 2, top = bb.max.y - 0.03;
+        const steelM = PM.hook ??= new THREE.MeshStandardNodeMaterial({ color: 0x2a2a28, roughness: 0.5, metalness: 0.8 });
+        const plate = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.07, 0.04), steelM); plate.position.set(w / 2 - 0.003, top + 0.02, cz);
+        const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, w / 2 - bb.min.x + 0.02, 8).rotateZ(Math.PI / 2), steelM);
+        rod.position.set((w / 2 + bb.min.x) / 2 - 0.01, top, cz);
+        const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.03, 8), steelM); tip.position.set(bb.min.x - 0.005, top + 0.012, cz);
+        for (const m of [plate, rod, tip]) { m.castShadow = true; root.add(m); }
+      }
       // screwdrivers and a wire coil hanging on the pegboard (in front of the printed board: real depth and shadows)
       const pegX = -1.83, pegY = 1.72, pegZ = -d / 2 + 0.012;
       [[-0.5, 0.18], [-0.44, 0.17], [-0.38, 0.19], [0.36, 0.2], [0.42, 0.18]].forEach(([dx, dy], i) => {

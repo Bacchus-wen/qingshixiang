@@ -386,6 +386,38 @@
   "scale": 0.6
  },
  {
+  "name": "spare_arm",
+  "glb": "spare_arm.glb",
+  "pos": [
+   2.9,
+   1.32,
+   -0.92
+  ],
+  "ry": -90,
+  "wall": "right"
+ },
+ {
+  "name": "spare_torso",
+  "glb": "spare_torso.glb",
+  "pos": [
+   -0.15,
+   0,
+   0.35
+  ],
+  "ry": 160
+ },
+ {
+  "name": "spare_leg",
+  "glb": "spare_leg.glb",
+  "pos": [
+   0.12,
+   0,
+   0.62
+  ],
+  "ry": 75,
+  "roll": 88
+ },
+ {
   "name": "stool_tv",
   "glb": "stool.glb",
   "pos": [
