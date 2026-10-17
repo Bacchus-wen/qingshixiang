@@ -360,7 +360,7 @@ export default {
       const room = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), bm(0x4a4236, 0.9)); room.position.y = h / 2; env.add(room);
       const fl = new THREE.Mesh(new THREE.PlaneGeometry(w, d).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x2c2822 })); fl.position.y = 0.01; env.add(fl);
       const tube = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.05, 0.1), new THREE.MeshBasicMaterial({ color: new THREE.Color(0xfff8ee).multiplyScalar(6) })); tube.position.set(0.1, h - 0.08, -0.55); env.add(tube);
-      const door = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 2.6), new THREE.MeshBasicMaterial({ color: new THREE.Color(0x6f86ad).multiplyScalar(1.6), side: THREE.DoubleSide })); door.position.set(0, 1.3, d / 2 - 0.01); env.add(door);
+      const door = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 2.6), new THREE.MeshBasicMaterial({ color: new THREE.Color(0x5d6a80).multiplyScalar(1.0), side: THREE.DoubleSide })); door.position.set(0, 1.3, d / 2 - 0.01); env.add(door);
       const hot = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 8), new THREE.MeshBasicMaterial({ color: new THREE.Color(0xffc27a).multiplyScalar(8) })); hot.position.set(-1.7, 1.2, 0.0); env.add(hot);
       const pm = new THREE.PMREMGenerator(ctx.renderer);
       scene.environment = pm.fromScene(env, 0.04).texture; scene.environmentIntensity = 0.55;
