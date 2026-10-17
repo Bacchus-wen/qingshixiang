@@ -21,4 +21,6 @@ e1 tv_poster tv_poster 512x1024; ua notice notice 512x1024
 e1 street_backdrop street_backdrop 2048x1024
 # sandwich-board sign at the entrance
 ua sign_aframe sign_aframe 512x1024
+# pencil height marks beside the back door (drawn as a multiply decal, so only the marks show)
+ua height_marks height_marks 512x1024
 ls -la $OUT/*.ktx2 | awk '{s+=$5} END {print "total", s}'

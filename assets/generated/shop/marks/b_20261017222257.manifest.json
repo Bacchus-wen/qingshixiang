@@ -1,0 +1,53 @@
+{
+  "batch_id": "b_20261017222257",
+  "tasks": 1,
+  "submitted": 1,
+  "failed": 0,
+  "total_images": 1,
+  "items": [
+    {
+      "index": 1,
+      "prompt": "Perfectly flat orthographic front view filling the entire frame edge to edge, no perspective, no background, even lighting, photographic: a strip of old off-white painted plaster wall beside a door frame, covered with a child's height marks drawn in pencil and ballpoint over the years: short horizontal lines, each with small handwritten Chinese notes and dates such as 爸爸 170, 我 1993.6.1, 弟弟 1990, 弟弟 1991, 弟弟 1992, faded and smudged, some marks in red pen, a few scuffs and fingerprints, realistic texture.",
+      "id": "img_43740",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43740/a8d11b5d-d9c8-42b4-b4c9-f8e057e7c6df.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T22%3A22%3A56Z%2F3600%2F%2F28b36aa7e038d84608cdf1ad9426334f471625ebb9187b4219565d6ea4b6a527"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/marks/img_43740/ai_generate_43740_1.png"
+      ]
+    }
+  ],
+  "plan": {
+    "kind": "image",
+    "model": "gpt",
+    "version": "gpt-image-2.5-sunburst",
+    "count": 1,
+    "quota": {
+      "limit": 300,
+      "used": 78,
+      "remaining": 222,
+      "unit": "张",
+      "after": 79
+    },
+    "running": {
+      "limit": 20,
+      "current": 0
+    },
+    "allowed": true,
+    "blockers": [],
+    "cost": {
+      "amount": 0,
+      "currency": "USD",
+      "priced": false,
+      "estimated": false,
+      "note": null
+    },
+    "request": {
+      "batch": true,
+      "tasks": 1,
+      "total_images": 1,
+      "local_uploads": []
+    }
+  }
+}

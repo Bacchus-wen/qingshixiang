@@ -5,7 +5,7 @@ import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { SHOTS } from '../../engine/shots.js';
-import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorld, smoothstep, vec2, vec3, mx_worley_noise_float, texture, normalWorldGeometry, abs, step, uniform, uv } from 'three/tsl';
+import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorld, smoothstep, vec2, vec3, mx_worley_noise_float, texture, normalWorldGeometry, abs, step, uniform, uv, vec4 } from 'three/tsl';
 
 // v4: the closed-down home-appliance repair shop (docs/scene-shop.md). This phase is models + layout only:
 // a simple room shell, the Tripo models placed from /models/shop/layout.json (every item is grounded on its
@@ -18,7 +18,7 @@ export const ROOM = { w: 6.0, d: 4.5, h: 3.0 };
 // in world space so walls and floor line up without UV work. All are loaded up front (init awaits them).
 const TEX = {};
 const TEX_NAMES = ['floor_terrazzo', 'wall_upper', 'wall_dado', 'ceiling', 'facade', 'pavement', 'shutter', 'cardboard', 'pegboard',
-  'poster', 'calendar', 'price_list', 'slogan', 'sign_main', 'sign_side', 'tags', 'box_a', 'box_b', 'box_c', 'box_d', 'tv_poster', 'notice', 'street_backdrop', 'sign_aframe'];
+  'poster', 'calendar', 'price_list', 'slogan', 'sign_main', 'sign_side', 'tags', 'box_a', 'box_b', 'box_c', 'box_d', 'tv_poster', 'notice', 'street_backdrop', 'sign_aframe', 'height_marks'];
 async function loadTextures(ktx2) {
   await Promise.all(TEX_NAMES.map(async (n) => {
     try {
@@ -363,6 +363,17 @@ export default {
     root.add(onWall(decal('slogan', 0.96, 0.64), 'right', -0.5, 2.38, 0.015));
     root.add(onWall(decal('tv_poster', 0.4, 0.6, { curl: 0.012 }), 'left', 1.22, 2.36));
     root.add(onWall(decal('notice', 0.36, 0.54, { curl: 0.008 }), 'right', -1.98, 1.72));
+    { // pencil height marks beside the back door, over the years (multiply decal: the plaster in the photo is neutral,
+      // so only the pencil lines and writing darken our wall). The photo's own door frame (right 20%) is cropped off.
+      const ht = tex('height_marks'); ht.wrapS = ht.wrapT = THREE.ClampToEdgeWrapping;
+      const mm = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.MultiplyBlending, premultipliedAlpha: true });
+      const crop = 0.8, H = 1.25, W = H * (1024 * crop) / 1536;
+      const hc = texture(ht, uv().mul(vec2(crop, 1))).rgb, hl = hc.dot(vec3(0.3, 0.59, 0.11));
+      const ink = smoothstep(0.74, 0.46, hl); // only the strokes: the photo's plaster (light) multiplies by 1
+      mm.colorNode = vec4(mix(vec3(1), hc.div(0.78).min(1), ink), 1);
+      const pm = new THREE.Mesh(new THREE.PlaneGeometry(W, H), mm); pm.renderOrder = 2;
+      root.add(onWall(pm, 'back', 1.235 - W / 2, 0.55 + H / 2, 0.003));
+    }
     root.add(onWall(decal('sign_main', 2.4, 1.2, { rough: 0.6 }), 'front-out', 0, 3.42, 0.01));
     root.add(onWall(decal('sign_side', 0.82, 1.64, { rough: 0.6 }), 'front-out', -2.24, 1.62, 0.01)); // close to the opening: reads whole from the street
     // review lighting: warm desk lamp key, cold dusk from the street, a weak bounce so models read
