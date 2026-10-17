@@ -99,8 +99,8 @@ export default {
       // +X is the robot's facing direction. The cat sleeps on its +Z side, against the wall by the torn
       // shoulder's cables (dry, out of the puddle, and in view of the waiting camera) (Claude)
       ctx.api.robot?.root?.getWorldPosition(this.origin);
-      this.origin.x += Number(ctx.params?.get('catx') ?? 0.12);
-      this.origin.z += Number(ctx.params?.get('catz') ?? 0.62);
+      this.origin.x += Number(ctx.params?.get('catx') ?? 0.35); // r19: by the robot's knee in the mid-ground, not a black ball in the lens
+      this.origin.z += Number(ctx.params?.get('catz') ?? -0.75);
       this.origin.y = 0.14;
       root.position.copy(this.origin);
       this.debug = ctx.params?.get('cat');
