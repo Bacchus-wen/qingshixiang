@@ -34,7 +34,7 @@ fixed = [
  {"name": "back_door", "glb": "back_door.glb", "pos": [1.75, 0, 0], "wall": "back"},
  {"name": "wall_clock", "glb": "wall_clock.glb", "pos": [2.63, 1.78, 0], "wall": "back"},
  {"name": "parts_cabinet", "glb": "parts_cabinet.glb", "pos": [2.62, 0, -0.6], "ry": -90},
- {"name": "stool_2", "glb": "stool.glb", "pos": [1.25, 0, 0.55], "ry": 12},
+ {"name": "stool_2", "glb": "stool.glb", "pos": [1.9, 0, -0.55], "ry": 8},
  {"name": "queue_carton", "type": "carton", "front": "box_a", "size": [0.46, 0.4, 0.4], "pos": [2.7, 0, 0.42], "ry": -92},
  {"name": "queue_tv", "glb": "crt_tv.glb", "pos": [2.68, 0, 0.42], "ry": -104, "on": "queue_carton"},
  {"name": "queue_fan", "glb": "desk_fan.glb", "pos": [2.7, 0, 0.84], "ry": -120},
@@ -42,14 +42,13 @@ fixed = [
  {"name": "meter_box", "glb": "../v2/meterbox.glb", "pos": [2.42, 1.72, 0], "ry": -90, "wall": "front-out"},
  {"name": "flat_cartons", "glb": "../v2/cardboard.glb", "pos": [2.42, 0, 1.95], "ry": 4, "scale": 0.6},
  {"name": "spare_arm", "glb": "spare_arm.glb", "pos": [2.9, 1.42, -0.88], "ry": -112, "wall": "right"},
- {"name": "spare_torso", "glb": "spare_torso.glb", "pos": [-1.02, 0, 1.78], "ry": 150},
+ {"name": "work_carton", "type": "carton", "front": "box_c", "size": [0.32, 0.3, 0.26], "pos": [-0.93, 0, 1.56], "ry": -40, "on": "floor"},
+ {"name": "spare_torso", "glb": "spare_torso.glb", "pos": [-0.93, 0, 1.56], "ry": 128, "on": "work_carton", "scale": 0.92},
  {"name": "spare_leg", "glb": "spare_leg.glb", "pos": [2.9, 1.12, -0.42], "ry": -68, "wall": "right"},
  {"name": "drop_carton_a", "type": "carton", "front": "box_b", "size": [0.4, 0.46, 0.34], "pos": [1.45, 0, 1.62], "ry": -14},
  {"name": "drop_carton_b", "type": "carton", "front": "box_a", "size": [0.42, 0.36, 0.38], "pos": [1.97, 0, 1.4], "ry": 8},
  {"name": "drop_fan", "glb": "desk_fan.glb", "pos": [1.97, 0, 1.4], "ry": -150, "on": "drop_carton_b", "tint": [0.95, 0.9, 0.78]},
- {"name": "stool_tv", "glb": "stool.glb", "pos": [0.05, 0, -1.22], "ry": -18},
- {"name": "tv_on_stool", "glb": "crt_tv.glb", "pos": [0.05, 0, -1.22], "ry": 32, "on": "stool_tv", "scale": 0.82, "tint": [0.62, 0.64, 0.66]},
- {"name": "thermos_floor", "glb": "thermos.glb", "pos": [1.25, 0, 0.55], "ry": 40, "on": "stool_2"},
+  {"name": "thermos_floor", "glb": "thermos.glb", "pos": [2.55, 0, -0.25], "ry": 40, "on": "parts_cabinet"},
  {"name": "bicycle", "glb": "bicycle.glb", "pos": [2.35, 0, 2.95], "yaw0": 35.7, "ry": 183, "roll": 10, "scale": 0.84},
 ]
 # shelf fill: heavy cartons at the bottom, mixed electronics above, never the same model twice side by side; a second
@@ -83,7 +82,7 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
                 fitk = [k_ for k_ in CART if CART[k_][1] * 0.85 <= clear[lv] - 0.02]
                 key = random.choice(fitk); w0, h, d0 = CART[key]
                 sc = round(min(random.uniform(0.85, 1.0), (clear[lv] - 0.02) / h), 2); w0 *= sc; d0 *= sc
-                cyaw = random.uniform(-3, 3) if lv == 0 else random.uniform(-16, 16)
+                cyaw = random.uniform(-9, 9) if lv == 0 else random.uniform(-18, 18)
                 ca = math.radians(cyaw)
                 w = w0 * abs(math.cos(ca)) + d0 * abs(math.sin(ca)); dd = w0 * abs(math.sin(ca)) + d0 * abs(math.cos(ca))
                 if dd > abs(front - back) - 0.02: cyaw = 0; w = w0; dd = d0
@@ -97,7 +96,7 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
             g = random.choice(cands); last = g
             sc = round(random.uniform(0.78, 0.92) if g == 'crt_tv.glb' and random.random() < 0.5 else random.uniform(0.92, 1.0), 2)  # 14-inch and 18-inch sets
             r = random.random()   # not a shop display: most askew, some turned well round, a few side-on
-            yaw = random.uniform(-4, 4) if r < 0.25 else random.uniform(-14, 14) if r < 0.7 else random.uniform(-32, 32) if r < 0.9 else random.choice([-1, 1]) * random.uniform(60, 90)
+            yaw = random.uniform(-4, 4) if r < 0.12 else random.uniform(-14, 14) if r < 0.7 else random.uniform(-32, 32) if r < 0.9 else random.choice([-1, 1]) * random.uniform(60, 90)
             if g == 'crt_tv.glb' and random.random() < 0.18: yaw += 180   # a set turned round: back cover off, under repair
             a = math.radians(yaw)
             w = (W[g] * abs(math.cos(a)) + D[g] * abs(math.sin(a))) * sc      # rotated footprint along the shelf
@@ -114,7 +113,7 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
             t = tint_for(g)
             if t: it["tint"] = t
             out.append(it)
-            if random.random() < 0.16:
+            if random.random() < 0.1:
                 tags.append([round(cx - (x0 + x1) / 2 + random.uniform(-0.08, 0.08), 3) * (1 if along == 'x' else -1), lv,
                              random.choice(range(10)) if random.random() < 0.8 else random.choice([10, 11])])
             # sometimes a small thing stacked on top (clock on a radio), when it clears the board above
@@ -143,5 +142,7 @@ for i, (key, x, z, ry, lvl) in enumerate([('box_a', 0.7, -1.48, 6, 0), ('box_b',
     it = {"name": f"floor_carton_{i}", "type": "carton", "front": key, "size": [w, h, dd], "pos": [x, 0, z], "ry": ry}
     if lvl == 0: it["on"] = "floor"
     out.append(it)
+# after the floor cartons (its support must be placed first)
+out.append({"name": "tv_on_cartons", "glb": "crt_tv.glb", "pos": [0.71, 0, -1.48], "ry": 24, "on": "floor_carton_1", "scale": 0.78, "tint": [0.62, 0.64, 0.66]})
 json.dump(out, open('assets/models/shop/layout.json', 'w'), indent=1)
 print(len(out), 'items')

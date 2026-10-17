@@ -345,7 +345,7 @@ export default {
       let si = 0;
       for (let y = 2.55; y > 2.02; y -= 0.075, si++) { // slats a little out of line: dented, one bowed
         const s = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.07, 0.02, 12, 1, 1), sm); const p = s.geometry.attributes.position;
-        for (let i = 0; i < p.count; i++) { const x = p.getX(i); p.setZ(i, p.getZ(i) + Math.sin(x * 1.7 + si * 2.1) * 0.006 + (si === 3 ? Math.cos(x * 0.8) * 0.012 : 0)); }
+        for (let i = 0; i < p.count; i++) { const x = p.getX(i); p.setZ(i, p.getZ(i) + Math.sin(x * 1.7 + si * 2.1) * 0.006 + ((si >= 2 && si <= 4) ? Math.cos(x * 0.8) * (0.014 - Math.abs(si - 3) * 0.004) : 0)); }
         s.geometry.computeVertexNormals(); s.position.set(0, y, d / 2 + 0.05); s.rotation.x = Math.sin(si * 7.3) * 0.05; s.castShadow = true; slats.add(s);
       }
       const bar = new THREE.Mesh(new THREE.BoxGeometry(3.62, 0.06, 0.06), sm); bar.position.set(0, 1.99, d / 2 + 0.05); bar.castShadow = true; slats.add(bar);
@@ -540,15 +540,8 @@ export default {
       // conduit: tube fixture -> along the ceiling -> down the right wall to a switch box at 1.45 m
       pipe([[0.72, h - 0.03, -0.55], [0.72, h - 0.03, 0.3], [w / 2 - 0.03, h - 0.03, 0.3], [w / 2 - 0.03, 1.5, 0.3]], 0.011);
       plastic.push(new THREE.BoxGeometry(0.03, 0.12, 0.085).translate(w / 2 - 0.015, 1.45, 0.3));
-      // the robot's power cable: from its back, down to the floor, behind the bench to a socket on the back wall
-      if (placed.robot) {
-        const r = placed.robot, f = new THREE.Vector3(0, 0, 1).applyQuaternion(r.quaternion), b = f.clone().negate(), P = r.position;
-        const at = (dx, y, k = 0) => [P.x + b.x * dx + f.z * k, y, P.z + b.z * dx - f.x * k];
-        const sx = -1.27, sz = -d / 2;
-        tube([at(0.16, 0.5), at(0.24, 0.32), at(0.3, 0.07), at(0.36, 0.006), [-0.7, 0.006, 0.6], [-0.78, 0.006, 0.2], [-0.95, 0.006, -0.8], [-1.1, 0.006, -1.75], [sx, 0.006, sz + 0.12], [sx, 0.12, sz + 0.03], [sx, 0.24, sz + 0.035]], 0.0055, cables);
-        plastic.push(new THREE.BoxGeometry(0.085, 0.085, 0.022).translate(sx, 0.3, sz + 0.011)); // socket
-        plastic.push(new THREE.BoxGeometry(0.04, 0.05, 0.03).translate(sx, 0.27, sz + 0.035));    // plug
-      }
+      // a wall socket under the pegboard (the robot's long power cable was removed: it read as a stray line)
+      { const sx = -1.27, sz = -d / 2; plastic.push(new THREE.BoxGeometry(0.085, 0.085, 0.022).translate(sx, 0.3, sz + 0.011)); }
       // cords off a few shelf appliances: over the board's front edge, hanging, plug at the end
       const shelfItems = Object.values(placed).filter((o) => o.userData.layout.on === 'shelf_back' && /fan|tv|radio/.test(o.userData.layout.glb || '') && o.userData.layout.level >= 1);
       for (const o of shelfItems.filter((_, i) => i % 3 === 1).slice(0, 4)) {
@@ -595,9 +588,10 @@ export default {
         const bb = new THREE.Box3().setFromObject(part, true), cz = (bb.min.z + bb.max.z) / 2, top = bb.max.y - 0.03;
         const steelM = PM.hook ??= new THREE.MeshStandardNodeMaterial({ color: 0x2a2a28, roughness: 0.5, metalness: 0.8 });
         const plate = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.07, 0.04), steelM); plate.position.set(w / 2 - 0.003, top + 0.02, cz);
-        const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, w / 2 - bb.min.x + 0.02, 8).rotateZ(Math.PI / 2), steelM);
-        rod.position.set((w / 2 + bb.min.x) / 2 - 0.01, top, cz);
-        const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.03, 8), steelM); tip.position.set(bb.min.x - 0.005, top + 0.012, cz);
+        const midx = (bb.min.x + bb.max.x) / 2, rl = w / 2 - midx + 0.01; // wall to the joint's centre line only
+        const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, rl, 8).rotateZ(Math.PI / 2), steelM);
+        rod.position.set(w / 2 - rl / 2 + 0.002, top, cz);
+        const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.025, 8), steelM); tip.position.set(midx - 0.005, top + 0.01, cz);
         for (const m of [plate, rod, tip]) { m.castShadow = true; root.add(m); }
       }
       // screwdrivers and a wire coil hanging on the pegboard (in front of the printed board: real depth and shadows)
