@@ -192,7 +192,7 @@ export default {
     const spot = this.spot = new THREE.SpotLight(eyeColor.value.clone(), 0, 45, 0.3, 0.65, 1.4);
     spot.map = this.gobo.tex;
     spot.color.setRGB(1.0, 0.84, 0.68); // r19: whiter still, so the neon inside the cone keeps its own colours
-    spot.castShadow = true; spot.shadow.mapSize.setScalar(ctx.quality === 'low' ? 512 : 1024); spot.shadow.camera.near = 0.2; spot.shadow.bias = -0.0005;
+    spot.castShadow = !ctx.params.has('noeyeshadow'); spot.shadow.mapSize.setScalar(ctx.quality === 'low' ? 512 : 1024); spot.shadow.camera.near = 0.2; spot.shadow.bias = -0.0005;
     scene.add(spot, spot.target);
     // a faint cold rim from behind and above (the street's ambient bounce): reads the shell, scratches and oil
     // in the dark. Constant intensity: lights are never toggled at runtime (recompiles everything).
@@ -380,7 +380,7 @@ export default {
     this.spot.shadow.autoUpdate = o > 0.005 || this.frames < 30;
     // v3: the amber cone is the protagonist of the memory shots (targets/memory.jpg)
     // the visible cone carries the beam now; the raymarched box keeps the gobo and occlusion
-    if (this.beamVol) { this.beamVol.material.userData.density.value = 0.04 * o * Number(ctx.params?.get('bvol') ?? 1); this.beamVol.visible = o > 0.01 || this.frames < 30; }
+    if (this.beamVol) { this.beamVol.material.userData.density.value = 0.04 * o * Number(ctx.params?.get('bvol') ?? 1); this.beamVol.visible = (o > 0.01 || this.frames < 30) && ctx.params.has('beamvol'); } // r20: off by default -- the cone carries the beam, the box cost ~7 ms at 1080p for a faint haze
     const mode = ctx.memory.goboMode;
     const fq = Math.round(flood * 10) / 10;
     if (mode !== this._lastMode || fq !== this._lastFlood || (mode !== 'line' && t - this.goboT > 1 / 15 && Math.abs(o - (this._lastGobo ?? -1)) > 0.01)) {
