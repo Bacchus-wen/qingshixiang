@@ -380,7 +380,7 @@ export default {
       this.coneApex.value.copy(this._v); this.coneAxis.value.copy(this._d); this.coneTan.value = tanA;
       // r18: the beam stays in the flood and the last breath (it only thins a little while the whole street is lit)
       this.coneK.value = o * (1 - 0.35 * flood) * (ctx.memory.goboMode === 'line' ? 0.15 : 1) * Number(ctx.params?.get('cone') ?? 1);
-      this.cone.visible = o > 0.01 || (this.frames ?? 0) < 30;
+      this.cone.visible = (o > 0.01 || (this.frames ?? 0) < 30) && ctx.params?.get('cone') !== 'off';
     }
     // ---- publish the memory cone
     const m = ctx.memory;
