@@ -21,8 +21,9 @@ function makePuddle() {
   }
   g.rotateX(-Math.PI / 2);
   // not a mirror: some roughness and gentle ripples, so the reflection stays darker than the cat beside it
-  const m = new THREE.MeshStandardNodeMaterial({ roughness: 0.3, metalness: 0 });
-  m.colorNode = vec3(0.012);
+  // r19: glossier (it read as a black hole beside the robot); the ripples still break the reflection
+  const m = new THREE.MeshStandardNodeMaterial({ roughness: 0.07, metalness: 0 });
+  m.colorNode = vec3(0.02);
   const rip = rippleNormal(positionWorld.xz).mul(wetUniforms.rain).mul(0.25);
   m.normalNode = transformNormalToView(normalize(vec3(rip.x, float(1), rip.y)));
   const mesh = new THREE.Mesh(g, m);
