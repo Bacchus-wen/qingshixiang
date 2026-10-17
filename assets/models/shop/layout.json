@@ -124,11 +124,11 @@
   "name": "bench_clock",
   "glb": "alarm_clock.glb",
   "pos": [
-   -1.0,
+   -2.24,
    0,
-   0.6
+   0.92
   ],
-  "ry": 24,
+  "ry": 22,
   "on": "workbench"
  },
  {
@@ -137,9 +137,9 @@
   "kind": "spool",
   "seed": 0,
   "pos": [
-   -1.08,
+   -0.99,
    0,
-   0.82
+   1.06
   ],
   "on": "workbench"
  },
@@ -186,9 +186,9 @@
   "type": "proc",
   "kind": "tin",
   "pos": [
-   -1.32,
+   -1.38,
    0,
-   1.06
+   1.08
   ],
   "on": "workbench"
  },
@@ -209,53 +209,53 @@
   "name": "desk_lamp",
   "glb": "desk_lamp.glb",
   "pos": [
-   -1.93,
+   -1.78,
    0,
-   0.68
+   0.66
   ],
-  "ry": 40,
+  "ry": 32,
   "on": "workbench"
  },
  {
   "name": "tube_radio_open",
   "glb": "tube_radio_open.glb",
   "pos": [
-   -1.38,
+   -1.2,
    0,
-   0.7
+   0.73
   ],
-  "ry": 8,
+  "ry": -16,
   "on": "workbench"
  },
  {
   "name": "magnifier",
   "glb": "magnifier.glb",
   "pos": [
-   -1.02,
+   -1.63,
    0,
-   0.97
+   0.98
   ],
-  "ry": -30,
+  "ry": 25,
   "on": "workbench"
  },
  {
   "name": "soldering_iron",
   "glb": "soldering_iron.glb",
   "pos": [
-   -1.85,
+   -2.06,
    0,
-   1.1
+   1.11
   ],
-  "ry": 15,
+  "ry": 12,
   "on": "workbench"
  },
  {
   "name": "enamel_mug",
   "glb": "enamel_mug.glb",
   "pos": [
-   -2.25,
+   -2.22,
    0,
-   1.15
+   0.6
   ],
   "ry": 30,
   "on": "workbench"
