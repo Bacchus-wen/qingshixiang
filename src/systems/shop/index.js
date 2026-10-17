@@ -569,6 +569,16 @@ export default {
         }
         root.add(mergeByMaterial(bits));
       }
+      // a bare bulb on a flex over the back door corner, enamel shade, switched off
+      {
+        const bx = 1.75, bz = -1.6, drop = 0.75;
+        const cord = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, drop, 6), PM.cordBlack ??= new THREE.MeshStandardNodeMaterial({ color: 0x151515, roughness: 0.6 }));
+        cord.position.set(bx, h - drop / 2, bz); root.add(cord);
+        const shade = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.16, 0.09, 24, 1, true), PM.enamel ??= new THREE.MeshStandardNodeMaterial({ color: 0x2f4a3a, roughness: 0.35, side: THREE.DoubleSide }));
+        shade.position.set(bx, h - drop - 0.03, bz); shade.castShadow = true; root.add(shade);
+        const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.032, 16, 12), new THREE.MeshStandardNodeMaterial({ color: 0xf2efe6, roughness: 0.15, transparent: true, opacity: 0.85 }));
+        bulb.position.set(bx, h - drop - 0.085, bz); root.add(bulb);
+      }
       // spare limbs hang on wall hooks: a plate on the wall and a bent rod through the top joint
       for (const part of [placed.spare_arm, placed.spare_leg]) {
         if (!part || part.userData.layout.wall !== 'right') continue;
@@ -633,6 +643,16 @@ export default {
       const go = (name) => { const v = SHOTS[name]; if (!v) return; cam.position.set(...v.pos); cam.fov = v.fov ?? 50; cam.updateProjectionMatrix(); oc.target.set(...v.look); oc.update(); };
       go('shop-establish');
       addEventListener('keydown', (e) => { const k = Number(e.key); if (k >= 1 && k <= KEYS.length) go(KEYS[k - 1]); });
+      // a small, quiet hint for reviewers (bottom-left); fades after a while, any key brings it back
+      const ui = document.getElementById('ui');
+      if (ui) {
+        const hint = document.createElement('div');
+        hint.textContent = '拖动旋转 · 右键平移 · 滚轮缩放 · 数字键 1–8 切换机位';
+        Object.assign(hint.style, { position: 'fixed', left: '16px', bottom: '14px', font: '13px/1.4 -apple-system, "PingFang SC", sans-serif', color: 'rgba(235,228,214,0.78)', letterSpacing: '0.04em', textShadow: '0 1px 3px rgba(0,0,0,0.8)', pointerEvents: 'none', transition: 'opacity 1.2s', opacity: '1' });
+        ui.appendChild(hint);
+        let t = setTimeout(() => (hint.style.opacity = '0'), 9000);
+        addEventListener('keydown', () => { hint.style.opacity = '1'; clearTimeout(t); t = setTimeout(() => (hint.style.opacity = '0'), 6000); });
+      }
     }
   },
   update(dt, t, ctx) {
