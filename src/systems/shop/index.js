@@ -597,7 +597,7 @@ export default {
           mess.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, 0.0018, 5), wireM[k % 3]));
         });
         const paperM = PM.paper ??= new THREE.MeshStandardNodeMaterial({ color: 0xd9d2bf, roughness: 0.95 });
-        [[-0.32, 1.95], [0.55, 1.1]].forEach(([x, z], k) => { // crumpled paper
+        [[-1.95, 1.34], [-1.02, 1.3]].forEach(([x, z], k) => { // crumpled notes, dropped by the bench
           const g = new THREE.IcosahedronGeometry(0.032, 1), p = g.attributes.position;
           for (let i = 0; i < p.count; i++) { const f = 0.75 + rr(i * 3 + k * 50) * 0.45; p.setXYZ(i, p.getX(i) * f, p.getY(i) * f * 0.85, p.getZ(i) * f); }
           g.computeVertexNormals(); const m = new THREE.Mesh(g, paperM); m.position.set(x, 0.025, z); m.rotation.set(rr(k) * 3, rr(k + 1) * 3, 0); mess.add(m);
@@ -689,8 +689,19 @@ export default {
         let o = hit.object; while (o && !o.userData?.layout) o = o.parent;
         if (!o || !o.userData.layout.glb) return;
         const b = new THREE.Box3().setFromObject(o, true), c = b.getCenter(new THREE.Vector3()), rad = b.getSize(new THREE.Vector3()).length() / 2;
-        const dir = cam.position.clone().sub(c).setY(0).normalize().multiplyScalar(0.8).add(new THREE.Vector3(0, 0.45, 0)).normalize();
-        Object.assign(fly, { t: 0, p0: cam.position.clone(), q0: oc.target.clone(), p1: c.clone().addScaledVector(dir, Math.max(0.45, rad * 2.6)), q1: c });
+        // try directions around the model, starting from the current one: take the first whose view line is clear
+        // of other objects and that stays inside the room (or out in the street for street things)
+        const base = Math.atan2(cam.position.x - c.x, cam.position.z - c.z), dist = Math.max(0.45, rad * 2.6), others = Object.values(placed).filter((x) => x !== o);
+        let p1 = null;
+        for (const da of [0, 0.5, -0.5, 1, -1, 1.6, -1.6, 2.4, -2.4, 3.14]) {
+          const a = base + da, dir = new THREE.Vector3(Math.sin(a) * 0.8, 0.45, Math.cos(a) * 0.8).normalize(), p = c.clone().addScaledVector(dir, dist);
+          const inside = c.z > ROOM.d / 2 + 0.25 || (Math.abs(p.x) < ROOM.w / 2 - 0.15 && p.z > -ROOM.d / 2 + 0.15 && p.z < ROOM.d / 2 - 0.15 && p.y < ROOM.h - 0.15);
+          if (!inside) continue;
+          pick.set(c, dir); pick.far = dist; if (pick.intersectObjects(others, true).length) continue;
+          p1 = p; break;
+        }
+        if (!p1) return;
+        Object.assign(fly, { t: 0, p0: cam.position.clone(), q0: oc.target.clone(), p1, q1: c });
         let tris = 0; o.traverse((m) => { if (m.isMesh) tris += (m.geometry.index ? m.geometry.index.count : m.geometry.attributes.position.count) / 3; });
         info.textContent = `${NAMES[o.userData.layout.glb] || o.userData.layout.glb} · ${(tris / 1000).toFixed(1)} 千三角面 · Tripo 生成`;
         info.style.opacity = '1'; clearTimeout(this._infoT); this._infoT = setTimeout(() => (info.style.opacity = '0'), 7000);

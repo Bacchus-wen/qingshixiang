@@ -13,19 +13,29 @@
   "levels": 6,
   "tags": [
    [
-    -0.018,
+    -0.926,
+    1,
+    6
+   ],
+   [
+    -0.462,
     1,
     5
    ],
    [
-    0.11,
-    2,
-    2
+    0.389,
+    1,
+    1
    ],
    [
-    -0.376,
-    3,
+    -1.004,
+    4,
     5
+   ],
+   [
+    -0.258,
+    5,
+    1
    ]
   ]
  },
@@ -42,7 +52,23 @@
   "d": 0.5,
   "h": 2.7,
   "levels": 6,
-  "tags": []
+  "tags": [
+   [
+    0.579,
+    4,
+    5
+   ],
+   [
+    -0.17,
+    4,
+    3
+   ],
+   [
+    0.113,
+    5,
+    11
+   ]
+  ]
  },
  {
   "name": "shelf_left2",
@@ -436,9 +462,9 @@
    0.26
   ],
   "pos": [
-   -0.93,
+   -0.89,
    0,
-   1.56
+   1.47
   ],
   "ry": -40,
   "on": "floor"
@@ -447,9 +473,9 @@
   "name": "spare_torso",
   "glb": "spare_torso.glb",
   "pos": [
-   -0.93,
+   -0.89,
    0,
-   1.56
+   1.47
   ],
   "ry": 128,
   "on": "work_carton",
@@ -520,7 +546,7 @@
   "pos": [
    2.55,
    0,
-   -0.25
+   -0.98
   ],
   "ry": 40,
   "on": "parts_cabinet"
@@ -630,181 +656,16 @@
  },
  {
   "name": "shelf_back_1_0",
-  "glb": "desk_fan.glb",
+  "glb": "crt_tv.glb",
   "pos": [
-   -0.942,
+   -0.909,
    0,
-   -2.005
+   -2.017
   ],
-  "ry": -11.114440051579443,
+  "ry": -11.271943872147466,
   "on": "shelf_back",
   "level": 1,
-  "scale": 0.96,
-  "tint": [
-   0.95,
-   0.9,
-   0.78
-  ]
- },
- {
-  "name": "shelf_back_1_1",
-  "type": "carton",
-  "front": "box_a",
-  "size": [
-   0.432,
-   0.376,
-   0.376
-  ],
-  "pos": [
-   -0.513,
-   0,
-   -2.012
-  ],
-  "ry": -0.1290781759142945,
-  "on": "shelf_back",
-  "level": 1
- },
- {
-  "name": "shelf_back_1_2",
-  "glb": "crt_tv.glb",
-  "pos": [
-   -0.016,
-   0,
-   -2.007
-  ],
-  "ry": 8.242625482629752,
-  "on": "shelf_back",
-  "level": 1,
-  "scale": 0.96
- },
- {
-  "name": "shelf_back_1_3",
-  "type": "carton",
-  "front": "box_d",
-  "size": [
-   0.365,
-   0.348,
-   0.226
-  ],
-  "pos": [
-   0.449,
-   0,
-   -2.069
-  ],
-  "ry": -5.685990978245117,
-  "on": "shelf_back",
-  "level": 1
- },
- {
-  "name": "shelf_back_2_0",
-  "glb": "desk_fan.glb",
-  "pos": [
-   -0.953,
-   0,
-   -2.03
-  ],
-  "ry": -1.226250723560435,
-  "on": "shelf_back",
-  "level": 2,
-  "scale": 0.97
- },
- {
-  "name": "shelf_back_2_1",
-  "glb": "cassette_recorder.glb",
-  "pos": [
-   -0.524,
-   0,
-   -2.107
-  ],
-  "ry": -1.522058516974191,
-  "on": "shelf_back",
-  "level": 2,
-  "scale": 0.97,
-  "tint": [
-   0.85,
-   0.42,
-   0.36
-  ]
- },
- {
-  "name": "shelf_back_2_2",
-  "glb": "crt_tv.glb",
-  "pos": [
-   0.088,
-   0,
-   -2.025
-  ],
-  "ry": -7.0667846564864,
-  "on": "shelf_back",
-  "level": 2,
-  "scale": 0.89,
-  "tint": [
-   0.62,
-   0.64,
-   0.66
-  ]
- },
- {
-  "name": "shelf_back_2_3",
-  "glb": "desk_fan.glb",
-  "pos": [
-   0.647,
-   0,
-   -2.012
-  ],
-  "ry": -7.538957772956899,
-  "on": "shelf_back",
-  "level": 2,
-  "scale": 0.97,
-  "tint": [
-   0.72,
-   0.92,
-   0.84
-  ]
- },
- {
-  "name": "shelf_back_2_3s",
-  "glb": "alarm_clock.glb",
-  "pos": [
-   0.518,
-   0,
-   -1.766
-  ],
-  "ry": 9.932806847048589,
-  "on": "shelf_back",
-  "level": 2,
-  "scale": 0.95
- },
- {
-  "name": "shelf_back_3_0",
-  "glb": "tube_radio_closed.glb",
-  "pos": [
-   -0.881,
-   0,
-   -1.964
-  ],
-  "ry": 28.92071813321742,
-  "on": "shelf_back",
-  "level": 3,
-  "scale": 0.96,
-  "tint": [
-   0.95,
-   0.88,
-   0.78
-  ]
- },
- {
-  "name": "shelf_back_3_1",
-  "glb": "crt_tv.glb",
-  "pos": [
-   -0.35,
-   0,
-   -2.005
-  ],
-  "ry": -10.92200745998694,
-  "on": "shelf_back",
-  "level": 3,
-  "scale": 0.92,
+  "scale": 0.86,
   "tint": [
    0.75,
    0.6,
@@ -812,17 +673,190 @@
   ]
  },
  {
-  "name": "shelf_back_3_2",
+  "name": "shelf_back_1_1",
   "glb": "desk_fan.glb",
   "pos": [
-   0.089,
+   -0.46,
    0,
-   -2.028
+   -2.005
   ],
-  "ry": -4.273092710496357,
+  "ry": 12.73564375869256,
+  "on": "shelf_back",
+  "level": 1,
+  "scale": 0.94
+ },
+ {
+  "name": "shelf_back_1_2",
+  "glb": "tube_radio_closed.glb",
+  "pos": [
+   0.0,
+   0,
+   -2.039
+  ],
+  "ry": 7.199946027826982,
+  "on": "shelf_back",
+  "level": 1,
+  "scale": 0.93
+ },
+ {
+  "name": "shelf_back_1_3",
+  "glb": "desk_fan.glb",
+  "pos": [
+   0.424,
+   0,
+   -2.037
+  ],
+  "ry": -0.09310573162834679,
+  "on": "shelf_back",
+  "level": 1,
+  "scale": 0.95,
+  "tint": [
+   0.72,
+   0.92,
+   0.84
+  ]
+ },
+ {
+  "name": "shelf_back_1_3s",
+  "glb": "enamel_mug.glb",
+  "pos": [
+   0.38,
+   0,
+   -1.766
+  ],
+  "ry": 2.3383869215315443,
+  "on": "shelf_back",
+  "level": 1,
+  "scale": 0.95
+ },
+ {
+  "name": "shelf_back_1_4",
+  "glb": "cassette_recorder.glb",
+  "pos": [
+   0.859,
+   0,
+   -2.062
+  ],
+  "ry": -13.36823801444352,
+  "on": "shelf_back",
+  "level": 1,
+  "scale": 0.95,
+  "tint": [
+   0.85,
+   0.42,
+   0.36
+  ]
+ },
+ {
+  "name": "shelf_back_2_0",
+  "glb": "cassette_recorder.glb",
+  "pos": [
+   -0.896,
+   0,
+   -2.101
+  ],
+  "ry": -2.3716975180724393,
+  "on": "shelf_back",
+  "level": 2,
+  "scale": 0.99
+ },
+ {
+  "name": "shelf_back_2_1",
+  "type": "carton",
+  "front": "box_b",
+  "size": [
+   0.352,
+   0.405,
+   0.299
+  ],
+  "pos": [
+   -0.314,
+   0,
+   -2.023
+  ],
+  "ry": -9.599900987489,
+  "on": "shelf_back",
+  "level": 2
+ },
+ {
+  "name": "shelf_back_2_2",
+  "glb": "crt_tv.glb",
+  "pos": [
+   0.111,
+   0,
+   -2.055
+  ],
+  "ry": 3.0747481871959152,
+  "on": "shelf_back",
+  "level": 2,
+  "scale": 0.8
+ },
+ {
+  "name": "shelf_back_2_3",
+  "glb": "tube_radio_closed.glb",
+  "pos": [
+   0.78,
+   0,
+   -1.964
+  ],
+  "ry": 28.92071813321742,
+  "on": "shelf_back",
+  "level": 2,
+  "scale": 0.96,
+  "tint": [
+   0.72,
+   0.6,
+   0.5
+  ]
+ },
+ {
+  "name": "shelf_back_3_0",
+  "type": "carton",
+  "front": "box_a",
+  "size": [
+   0.4,
+   0.348,
+   0.348
+  ],
+  "pos": [
+   -0.947,
+   0,
+   -2.018
+  ],
+  "ry": 2.404209892791041,
+  "on": "shelf_back",
+  "level": 3
+ },
+ {
+  "name": "shelf_back_3_1",
+  "glb": "tube_radio_closed.glb",
+  "pos": [
+   -0.479,
+   0,
+   -2.054
+  ],
+  "ry": -3.465577869419654,
   "on": "shelf_back",
   "level": 3,
   "scale": 0.93,
+  "tint": [
+   0.95,
+   0.88,
+   0.78
+  ]
+ },
+ {
+  "name": "shelf_back_3_2",
+  "glb": "desk_fan.glb",
+  "pos": [
+   -0.034,
+   0,
+   -2.007
+  ],
+  "ry": -9.964710273882353,
+  "on": "shelf_back",
+  "level": 3,
+  "scale": 0.96,
   "tint": [
    0.95,
    0.9,
@@ -831,91 +865,73 @@
  },
  {
   "name": "shelf_back_3_2s",
-  "glb": "enamel_mug.glb",
+  "glb": "alarm_clock.glb",
   "pos": [
-   0.209,
+   -0.03,
    0,
    -1.766
   ],
-  "ry": -1.020316225201988,
+  "ry": -8.843549798953779,
   "on": "shelf_back",
   "level": 3,
   "scale": 0.95
  },
  {
   "name": "shelf_back_3_3",
-  "type": "carton",
-  "front": "box_c",
-  "size": [
-   0.307,
-   0.288,
-   0.25
-  ],
+  "glb": "cassette_recorder.glb",
   "pos": [
-   0.428,
+   0.421,
    0,
-   -2.073
+   -2.113
   ],
-  "ry": -0.7696100336403155,
+  "ry": 0.2248755275064518,
   "on": "shelf_back",
-  "level": 3
+  "level": 3,
+  "scale": 0.96,
+  "tint": [
+   0.32,
+   0.32,
+   0.34
+  ]
+ },
+ {
+  "name": "shelf_back_3_3s",
+  "glb": "thermos.glb",
+  "pos": [
+   0.551,
+   0,
+   -1.794
+  ],
+  "ry": -4.329114905311634,
+  "on": "shelf_back",
+  "level": 3,
+  "scale": 0.95
+ },
+ {
+  "name": "shelf_back_3_4",
+  "glb": "desk_fan.glb",
+  "pos": [
+   0.862,
+   0,
+   -2.013
+  ],
+  "ry": 8.72231490966066,
+  "on": "shelf_back",
+  "level": 3,
+  "scale": 0.95
  },
  {
   "name": "shelf_back_4_0",
-  "type": "carton",
-  "front": "box_c",
-  "size": [
-   0.32,
-   0.3,
-   0.26
-  ],
-  "pos": [
-   -0.958,
-   0,
-   -2.037
-  ],
-  "ry": 13.079701090428081,
-  "on": "shelf_back",
-  "level": 4
- },
- {
-  "name": "shelf_back_4_1",
   "glb": "desk_fan.glb",
   "pos": [
-   -0.545,
+   -0.97,
    0,
-   -2.007
+   -2.017
   ],
-  "ry": -7.761802830453315,
+  "ry": 88.65001893963999,
   "on": "shelf_back",
   "level": 4,
-  "scale": 0.99
- },
- {
-  "name": "shelf_back_4_2",
-  "glb": "tube_radio_closed.glb",
-  "pos": [
-   -0.059,
-   0,
-   -2.0
-  ],
-  "ry": 15.351873304045704,
-  "on": "shelf_back",
-  "level": 4,
-  "scale": 0.98
- },
- {
-  "name": "shelf_back_4_3",
-  "glb": "desk_fan.glb",
-  "pos": [
-   0.618,
-   0,
-   -2.005
-  ],
-  "ry": 12.782422137557457,
-  "on": "shelf_back",
-  "level": 4,
-  "scale": 0.94,
+  "scale": 0.96,
   "tint": [
    0.72,
    0.92,
@@ -923,66 +939,61 @@
   ]
  },
  {
+  "name": "shelf_back_4_0s",
+  "glb": "alarm_clock.glb",
+  "pos": [
+   -0.974,
+   0,
+   -1.766
+  ],
+  "ry": 4.589341285230269,
+  "on": "shelf_back",
+  "level": 4,
+  "scale": 0.95
+ },
+ {
+  "name": "shelf_back_4_1",
+  "type": "carton",
+  "front": "box_a",
+  "size": [
+   0.455,
+   0.396,
+   0.396
+  ],
+  "pos": [
+   -0.552,
+   0,
+   -2.002
+  ],
+  "ry": 0,
+  "on": "shelf_back",
+  "level": 4
+ },
+ {
   "name": "shelf_back_5_0",
   "glb": "tube_radio_closed.glb",
   "pos": [
-   -0.897,
+   -0.866,
    0,
-   -2.03
+   -2.018
   ],
-  "ry": 8.390024855790486,
+  "ry": -10.442925715659799,
   "on": "shelf_back",
   "level": 5,
-  "scale": 0.96,
-  "tint": [
-   0.72,
-   0.6,
-   0.5
-  ]
+  "scale": 0.98
  },
  {
   "name": "shelf_back_5_1",
   "glb": "tube_radio_closed.glb",
   "pos": [
-   -0.375,
+   -0.336,
    0,
-   -2.026
+   -2.056
   ],
-  "ry": 8.42305992910735,
+  "ry": 1.3624812316298165,
   "on": "shelf_back",
   "level": 5,
-  "scale": 0.98,
-  "tint": [
-   0.95,
-   0.88,
-   0.78
-  ]
- },
- {
-  "name": "shelf_back_5_2",
-  "glb": "tube_radio_closed.glb",
-  "pos": [
-   0.249,
-   0,
-   -2.044
-  ],
-  "ry": 4.364029318786265,
-  "on": "shelf_back",
-  "level": 5,
-  "scale": 0.97
- },
- {
-  "name": "shelf_back_5_3",
-  "glb": "tube_radio_closed.glb",
-  "pos": [
-   0.788,
-   0,
-   -1.968
-  ],
-  "ry": -25.422588574132426,
-  "on": "shelf_back",
-  "level": 5,
-  "scale": 0.98,
+  "scale": 0.97,
   "tint": [
    0.72,
    0.6,
@@ -992,41 +1003,59 @@
  {
   "name": "shelf_left_0_0",
   "type": "carton",
-  "front": "box_d",
+  "front": "box_c",
   "size": [
-   0.412,
-   0.392,
-   0.255
+   0.285,
+   0.267,
+   0.231
   ],
   "pos": [
-   -2.796,
+   -2.831,
    0,
-   -1.609
+   -1.672
   ],
-  "ry": 82.09628144189944,
+  "ry": 88.54222594958179,
   "on": "shelf_left",
   "level": 0
  },
  {
   "name": "shelf_left_0_1",
   "type": "carton",
-  "front": "box_d",
+  "front": "box_c",
   "size": [
-   0.399,
-   0.38,
-   0.247
+   0.314,
+   0.294,
+   0.255
   ],
   "pos": [
-   -2.807,
+   -2.815,
    0,
-   -1.152
+   -1.351
   ],
-  "ry": 95.6708465835254,
+  "ry": 92.9245469458422,
   "on": "shelf_left",
   "level": 0
  },
  {
   "name": "shelf_left_0_2",
+  "type": "carton",
+  "front": "box_d",
+  "size": [
+   0.407,
+   0.388,
+   0.252
+  ],
+  "pos": [
+   -2.801,
+   0,
+   -0.944
+  ],
+  "ry": 96.80703804664076,
+  "on": "shelf_left",
+  "level": 0
+ },
+ {
+  "name": "shelf_left_0_3",
   "type": "carton",
   "front": "box_b",
   "size": [
@@ -1035,70 +1064,62 @@
    0.316
   ],
   "pos": [
-   -2.791,
+   -2.766,
    0,
-   -0.734
+   -0.507
   ],
-  "ry": 90.42311854056899,
+  "ry": 81.33668762229756,
   "on": "shelf_left",
   "level": 0
  },
  {
   "name": "shelf_left_1_0",
-  "type": "carton",
-  "front": "box_b",
-  "size": [
-   0.368,
-   0.423,
-   0.313
-  ],
+  "glb": "tube_radio_closed.glb",
   "pos": [
-   -2.769,
+   -2.811,
    0,
-   -1.613
+   -1.594
   ],
-  "ry": 98.10695773610561,
+  "ry": 90.51376395568504,
   "on": "shelf_left",
-  "level": 1
+  "level": 1,
+  "scale": 0.96,
+  "tint": [
+   0.95,
+   0.88,
+   0.78
+  ]
  },
  {
   "name": "shelf_left_1_1",
-  "glb": "cassette_recorder.glb",
+  "glb": "crt_tv.glb",
   "pos": [
-   -2.86,
+   -2.76,
    0,
-   -1.141
+   -1.094
   ],
-  "ry": 90.48236906867162,
+  "ry": 97.27980799252046,
   "on": "shelf_left",
   "level": 1,
-  "scale": 0.98
- },
- {
-  "name": "shelf_left_1_1s",
-  "glb": "alarm_clock.glb",
-  "pos": [
-   -2.516,
-   0,
-   -1.139
-  ],
-  "ry": 91.85188159969428,
-  "on": "shelf_left",
-  "level": 1,
-  "scale": 0.95
+  "scale": 0.96,
+  "tint": [
+   0.62,
+   0.64,
+   0.66
+  ]
  },
  {
   "name": "shelf_left_1_2",
   "glb": "desk_fan.glb",
   "pos": [
-   -2.754,
+   -2.784,
    0,
-   -0.498
+   -0.65
   ],
-  "ry": 81.58328985718241,
+  "ry": 89.38501690489838,
   "on": "shelf_left",
   "level": 1,
-  "scale": 1.0,
+  "scale": 0.96,
   "tint": [
    0.95,
    0.9,
@@ -1107,55 +1128,65 @@
  },
  {
   "name": "shelf_left_2_0",
-  "glb": "crt_tv.glb",
-  "pos": [
-   -2.788,
-   0,
-   -1.576
+  "type": "carton",
+  "front": "box_b",
+  "size": [
+   0.364,
+   0.419,
+   0.309
   ],
-  "ry": 268.3793064717012,
-  "on": "shelf_left",
-  "level": 2,
-  "scale": 0.93
- },
- {
-  "name": "shelf_left_2_0s",
-  "glb": "thermos.glb",
   "pos": [
-   -2.544,
+   -2.765,
    0,
-   -1.486
+   -1.621
   ],
-  "ry": 101.910792986363,
+  "ry": 79.65683278516678,
   "on": "shelf_left",
-  "level": 2,
-  "scale": 0.95
+  "level": 2
  },
  {
   "name": "shelf_left_2_1",
-  "glb": "tube_radio_closed.glb",
-  "pos": [
-   -2.812,
-   0,
-   -1.093
+  "type": "carton",
+  "front": "box_b",
+  "size": [
+   0.396,
+   0.455,
+   0.337
   ],
-  "ry": 89.0966032009457,
+  "pos": [
+   -2.765,
+   0,
+   -1.185
+  ],
+  "ry": 95.16448795623506,
   "on": "shelf_left",
-  "level": 2,
-  "scale": 0.94,
-  "tint": [
-   0.95,
-   0.88,
-   0.78
-  ]
+  "level": 2
  },
  {
   "name": "shelf_left_3_0",
+  "type": "carton",
+  "front": "box_d",
+  "size": [
+   0.42,
+   0.4,
+   0.26
+  ],
+  "pos": [
+   -2.808,
+   0,
+   -1.602
+  ],
+  "ry": 86.53715104019777,
+  "on": "shelf_left",
+  "level": 3
+ },
+ {
+  "name": "shelf_left_3_1",
   "glb": "tube_radio_closed.glb",
   "pos": [
    -2.808,
    0,
-   -1.581
+   -1.121
   ],
   "ry": 90.43240198246663,
   "on": "shelf_left",
@@ -1163,289 +1194,16 @@
   "scale": 0.98
  },
  {
-  "name": "shelf_left_3_1",
-  "type": "carton",
-  "front": "box_b",
-  "size": [
-   0.4,
-   0.46,
-   0.34
-  ],
-  "pos": [
-   -2.736,
-   0,
-   -1.088
-  ],
-  "ry": 75.77206539382193,
-  "on": "shelf_left",
-  "level": 3
- },
- {
   "name": "shelf_left_3_2",
-  "type": "carton",
-  "front": "box_b",
-  "size": [
-   0.356,
-   0.409,
-   0.303
-  ],
-  "pos": [
-   -2.762,
-   0,
-   -0.629
-  ],
-  "ry": 76.66400013500439,
-  "on": "shelf_left",
-  "level": 3
- },
- {
-  "name": "shelf_left_4_0",
-  "glb": "desk_fan.glb",
+  "glb": "crt_tv.glb",
   "pos": [
    -2.786,
    0,
-   -1.649
+   -0.626
   ],
-  "ry": 87.90887714228023,
+  "ry": 93.24718950861677,
   "on": "shelf_left",
-  "level": 4,
-  "scale": 0.92
- },
- {
-  "name": "shelf_left_4_0s",
-  "glb": "alarm_clock.glb",
-  "pos": [
-   -2.516,
-   0,
-   -1.579
-  ],
-  "ry": 77.51227578703555,
-  "on": "shelf_left",
-  "level": 4,
-  "scale": 0.95
- },
- {
-  "name": "shelf_left_4_1",
-  "glb": "crt_tv.glb",
-  "pos": [
-   -2.753,
-   0,
-   -1.12
-  ],
-  "ry": 101.6319476924842,
-  "on": "shelf_left",
-  "level": 4,
-  "scale": 0.92,
-  "tint": [
-   0.62,
-   0.64,
-   0.66
-  ]
- },
- {
-  "name": "shelf_left_4_2",
-  "type": "carton",
-  "front": "box_a",
-  "size": [
-   0.405,
-   0.352,
-   0.352
-  ],
-  "pos": [
-   -2.726,
-   0,
-   -0.621
-  ],
-  "ry": 105.56088798665796,
-  "on": "shelf_left",
-  "level": 4
- },
- {
-  "name": "shelf_left_5_0",
-  "type": "carton",
-  "front": "box_c",
-  "size": [
-   0.275,
-   0.258,
-   0.224
-  ],
-  "pos": [
-   -2.802,
-   0,
-   -1.665
-  ],
-  "ry": 72.66362028115164,
-  "on": "shelf_left",
-  "level": 5
- },
- {
-  "name": "shelf_left_5_1",
-  "glb": "tube_radio_closed.glb",
-  "pos": [
-   -2.798,
-   0,
-   -1.236
-  ],
-  "ry": 94.4329689959419,
-  "on": "shelf_left",
-  "level": 5,
-  "scale": 0.94,
-  "tint": [
-   0.72,
-   0.6,
-   0.5
-  ]
- },
- {
-  "name": "shelf_left_5_2",
-  "glb": "tube_radio_closed.glb",
-  "pos": [
-   -2.764,
-   0,
-   -0.723
-  ],
-  "ry": 103.23042570535858,
-  "on": "shelf_left",
-  "level": 5,
-  "scale": 0.95,
-  "tint": [
-   0.95,
-   0.88,
-   0.78
-  ]
- },
- {
-  "name": "shelf_left2_0_0",
-  "type": "carton",
-  "front": "box_c",
-  "size": [
-   0.301,
-   0.282,
-   0.244
-  ],
-  "pos": [
-   -2.809,
-   0,
-   0.779
-  ],
-  "ry": 93.46833930369506,
-  "on": "shelf_left2",
-  "level": 0
- },
- {
-  "name": "shelf_left2_0_1",
-  "type": "carton",
-  "front": "box_b",
-  "size": [
-   0.348,
-   0.4,
-   0.296
-  ],
-  "pos": [
-   -2.789,
-   0,
-   1.124
-  ],
-  "ry": 89.02484294820732,
-  "on": "shelf_left2",
-  "level": 0
- },
- {
-  "name": "shelf_left2_0_2",
-  "type": "carton",
-  "front": "box_c",
-  "size": [
-   0.32,
-   0.3,
-   0.26
-  ],
-  "pos": [
-   -2.808,
-   0,
-   1.478
-  ],
-  "ry": 90.84732073414035,
-  "on": "shelf_left2",
-  "level": 0
- },
- {
-  "name": "shelf_left2_1_0",
-  "type": "carton",
-  "front": "box_c",
-  "size": [
-   0.298,
-   0.279,
-   0.242
-  ],
-  "pos": [
-   -2.793,
-   0,
-   0.789
-  ],
-  "ry": 79.23528195123716,
-  "on": "shelf_left2",
-  "level": 1
- },
- {
-  "name": "shelf_left2_1_1",
-  "type": "carton",
-  "front": "box_c",
-  "size": [
-   0.31,
-   0.291,
-   0.252
-  ],
-  "pos": [
-   -2.783,
-   0,
-   1.157
-  ],
-  "ry": 77.1791450856805,
-  "on": "shelf_left2",
-  "level": 1
- },
- {
-  "name": "shelf_left2_1_2",
-  "glb": "desk_fan.glb",
-  "pos": [
-   -2.772,
-   0,
-   1.538
-  ],
-  "ry": 92.39633195708574,
-  "on": "shelf_left2",
-  "level": 1,
-  "scale": 0.94,
-  "tint": [
-   0.72,
-   0.92,
-   0.84
-  ]
- },
- {
-  "name": "shelf_left2_1_2s",
-  "glb": "enamel_mug.glb",
-  "pos": [
-   -2.546,
-   0,
-   1.602
-  ],
-  "ry": 96.62031814114654,
-  "on": "shelf_left2",
-  "level": 1,
-  "scale": 0.95
- },
- {
-  "name": "shelf_left2_2_0",
-  "glb": "crt_tv.glb",
-  "pos": [
-   -2.741,
-   0,
-   0.896
-  ],
-  "ry": 278.76135097839665,
-  "on": "shelf_left2",
-  "level": 2,
+  "level": 3,
   "scale": 0.98,
   "tint": [
    0.75,
@@ -1454,61 +1212,105 @@
   ]
  },
  {
-  "name": "shelf_left2_2_1",
-  "glb": "tube_radio_closed.glb",
+  "name": "shelf_left_3_2s",
+  "glb": "thermos.glb",
   "pos": [
-   -2.803,
+   -2.544,
    0,
-   1.562
+   -0.512
   ],
-  "ry": 91.09695901636526,
-  "on": "shelf_left2",
-  "level": 2,
-  "scale": 0.93
- },
- {
-  "name": "shelf_left2_2_1s",
-  "glb": "alarm_clock.glb",
-  "pos": [
-   -2.546,
-   0,
-   1.602
-  ],
-  "ry": 95.41992528242461,
-  "on": "shelf_left2",
-  "level": 2,
+  "ry": 95.27920912630385,
+  "on": "shelf_left",
+  "level": 3,
   "scale": 0.95
  },
  {
-  "name": "shelf_left2_3_0",
-  "glb": "cassette_recorder.glb",
+  "name": "shelf_left_4_0",
+  "glb": "crt_tv.glb",
   "pos": [
-   -2.848,
+   -2.738,
    0,
-   0.863
+   -1.687
   ],
-  "ry": 88.12446577756319,
-  "on": "shelf_left2",
-  "level": 3,
-  "scale": 0.94,
+  "ry": 185.9511422528583,
+  "on": "shelf_left",
+  "level": 4,
+  "scale": 0.79
+ },
+ {
+  "name": "shelf_left_4_1",
+  "glb": "desk_fan.glb",
+  "pos": [
+   -2.779,
+   0,
+   -1.341
+  ],
+  "ry": 91.67629374494769,
+  "on": "shelf_left",
+  "level": 4,
+  "scale": 0.97
+ },
+ {
+  "name": "shelf_left_4_1s",
+  "glb": "alarm_clock.glb",
+  "pos": [
+   -2.516,
+   0,
+   -1.414
+  ],
+  "ry": 84.3597721223543,
+  "on": "shelf_left",
+  "level": 4,
+  "scale": 0.95
+ },
+ {
+  "name": "shelf_left_4_2",
+  "glb": "crt_tv.glb",
+  "pos": [
+   -2.774,
+   0,
+   -0.917
+  ],
+  "ry": 98.5030104555828,
+  "on": "shelf_left",
+  "level": 4,
+  "scale": 0.87,
   "tint": [
-   0.32,
-   0.32,
-   0.34
+   0.62,
+   0.64,
+   0.66
   ]
  },
  {
-  "name": "shelf_left2_3_1",
+  "name": "shelf_left_5_0",
+  "type": "carton",
+  "front": "box_c",
+  "size": [
+   0.32,
+   0.3,
+   0.26
+  ],
+  "pos": [
+   -2.805,
+   0,
+   -1.643
+  ],
+  "ry": 84.33736651502909,
+  "on": "shelf_left",
+  "level": 5
+ },
+ {
+  "name": "shelf_left_5_1",
   "glb": "tube_radio_closed.glb",
   "pos": [
-   -2.773,
+   -2.766,
    0,
-   1.367
+   -1.183
   ],
-  "ry": 97.47516296289064,
-  "on": "shelf_left2",
-  "level": 3,
-  "scale": 0.96,
+  "ry": 77.52287903007621,
+  "on": "shelf_left",
+  "level": 5,
+  "scale": 0.95,
   "tint": [
    0.72,
    0.6,
@@ -1516,15 +1318,211 @@
   ]
  },
  {
-  "name": "shelf_left2_3_1t",
+  "name": "shelf_left_5_1s",
+  "glb": "enamel_mug.glb",
+  "pos": [
+   -2.517,
+   0,
+   -1.055
+  ],
+  "ry": 95.11629893726035,
+  "on": "shelf_left",
+  "level": 5,
+  "scale": 0.95
+ },
+ {
+  "name": "shelf_left2_0_0",
+  "type": "carton",
+  "front": "box_c",
+  "size": [
+   0.317,
+   0.297,
+   0.257
+  ],
+  "pos": [
+   -2.789,
+   0,
+   0.786
+  ],
+  "ry": 98.50721396303477,
+  "on": "shelf_left2",
+  "level": 0
+ },
+ {
+  "name": "shelf_left2_0_1",
+  "type": "carton",
+  "front": "box_b",
+  "size": [
+   0.344,
+   0.396,
+   0.292
+  ],
+  "pos": [
+   -2.774,
+   0,
+   1.171
+  ],
+  "ry": 96.8829942909767,
+  "on": "shelf_left2",
+  "level": 0
+ },
+ {
+  "name": "shelf_left2_0_2",
+  "type": "carton",
+  "front": "box_b",
+  "size": [
+   0.34,
+   0.391,
+   0.289
+  ],
+  "pos": [
+   -2.789,
+   0,
+   1.549
+  ],
+  "ry": 87.86927891902648,
+  "on": "shelf_left2",
+  "level": 0
+ },
+ {
+  "name": "shelf_left2_1_0",
+  "type": "carton",
+  "front": "box_a",
+  "size": [
+   0.419,
+   0.364,
+   0.364
+  ],
+  "pos": [
+   -2.733,
+   0,
+   0.843
+  ],
+  "ry": 82.78725814039115,
+  "on": "shelf_left2",
+  "level": 1
+ },
+ {
+  "name": "shelf_left2_1_1",
+  "type": "carton",
+  "front": "box_b",
+  "size": [
+   0.38,
+   0.437,
+   0.323
+  ],
+  "pos": [
+   -2.754,
+   0,
+   1.306
+  ],
+  "ry": 97.77576384116321,
+  "on": "shelf_left2",
+  "level": 1
+ },
+ {
+  "name": "shelf_left2_2_0",
+  "type": "carton",
+  "front": "box_d",
+  "size": [
+   0.403,
+   0.384,
+   0.25
+  ],
+  "pos": [
+   -2.778,
+   0,
+   0.851
+  ],
+  "ry": 101.2398809656462,
+  "on": "shelf_left2",
+  "level": 2
+ },
+ {
+  "name": "shelf_left2_2_1",
+  "glb": "tube_radio_closed.glb",
+  "pos": [
+   -2.754,
+   0,
+   1.355
+  ],
+  "ry": 100.99923261935422,
+  "on": "shelf_left2",
+  "level": 2,
+  "scale": 0.99,
+  "tint": [
+   0.95,
+   0.88,
+   0.78
+  ]
+ },
+ {
+  "name": "shelf_left2_3_0",
+  "glb": "tube_radio_closed.glb",
+  "pos": [
+   -2.8,
+   0,
+   0.867
+  ],
+  "ry": 89.70024081607312,
+  "on": "shelf_left2",
+  "level": 3,
+  "scale": 0.97
+ },
+ {
+  "name": "shelf_left2_3_0t",
   "glb": "alarm_clock.glb",
   "pos": [
-   -2.773,
+   -2.8,
    0,
-   1.367
+   0.867
   ],
-  "ry": 79.90637641576242,
-  "on": "shelf_left2_3_1",
+  "ry": 99.55796935826099,
+  "on": "shelf_left2_3_0",
+  "scale": 0.95
+ },
+ {
+  "name": "shelf_left2_3_0s",
+  "glb": "enamel_mug.glb",
+  "pos": [
+   -2.546,
+   0,
+   0.858
+  ],
+  "ry": 99.27656339282915,
+  "on": "shelf_left2",
+  "level": 3,
+  "scale": 0.95
+ },
+ {
+  "name": "shelf_left2_3_1",
+  "glb": "crt_tv.glb",
+  "pos": [
+   -2.783,
+   0,
+   1.355
+  ],
+  "ry": 89.06048381785988,
+  "on": "shelf_left2",
+  "level": 3,
+  "scale": 0.94,
+  "tint": [
+   0.75,
+   0.6,
+   0.5
+  ]
+ },
+ {
+  "name": "shelf_left2_3_1s",
+  "glb": "alarm_clock.glb",
+  "pos": [
+   -2.546,
+   0,
+   1.392
+  ],
+  "ry": 94.28288926145959,
+  "on": "shelf_left2",
+  "level": 3,
   "scale": 0.95
  },
  {

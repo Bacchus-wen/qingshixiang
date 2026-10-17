@@ -42,13 +42,13 @@ fixed = [
  {"name": "meter_box", "glb": "../v2/meterbox.glb", "pos": [2.42, 1.72, 0], "ry": -90, "wall": "front-out"},
  {"name": "flat_cartons", "glb": "../v2/cardboard.glb", "pos": [2.42, 0, 1.95], "ry": 4, "scale": 0.6},
  {"name": "spare_arm", "glb": "spare_arm.glb", "pos": [2.9, 1.42, -0.88], "ry": -112, "wall": "right"},
- {"name": "work_carton", "type": "carton", "front": "box_c", "size": [0.32, 0.3, 0.26], "pos": [-0.93, 0, 1.56], "ry": -40, "on": "floor"},
- {"name": "spare_torso", "glb": "spare_torso.glb", "pos": [-0.93, 0, 1.56], "ry": 128, "on": "work_carton", "scale": 0.92},
+ {"name": "work_carton", "type": "carton", "front": "box_c", "size": [0.32, 0.3, 0.26], "pos": [-0.89, 0, 1.47], "ry": -40, "on": "floor"},
+ {"name": "spare_torso", "glb": "spare_torso.glb", "pos": [-0.89, 0, 1.47], "ry": 128, "on": "work_carton", "scale": 0.92},
  {"name": "spare_leg", "glb": "spare_leg.glb", "pos": [2.9, 1.12, -0.42], "ry": -68, "wall": "right"},
  {"name": "drop_carton_a", "type": "carton", "front": "box_b", "size": [0.4, 0.46, 0.34], "pos": [1.45, 0, 1.62], "ry": -14},
  {"name": "drop_carton_b", "type": "carton", "front": "box_a", "size": [0.42, 0.36, 0.38], "pos": [1.97, 0, 1.4], "ry": 8},
  {"name": "drop_fan", "glb": "desk_fan.glb", "pos": [1.97, 0, 1.4], "ry": -150, "on": "drop_carton_b", "tint": [0.95, 0.9, 0.78]},
-  {"name": "thermos_floor", "glb": "thermos.glb", "pos": [2.55, 0, -0.25], "ry": 40, "on": "parts_cabinet"},
+  {"name": "thermos_floor", "glb": "thermos.glb", "pos": [2.55, 0, -0.98], "ry": 40, "on": "parts_cabinet"},
  {"name": "bicycle", "glb": "bicycle.glb", "pos": [2.35, 0, 2.95], "yaw0": 35.7, "ry": 183, "roll": 10, "scale": 0.84},
 ]
 # shelf fill: heavy cartons at the bottom, mixed electronics above, never the same model twice side by side; a second
@@ -77,6 +77,9 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
     tags = shelf_tags.setdefault(shelf, [])
     for lv in range(levels):
         x = x0 + random.uniform(0.01, 0.04); k = 0; last = None
+        mode = random.choice(['dense', 'dense', 'sparse', 'gap']) if lv > 0 else 'dense'
+        xe = x1 if mode != 'gap' else x0 + (x1 - x0) * random.uniform(0.5, 0.7)   # 'gap': the rest of the board stays empty
+        gap_lo, gap_hi = (0.0, 0.012) if mode == 'dense' else (0.1, 0.24) if mode == 'sparse' else (0.0, 0.03)
         while True:
             if lv == 0 or (lv == levels - 1 and clear[lv] < 0.5 and random.random() < 0.35 and x < x0 + 0.6) or (0 < lv < levels - 1 and random.random() < 0.18):
                 fitk = [k_ for k_ in CART if CART[k_][1] * 0.85 <= clear[lv] - 0.02]
@@ -102,7 +105,7 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
             a = math.radians(yaw)
             w = (W[g] * abs(math.cos(a)) + D[g] * abs(math.sin(a))) * sc      # rotated footprint along the shelf
             dep = (W[g] * abs(math.sin(a)) + D[g] * abs(math.cos(a))) * sc    # ... and across it
-            if x + w > x1: break
+            if x + w > xe: break
             cx = x + w / 2; c = back + sgn * (dep / 2 + 0.012)
             if dep > abs(front - back) - 0.01:   # too deep turned like that for this board: stand it square
                 yaw = random.uniform(-4, 4); dep = D[g] * sc; w = W[g] * sc
@@ -129,7 +132,7 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
                 fpos = [fx, 0, fz] if along == 'x' else [fz, 0, fx]
                 out.append({"name": f"{shelf}_{lv}_{k}s", "glb": sg, "pos": [round(fpos[0], 3), 0, round(fpos[2], 3)], "ry": ry + random.uniform(-15, 15),
                             "on": shelf, "level": lv, "scale": 0.95})
-            x += w + (random.uniform(0.0, 0.012) if random.random() < 0.72 else random.uniform(0.09, 0.2)); k += 1   # tight runs and real gaps
+            x += w + random.uniform(gap_lo, gap_hi); k += 1
 # back shelf: x from -1.13 to 0.93, board z from -2.21 (back) to -1.72 (front)
 fill('shelf_back', 'x', -1.17, 1.11, -2.21, -1.72, 6, 0, [0.5, 0.5, 0.5, 0.5, 0.5, 0.33])  # six boards to 2.66 m: stock to the ceiling
 # left shelf (rotated 90 deg: its local x runs along -z of the room... tags use shelf-local x): board x from -2.96 to -2.47
