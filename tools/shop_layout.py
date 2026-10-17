@@ -7,13 +7,13 @@ W = {'tube_radio_closed.glb': 0.5, 'crt_tv.glb': 0.5, 'desk_fan.glb': 0.37, 'cas
 H = {'tube_radio_closed.glb': 0.33, 'crt_tv.glb': 0.5, 'desk_fan.glb': 0.46, 'cassette_recorder.glb': 0.36,
      'alarm_clock.glb': 0.16, 'thermos.glb': 0.36, 'toolbox.glb': 0.31, 'tube_radio_open.glb': 0.35, 'enamel_mug.glb': 0.1}
 fixed = [
- {"name": "shelf_back", "type": "shelf", "pos": [-0.1, 0, -1.97], "w": 2.1, "d": 0.5, "h": 2.55, "levels": 5},
- {"name": "shelf_left", "type": "shelf", "pos": [-2.72, 0, -1.05], "ry": 90, "w": 1.7, "d": 0.5, "h": 2.3, "levels": 4},
+ {"name": "shelf_back", "type": "shelf", "pos": [-0.03, 0, -1.97], "w": 2.36, "d": 0.5, "h": 2.7, "levels": 6},
+ {"name": "shelf_left", "type": "shelf", "pos": [-2.72, 0, -1.05], "ry": 90, "w": 1.7, "d": 0.5, "h": 2.7, "levels": 6},
  {"name": "shelf_left2", "type": "shelf", "pos": [-2.72, 0, 1.225], "ry": 90, "w": 1.35, "d": 0.45, "h": 1.9, "levels": 4},
- {"name": "wall_plank", "type": "plank", "pos": [-1.83, 2.3, -2.25], "w": 1.15, "d": 0.24},
- {"name": "plank_radio", "glb": "tube_radio_closed.glb", "pos": [-2.12, 0, -2.12], "ry": 6, "scale": 0.8, "on": "wall_plank", "tint": [0.72, 0.6, 0.5]},
- {"name": "plank_clock", "glb": "alarm_clock.glb", "pos": [-1.78, 0, -2.13], "ry": -18, "on": "wall_plank"},
- {"name": "plank_tv", "glb": "crt_tv.glb", "pos": [-1.5, 0, -2.12], "ry": -8, "scale": 0.6, "on": "wall_plank"},
+ {"name": "wall_plank", "type": "plank", "pos": [-1.88, 2.3, -2.25], "w": 1.08, "d": 0.24},
+ {"name": "plank_radio", "glb": "tube_radio_closed.glb", "pos": [-2.16, 0, -2.12], "ry": 6, "scale": 0.8, "on": "wall_plank", "tint": [0.72, 0.6, 0.5]},
+ {"name": "plank_clock", "glb": "alarm_clock.glb", "pos": [-1.84, 0, -2.13], "ry": -18, "on": "wall_plank"},
+ {"name": "plank_tv", "glb": "crt_tv.glb", "pos": [-1.58, 0, -2.12], "ry": -8, "scale": 0.6, "on": "wall_plank"},
  {"name": "workbench", "glb": "workbench.glb", "pos": [-1.6, 0, 0.9], "ry": 0},
  {"name": "bench_clock", "glb": "alarm_clock.glb", "pos": [-2.24, 0, 0.92], "ry": 22, "on": "workbench"},
  {"name": "spool_a", "type": "proc", "kind": "spool", "seed": 0, "pos": [-0.99, 0, 1.06], "on": "workbench"},
@@ -92,7 +92,8 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
                 out.append({"name": f"{shelf}_{lv}_{k}", "type": "carton", "front": key, "size": [round(w0, 3), round(h * sc, 3), round(d0, 3)],
                             "pos": [round(pos[0], 3), 0, round(pos[2], 3)], "ry": ry + cyaw, "on": shelf, "level": lv})
                 x += w + random.uniform(0.01, 0.03); k += 1; continue
-            cands = [g for g in BIG if H[g] <= clear[lv] and g != last]
+            cands = [g for g in BIG if H[g] <= clear[lv] and g != last] or [g for g in BIG if H[g] <= clear[lv]]
+            if not cands: break
             g = random.choice(cands); last = g
             sc = round(random.uniform(0.78, 0.92) if g == 'crt_tv.glb' and random.random() < 0.5 else random.uniform(0.92, 1.0), 2)  # 14-inch and 18-inch sets
             r = random.random()   # not a shop display: most askew, some turned well round, a few side-on
@@ -130,9 +131,9 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
                             "on": shelf, "level": lv, "scale": 0.95})
             x += w + (random.uniform(0.0, 0.012) if random.random() < 0.72 else random.uniform(0.09, 0.2)); k += 1   # tight runs and real gaps
 # back shelf: x from -1.13 to 0.93, board z from -2.21 (back) to -1.72 (front)
-fill('shelf_back', 'x', -1.1, 0.9, -2.21, -1.72, 5, 0, [0.58, 0.58, 0.58, 0.58, 0.45])  # top board 2.51 m: 0.49 m to the ceiling
+fill('shelf_back', 'x', -1.17, 1.11, -2.21, -1.72, 6, 0, [0.5, 0.5, 0.5, 0.5, 0.5, 0.33])  # six boards to 2.66 m: stock to the ceiling
 # left shelf (rotated 90 deg: its local x runs along -z of the room... tags use shelf-local x): board x from -2.96 to -2.47
-fill('shelf_left', 'z', -1.85, -0.25, -2.96, -2.47, 4, 90, [0.66, 0.66, 0.66, 0.9])
+fill('shelf_left', 'z', -1.85, -0.25, -2.96, -2.47, 6, 90, [0.5, 0.5, 0.5, 0.5, 0.5, 0.33])
 fill('shelf_left2', 'z', 0.6, 1.85, -2.95, -2.5, 4, 90, [0.56, 0.56, 0.56, 0.9])
 for f in fixed:
     if f['name'] in shelf_tags: f['tags'] = shelf_tags[f['name']]

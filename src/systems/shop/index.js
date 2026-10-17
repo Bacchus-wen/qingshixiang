@@ -374,10 +374,10 @@ export default {
       plane.position.set(0.4, -STEP + BH / 2 - 0.05, d / 2 + 0.25 + 8.5); root.add(plane);
     }
     // printed things on the walls (generated with the company platform, docs/gen-log.md)
-    root.add(onWall(decal('pegboard', 1.2, 0.8), 'back', -1.83, 1.72, 0.0145));
+    root.add(onWall(decal('pegboard', 1.14, 0.76), 'back', -1.88, 1.72, 0.0145));
     { // the pegboard is a real 6 mm board on spacers, not a sticker: its edges catch light and cast a thin shadow
-      const pb = new THREE.Mesh(new THREE.BoxGeometry(1.205, 0.805, 0.006), new THREE.MeshStandardNodeMaterial({ color: 0x6b4526, roughness: 0.8 }));
-      pb.position.set(-1.83, 1.72, -d / 2 + 0.0135 - 0.0032); pb.castShadow = pb.receiveShadow = true; root.add(pb);
+      const pb = new THREE.Mesh(new THREE.BoxGeometry(1.145, 0.765, 0.006), new THREE.MeshStandardNodeMaterial({ color: 0x6b4526, roughness: 0.8 }));
+      pb.position.set(-1.88, 1.72, -d / 2 + 0.0135 - 0.0032); pb.castShadow = pb.receiveShadow = true; root.add(pb);
     }
     root.add(onWall(decal('poster', 0.46, 0.69, { curl: 0.012 }), 'left', 0.12, 1.86));
     root.add(onWall(decal('calendar', 0.34, 0.51, { curl: 0.01 }), 'back', 2.63, 1.4));
@@ -619,7 +619,7 @@ export default {
         for (const m of [plate, rod, tip]) { m.castShadow = true; root.add(m); }
       }
       // screwdrivers and a wire coil hanging on the pegboard (in front of the printed board: real depth and shadows)
-      const pegX = -1.83, pegY = 1.72, pegZ = -d / 2 + 0.012;
+      const pegX = -1.88, pegY = 1.72, pegZ = -d / 2 + 0.012;
       // two staggered rows of real screwdrivers across the board (the photo stays in the gaps), slightly askew
       const rnd = (k) => { const x = Math.sin(k * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
       let k = 0; const tools = new THREE.Group();
