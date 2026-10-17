@@ -5,7 +5,7 @@ import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { SHOTS } from '../../engine/shots.js';
-import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorld, smoothstep, vec2, vec3, mx_worley_noise_float, texture, normalWorldGeometry, abs, step, uniform } from 'three/tsl';
+import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorld, smoothstep, vec2, vec3, mx_worley_noise_float, texture, normalWorldGeometry, abs, step, uniform, uv } from 'three/tsl';
 
 // v4: the closed-down home-appliance repair shop (docs/scene-shop.md). This phase is models + layout only:
 // a simple room shell, the Tripo models placed from /models/shop/layout.json (every item is grounded on its
@@ -305,10 +305,11 @@ export default {
     // plane across the road, unlit (it carries its own dusk light), plus dark ground under it
     {
       const bd = new THREE.MeshBasicNodeMaterial(); const bt = tex('street_backdrop'); bt.wrapS = bt.wrapT = THREE.ClampToEdgeWrapping;
-      bd.colorNode = texture(bt).rgb.mul(0.55);
-      const BW = 16, BH = BW * 1024 / 1536;
+      const CROP = 0.13; // the painting's own road strip (bottom 13%) is cut: the buildings stand on our pavement
+      bd.colorNode = texture(bt, uv().mul(vec2(1, 1 - CROP)).add(vec2(0, CROP))).rgb.mul(0.55);
+      const BW = 16, BH = BW * 1024 / 1536 * (1 - CROP);
       const plane = new THREE.Mesh(new THREE.PlaneGeometry(BW, BH), bd); plane.rotation.y = Math.PI; // faces the shop (-z)
-      plane.position.set(0.4, -STEP + BH / 2 - 0.25, d / 2 + 0.25 + 8.5); root.add(plane);
+      plane.position.set(0.4, -STEP + BH / 2 - 0.05, d / 2 + 0.25 + 8.5); root.add(plane);
     }
     // printed things on the walls (generated with the company platform, docs/gen-log.md)
     root.add(onWall(decal('pegboard', 1.2, 0.8), 'back', -1.83, 1.72, 0.0145));

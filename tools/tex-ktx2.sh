@@ -17,4 +17,6 @@ ua calendar calendar 512x1024; ua price_list price_list 512x1024; ua slogan slog
 ua badge_shanghai badge_shanghai 512x256; ua badge_plaque badge_plaque 512x256
 # second wall batch (the business licence was generated but is not used: it carries the state emblem)
 e1 tv_poster tv_poster 512x1024; ua notice notice 512x1024
+# the other side of the street (matte painting seen through the opening)
+e1 street_backdrop street_backdrop 2048x1024
 ls -la $OUT/*.ktx2 | awk '{s+=$5} END {print "total", s}'
