@@ -383,6 +383,7 @@ export default {
           if (it.wall === 'back') o.position.z += -D / 2 - _box.min.z;
           if (it.wall === 'left') o.position.x += -W / 2 - _box.min.x;
           if (it.wall === 'right') o.position.x += W / 2 - _box.max.x;
+          if (it.wall === 'front-out') o.position.z += D / 2 + 0.25 - _box.min.z; // street face of the front wall
           o.position.y += (it.pos[1] ?? 1.5) - _box.min.y;
         } else {
           // grounded: lowest point onto the highest surface under its footprint (floor, bench top, shelf board...)

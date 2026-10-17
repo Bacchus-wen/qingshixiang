@@ -347,9 +347,9 @@
   "name": "queue_fan",
   "glb": "desk_fan.glb",
   "pos": [
-   2.72,
+   2.7,
    0,
-   1.0
+   0.84
   ],
   "ry": -120
  },
@@ -359,9 +359,31 @@
   "pos": [
    2.75,
    0,
-   1.55
+   1.42
   ],
-  "ry": -80
+  "ry": -84
+ },
+ {
+  "name": "meter_box",
+  "glb": "../v2/meterbox.glb",
+  "pos": [
+   2.42,
+   1.72,
+   0
+  ],
+  "ry": -90,
+  "wall": "front-out"
+ },
+ {
+  "name": "flat_cartons",
+  "glb": "../v2/cardboard.glb",
+  "pos": [
+   2.42,
+   0,
+   1.95
+  ],
+  "ry": 4,
+  "scale": 0.6
  },
  {
   "name": "stool_tv",
