@@ -336,8 +336,8 @@ export async function buildDetails(ctx, root, facades, M, r) {
   scene.add(new THREE.HemisphereLight(0x5c6470, 0x2a2826, 0.42)); // v3 (Grok r17): neutral cool fill, no purple cast // v3: the haze and real lights carry the night now
   // things people dropped: an umbrella upside down in the road near the robot, one left open against a shutter,
   // soaked flyers and a crate by the shops
-  props.push(['umbrella_broken', -1.6, 0, -11.2, 0.7], ['umbrella_open', -(L.halfRoad + L.walk) + 0.6, L.curb, -21.5, 1.2, { rz: 0.35 }],
-    ['debris', -(L.halfRoad + 0.6), L.curb, -15.8, 0.4], ['debris', L.halfRoad + 0.7, L.curb, -27, 2.1], ['umbrella_broken', 2.2, 0, -31, 2.6]);
+  props.push(['umbrella_broken', -1.6, 0.12, -11.2, 0.7, { rz: 0.95 }], ['umbrella_open', -(L.halfRoad + L.walk) + 0.6, L.curb, -21.5, 1.2, { rz: 0.35 }],
+    ['debris', L.halfRoad + 0.7, L.curb, -27, 2.1], ['umbrella_broken', 2.2, 0, -31, 2.6]);
   // traces of the people who lived here (Codex props pack 2), placed where they mean something
   const W = L.halfRoad + L.walk;
   props.push(
