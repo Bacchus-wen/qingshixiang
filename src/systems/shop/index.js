@@ -3,6 +3,8 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { SHOTS } from '../../engine/shots.js';
 import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorld, smoothstep, vec2, vec3, mx_worley_noise_float, texture, normalWorldGeometry, abs, step, uniform } from 'three/tsl';
 
 // v4: the closed-down home-appliance repair shop (docs/scene-shop.md). This phase is models + layout only:
@@ -418,6 +420,22 @@ export default {
     if (lampObj) { _box.setFromObject(lampObj); this.lamp.position.set((_box.min.x + _box.max.x) / 2 + 0.1, _box.max.y - 0.05, (_box.min.z + _box.max.z) / 2); this.lamp.target.position.set(this.lamp.position.x + 0.3, 0.8, this.lamp.position.z + 0.2); }
     else { this.lamp.position.set(-1.6, 1.45, 0.1); this.lamp.target.position.set(-1.2, 0.8, 0.2); }
     ctx.api.shop = { root, placed, ROOM };
+    // review viewer (this phase has no story camera yet): orbit/zoom/pan with the mouse, number keys jump to the
+    // review shots, the camera is kept inside the room (or out on the street in front of it)
+    if (!ctx.isShot) {
+      const cam = ctx.camera, oc = this.controls = new OrbitControls(cam, ctx.renderer.domElement);
+      oc.enableDamping = true; oc.dampingFactor = 0.08; oc.minDistance = 0.3; oc.maxDistance = 9; oc.maxPolarAngle = Math.PI * 0.53;
+      const KEYS = ['shop-establish', 'shop-robotfull', 'shop-bench', 'shop-back', 'shop-left', 'shop-robotface', 'shop-front', 'shop-iso'];
+      const go = (name) => { const v = SHOTS[name]; if (!v) return; cam.position.set(...v.pos); cam.fov = v.fov ?? 50; cam.updateProjectionMatrix(); oc.target.set(...v.look); oc.update(); };
+      go('shop-establish');
+      addEventListener('keydown', (e) => { const k = Number(e.key); if (k >= 1 && k <= KEYS.length) go(KEYS[k - 1]); });
+    }
   },
-  update() {},
+  update(dt, t, ctx) {
+    const oc = this.controls; if (!oc) return;
+    oc.update();
+    const p = ctx.camera.position, R = ROOM;
+    if (p.z < R.d / 2 + 0.3) { p.x = Math.max(-R.w / 2 + 0.12, Math.min(R.w / 2 - 0.12, p.x)); p.z = Math.max(-R.d / 2 + 0.12, p.z); p.y = Math.max(0.15, Math.min(R.h - 0.12, p.y)); }
+    else { p.y = Math.max(0.1, p.y); p.z = Math.min(p.z, 12); }
+  },
 };
