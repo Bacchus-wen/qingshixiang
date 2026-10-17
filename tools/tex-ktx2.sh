@@ -10,11 +10,9 @@ e1() { toktx --t2 --lower_left_maps_to_s0t0 --encode etc1s --clevel 4 --qlevel 2
 ua() { toktx --t2 --lower_left_maps_to_s0t0 --encode uastc --uastc_quality 2 --uastc_rdo_l 2 --zcmp 18 --genmipmap --assign_oetf srgb ${3:+--resize $3} $OUT/$1.ktx2 $SRC/$2.png; }
 e1 wall_upper wall_upper; e1 wall_dado wall_dado; e1 ceiling ceiling; e1 facade facade; e1 pavement pavement; e1 shutter shutter; e1 cardboard cardboard 512x512
 e1 floor_terrazzo floor_terrazzo
-e1 pegboard pegboard 1024x512; e1 poster poster 512x1024; e1 box_a box_a 512x512; e1 box_b box_b 512x512; e1 box_c box_c 512x512; e1 box_d box_d 512x512
+e1 poster poster 512x1024; e1 box_a box_a 512x512; e1 box_b box_b 512x512; e1 box_c box_c 512x512; e1 box_d box_d 512x512
 ua calendar calendar 512x1024; ua price_list price_list 512x1024; ua slogan slogan 1024x512; ua sign_main sign_main 1024x512; ua sign_side sign_side 512x1024; ua tags tags 1024x1024
 
-# robot badges (chrome script logo with alpha, red enamel plate)
-ua badge_shanghai badge_shanghai 512x256; ua badge_plaque badge_plaque 512x256
 # second wall batch (the business licence was generated but is not used: it carries the state emblem)
 e1 tv_poster tv_poster 512x1024; ua notice notice 512x1024
 # the other side of the street (matte painting seen through the opening)

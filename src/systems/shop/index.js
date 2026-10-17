@@ -17,7 +17,7 @@ export const ROOM = { w: 6.0, d: 4.5, h: 3.0 };
 // docs/gen-log.md), shipped as KTX2 (tools/tex-ktx2.sh: ~1 byte/px on the GPU instead of 4). Tiled surfaces are mapped
 // in world space so walls and floor line up without UV work. All are loaded up front (init awaits them).
 const TEX = {};
-const TEX_NAMES = ['floor_terrazzo', 'wall_upper', 'wall_dado', 'ceiling', 'facade', 'pavement', 'shutter', 'cardboard', 'pegboard',
+const TEX_NAMES = ['floor_terrazzo', 'wall_upper', 'wall_dado', 'ceiling', 'facade', 'pavement', 'shutter', 'cardboard',
   'poster', 'calendar', 'price_list', 'slogan', 'sign_main', 'sign_side', 'tags', 'box_a', 'box_b', 'box_c', 'box_d', 'tv_poster', 'notice', 'street_backdrop', 'sign_aframe', 'height_marks', 'sign_vertical', 'pegboard_empty'];
 async function loadTextures(ktx2) {
   await Promise.all(TEX_NAMES.map(async (n) => {
