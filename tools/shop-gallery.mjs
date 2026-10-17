@@ -41,6 +41,7 @@ for (const { key, name } of list) {
     for (let i = 0; i < 6; i++) e.postfx.render(1 / 60);
   }, { name });
   const f = `renders/gallery/${key.replace('.glb', '')}.png`;
+  await page.waitForTimeout(350); // WebGPU presents asynchronously: without this each tile shows the previous view
   await page.screenshot({ path: f }); files.push(f);
   console.log('SHOT', key, '->', f);
 }
