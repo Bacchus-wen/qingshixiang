@@ -1,0 +1,10 @@
+[17:23:40] ctl-resize street-eye steady (no change) {"frames":256,"p50":33.3,"max":66.6,"over250":0,"openGapMs":29,"pipelines":0,"bindGroups":0,"pixelRatio":1,"gpuMB":1226.5}
+[17:23:55] ctl-resize street-eye setPixelRatio(0.85) {"frames":4,"p50":49.9,"max":10549.6,"over250":1,"openGapMs":4370,"pipelines":180,"bindGroups":1130,"pixelRatio":0.85,"gpuMB":1138.4}
+[17:24:01] ctl-resize street-eye steady after {"frames":0,"p50":0,"max":0,"over250":0,"openGapMs":6004,"pipelines":0,"bindGroups":0,"pixelRatio":0.85,"gpuMB":1138.4}
+[17:24:16] ctl-resize street-eye setPixelRatio(0.7) {"frames":0,"p50":0,"max":0,"over250":0,"openGapMs":15003,"pipelines":0,"bindGroups":0,"pixelRatio":0.7,"gpuMB":1138.4}
+[17:24:22] ctl-resize street-eye steady after 2 {"frames":0,"p50":0,"max":0,"over250":0,"openGapMs":6003,"pipelines":0,"bindGroups":0,"pixelRatio":0.7,"gpuMB":1138.4}
+[17:24:54] ctl-resize flood steady (no change) {"frames":189,"p50":49.9,"max":66.7,"over250":0,"openGapMs":21,"pipelines":1,"bindGroups":5,"pixelRatio":1,"gpuMB":1185.8}
+[17:25:09] ctl-resize flood setPixelRatio(0.85) {"frames":4,"p50":50,"max":8166.4,"over250":1,"openGapMs":6761,"pipelines":149,"bindGroups":751,"pixelRatio":0.85,"gpuMB":1097.6}
+[17:25:15] ctl-resize flood steady after {"frames":74,"p50":33.3,"max":66.7,"over250":0,"openGapMs":18,"pipelines":0,"bindGroups":0,"pixelRatio":0.85,"gpuMB":1097.6}
+[17:25:30] ctl-resize flood setPixelRatio(0.7) {"frames":4,"p50":33.4,"max":8216.3,"over250":1,"openGapMs":6724,"pipelines":149,"bindGroups":751,"pixelRatio":0.7,"gpuMB":1023.7}
+[17:25:36] ctl-resize flood steady after 2 {"frames":32,"p50":16.8,"max":50.1,"over250":0,"openGapMs":29,"pipelines":0,"bindGroups":0,"pixelRatio":0.7,"gpuMB":1023.7}

@@ -1,0 +1,209 @@
+[12:44:34] launch ["--enable-unsafe-webgpu","--use-angle=metal","--enable-precise-memory-info"]
+[12:44:36] baseline {"browser":[{"pid":66788,"footprintMB":63,"top":[{"cat":"app-specific tag 14","dirtyMB":38},{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"__DATA","dirtyMB":2.7},{"cat":"untagged (VM_ALLOCATE)","dirtyMB":2},{"cat":"__DATA_DIRTY","dirtyMB":1.8},{"cat":"MALLOC_SMALL","dirtyMB":1.4}]}],"renderer":[{"pid":66801,"footprintMB":25,"top":[{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"app-specific tag 14","dirtyMB":5.9},{"cat":"__DATA","dirtyMB":2},{"cat":"app-specific tag 16","dirtyMB":1.6},{"cat":"page table","dirtyMB":0.8},{"cat":"MALLOC_SMALL","dirtyMB":0.7}]},{"pid":66802,"footprintMB":28,"top":[{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"app-specific tag 14","dirtyMB":7.5},{"cat":"app-specific tag 16","dirtyMB":2.9},{"cat":"__DATA","dirtyMB":2.1},{"cat":"page table","dirtyMB":0.8},{"cat":"__DATA_DIRTY","dirtyMB":0.6}]},{"pid":66800,"footprintMB":61,"top":[{"cat":"app-specific tag 14","dirtyMB":25},{"cat":"app-specific tag 16","dirtyMB":17},{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"__DATA","dirtyMB":2.2},{"cat":"page table","dirtyMB":1},{"cat":"stack","dirtyMB":0.8}]}],"GPU":[{"pid":66796,"footprintMB":251,"top":[{"cat":"Owned physical footprint (unmapped) (graphics)","dirtyMB":112},{"cat":"IOSurface","dirtyMB":61},{"cat":"IOAccelerator (graphics)","dirtyMB":29},{"cat":"app-specific tag 14","dirtyMB":22},{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"Owned physical footprint (unmapped)","dirtyMB":5}]}]}
+[12:45:07] ours-flood run1: ready 21.3s, fps 20.2, raf p50 50 p95 66.7 max 83.4, >34ms 79, cpu 8.74 (p95 12), draws 437, tris 9504662, gpuMem 1185.75MB (tex 1122.66, buf 63.09), heap 207.24MB, pipesDuring 1, net 53.68MB
+[12:45:38] ours-flood run2: ready 18.9s, fps 21.2, raf p50 50 p95 66.7 max 66.7, >34ms 80, cpu 8.37 (p95 11.8), draws 437, tris 9505374, gpuMem 1185.75MB (tex 1122.66, buf 63.09), heap 198.55MB, pipesDuring 1, net 49.38MB
+[12:46:10] ours-street-eye run1: ready 20.4s, fps 31.8, raf p50 33.3 p95 50 max 50.1, >34ms 14, cpu 7.74 (p95 8.6), draws 506, tris 3747242, gpuMem 1226.55MB (tex 1162.99, buf 63.55), heap 207.41MB, pipesDuring 0, net 50.68MB
+[12:46:40] ours-street-eye run2: ready 19.1s, fps 33.4, raf p50 33.3 p95 33.4 max 50.1, >34ms 6, cpu 7.41 (p95 8), draws 506, tris 3747242, gpuMem 1226.55MB (tex 1162.99, buf 63.55), heap 213.56MB, pipesDuring 0, net 49.19MB
+[12:48:22] cc-street run1: ready 90s, fps 15.6, raf p50 66.6 p95 83.3 max 100.1, >34ms 77, cpu 64.72 (p95 85.6), draws 2333, tris 25029134, gpuMem 1425.87MB (tex 1124.83, buf 301.04), heap 856.7MB, pipesDuring 0, net 286.94MB
+[12:50:05] cc-street run2: ready 89.2s, fps 16.2, raf p50 66.6 p95 83.3 max 83.4, >34ms 80, cpu 62.63 (p95 75.7), draws 2329, tris 25042248, gpuMem 1425.89MB (tex 1124.83, buf 301.06), heap 848.64MB, pipesDuring 0, net 286.94MB
+[12:51:44] cc-overlook run1: ready 86.7s, fps 23.2, raf p50 49.9 p95 50.1 max 66.7, >34ms 67, cpu 42.46 (p95 54.7), draws 1651, tris 21680708, gpuMem 1413.32MB (tex 1116.83, buf 296.49), heap 1078.8MB, pipesDuring 0, net 286.94MB
+[12:53:22] cc-overlook run2: ready 86.4s, fps 20.6, raf p50 50 p95 66.7 max 83.4, >34ms 82, cpu 36.64 (p95 51.8), draws 1647, tris 21623738, gpuMem 1421.14MB (tex 1124.83, buf 296.31), heap 782.18MB, pipesDuring 0, net 286.94MB
+[12:53:24] done -> /tmp/perfcmp/A-vsync.json
+[12:54:49] launch ["--enable-unsafe-webgpu","--use-angle=metal","--enable-precise-memory-info","--disable-gpu-vsync","--disable-frame-rate-limit"]
+[12:54:52] baseline {"browser":[{"pid":68303,"footprintMB":61,"top":[{"cat":"app-specific tag 14","dirtyMB":36},{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"__DATA","dirtyMB":2.7},{"cat":"untagged (VM_ALLOCATE)","dirtyMB":2},{"cat":"__DATA_DIRTY","dirtyMB":1.8},{"cat":"MALLOC_SMALL","dirtyMB":1.4}]}],"renderer":[{"pid":68324,"footprintMB":25,"top":[{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"app-specific tag 14","dirtyMB":5.9},{"cat":"__DATA","dirtyMB":2},{"cat":"app-specific tag 16","dirtyMB":1.6},{"cat":"page table","dirtyMB":0.8},{"cat":"__DATA_DIRTY","dirtyMB":0.6}]},{"pid":68325,"footprintMB":29,"top":[{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"app-specific tag 14","dirtyMB":8},{"cat":"app-specific tag 16","dirtyMB":2.9},{"cat":"__DATA","dirtyMB":2.1},{"cat":"page table","dirtyMB":0.8},{"cat":"__DATA_DIRTY","dirtyMB":0.6}]},{"pid":68323,"footprintMB":177,"top":[{"cat":"app-specific tag 16","dirtyMB":120},{"cat":"app-specific tag 14","dirtyMB":38},{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"__DATA","dirtyMB":2.2},{"cat":"page table","dirtyMB":1},{"cat":"stack","dirtyMB":0.8}]}],"GPU":[{"pid":68316,"footprintMB":159,"top":[{"cat":"IOSurface","dirtyMB":87},{"cat":"app-specific tag 14","dirtyMB":24},{"cat":"Owned physical footprint (unmapped) (graphics)","dirtyMB":14},{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"IOAccelerator (graphics)","dirtyMB":6.8},{"cat":"Owned physical footprint (unmapped)","dirtyMB":5.8}]}]}
+[12:55:26] ours-flood run1 uncap: ready 18.6s, fps 20.2, raf p50 49.5 p95 68.6 max 98.9, >34ms 98, cpu 48.94 (p95 57.6), draws 437, tris 9504662, gpuMem 1185.75MB (tex 1122.66, buf 63.09), heap 194.03MB, pipesDuring 1, net 53.68MB
+[12:56:00] ours-flood run2 uncap: ready 17.6s, fps 19.6, raf p50 50.5 p95 69.1 max 97.9, >34ms 95, cpu 50.82 (p95 57.2), draws 437, tris 9504662, gpuMem 1185.75MB (tex 1122.66, buf 63.09), heap 191.92MB, pipesDuring 1, net 49.86MB
+[12:56:46] ours-street-eye run1 uncap: ready 24.3s, fps 21.8, raf p50 45.6 p95 77.9 max 90.2, >34ms 98, cpu 45.46 (p95 75.7), draws 506, tris 3747242, gpuMem 1226.55MB (tex 1162.99, buf 63.55), heap 208.16MB, pipesDuring 0, net 50.11MB
+[12:57:38] ours-street-eye run2 uncap: ready 21.4s, fps 23.4, raf p50 42.3 p95 70.3 max 99.5, >34ms 109, cpu 42.41 (p95 66.9), draws 506, tris 3747242, gpuMem 1226.55MB (tex 1162.99, buf 63.55), heap 199.72MB, pipesDuring 0, net 49.72MB
+[12:59:27] cc-street run1 uncap: ready 94s, fps 10.4, raf p50 95.4 p95 133.1 max 287.4, >34ms 51, cpu 97.54 (p95 134), draws 2315, tris 24986196, gpuMem 1425.82MB (tex 1124.83, buf 300.99), heap 820.36MB, pipesDuring 0, net 286.94MB
+[13:01:19] cc-street run2 uncap: ready 96.5s, fps 9.8, raf p50 103.6 p95 122.5 max 172.6, >34ms 48, cpu 103.49 (p95 123.9), draws 2313, tris 24968590, gpuMem 1425.79MB (tex 1124.83, buf 300.96), heap 1041.37MB, pipesDuring 0, net 286.94MB
+[13:02:29] abl-nodof run1 uncap: ready 51.3s, fps 21, raf p50 48.6 p95 58.2 max 69.2, >34ms 103, cpu 46.6 (p95 54.5), draws 427, tris 9505182, gpuMem 1093.81MB (tex 1030.7, buf 63.11), heap 201.17MB, pipesDuring 1, net 53.68MB
+[13:03:07] abl-nossr run1 uncap: ready 18.3s, fps 20.4, raf p50 49.4 p95 67.5 max 69.2, >34ms 100, cpu 48.7 (p95 60.7), draws 431, tris 9504656, gpuMem 1176.53MB (tex 1113.44, buf 63.09), heap 194.46MB, pipesDuring 1, net 49.84MB
+[13:03:44] abl-noao run1 uncap: ready 18.5s, fps 21.4, raf p50 46 p95 66.2 max 137.2, >34ms 102, cpu 46.05 (p95 56.5), draws 436, tris 9505373, gpuMem 1185.26MB (tex 1122.17, buf 63.09), heap 205.29MB, pipesDuring 1, net 49.45MB
+[13:04:22] abl-noscatter run1 uncap: ready 18.4s, fps 19.6, raf p50 51.8 p95 69.6 max 70.6, >34ms 96, cpu 50.72 (p95 61.8), draws 431, tris 9504656, gpuMem 1134.34MB (tex 1071.24, buf 63.09), heap 209.93MB, pipesDuring 1, net 49.84MB
+[13:04:58] abl-notraa run1 uncap: ready 17.6s, fps 21.2, raf p50 47.2 p95 57.4 max 81.1, >34ms 104, cpu 47.07 (p95 55), draws 435, tris 9504760, gpuMem 1122.47MB (tex 1059.38, buf 63.09), heap 195.68MB, pipesDuring 1, net 48.88MB
+[13:06:18] abl-qlow run1 uncap: ready 59.9s, fps 23.6, raf p50 42.4 p95 51.3 max 111.6, >34ms 113, cpu 34.43 (p95 50.6), draws 419, tris 9439548, gpuMem 1041.77MB (tex 991.25, buf 50.52), heap 173.05MB, pipesDuring 1, net 49.89MB
+[13:06:52] abl-nomodules run1 uncap: ready 16.4s, fps 22.6, raf p50 43.7 p95 64.4 max 110.3, >34ms 108, cpu 43.05 (p95 57.8), draws 400, tris 1402529, gpuMem 929.45MB (tex 882.66, buf 46.79), heap 207.87MB, pipesDuring 1, net 18.38MB
+[13:07:30] abl-noghosts run1 uncap: ready 17.6s, fps 20, raf p50 50.6 p95 69.1 max 99.8, >34ms 96, cpu 49.47 (p95 57.9), draws 433, tris 9329399, gpuMem 1143.35MB (tex 1081.29, buf 62.07), heap 200.01MB, pipesDuring 1, net 24.1MB
+[13:08:04] abl-norain run1 uncap: ready 17.2s, fps 21, raf p50 46.1 p95 66.8 max 107.7, >34ms 102, cpu 47.02 (p95 59.7), draws 432, tris 9378512, gpuMem 1184.79MB (tex 1122.66, buf 62.13), heap 216.66MB, pipesDuring 1, net 8.65MB
+[13:09:22] abl-noclustered run1 uncap: ready 54.8s, fps 15.6, raf p50 63.5 p95 85.7 max 134.9, >34ms 76, cpu 63.94 (p95 79.9), draws 435, tris 9504218, gpuMem 1173.81MB (tex 1122.65, buf 51.15), heap 174.94MB, pipesDuring 0, net 49.62MB
+[13:10:45] abl-noeyeshadow run1 uncap: ready 43.5s, fps 20, raf p50 49.9 p95 71.3 max 103.1, >34ms 93, cpu 49.37 (p95 62.5), draws 386, tris 6585579, gpuMem 1166.54MB (tex 1103.99, buf 62.54), heap 187.69MB, pipesDuring 1, net 52.88MB
+[13:11:43] abl-combo run1 uncap: ready 37.6s, fps 21.4, raf p50 47.4 p95 67.7 max 69.5, >34ms 104, cpu 44.71 (p95 53.6), draws 343, tris 1144130, gpuMem 766.39MB (tex 720.13, buf 46.26), heap 168.99MB, pipesDuring 1, net 37.86MB
+[13:12:24] ours-flood-again run1 uncap: ready 19.1s, fps 15.8, raf p50 63.1 p95 92.3 max 112.1, >34ms 75, cpu 62.26 (p95 78.7), draws 435, tris 9504218, gpuMem 1185.41MB (tex 1122.66, buf 62.75), heap 205.82MB, pipesDuring 0, net 53.68MB
+[13:12:27] done -> /tmp/perfcmp/BC-uncap.json
+[13:14:02] launch ["--enable-unsafe-webgpu","--use-angle=metal","--enable-precise-memory-info"]
+[13:14:05] baseline null
+[13:14:33] ours-street-eye run1: ready 21.6s, fps 26.7, raf p50 33.4 p95 50 max 66.7, >34ms 23, cpu 8.34 (p95 9.4), gpuBusy 11.02 (p95 41.45, n 327), draws 506, tris 3747242, gpuMem 1226.61MB (tex 1162.99, buf 63.62), heap 206.54MB, pipesDuring 0, net 53.68MB
+[13:14:35] done -> /tmp/perfcmp/ts-test.json
+[13:17:42] launch ["--enable-unsafe-webgpu","--use-angle=metal","--enable-precise-memory-info"]
+[13:17:44] baseline null
+[13:18:11] ours-street-eye run1: ready 20.7s, fps 26.3, raf p50 33.3 p95 66.7 max 66.8, >34ms 25, cpu 8.45 (p95 9.4), gpuBusy 38.63 (p95 50.23, n 96), draws 506, tris 3747242, gpuMem 1226.61MB (tex 1162.99, buf 63.62), heap 206.72MB, pipesDuring 0, net 53.68MB
+[13:18:13] done -> /tmp/perfcmp/ts-test.json
+[13:18:51] launch ["--enable-unsafe-webgpu","--use-angle=metal","--enable-precise-memory-info"]
+[13:18:53] baseline null
+[13:19:21] ours-street-eye run1: ready 21.5s, fps 27.3, raf p50 33.3 p95 50.1 max 66.7, >34ms 19, cpu 8.41 (p95 9.4), gpuBusy 37.14 (p95 46.26, n 79), draws 506, tris 3747242, gpuMem 1226.61MB (tex 1162.99, buf 63.62), heap 211.35MB, pipesDuring 0, net 53.68MB
+[13:19:23] done -> /tmp/perfcmp/ts-test.json
+[13:20:27] launch ["--enable-unsafe-webgpu","--use-angle=metal","--enable-precise-memory-info"]
+[13:20:30] baseline {"browser":[{"pid":73035,"footprintMB":61,"top":[{"cat":"app-specific tag 14","dirtyMB":37},{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"__DATA","dirtyMB":2.7},{"cat":"untagged (VM_ALLOCATE)","dirtyMB":2},{"cat":"__DATA_DIRTY","dirtyMB":1.8},{"cat":"MALLOC_SMALL","dirtyMB":1.5}]}],"renderer":[{"pid":73048,"footprintMB":25,"top":[{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"app-specific tag 14","dirtyMB":5.9},{"cat":"__DATA","dirtyMB":2},{"cat":"app-specific tag 16","dirtyMB":1.6},{"cat":"page table","dirtyMB":0.7},{"cat":"__DATA_DIRTY","dirtyMB":0.6}]},{"pid":73049,"footprintMB":28,"top":[{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"app-specific tag 14","dirtyMB":7.5},{"cat":"app-specific tag 16","dirtyMB":2.9},{"cat":"__DATA","dirtyMB":2.1},{"cat":"page table","dirtyMB":0.8},{"cat":"MALLOC_SMALL","dirtyMB":0.7}]},{"pid":73047,"footprintMB":62,"top":[{"cat":"app-specific tag 14","dirtyMB":26},{"cat":"app-specific tag 16","dirtyMB":17},{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"__DATA","dirtyMB":2.2},{"cat":"page table","dirtyMB":1},{"cat":"stack","dirtyMB":0.8}]}],"GPU":[{"pid":73043,"footprintMB":256,"top":[{"cat":"Owned physical footprint (unmapped) (graphics)","dirtyMB":112},{"cat":"IOSurface","dirtyMB":61},{"cat":"IOAccelerator (graphics)","dirtyMB":32},{"cat":"app-specific tag 14","dirtyMB":23},{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"Owned physical footprint (unmapped)","dirtyMB":5.8}]}]}
+[13:21:02] ours-flood run1: ready 20.6s, fps 18.2, raf p50 50 p95 83.3 max 83.4, >34ms 83, cpu 8.91 (p95 12.5), gpuBusy 55.52 (p95 70.85, n 88), draws 437, tris 9504338, gpuMem 1185.82MB (tex 1122.66, buf 63.16), heap 187.54MB, pipesDuring 1, net 53.68MB
+[13:21:34] ours-flood run2: ready 19.9s, fps 19, raf p50 50 p95 66.7 max 83.4, >34ms 83, cpu 9.54 (p95 13.2), gpuBusy 53.35 (p95 70.75, n 92), draws 437, tris 9504660, gpuMem 1185.82MB (tex 1122.66, buf 63.16), heap 191.96MB, pipesDuring 1, net 51.17MB
+[13:22:09] ours-street-eye run1: ready 21.8s, fps 25.4, raf p50 33.4 p95 50.1 max 66.7, >34ms 48, cpu 9.02 (p95 12.6), gpuBusy 40.2 (p95 53.78, n 124), draws 506, tris 3747242, gpuMem 1226.61MB (tex 1162.99, buf 63.62), heap 289.76MB, pipesDuring 0, net 52.43MB
+[13:22:43] ours-street-eye run2: ready 21.2s, fps 26.6, raf p50 33.4 p95 50.1 max 66.7, >34ms 38, cpu 8.3 (p95 9), gpuBusy 38.12 (p95 49.89, n 130), draws 506, tris 3747242, gpuMem 1226.61MB (tex 1162.99, buf 63.62), heap 207.86MB, pipesDuring 0, net 48.89MB
+[13:24:33] cc-street run1: ready 95.6s, fps 12.6, raf p50 83.3 p95 183.3 max 233.4, >34ms 54, cpu 80.36 (p95 160), gpuBusy 78.79 (p95 99.32, n 60), draws 2329, tris 25042412, gpuMem 1425.95MB (tex 1124.83, buf 301.12), heap 790.36MB, pipesDuring 0, net 286.94MB
+[13:26:25] cc-street run2: ready 95.1s, fps 12.4, raf p50 66.8 p95 150.1 max 216.6, >34ms 56, cpu 81.36 (p95 154.7), gpuBusy 79.66 (p95 101.93, n 59), draws 2329, tris 25042412, gpuMem 1425.95MB (tex 1124.83, buf 301.12), heap 798.17MB, pipesDuring 0, net 286.94MB
+[13:28:10] cc-overlook run1: ready 91.2s, fps 17.6, raf p50 50.1 p95 116.6 max 116.7, >34ms 70, cpu 40.72 (p95 97), gpuBusy 56.72 (p95 65.1, n 85), draws 1687, tris 21633620, gpuMem 1421.2MB (tex 1124.83, buf 296.37), heap 723.63MB, pipesDuring 0, net 286.94MB
+[13:28:42] f-novol run1: ready 19.1s, fps 20.6, raf p50 50 p95 66.7 max 83.4, >34ms 83, cpu 8.65 (p95 12.2), gpuBusy 49.51 (p95 64.45, n 100), draws 436, tris 9505180, gpuMem 1185.82MB (tex 1122.66, buf 63.15), heap 199.07MB, pipesDuring 1, net 53.68MB
+[13:29:13] f-nodof run1: ready 18.2s, fps 21.6, raf p50 50 p95 83.4 max 150, >34ms 61, cpu 8.24 (p95 13.4), gpuBusy 46.65 (p95 67.44, n 105), draws 427, tris 9505364, gpuMem 1093.87MB (tex 1030.7, buf 63.17), heap 201.73MB, pipesDuring 1, net 50.97MB
+[13:29:46] f-nossr run1: ready 19.3s, fps 21.4, raf p50 50 p95 83.4 max 100.1, >34ms 72, cpu 8.05 (p95 11.8), gpuBusy 47.17 (p95 53.83, n 104), draws 431, tris 9504754, gpuMem 1176.59MB (tex 1113.44, buf 63.16), heap 187.3MB, pipesDuring 1, net 48.61MB
+[13:30:18] f-noao run1: ready 20s, fps 24, raf p50 33.4 p95 66.6 max 83.3, >34ms 53, cpu 7.9 (p95 9.2), gpuBusy 42.1 (p95 61.53, n 117), draws 436, tris 9523981, gpuMem 1185.32MB (tex 1122.17, buf 63.16), heap 216.84MB, pipesDuring 1, net 49.87MB
+[13:30:49] f-noscatter run1: ready 18s, fps 25.4, raf p50 33.4 p95 66.7 max 83.4, >34ms 47, cpu 7.32 (p95 8.9), gpuBusy 39.77 (p95 47.33, n 124), draws 431, tris 9523986, gpuMem 1134.4MB (tex 1071.24, buf 63.16), heap 215.26MB, pipesDuring 1, net 50.73MB
+[13:31:19] f-notraa run1: ready 17.5s, fps 24.8, raf p50 33.4 p95 50.1 max 66.7, >34ms 49, cpu 8.03 (p95 10.7), gpuBusy 39.78 (p95 49.27, n 121), draws 436, tris 9523980, gpuMem 1122.54MB (tex 1059.38, buf 63.16), heap 194.57MB, pipesDuring 1, net 53.43MB
+[13:31:43] f-qlow run1: ready 11.6s, fps 30.4, raf p50 33.3 p95 66.7 max 83.4, >34ms 26, cpu 6.59 (p95 7.8), gpuBusy 32.82 (p95 39.62, n 149), draws 420, tris 9439560, gpuMem 1041.83MB (tex 991.25, buf 50.58), heap 196.77MB, pipesDuring 1, net 49.67MB
+[13:32:12] f-nomodules run1: ready 16s, fps 28, raf p50 33.3 p95 50 max 66.7, >34ms 23, cpu 6.96 (p95 7.8), gpuBusy 35.87 (p95 44.73, n 137), draws 400, tris 1421147, gpuMem 929.51MB (tex 882.66, buf 46.85), heap 187.95MB, pipesDuring 1, net 18.38MB
+[13:32:41] f-noeyeshadow run1: ready 17.1s, fps 25.8, raf p50 33.4 p95 50.1 max 66.7, >34ms 45, cpu 7.55 (p95 9.4), gpuBusy 39.07 (p95 46.11, n 126), draws 390, tris 6605353, gpuMem 1166.6MB (tex 1103.99, buf 62.6), heap 211.31MB, pipesDuring 1, net 31.74MB
+[14:24:38] f-norain run1 ERROR page.screenshot: Timeout 30000ms exceeded.
+[15:34:11] f-noghosts run1 ERROR page.waitForFunction: Timeout 300000ms exceeded.
+[16:23:17] f-flatmat run1 ERROR page.screenshot: Timeout 30000ms exceeded.
+[16:35:17] f-combo run1 ERROR page.waitForFunction: Timeout 300000ms exceeded.
+[17:06:53] f-720p run1: ready 35s, fps 40.6, raf p50 16.7 p95 33.4 max 300, >34ms 7, cpu 13.91 (p95 32.9), gpuBusy 20.67 (p95 24.15, n 200), draws 438, tris 9523994, gpuMem 1002.66MB (tex 946.07, buf 56.59), heap 193.68MB, pipesDuring 1, net 34MB
+[17:07:04] s-novol run1 ERROR page.waitForFunction: Target page, context or browser has been closed
+[17:07:06] done -> /tmp/perfcmp/D-ts.json
+[17:09:49] launch ["--enable-unsafe-webgpu","--use-angle=metal","--enable-precise-memory-info"]
+[17:09:52] baseline null
+[17:10:20] ours-street-eye run1: ready 21.4s, fps 30.3, raf p50 33.3 p95 50 max 50.1, >34ms 11, cpu 8.04 (p95 8.6), gpuBusy 33.65 (p95 39.14, n 88), draws 506, tris 3747242, gpuMem 1226.61MB (tex 1162.99, buf 63.62), heap 199.01MB, pipesDuring 0, net 53.68MB
+[17:10:22] done -> /tmp/perfcmp/sanity.json
+[17:11:43] realplay ours: run1 {"run":1,"loadS":13.685,"frames":574,"durS":29.7,"p50":33.4,"p95":66.7,"p99":133.3,"max":4983.1,"over34":222,"over50":70,"over100":6,"over250":2,"pipelinesDuring":114,"texAllocsDuring":45,"pixelRatioEnd":0.85,"gpuMB":1144.9,"heapMB":202.7}
+[17:13:05] realplay ours: run2 {"run":2,"loadS":13.237,"frames":697,"durS":34.4,"p50":33.3,"p95":50.1,"p99":99.9,"max":4799.8,"over34":157,"over50":44,"over100":4,"over250":3,"pipelinesDuring":208,"texAllocsDuring":47,"pixelRatioEnd":0.7,"gpuMB":1080.6,"heapMB":204.7}
+[17:15:39] realplay cc: run1 {"run":1,"loadS":94.845,"frames":359,"durS":33.3,"p50":66.7,"p95":183.4,"p99":383.3,"max":549.9,"over34":349,"over50":282,"over100":85,"over250":7,"pipelinesDuring":56,"texAllocsDuring":2,"pixelRatioEnd":1,"gpuMB":1425.7,"heapMB":1041}
+[17:17:47] realplay cc: run2 {"run":2,"loadS":88.474,"frames":383,"durS":32.8,"p50":66.7,"p95":166.6,"p99":333.3,"max":549.9,"over34":367,"over50":313,"over100":68,"over250":4,"pipelinesDuring":56,"texAllocsDuring":2,"pixelRatioEnd":1,"gpuMB":1426.1,"heapMB":1043.8}
+[17:18:19] cpuprof ours-street-eye frames 123, main-thread busy 9.64 ms/frame, idle 71.5%
+[17:18:19] cpuprof       6.75 ms    70% three.js
+[17:18:19] cpuprof       1.63 ms  16.9% (program)
+[17:18:19] cpuprof       1.08 ms  11.2% three.js (native)
+[17:18:19] cpuprof       0.03 ms   0.4% engine
+[17:18:19] cpuprof       0.03 ms   0.3% (garbage collector)
+[17:18:19] cpuprof       0.02 ms   0.2% systems/ghosts
+[17:18:19] cpuprof       0.02 ms   0.2% materials
+[17:18:19] cpuprof       0.01 ms   0.1% ui
+[17:18:19] cpuprof       0.01 ms   0.1% systems/neon
+[17:18:19] cpuprof       0.01 ms   0.1% systems/traffic
+[17:18:19] cpuprof       0.01 ms   0.1% systems/wind
+[17:18:19] cpuprof       0.01 ms   0.1% systems/cat
+[17:18:19] cpuprof          1.63 ms (program)  :0
+[17:18:19] cpuprof          1.46 ms _renderObjectDirect  deps/chunk-NCE3QSFX.js:32679
+[17:18:19] cpuprof          0.74 ms update  deps/chunk-NCE3QSFX.js:33072
+[17:18:19] cpuprof          0.69 ms _update  deps/chunk-NCE3QSFX.js:16217
+[17:18:19] cpuprof           0.3 ms update  deps/chunk-NCE3QSFX.js:7554
+[17:18:19] cpuprof          0.29 ms writeBuffer  :0
+[17:18:19] cpuprof          0.28 ms updateForRender  deps/chunk-NCE3QSFX.js:28894
+[17:18:19] cpuprof          0.22 ms updateMatrixWorld  deps/chunk-RPIXPYIO.js:7328
+[17:18:19] cpuprof           0.2 ms _needsRenderUpdate  deps/chunk-NCE3QSFX.js:16022
+[17:18:19] cpuprof          0.19 ms updateValue  deps/chunk-NCE3QSFX.js:7561
+[17:18:19] cpuprof          0.18 ms setVertexBuffer  :0
+[17:18:19] cpuprof          0.17 ms submit  :0
+[17:18:45] cpuprof ours-flood frames 89, main-thread busy 9.42 ms/frame, idle 79.8%
+[17:18:45] cpuprof       5.95 ms  63.2% three.js
+[17:18:45] cpuprof       2.02 ms  21.5% (program)
+[17:18:45] cpuprof       1.06 ms  11.2% three.js (native)
+[17:18:45] cpuprof       0.15 ms   1.6% (garbage collector)
+[17:18:45] cpuprof       0.08 ms   0.8% engine
+[17:18:45] cpuprof       0.06 ms   0.6% systems/ghosts
+[17:18:45] cpuprof       0.02 ms   0.2% systems/wind
+[17:18:45] cpuprof       0.02 ms   0.2% materials
+[17:18:45] cpuprof       0.01 ms   0.2% systems/street
+[17:18:45] cpuprof       0.01 ms   0.1% systems/traffic
+[17:18:45] cpuprof       0.01 ms   0.1% story
+[17:18:45] cpuprof       0.01 ms   0.1% ui
+[17:18:45] cpuprof          2.02 ms (program)  :0
+[17:18:45] cpuprof          0.99 ms _renderObjectDirect  deps/chunk-NCE3QSFX.js:32679
+[17:18:45] cpuprof          0.65 ms update  deps/chunk-NCE3QSFX.js:33072
+[17:18:45] cpuprof          0.59 ms _update  deps/chunk-NCE3QSFX.js:16217
+[17:18:45] cpuprof          0.38 ms writeBuffer  :0
+[17:18:45] cpuprof          0.33 ms updateMatrixWorld  deps/chunk-RPIXPYIO.js:7328
+[17:18:45] cpuprof          0.31 ms _projectObject  deps/chunk-NCE3QSFX.js:32328
+[17:18:45] cpuprof          0.23 ms submit  :0
+[17:18:45] cpuprof          0.19 ms updateForRender  deps/chunk-NCE3QSFX.js:28894
+[17:18:45] cpuprof          0.16 ms update  deps/chunk-NCE3QSFX.js:7554
+[17:18:45] cpuprof          0.15 ms (garbage collector)  :0
+[17:18:45] cpuprof          0.13 ms updateValue  deps/chunk-NCE3QSFX.js:7561
+[17:20:24] cpuprof cc-street frames 61, main-thread busy 74.49 ms/frame, idle 0.1%
+[17:20:24] cpuprof      32.53 ms  43.7% three.js (native)
+[17:20:24] cpuprof      31.25 ms    42% three.js
+[17:20:24] cpuprof       9.28 ms  12.5% (program)
+[17:20:24] cpuprof       0.55 ms   0.7% systems/crowd
+[17:20:24] cpuprof       0.42 ms   0.6% systems/vehicles
+[17:20:24] cpuprof       0.19 ms   0.3% (garbage collector)
+[17:20:24] cpuprof        0.1 ms   0.1% 007b5d42
+[17:20:24] cpuprof       0.05 ms   0.1% systems/ground
+[17:20:24] cpuprof       0.05 ms   0.1% systems/weather
+[17:20:24] cpuprof       0.03 ms     0% engine
+[17:20:24] cpuprof       0.02 ms     0% systems/signage
+[17:20:24] cpuprof       0.01 ms     0% systems/landmarks
+[17:20:24] cpuprof         29.37 ms writeBuffer  :0
+[17:20:24] cpuprof          9.28 ms (program)  :0
+[17:20:24] cpuprof          7.04 ms _renderObjectDirect  deps/chunk-WHWYD5VO.js:32679
+[17:20:24] cpuprof          2.98 ms updateLightsTexture  deps/three_addons_lighting_ClusteredLighting__js.js:87
+[17:20:24] cpuprof           2.4 ms _update  deps/chunk-WHWYD5VO.js:16217
+[17:20:24] cpuprof          2.07 ms update  deps/chunk-WHWYD5VO.js:33072
+[17:20:24] cpuprof          1.48 ms setVertexBuffer  :0
+[17:20:24] cpuprof          1.37 ms updateForRender  deps/chunk-WHWYD5VO.js:28894
+[17:20:24] cpuprof          1.16 ms multiplyMatrices  deps/chunk-RHDRAB2N.js:5608
+[17:20:24] cpuprof          1.03 ms _projectObject  deps/chunk-WHWYD5VO.js:32328
+[17:20:24] cpuprof          0.81 ms updateMatrixWorld  deps/chunk-RHDRAB2N.js:7328
+[17:20:24] cpuprof          0.75 ms _draw  deps/chunk-WHWYD5VO.js:47014
+[17:20:26] launch ["--enable-unsafe-webgpu","--use-angle=metal","--enable-precise-memory-info"]
+[17:20:28] baseline {"browser":[{"pid":77982,"footprintMB":61,"top":[{"cat":"app-specific tag 14","dirtyMB":36},{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"__DATA","dirtyMB":2.7},{"cat":"untagged (VM_ALLOCATE)","dirtyMB":2},{"cat":"__DATA_DIRTY","dirtyMB":1.8},{"cat":"MALLOC_SMALL","dirtyMB":1.4}]}],"renderer":[{"pid":77995,"footprintMB":25,"top":[{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"app-specific tag 14","dirtyMB":6.1},{"cat":"__DATA","dirtyMB":2},{"cat":"app-specific tag 16","dirtyMB":1.6},{"cat":"page table","dirtyMB":0.8},{"cat":"MALLOC_SMALL","dirtyMB":0.7}]},{"pid":77996,"footprintMB":28,"top":[{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"app-specific tag 14","dirtyMB":7.4},{"cat":"app-specific tag 16","dirtyMB":2.9},{"cat":"__DATA","dirtyMB":2.1},{"cat":"page table","dirtyMB":0.8},{"cat":"MALLOC_SMALL","dirtyMB":0.7}]},{"pid":77994,"footprintMB":61,"top":[{"cat":"app-specific tag 14","dirtyMB":25},{"cat":"app-specific tag 16","dirtyMB":17},{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"__DATA","dirtyMB":2.2},{"cat":"page table","dirtyMB":0.9},{"cat":"stack","dirtyMB":0.8}]}],"GPU":[{"pid":77990,"footprintMB":250,"top":[{"cat":"Owned physical footprint (unmapped) (graphics)","dirtyMB":112},{"cat":"IOSurface","dirtyMB":61},{"cat":"IOAccelerator (graphics)","dirtyMB":27},{"cat":"app-specific tag 14","dirtyMB":23},{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"Owned physical footprint (unmapped)","dirtyMB":5}]}]}
+[17:20:57] frozen-flood run1: ready 18s, fps 23.2, raf p50 49.9 p95 66.6 max 66.8, >34ms 63, cpu 8.32 (p95 9.6), gpuBusy 43.74 (p95 58.62, n 113), draws 437, tris 9523980, gpuMem 1185.82MB (tex 1122.66, buf 63.16), heap 204.54MB, pipesDuring 1, net 49.36MB
+[17:21:28] frozen-flood run2: ready 18.5s, fps 23.2, raf p50 49.9 p95 66.5 max 66.7, >34ms 63, cpu 8.68 (p95 11.2), gpuBusy 43.45 (p95 57.64, n 113), draws 437, tris 9523982, gpuMem 1185.82MB (tex 1122.66, buf 63.16), heap 208.92MB, pipesDuring 1, net 49.36MB
+[17:22:00] frozen-street-eye run1: ready 19.4s, fps 31.2, raf p50 33.3 p95 50 max 50.1, >34ms 15, cpu 7.91 (p95 8.8), gpuBusy 32.48 (p95 38.82, n 153), draws 506, tris 3747242, gpuMem 1226.61MB (tex 1162.99, buf 63.62), heap 204.41MB, pipesDuring 0, net 49.36MB
+[17:22:31] frozen-street-eye run2: ready 19.2s, fps 30.8, raf p50 33.3 p95 50 max 66.6, >34ms 18, cpu 8.11 (p95 9.7), gpuBusy 32.68 (p95 43.68, n 151), draws 506, tris 3747242, gpuMem 1226.61MB (tex 1162.99, buf 63.62), heap 196.62MB, pipesDuring 0, net 49.36MB
+[17:22:33] done -> /tmp/perfcmp/G-frozen.json
+[17:23:40] ctl-resize street-eye steady (no change) {"frames":256,"p50":33.3,"max":66.6,"over250":0,"openGapMs":29,"pipelines":0,"bindGroups":0,"pixelRatio":1,"gpuMB":1226.5}
+[17:23:55] ctl-resize street-eye setPixelRatio(0.85) {"frames":4,"p50":49.9,"max":10549.6,"over250":1,"openGapMs":4370,"pipelines":180,"bindGroups":1130,"pixelRatio":0.85,"gpuMB":1138.4}
+[17:24:01] ctl-resize street-eye steady after {"frames":0,"p50":0,"max":0,"over250":0,"openGapMs":6004,"pipelines":0,"bindGroups":0,"pixelRatio":0.85,"gpuMB":1138.4}
+[17:24:16] ctl-resize street-eye setPixelRatio(0.7) {"frames":0,"p50":0,"max":0,"over250":0,"openGapMs":15003,"pipelines":0,"bindGroups":0,"pixelRatio":0.7,"gpuMB":1138.4}
+[17:24:22] ctl-resize street-eye steady after 2 {"frames":0,"p50":0,"max":0,"over250":0,"openGapMs":6003,"pipelines":0,"bindGroups":0,"pixelRatio":0.7,"gpuMB":1138.4}
+[17:24:54] ctl-resize flood steady (no change) {"frames":189,"p50":49.9,"max":66.7,"over250":0,"openGapMs":21,"pipelines":1,"bindGroups":5,"pixelRatio":1,"gpuMB":1185.8}
+[17:25:09] ctl-resize flood setPixelRatio(0.85) {"frames":4,"p50":50,"max":8166.4,"over250":1,"openGapMs":6761,"pipelines":149,"bindGroups":751,"pixelRatio":0.85,"gpuMB":1097.6}
+[17:25:15] ctl-resize flood steady after {"frames":74,"p50":33.3,"max":66.7,"over250":0,"openGapMs":18,"pipelines":0,"bindGroups":0,"pixelRatio":0.85,"gpuMB":1097.6}
+[17:25:30] ctl-resize flood setPixelRatio(0.7) {"frames":4,"p50":33.4,"max":8216.3,"over250":1,"openGapMs":6724,"pipelines":149,"bindGroups":751,"pixelRatio":0.7,"gpuMB":1023.7}
+[17:25:36] ctl-resize flood steady after 2 {"frames":32,"p50":16.8,"max":50.1,"over250":0,"openGapMs":29,"pipelines":0,"bindGroups":0,"pixelRatio":0.7,"gpuMB":1023.7}
+[17:25:37] launch ["--enable-unsafe-webgpu","--use-angle=metal","--enable-precise-memory-info"]
+[17:25:39] baseline null
+[17:26:07] i-flood-base run1: ready 17.8s, fps 23.8, raf p50 49.9 p95 66.6 max 66.8, >34ms 59, cpu 8.32 (p95 10.5), gpuBusy 42.7 (p95 56.4, n 116), draws 437, tris 9523982, gpuMem 1185.82MB (tex 1122.66, buf 63.16), heap 212.52MB, pipesDuring 1, net 53.68MB
+[17:26:33] i-flood-plan run1: ready 14.6s, fps 29.2, raf p50 33.3 p95 66.7 max 83.4, >34ms 28, cpu 6.47 (p95 8.8), gpuBusy 34.33 (p95 42.67, n 143), draws 354, tris 1163901, gpuMem 818.36MB (tex 772.04, buf 46.32), heap 188.47MB, pipesDuring 1, net 17.72MB
+[17:27:37] i-flood-plan-1600 run1: ready 52.6s, fps 37.2, raf p50 16.7 p95 50.1 max 83.4, >34ms 27, cpu 5.52 (p95 6.9), gpuBusy 27.21 (p95 40.57, n 183), draws 354, tris 1163901, gpuMem 745.87MB (tex 703.01, buf 42.86), heap 167.71MB, pipesDuring 1, net 0.02MB
+[17:28:26] i-flood-qlow-plan run1: ready 37s, fps 34.2, raf p50 33.3 p95 66.6 max 83.2, >34ms 25, cpu 5.7 (p95 8.6), gpuBusy 29.24 (p95 39.03, n 168), draws 346, tris 1079477, gpuMem 772.31MB (tex 738.58, buf 33.73), heap 165MB, pipesDuring 1, net 0.02MB
+[17:28:57] i-street-base run1: ready 19.5s, fps 31.6, raf p50 33.3 p95 50 max 50.1, >34ms 16, cpu 7.92 (p95 8.8), gpuBusy 31.91 (p95 39.17, n 155), draws 506, tris 3747242, gpuMem 1226.61MB (tex 1162.99, buf 63.62), heap 212.55MB, pipesDuring 0, net 31.74MB
+[17:29:52] i-street-plan run1: ready 43.9s, fps 55.2, raf p50 16.7 p95 33.3 max 50.1, >34ms 5, cpu 5.21 (p95 5.7), gpuBusy 18.22 (p95 23.63, n 273), draws 365, tris 683208, gpuMem 870.37MB (tex 823.04, buf 47.33), heap 178.6MB, pipesDuring 0, net 17.43MB
+[17:30:22] i-flood-base2 run1: ready 18.4s, fps 23.4, raf p50 49.9 p95 66.6 max 66.8, >34ms 62, cpu 8.45 (p95 10.8), gpuBusy 43.19 (p95 58.01, n 114), draws 437, tris 9505374, gpuMem 1185.82MB (tex 1122.66, buf 63.16), heap 208.01MB, pipesDuring 1, net 33.89MB
+[17:30:25] done -> /tmp/perfcmp/I-plan.json
+[17:44:49] launch ["--enable-unsafe-webgpu","--use-angle=metal","--enable-precise-memory-info"]
+[17:44:51] baseline null
+[17:45:20] j-base-a run1: ready 18.9s, fps 22.6, raf p50 49.9 p95 66.7 max 66.7, >34ms 66, cpu 8.31 (p95 10.8), gpuBusy 44.56 (p95 57.13, n 110), draws 437, tris 9523980, gpuMem 1185.82MB (tex 1122.66, buf 63.16), heap 207.12MB, pipesDuring 1, net 53.68MB
+[17:45:40] j-flatmat run1: ready 8.1s, fps 48.2, raf p50 16.7 p95 33.4 max 33.4, >34ms 0, cpu 7.76 (p95 8.4), gpuBusy 21.06 (p95 26.15, n 238), draws 335, tris 9244153, gpuMem 625.94MB (tex 570.08, buf 55.86), heap 193.36MB, pipesDuring 0, net 51.09MB
+[17:46:04] j-720p run1: ready 13.2s, fps 42.2, raf p50 16.7 p95 33.4 max 50, >34ms 2, cpu 7.12 (p95 8), gpuBusy 23.89 (p95 31.6, n 208), draws 438, tris 9523994, gpuMem 1002.66MB (tex 946.07, buf 56.59), heap 248.94MB, pipesDuring 1, net 49.21MB
+[17:46:34] j-noeyeshadow run1: ready 17.6s, fps 23.8, raf p50 49.9 p95 66.6 max 66.7, >34ms 59, cpu 7.49 (p95 8.9), gpuBusy 42.53 (p95 57.41, n 116), draws 390, tris 6605353, gpuMem 1166.6MB (tex 1103.99, buf 62.6), heap 206.62MB, pipesDuring 1, net 50.16MB
+[17:47:04] j-noscatter run1: ready 18.6s, fps 22, raf p50 49.9 p95 83.4 max 116.7, >34ms 62, cpu 8.04 (p95 11.6), gpuBusy 45.85 (p95 61.65, n 107), draws 431, tris 9523976, gpuMem 1134.4MB (tex 1071.24, buf 63.16), heap 197.62MB, pipesDuring 1, net 48.83MB
+[17:47:35] j-notraa run1: ready 18.2s, fps 23.4, raf p50 49.9 p95 66.6 max 66.7, >34ms 62, cpu 8.54 (p95 11.9), gpuBusy 43.47 (p95 58.36, n 114), draws 436, tris 9523980, gpuMem 1122.54MB (tex 1059.38, buf 63.16), heap 206.22MB, pipesDuring 1, net 49.58MB
+[17:48:05] j-nodof run1: ready 17.9s, fps 24, raf p50 33.4 p95 83.4 max 116.7, >34ms 49, cpu 7.61 (p95 10.3), gpuBusy 41.91 (p95 56.65, n 117), draws 427, tris 9523972, gpuMem 1093.87MB (tex 1030.7, buf 63.17), heap 210.37MB, pipesDuring 1, net 49.96MB
+[17:48:35] j-norain run1: ready 18s, fps 21.2, raf p50 50 p95 66.7 max 66.8, >34ms 77, cpu 8.77 (p95 12.5), gpuBusy 48.42 (p95 58.66, n 103), draws 432, tris 9397832, gpuMem 1184.85MB (tex 1122.66, buf 62.19), heap 200.87MB, pipesDuring 1, net 49.23MB
+[17:49:04] j-nomodules run1: ready 16.9s, fps 26.2, raf p50 33.4 p95 50 max 66.6, >34ms 39, cpu 7.33 (p95 9), gpuBusy 38.37 (p95 45.1, n 128), draws 400, tris 1421147, gpuMem 929.51MB (tex 882.66, buf 46.85), heap 183.81MB, pipesDuring 1, net 37.86MB
+[17:49:27] j-qlow run1: ready 12s, fps 27.2, raf p50 33.3 p95 66.7 max 100, >34ms 36, cpu 7 (p95 10.4), gpuBusy 37.06 (p95 47.38, n 133), draws 419, tris 9439558, gpuMem 1041.83MB (tex 991.25, buf 50.58), heap 196.98MB, pipesDuring 1, net 53.68MB
+[17:49:58] j-base-b run1: ready 18.7s, fps 22.8, raf p50 50 p95 66.6 max 66.7, >34ms 67, cpu 8.59 (p95 11), gpuBusy 44.38 (p95 55.38, n 111), draws 437, tris 9523980, gpuMem 1185.82MB (tex 1122.66, buf 63.16), heap 211.55MB, pipesDuring 1, net 53.68MB
+[17:50:00] done -> /tmp/perfcmp/J-recheck.json
+[17:51:14] launch ["--enable-unsafe-webgpu","--use-angle=metal","--enable-precise-memory-info"]
+[17:51:17] baseline null
+[17:51:46] k-base-a run1: ready 18.4s, fps 24.2, raf p50 33.4 p95 50.1 max 66.7, >34ms 57, cpu 7.03 (p95 7.9), gpuBusy 41.86 (p95 56.74, n 118), draws 437, tris 9523982, gpuMem 1185.82MB (tex 1122.66, buf 63.16), heap 196.16MB, pipesDuring 1, net 53.68MB
+[17:52:15] k-novol run1: ready 17.4s, fps 25.6, raf p50 33.4 p95 50.1 max 66.7, >34ms 45, cpu 7.25 (p95 8.1), gpuBusy 39.63 (p95 49.76, n 125), draws 436, tris 9523970, gpuMem 1185.82MB (tex 1122.66, buf 63.15), heap 196.01MB, pipesDuring 1, net 50.13MB
+[17:52:45] k-nossr run1: ready 17.7s, fps 26, raf p50 33.3 p95 66.7 max 83.4, >34ms 40, cpu 6.64 (p95 7.9), gpuBusy 39.23 (p95 46.56, n 127), draws 431, tris 9523986, gpuMem 1176.59MB (tex 1113.44, buf 63.16), heap 216.21MB, pipesDuring 1, net 50.1MB
+[17:53:15] k-noao run1: ready 17.9s, fps 26.4, raf p50 33.4 p95 50 max 50.1, >34ms 39, cpu 7.47 (p95 8.6), gpuBusy 38.38 (p95 46.55, n 129), draws 436, tris 9523991, gpuMem 1185.32MB (tex 1122.17, buf 63.16), heap 201.83MB, pipesDuring 1, net 52.27MB
+[17:53:44] k-noghosts run1: ready 17.4s, fps 26.8, raf p50 33.4 p95 50.1 max 66.7, >34ms 37, cpu 7.1 (p95 8.1), gpuBusy 37.72 (p95 46.29, n 131), draws 433, tris 9348729, gpuMem 1143.42MB (tex 1081.29, buf 62.13), heap 189.33MB, pipesDuring 1, net 41.23MB
+[17:54:09] k-noclustered run1: ready 13.5s, fps 25.6, raf p50 33.4 p95 50.1 max 66.7, >34ms 42, cpu 6.57 (p95 7.5), gpuBusy 39.52 (p95 49.85, n 125), draws 437, tris 9523982, gpuMem 1173.87MB (tex 1122.65, buf 51.22), heap 190.82MB, pipesDuring 1, net 53.68MB
+[17:54:40] k-sbase-a run1: ready 19s, fps 34.2, raf p50 33.3 p95 33.4 max 50.1, >34ms 6, cpu 7.54 (p95 8.5), gpuBusy 29.41 (p95 37.51, n 168), draws 506, tris 3747242, gpuMem 1226.61MB (tex 1162.99, buf 63.62), heap 210.57MB, pipesDuring 0, net 53.68MB
+[17:55:08] k-snovol run1: ready 17.5s, fps 47, raf p50 16.7 p95 33.4 max 33.4, >34ms 0, cpu 6.36 (p95 7), gpuBusy 21.42 (p95 25.22, n 232), draws 390, tris 3463339, gpuMem 1226.61MB (tex 1162.99, buf 63.61), heap 262.28MB, pipesDuring 0, net 53.68MB
+[17:56:04] k-snodof run1: ready 43.8s, fps 35.8, raf p50 33.2 p95 50.1 max 66.8, >34ms 23, cpu 6.63 (p95 7.3), gpuBusy 28.19 (p95 35.28, n 176), draws 496, tris 3747232, gpuMem 1134.68MB (tex 1071.04, buf 63.64), heap 196.8MB, pipesDuring 0, net 53.68MB
+[17:56:33] k-snomodules run1: ready 17.5s, fps 36.8, raf p50 33.3 p95 33.4 max 50, >34ms 4, cpu 6.94 (p95 7.8), gpuBusy 27.38 (p95 33.81, n 181), draws 491, tris 967223, gpuMem 970.31MB (tex 922.99, buf 47.32), heap 201.22MB, pipesDuring 0, net 37.86MB
+[17:57:03] k-sbase-b run1: ready 18.8s, fps 33.4, raf p50 33.3 p95 33.4 max 50.1, >34ms 8, cpu 7.89 (p95 9.5), gpuBusy 30.05 (p95 38.12, n 164), draws 506, tris 3747242, gpuMem 1226.61MB (tex 1162.99, buf 63.62), heap 255.78MB, pipesDuring 0, net 53.68MB
+[17:57:34] k-base-b run1: ready 18.2s, fps 24, raf p50 33.4 p95 66.6 max 100, >34ms 54, cpu 7.24 (p95 8.4), gpuBusy 42.32 (p95 60.82, n 117), draws 437, tris 9523982, gpuMem 1185.82MB (tex 1122.66, buf 63.16), heap 192.46MB, pipesDuring 1, net 53.68MB
+[17:57:36] done -> /tmp/perfcmp/J2-recheck.json

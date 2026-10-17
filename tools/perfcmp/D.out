@@ -1,0 +1,36 @@
+[13:20:27] launch ["--enable-unsafe-webgpu","--use-angle=metal","--enable-precise-memory-info"]
+[13:20:30] baseline {"browser":[{"pid":73035,"footprintMB":61,"top":[{"cat":"app-specific tag 14","dirtyMB":37},{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"__DATA","dirtyMB":2.7},{"cat":"untagged (VM_ALLOCATE)","dirtyMB":2},{"cat":"__DATA_DIRTY","dirtyMB":1.8},{"cat":"MALLOC_SMALL","dirtyMB":1.5}]}],"renderer":[{"pid":73048,"footprintMB":25,"top":[{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"app-specific tag 14","dirtyMB":5.9},{"cat":"__DATA","dirtyMB":2},{"cat":"app-specific tag 16","dirtyMB":1.6},{"cat":"page table","dirtyMB":0.7},{"cat":"__DATA_DIRTY","dirtyMB":0.6}]},{"pid":73049,"footprintMB":28,"top":[{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"app-specific tag 14","dirtyMB":7.5},{"cat":"app-specific tag 16","dirtyMB":2.9},{"cat":"__DATA","dirtyMB":2.1},{"cat":"page table","dirtyMB":0.8},{"cat":"MALLOC_SMALL","dirtyMB":0.7}]},{"pid":73047,"footprintMB":62,"top":[{"cat":"app-specific tag 14","dirtyMB":26},{"cat":"app-specific tag 16","dirtyMB":17},{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"__DATA","dirtyMB":2.2},{"cat":"page table","dirtyMB":1},{"cat":"stack","dirtyMB":0.8}]}],"GPU":[{"pid":73043,"footprintMB":256,"top":[{"cat":"Owned physical footprint (unmapped) (graphics)","dirtyMB":112},{"cat":"IOSurface","dirtyMB":61},{"cat":"IOAccelerator (graphics)","dirtyMB":32},{"cat":"app-specific tag 14","dirtyMB":23},{"cat":"__DATA_CONST","dirtyMB":12},{"cat":"Owned physical footprint (unmapped)","dirtyMB":5.8}]}]}
+[13:21:02] ours-flood run1: ready 20.6s, fps 18.2, raf p50 50 p95 83.3 max 83.4, >34ms 83, cpu 8.91 (p95 12.5), gpuBusy 55.52 (p95 70.85, n 88), draws 437, tris 9504338, gpuMem 1185.82MB (tex 1122.66, buf 63.16), heap 187.54MB, pipesDuring 1, net 53.68MB
+[13:21:34] ours-flood run2: ready 19.9s, fps 19, raf p50 50 p95 66.7 max 83.4, >34ms 83, cpu 9.54 (p95 13.2), gpuBusy 53.35 (p95 70.75, n 92), draws 437, tris 9504660, gpuMem 1185.82MB (tex 1122.66, buf 63.16), heap 191.96MB, pipesDuring 1, net 51.17MB
+[13:22:09] ours-street-eye run1: ready 21.8s, fps 25.4, raf p50 33.4 p95 50.1 max 66.7, >34ms 48, cpu 9.02 (p95 12.6), gpuBusy 40.2 (p95 53.78, n 124), draws 506, tris 3747242, gpuMem 1226.61MB (tex 1162.99, buf 63.62), heap 289.76MB, pipesDuring 0, net 52.43MB
+[13:22:43] ours-street-eye run2: ready 21.2s, fps 26.6, raf p50 33.4 p95 50.1 max 66.7, >34ms 38, cpu 8.3 (p95 9), gpuBusy 38.12 (p95 49.89, n 130), draws 506, tris 3747242, gpuMem 1226.61MB (tex 1162.99, buf 63.62), heap 207.86MB, pipesDuring 0, net 48.89MB
+[13:24:33] cc-street run1: ready 95.6s, fps 12.6, raf p50 83.3 p95 183.3 max 233.4, >34ms 54, cpu 80.36 (p95 160), gpuBusy 78.79 (p95 99.32, n 60), draws 2329, tris 25042412, gpuMem 1425.95MB (tex 1124.83, buf 301.12), heap 790.36MB, pipesDuring 0, net 286.94MB
+[13:26:25] cc-street run2: ready 95.1s, fps 12.4, raf p50 66.8 p95 150.1 max 216.6, >34ms 56, cpu 81.36 (p95 154.7), gpuBusy 79.66 (p95 101.93, n 59), draws 2329, tris 25042412, gpuMem 1425.95MB (tex 1124.83, buf 301.12), heap 798.17MB, pipesDuring 0, net 286.94MB
+[13:28:10] cc-overlook run1: ready 91.2s, fps 17.6, raf p50 50.1 p95 116.6 max 116.7, >34ms 70, cpu 40.72 (p95 97), gpuBusy 56.72 (p95 65.1, n 85), draws 1687, tris 21633620, gpuMem 1421.2MB (tex 1124.83, buf 296.37), heap 723.63MB, pipesDuring 0, net 286.94MB
+[13:28:42] f-novol run1: ready 19.1s, fps 20.6, raf p50 50 p95 66.7 max 83.4, >34ms 83, cpu 8.65 (p95 12.2), gpuBusy 49.51 (p95 64.45, n 100), draws 436, tris 9505180, gpuMem 1185.82MB (tex 1122.66, buf 63.15), heap 199.07MB, pipesDuring 1, net 53.68MB
+[13:29:13] f-nodof run1: ready 18.2s, fps 21.6, raf p50 50 p95 83.4 max 150, >34ms 61, cpu 8.24 (p95 13.4), gpuBusy 46.65 (p95 67.44, n 105), draws 427, tris 9505364, gpuMem 1093.87MB (tex 1030.7, buf 63.17), heap 201.73MB, pipesDuring 1, net 50.97MB
+[13:29:46] f-nossr run1: ready 19.3s, fps 21.4, raf p50 50 p95 83.4 max 100.1, >34ms 72, cpu 8.05 (p95 11.8), gpuBusy 47.17 (p95 53.83, n 104), draws 431, tris 9504754, gpuMem 1176.59MB (tex 1113.44, buf 63.16), heap 187.3MB, pipesDuring 1, net 48.61MB
+[13:30:18] f-noao run1: ready 20s, fps 24, raf p50 33.4 p95 66.6 max 83.3, >34ms 53, cpu 7.9 (p95 9.2), gpuBusy 42.1 (p95 61.53, n 117), draws 436, tris 9523981, gpuMem 1185.32MB (tex 1122.17, buf 63.16), heap 216.84MB, pipesDuring 1, net 49.87MB
+[13:30:49] f-noscatter run1: ready 18s, fps 25.4, raf p50 33.4 p95 66.7 max 83.4, >34ms 47, cpu 7.32 (p95 8.9), gpuBusy 39.77 (p95 47.33, n 124), draws 431, tris 9523986, gpuMem 1134.4MB (tex 1071.24, buf 63.16), heap 215.26MB, pipesDuring 1, net 50.73MB
+[13:31:19] f-notraa run1: ready 17.5s, fps 24.8, raf p50 33.4 p95 50.1 max 66.7, >34ms 49, cpu 8.03 (p95 10.7), gpuBusy 39.78 (p95 49.27, n 121), draws 436, tris 9523980, gpuMem 1122.54MB (tex 1059.38, buf 63.16), heap 194.57MB, pipesDuring 1, net 53.43MB
+[13:31:43] f-qlow run1: ready 11.6s, fps 30.4, raf p50 33.3 p95 66.7 max 83.4, >34ms 26, cpu 6.59 (p95 7.8), gpuBusy 32.82 (p95 39.62, n 149), draws 420, tris 9439560, gpuMem 1041.83MB (tex 991.25, buf 50.58), heap 196.77MB, pipesDuring 1, net 49.67MB
+[13:32:12] f-nomodules run1: ready 16s, fps 28, raf p50 33.3 p95 50 max 66.7, >34ms 23, cpu 6.96 (p95 7.8), gpuBusy 35.87 (p95 44.73, n 137), draws 400, tris 1421147, gpuMem 929.51MB (tex 882.66, buf 46.85), heap 187.95MB, pipesDuring 1, net 18.38MB
+[13:32:41] f-noeyeshadow run1: ready 17.1s, fps 25.8, raf p50 33.4 p95 50.1 max 66.7, >34ms 45, cpu 7.55 (p95 9.4), gpuBusy 39.07 (p95 46.11, n 126), draws 390, tris 6605353, gpuMem 1166.6MB (tex 1103.99, buf 62.6), heap 211.31MB, pipesDuring 1, net 31.74MB
+[14:24:38] f-norain run1 ERROR page.screenshot: Timeout 30000ms exceeded.
+[15:34:11] f-noghosts run1 ERROR page.waitForFunction: Timeout 300000ms exceeded.
+[16:23:17] f-flatmat run1 ERROR page.screenshot: Timeout 30000ms exceeded.
+[16:35:17] f-combo run1 ERROR page.waitForFunction: Timeout 300000ms exceeded.
+[17:06:53] f-720p run1: ready 35s, fps 40.6, raf p50 16.7 p95 33.4 max 300, >34ms 7, cpu 13.91 (p95 32.9), gpuBusy 20.67 (p95 24.15, n 200), draws 438, tris 9523994, gpuMem 1002.66MB (tex 946.07, buf 56.59), heap 193.68MB, pipesDuring 1, net 34MB
+[17:07:04] s-novol run1 ERROR page.waitForFunction: Target page, context or browser has been closed
+[17:07:06] done -> /tmp/perfcmp/D-ts.json
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+browserContext.newPage: Target page, context or browser has been closed
+    at /private/tmp/perfcmp/measure.mjs:72:30 {
+  log: []
+}
+
+Node.js v24.13.1
+EXIT 1

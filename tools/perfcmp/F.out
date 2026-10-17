@@ -1,0 +1,75 @@
+[17:18:19] cpuprof ours-street-eye frames 123, main-thread busy 9.64 ms/frame, idle 71.5%
+[17:18:19] cpuprof       6.75 ms    70% three.js
+[17:18:19] cpuprof       1.63 ms  16.9% (program)
+[17:18:19] cpuprof       1.08 ms  11.2% three.js (native)
+[17:18:19] cpuprof       0.03 ms   0.4% engine
+[17:18:19] cpuprof       0.03 ms   0.3% (garbage collector)
+[17:18:19] cpuprof       0.02 ms   0.2% systems/ghosts
+[17:18:19] cpuprof       0.02 ms   0.2% materials
+[17:18:19] cpuprof       0.01 ms   0.1% ui
+[17:18:19] cpuprof       0.01 ms   0.1% systems/neon
+[17:18:19] cpuprof       0.01 ms   0.1% systems/traffic
+[17:18:19] cpuprof       0.01 ms   0.1% systems/wind
+[17:18:19] cpuprof       0.01 ms   0.1% systems/cat
+[17:18:19] cpuprof          1.63 ms (program)  :0
+[17:18:19] cpuprof          1.46 ms _renderObjectDirect  deps/chunk-NCE3QSFX.js:32679
+[17:18:19] cpuprof          0.74 ms update  deps/chunk-NCE3QSFX.js:33072
+[17:18:19] cpuprof          0.69 ms _update  deps/chunk-NCE3QSFX.js:16217
+[17:18:19] cpuprof           0.3 ms update  deps/chunk-NCE3QSFX.js:7554
+[17:18:19] cpuprof          0.29 ms writeBuffer  :0
+[17:18:19] cpuprof          0.28 ms updateForRender  deps/chunk-NCE3QSFX.js:28894
+[17:18:19] cpuprof          0.22 ms updateMatrixWorld  deps/chunk-RPIXPYIO.js:7328
+[17:18:19] cpuprof           0.2 ms _needsRenderUpdate  deps/chunk-NCE3QSFX.js:16022
+[17:18:19] cpuprof          0.19 ms updateValue  deps/chunk-NCE3QSFX.js:7561
+[17:18:19] cpuprof          0.18 ms setVertexBuffer  :0
+[17:18:19] cpuprof          0.17 ms submit  :0
+[17:18:45] cpuprof ours-flood frames 89, main-thread busy 9.42 ms/frame, idle 79.8%
+[17:18:45] cpuprof       5.95 ms  63.2% three.js
+[17:18:45] cpuprof       2.02 ms  21.5% (program)
+[17:18:45] cpuprof       1.06 ms  11.2% three.js (native)
+[17:18:45] cpuprof       0.15 ms   1.6% (garbage collector)
+[17:18:45] cpuprof       0.08 ms   0.8% engine
+[17:18:45] cpuprof       0.06 ms   0.6% systems/ghosts
+[17:18:45] cpuprof       0.02 ms   0.2% systems/wind
+[17:18:45] cpuprof       0.02 ms   0.2% materials
+[17:18:45] cpuprof       0.01 ms   0.2% systems/street
+[17:18:45] cpuprof       0.01 ms   0.1% systems/traffic
+[17:18:45] cpuprof       0.01 ms   0.1% story
+[17:18:45] cpuprof       0.01 ms   0.1% ui
+[17:18:45] cpuprof          2.02 ms (program)  :0
+[17:18:45] cpuprof          0.99 ms _renderObjectDirect  deps/chunk-NCE3QSFX.js:32679
+[17:18:45] cpuprof          0.65 ms update  deps/chunk-NCE3QSFX.js:33072
+[17:18:45] cpuprof          0.59 ms _update  deps/chunk-NCE3QSFX.js:16217
+[17:18:45] cpuprof          0.38 ms writeBuffer  :0
+[17:18:45] cpuprof          0.33 ms updateMatrixWorld  deps/chunk-RPIXPYIO.js:7328
+[17:18:45] cpuprof          0.31 ms _projectObject  deps/chunk-NCE3QSFX.js:32328
+[17:18:45] cpuprof          0.23 ms submit  :0
+[17:18:45] cpuprof          0.19 ms updateForRender  deps/chunk-NCE3QSFX.js:28894
+[17:18:45] cpuprof          0.16 ms update  deps/chunk-NCE3QSFX.js:7554
+[17:18:45] cpuprof          0.15 ms (garbage collector)  :0
+[17:18:45] cpuprof          0.13 ms updateValue  deps/chunk-NCE3QSFX.js:7561
+[17:20:24] cpuprof cc-street frames 61, main-thread busy 74.49 ms/frame, idle 0.1%
+[17:20:24] cpuprof      32.53 ms  43.7% three.js (native)
+[17:20:24] cpuprof      31.25 ms    42% three.js
+[17:20:24] cpuprof       9.28 ms  12.5% (program)
+[17:20:24] cpuprof       0.55 ms   0.7% systems/crowd
+[17:20:24] cpuprof       0.42 ms   0.6% systems/vehicles
+[17:20:24] cpuprof       0.19 ms   0.3% (garbage collector)
+[17:20:24] cpuprof        0.1 ms   0.1% 007b5d42
+[17:20:24] cpuprof       0.05 ms   0.1% systems/ground
+[17:20:24] cpuprof       0.05 ms   0.1% systems/weather
+[17:20:24] cpuprof       0.03 ms     0% engine
+[17:20:24] cpuprof       0.02 ms     0% systems/signage
+[17:20:24] cpuprof       0.01 ms     0% systems/landmarks
+[17:20:24] cpuprof         29.37 ms writeBuffer  :0
+[17:20:24] cpuprof          9.28 ms (program)  :0
+[17:20:24] cpuprof          7.04 ms _renderObjectDirect  deps/chunk-WHWYD5VO.js:32679
+[17:20:24] cpuprof          2.98 ms updateLightsTexture  deps/three_addons_lighting_ClusteredLighting__js.js:87
+[17:20:24] cpuprof           2.4 ms _update  deps/chunk-WHWYD5VO.js:16217
+[17:20:24] cpuprof          2.07 ms update  deps/chunk-WHWYD5VO.js:33072
+[17:20:24] cpuprof          1.48 ms setVertexBuffer  :0
+[17:20:24] cpuprof          1.37 ms updateForRender  deps/chunk-WHWYD5VO.js:28894
+[17:20:24] cpuprof          1.16 ms multiplyMatrices  deps/chunk-RHDRAB2N.js:5608
+[17:20:24] cpuprof          1.03 ms _projectObject  deps/chunk-WHWYD5VO.js:32328
+[17:20:24] cpuprof          0.81 ms updateMatrixWorld  deps/chunk-RHDRAB2N.js:7328
+[17:20:24] cpuprof          0.75 ms _draw  deps/chunk-WHWYD5VO.js:47014

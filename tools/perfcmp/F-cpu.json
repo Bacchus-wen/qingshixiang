@@ -1,0 +1,650 @@
+[
+ {
+  "name": "ours-street-eye",
+  "frames": 123,
+  "seconds": 4.16,
+  "busyMsPerFrame": 9.64,
+  "idlePct": 71.5,
+  "top": [
+   {
+    "fn": "(program)  :0",
+    "msPerFrame": 1.63,
+    "pct": 16.9
+   },
+   {
+    "fn": "_renderObjectDirect  deps/chunk-NCE3QSFX.js:32679",
+    "msPerFrame": 1.46,
+    "pct": 15.1
+   },
+   {
+    "fn": "update  deps/chunk-NCE3QSFX.js:33072",
+    "msPerFrame": 0.74,
+    "pct": 7.7
+   },
+   {
+    "fn": "_update  deps/chunk-NCE3QSFX.js:16217",
+    "msPerFrame": 0.69,
+    "pct": 7.1
+   },
+   {
+    "fn": "update  deps/chunk-NCE3QSFX.js:7554",
+    "msPerFrame": 0.3,
+    "pct": 3.1
+   },
+   {
+    "fn": "writeBuffer  :0",
+    "msPerFrame": 0.29,
+    "pct": 3
+   },
+   {
+    "fn": "updateForRender  deps/chunk-NCE3QSFX.js:28894",
+    "msPerFrame": 0.28,
+    "pct": 2.9
+   },
+   {
+    "fn": "updateMatrixWorld  deps/chunk-RPIXPYIO.js:7328",
+    "msPerFrame": 0.22,
+    "pct": 2.2
+   },
+   {
+    "fn": "_needsRenderUpdate  deps/chunk-NCE3QSFX.js:16022",
+    "msPerFrame": 0.2,
+    "pct": 2
+   },
+   {
+    "fn": "updateValue  deps/chunk-NCE3QSFX.js:7561",
+    "msPerFrame": 0.19,
+    "pct": 2
+   },
+   {
+    "fn": "setVertexBuffer  :0",
+    "msPerFrame": 0.18,
+    "pct": 1.9
+   },
+   {
+    "fn": "submit  :0",
+    "msPerFrame": 0.17,
+    "pct": 1.7
+   },
+   {
+    "fn": "_projectObject  deps/chunk-NCE3QSFX.js:32328",
+    "msPerFrame": 0.16,
+    "pct": 1.7
+   },
+   {
+    "fn": "_draw  deps/chunk-NCE3QSFX.js:47014",
+    "msPerFrame": 0.14,
+    "pct": 1.4
+   },
+   {
+    "fn": "get  deps/chunk-NCE3QSFX.js:14972",
+    "msPerFrame": 0.14,
+    "pct": 1.4
+   },
+   {
+    "fn": "updateAttributes  deps/chunk-NCE3QSFX.js:15287",
+    "msPerFrame": 0.11,
+    "pct": 1.2
+   },
+   {
+    "fn": "setBindGroup  :0",
+    "msPerFrame": 0.11,
+    "pct": 1.1
+   },
+   {
+    "fn": "getCacheKey  deps/chunk-NCE3QSFX.js:1323",
+    "msPerFrame": 0.1,
+    "pct": 1
+   },
+   {
+    "fn": "get value  deps/chunk-NCE3QSFX.js:5924",
+    "msPerFrame": 0.1,
+    "pct": 1
+   },
+   {
+    "fn": "draw  deps/chunk-NCE3QSFX.js:47115",
+    "msPerFrame": 0.09,
+    "pct": 1
+   },
+   {
+    "fn": "updateBefore  deps/chunk-NCE3QSFX.js:28833",
+    "msPerFrame": 0.09,
+    "pct": 0.9
+   },
+   {
+    "fn": "renderObject  deps/chunk-NCE3QSFX.js:32588",
+    "msPerFrame": 0.08,
+    "pct": 0.8
+   },
+   {
+    "fn": "updateVector3  deps/chunk-NCE3QSFX.js:33152",
+    "msPerFrame": 0.07,
+    "pct": 0.8
+   },
+   {
+    "fn": "sort  deps/chunk-NCE3QSFX.js:16471",
+    "msPerFrame": 0.07,
+    "pct": 0.7
+   },
+   {
+    "fn": "multiplyMatrices  deps/chunk-RPIXPYIO.js:5608",
+    "msPerFrame": 0.07,
+    "pct": 0.7
+   }
+  ],
+  "systems": [
+   {
+    "sys": "three.js",
+    "msPerFrame": 6.75,
+    "pct": 70
+   },
+   {
+    "sys": "(program)",
+    "msPerFrame": 1.63,
+    "pct": 16.9
+   },
+   {
+    "sys": "three.js (native)",
+    "msPerFrame": 1.08,
+    "pct": 11.2
+   },
+   {
+    "sys": "engine",
+    "msPerFrame": 0.03,
+    "pct": 0.4
+   },
+   {
+    "sys": "(garbage collector)",
+    "msPerFrame": 0.03,
+    "pct": 0.3
+   },
+   {
+    "sys": "systems/ghosts",
+    "msPerFrame": 0.02,
+    "pct": 0.2
+   },
+   {
+    "sys": "materials",
+    "msPerFrame": 0.02,
+    "pct": 0.2
+   },
+   {
+    "sys": "ui",
+    "msPerFrame": 0.01,
+    "pct": 0.1
+   },
+   {
+    "sys": "systems/neon",
+    "msPerFrame": 0.01,
+    "pct": 0.1
+   },
+   {
+    "sys": "systems/traffic",
+    "msPerFrame": 0.01,
+    "pct": 0.1
+   },
+   {
+    "sys": "systems/wind",
+    "msPerFrame": 0.01,
+    "pct": 0.1
+   },
+   {
+    "sys": "systems/cat",
+    "msPerFrame": 0.01,
+    "pct": 0.1
+   },
+   {
+    "sys": "systems/street",
+    "msPerFrame": 0.01,
+    "pct": 0.1
+   },
+   {
+    "sys": "systems/street (native)",
+    "msPerFrame": 0.01,
+    "pct": 0.1
+   },
+   {
+    "sys": "systems/rain",
+    "msPerFrame": 0.01,
+    "pct": 0.1
+   },
+   {
+    "sys": "engine (native)",
+    "msPerFrame": 0,
+    "pct": 0.1
+   },
+   {
+    "sys": "story",
+    "msPerFrame": 0,
+    "pct": 0
+   },
+   {
+    "sys": "systems/robot (native)",
+    "msPerFrame": 0,
+    "pct": 0
+   }
+  ]
+ },
+ {
+  "name": "ours-flood",
+  "frames": 89,
+  "seconds": 4.15,
+  "busyMsPerFrame": 9.42,
+  "idlePct": 79.8,
+  "top": [
+   {
+    "fn": "(program)  :0",
+    "msPerFrame": 2.02,
+    "pct": 21.5
+   },
+   {
+    "fn": "_renderObjectDirect  deps/chunk-NCE3QSFX.js:32679",
+    "msPerFrame": 0.99,
+    "pct": 10.5
+   },
+   {
+    "fn": "update  deps/chunk-NCE3QSFX.js:33072",
+    "msPerFrame": 0.65,
+    "pct": 6.9
+   },
+   {
+    "fn": "_update  deps/chunk-NCE3QSFX.js:16217",
+    "msPerFrame": 0.59,
+    "pct": 6.3
+   },
+   {
+    "fn": "writeBuffer  :0",
+    "msPerFrame": 0.38,
+    "pct": 4.1
+   },
+   {
+    "fn": "updateMatrixWorld  deps/chunk-RPIXPYIO.js:7328",
+    "msPerFrame": 0.33,
+    "pct": 3.5
+   },
+   {
+    "fn": "_projectObject  deps/chunk-NCE3QSFX.js:32328",
+    "msPerFrame": 0.31,
+    "pct": 3.3
+   },
+   {
+    "fn": "submit  :0",
+    "msPerFrame": 0.23,
+    "pct": 2.4
+   },
+   {
+    "fn": "updateForRender  deps/chunk-NCE3QSFX.js:28894",
+    "msPerFrame": 0.19,
+    "pct": 2
+   },
+   {
+    "fn": "update  deps/chunk-NCE3QSFX.js:7554",
+    "msPerFrame": 0.16,
+    "pct": 1.7
+   },
+   {
+    "fn": "(garbage collector)  :0",
+    "msPerFrame": 0.15,
+    "pct": 1.6
+   },
+   {
+    "fn": "updateValue  deps/chunk-NCE3QSFX.js:7561",
+    "msPerFrame": 0.13,
+    "pct": 1.4
+   },
+   {
+    "fn": "_draw  deps/chunk-NCE3QSFX.js:47014",
+    "msPerFrame": 0.13,
+    "pct": 1.4
+   },
+   {
+    "fn": "updateVector3  deps/chunk-NCE3QSFX.js:33152",
+    "msPerFrame": 0.13,
+    "pct": 1.3
+   },
+   {
+    "fn": "setVertexBuffer  :0",
+    "msPerFrame": 0.13,
+    "pct": 1.3
+   },
+   {
+    "fn": "updateAttributes  deps/chunk-NCE3QSFX.js:15287",
+    "msPerFrame": 0.11,
+    "pct": 1.2
+   },
+   {
+    "fn": "getCacheKey  deps/chunk-NCE3QSFX.js:1323",
+    "msPerFrame": 0.11,
+    "pct": 1.1
+   },
+   {
+    "fn": "get  deps/chunk-NCE3QSFX.js:14972",
+    "msPerFrame": 0.09,
+    "pct": 1
+   },
+   {
+    "fn": "_needsRenderUpdate  deps/chunk-NCE3QSFX.js:16022",
+    "msPerFrame": 0.09,
+    "pct": 1
+   },
+   {
+    "fn": "sort  deps/chunk-NCE3QSFX.js:16471",
+    "msPerFrame": 0.09,
+    "pct": 0.9
+   },
+   {
+    "fn": "draw  deps/chunk-NCE3QSFX.js:47115",
+    "msPerFrame": 0.08,
+    "pct": 0.9
+   },
+   {
+    "fn": "multiplyMatrices  deps/chunk-RPIXPYIO.js:5608",
+    "msPerFrame": 0.08,
+    "pct": 0.9
+   },
+   {
+    "fn": "get values  deps/chunk-NCE3QSFX.js:33018",
+    "msPerFrame": 0.08,
+    "pct": 0.9
+   },
+   {
+    "fn": "updateColor  deps/chunk-NCE3QSFX.js:33197",
+    "msPerFrame": 0.07,
+    "pct": 0.7
+   },
+   {
+    "fn": "_getChildren  deps/chunk-NCE3QSFX.js:1289",
+    "msPerFrame": 0.07,
+    "pct": 0.7
+   }
+  ],
+  "systems": [
+   {
+    "sys": "three.js",
+    "msPerFrame": 5.95,
+    "pct": 63.2
+   },
+   {
+    "sys": "(program)",
+    "msPerFrame": 2.02,
+    "pct": 21.5
+   },
+   {
+    "sys": "three.js (native)",
+    "msPerFrame": 1.06,
+    "pct": 11.2
+   },
+   {
+    "sys": "(garbage collector)",
+    "msPerFrame": 0.15,
+    "pct": 1.6
+   },
+   {
+    "sys": "engine",
+    "msPerFrame": 0.08,
+    "pct": 0.8
+   },
+   {
+    "sys": "systems/ghosts",
+    "msPerFrame": 0.06,
+    "pct": 0.6
+   },
+   {
+    "sys": "systems/wind",
+    "msPerFrame": 0.02,
+    "pct": 0.2
+   },
+   {
+    "sys": "materials",
+    "msPerFrame": 0.02,
+    "pct": 0.2
+   },
+   {
+    "sys": "systems/street",
+    "msPerFrame": 0.01,
+    "pct": 0.2
+   },
+   {
+    "sys": "systems/traffic",
+    "msPerFrame": 0.01,
+    "pct": 0.1
+   },
+   {
+    "sys": "story",
+    "msPerFrame": 0.01,
+    "pct": 0.1
+   },
+   {
+    "sys": "ui",
+    "msPerFrame": 0.01,
+    "pct": 0.1
+   },
+   {
+    "sys": "systems/rain",
+    "msPerFrame": 0.01,
+    "pct": 0.1
+   },
+   {
+    "sys": "systems/neon",
+    "msPerFrame": 0.01,
+    "pct": 0.1
+   },
+   {
+    "sys": "systems/robot",
+    "msPerFrame": 0,
+    "pct": 0
+   },
+   {
+    "sys": "engine (native)",
+    "msPerFrame": 0,
+    "pct": 0
+   }
+  ]
+ },
+ {
+  "name": "cc-street",
+  "frames": 61,
+  "seconds": 4.55,
+  "busyMsPerFrame": 74.49,
+  "idlePct": 0.1,
+  "top": [
+   {
+    "fn": "writeBuffer  :0",
+    "msPerFrame": 29.37,
+    "pct": 39.4
+   },
+   {
+    "fn": "(program)  :0",
+    "msPerFrame": 9.28,
+    "pct": 12.5
+   },
+   {
+    "fn": "_renderObjectDirect  deps/chunk-WHWYD5VO.js:32679",
+    "msPerFrame": 7.04,
+    "pct": 9.5
+   },
+   {
+    "fn": "updateLightsTexture  deps/three_addons_lighting_ClusteredLighting__js.js:87",
+    "msPerFrame": 2.98,
+    "pct": 4
+   },
+   {
+    "fn": "_update  deps/chunk-WHWYD5VO.js:16217",
+    "msPerFrame": 2.4,
+    "pct": 3.2
+   },
+   {
+    "fn": "update  deps/chunk-WHWYD5VO.js:33072",
+    "msPerFrame": 2.07,
+    "pct": 2.8
+   },
+   {
+    "fn": "setVertexBuffer  :0",
+    "msPerFrame": 1.48,
+    "pct": 2
+   },
+   {
+    "fn": "updateForRender  deps/chunk-WHWYD5VO.js:28894",
+    "msPerFrame": 1.37,
+    "pct": 1.8
+   },
+   {
+    "fn": "multiplyMatrices  deps/chunk-RHDRAB2N.js:5608",
+    "msPerFrame": 1.16,
+    "pct": 1.6
+   },
+   {
+    "fn": "_projectObject  deps/chunk-WHWYD5VO.js:32328",
+    "msPerFrame": 1.03,
+    "pct": 1.4
+   },
+   {
+    "fn": "updateMatrixWorld  deps/chunk-RHDRAB2N.js:7328",
+    "msPerFrame": 0.81,
+    "pct": 1.1
+   },
+   {
+    "fn": "_draw  deps/chunk-WHWYD5VO.js:47014",
+    "msPerFrame": 0.75,
+    "pct": 1
+   },
+   {
+    "fn": "get  deps/chunk-WHWYD5VO.js:14972",
+    "msPerFrame": 0.59,
+    "pct": 0.8
+   },
+   {
+    "fn": "draw  deps/chunk-WHWYD5VO.js:47115",
+    "msPerFrame": 0.56,
+    "pct": 0.7
+   },
+   {
+    "fn": "update  deps/chunk-WHWYD5VO.js:8125",
+    "msPerFrame": 0.45,
+    "pct": 0.6
+   },
+   {
+    "fn": "updateMatrix3  deps/chunk-WHWYD5VO.js:33218",
+    "msPerFrame": 0.43,
+    "pct": 0.6
+   },
+   {
+    "fn": "updateNumber  deps/chunk-WHWYD5VO.js:33111",
+    "msPerFrame": 0.42,
+    "pct": 0.6
+   },
+   {
+    "fn": "updateVector3  deps/chunk-WHWYD5VO.js:33152",
+    "msPerFrame": 0.41,
+    "pct": 0.6
+   },
+   {
+    "fn": "updateAttributes  deps/chunk-WHWYD5VO.js:15287",
+    "msPerFrame": 0.41,
+    "pct": 0.5
+   },
+   {
+    "fn": "renderObject  deps/chunk-WHWYD5VO.js:32588",
+    "msPerFrame": 0.4,
+    "pct": 0.5
+   },
+   {
+    "fn": "update  crowd/agents.js:152",
+    "msPerFrame": 0.37,
+    "pct": 0.5
+   },
+   {
+    "fn": "sort  deps/chunk-WHWYD5VO.js:16471",
+    "msPerFrame": 0.33,
+    "pct": 0.4
+   },
+   {
+    "fn": "setBindGroup  :0",
+    "msPerFrame": 0.32,
+    "pct": 0.4
+   },
+   {
+    "fn": "updateVector2  deps/chunk-WHWYD5VO.js:33131",
+    "msPerFrame": 0.3,
+    "pct": 0.4
+   },
+   {
+    "fn": "getForRender  deps/chunk-WHWYD5VO.js:15817",
+    "msPerFrame": 0.3,
+    "pct": 0.4
+   }
+  ],
+  "systems": [
+   {
+    "sys": "three.js (native)",
+    "msPerFrame": 32.53,
+    "pct": 43.7
+   },
+   {
+    "sys": "three.js",
+    "msPerFrame": 31.25,
+    "pct": 42
+   },
+   {
+    "sys": "(program)",
+    "msPerFrame": 9.28,
+    "pct": 12.5
+   },
+   {
+    "sys": "systems/crowd",
+    "msPerFrame": 0.55,
+    "pct": 0.7
+   },
+   {
+    "sys": "systems/vehicles",
+    "msPerFrame": 0.42,
+    "pct": 0.6
+   },
+   {
+    "sys": "(garbage collector)",
+    "msPerFrame": 0.19,
+    "pct": 0.3
+   },
+   {
+    "sys": "007b5d42",
+    "msPerFrame": 0.1,
+    "pct": 0.1
+   },
+   {
+    "sys": "systems/ground",
+    "msPerFrame": 0.05,
+    "pct": 0.1
+   },
+   {
+    "sys": "systems/weather",
+    "msPerFrame": 0.05,
+    "pct": 0.1
+   },
+   {
+    "sys": "engine",
+    "msPerFrame": 0.03,
+    "pct": 0
+   },
+   {
+    "sys": "systems/signage",
+    "msPerFrame": 0.02,
+    "pct": 0
+   },
+   {
+    "sys": "systems/landmarks",
+    "msPerFrame": 0.01,
+    "pct": 0
+   },
+   {
+    "sys": "engine (native)",
+    "msPerFrame": 0.01,
+    "pct": 0
+   },
+   {
+    "sys": "rapier",
+    "msPerFrame": 0,
+    "pct": 0
+   }
+  ]
+ }
+]

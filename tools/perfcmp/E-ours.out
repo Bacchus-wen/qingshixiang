@@ -1,0 +1,2 @@
+[17:11:43] realplay ours: run1 {"run":1,"loadS":13.685,"frames":574,"durS":29.7,"p50":33.4,"p95":66.7,"p99":133.3,"max":4983.1,"over34":222,"over50":70,"over100":6,"over250":2,"pipelinesDuring":114,"texAllocsDuring":45,"pixelRatioEnd":0.85,"gpuMB":1144.9,"heapMB":202.7}
+[17:13:05] realplay ours: run2 {"run":2,"loadS":13.237,"frames":697,"durS":34.4,"p50":33.3,"p95":50.1,"p99":99.9,"max":4799.8,"over34":157,"over50":44,"over100":4,"over250":3,"pipelinesDuring":208,"texAllocsDuring":47,"pixelRatioEnd":0.7,"gpuMB":1080.6,"heapMB":204.7}

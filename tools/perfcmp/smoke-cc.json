@@ -1,0 +1,1960 @@
+[
+ {
+  "name": "baseline-blank",
+  "proc": {
+   "browser": [
+    {
+     "pid": 65964,
+     "footprintMB": 61,
+     "top": [
+      {
+       "cat": "app-specific tag 14",
+       "dirtyMB": 36
+      },
+      {
+       "cat": "__DATA_CONST",
+       "dirtyMB": 12
+      },
+      {
+       "cat": "__DATA",
+       "dirtyMB": 2.7
+      },
+      {
+       "cat": "untagged (VM_ALLOCATE)",
+       "dirtyMB": 2
+      },
+      {
+       "cat": "__DATA_DIRTY",
+       "dirtyMB": 1.8
+      },
+      {
+       "cat": "MALLOC_SMALL",
+       "dirtyMB": 1.5
+      }
+     ]
+    }
+   ],
+   "renderer": [
+    {
+     "pid": 65979,
+     "footprintMB": 25,
+     "top": [
+      {
+       "cat": "__DATA_CONST",
+       "dirtyMB": 12
+      },
+      {
+       "cat": "app-specific tag 14",
+       "dirtyMB": 5.9
+      },
+      {
+       "cat": "__DATA",
+       "dirtyMB": 2
+      },
+      {
+       "cat": "app-specific tag 16",
+       "dirtyMB": 1.6
+      },
+      {
+       "cat": "page table",
+       "dirtyMB": 0.8
+      },
+      {
+       "cat": "MALLOC_SMALL",
+       "dirtyMB": 0.7
+      }
+     ]
+    },
+    {
+     "pid": 65980,
+     "footprintMB": 28,
+     "top": [
+      {
+       "cat": "__DATA_CONST",
+       "dirtyMB": 12
+      },
+      {
+       "cat": "app-specific tag 14",
+       "dirtyMB": 7.5
+      },
+      {
+       "cat": "app-specific tag 16",
+       "dirtyMB": 2.9
+      },
+      {
+       "cat": "__DATA",
+       "dirtyMB": 2.1
+      },
+      {
+       "cat": "page table",
+       "dirtyMB": 0.8
+      },
+      {
+       "cat": "MALLOC_SMALL",
+       "dirtyMB": 0.7
+      }
+     ]
+    },
+    {
+     "pid": 65974,
+     "footprintMB": 62,
+     "top": [
+      {
+       "cat": "app-specific tag 14",
+       "dirtyMB": 26
+      },
+      {
+       "cat": "app-specific tag 16",
+       "dirtyMB": 17
+      },
+      {
+       "cat": "__DATA_CONST",
+       "dirtyMB": 12
+      },
+      {
+       "cat": "__DATA",
+       "dirtyMB": 2.2
+      },
+      {
+       "cat": "page table",
+       "dirtyMB": 1
+      },
+      {
+       "cat": "stack",
+       "dirtyMB": 0.8
+      }
+     ]
+    }
+   ],
+   "GPU": [
+    {
+     "pid": 65970,
+     "footprintMB": 249,
+     "top": [
+      {
+       "cat": "Owned physical footprint (unmapped) (graphics)",
+       "dirtyMB": 112
+      },
+      {
+       "cat": "IOSurface",
+       "dirtyMB": 63
+      },
+      {
+       "cat": "IOAccelerator (graphics)",
+       "dirtyMB": 25
+      },
+      {
+       "cat": "app-specific tag 14",
+       "dirtyMB": 22
+      },
+      {
+       "cat": "__DATA_CONST",
+       "dirtyMB": 12
+      },
+      {
+       "cat": "Owned physical footprint (unmapped)",
+       "dirtyMB": 6.5
+      }
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "name": "cc-street",
+  "url": "http://127.0.0.1:5190/?shot=street",
+  "run": 1,
+  "uncap": false,
+  "loadToReadyS": 289.2,
+  "resumed": false,
+  "m": {
+   "seconds": 3.01,
+   "frames": 24,
+   "fps": 12,
+   "rafDelta": {
+    "n": 23,
+    "mean": 90.58,
+    "p50": 83.4,
+    "p90": 116.7,
+    "p95": 149.9,
+    "p99": 166.7,
+    "max": 166.7,
+    "min": 33.3
+   },
+   "over20": 23,
+   "over34": 21,
+   "over50": 20,
+   "cpuMs": {
+    "n": 34,
+    "mean": 88.19,
+    "p50": 87.7,
+    "p90": 106.5,
+    "p95": 151.3,
+    "p99": 174.9,
+    "max": 174.9,
+    "min": 35.7
+   },
+   "gpuMs": {
+    "n": 57,
+    "mean": 791.94,
+    "p50": 816.49,
+    "p90": 1257.42,
+    "p95": 1293.54,
+    "p99": 1480.55,
+    "max": 1480.55,
+    "min": 0.44
+   },
+   "gpuComputeMs": {
+    "n": 140,
+    "mean": 40.81,
+    "p50": 43.89,
+    "p90": 55.09,
+    "p95": 60.38,
+    "p99": 64.05,
+    "max": 70.36,
+    "min": 0.17
+   },
+   "resolves": 3,
+   "drawCalls": {
+    "n": 24,
+    "mean": 2230,
+    "p50": 2223,
+    "p90": 2251,
+    "p95": 2251,
+    "p99": 2251,
+    "max": 2251,
+    "min": 2223
+   },
+   "triangles": {
+    "n": 24,
+    "mean": 24626778.67,
+    "p50": 24609520,
+    "p90": 24675996,
+    "p95": 24675996,
+    "p99": 24675996,
+    "max": 24675996,
+    "min": 24609520
+   },
+   "renderCallsPerFrame": {
+    "n": 24,
+    "mean": 26,
+    "p50": 26,
+    "p90": 26,
+    "p95": 26,
+    "p99": 26,
+    "max": 26,
+    "min": 26
+   },
+   "passes": [
+    {
+     "label": "render|unlabelled",
+     "type": "render",
+     "msPerFrame": 411.897,
+     "perFrame": 13.89,
+     "drawsPerFrame": 0,
+     "trisPerFrame": 0
+    },
+    {
+     "label": "compute|unlabelled",
+     "type": "compute",
+     "msPerFrame": 77.689,
+     "perFrame": 9.53,
+     "drawsPerFrame": 0,
+     "trisPerFrame": 0
+    },
+    {
+     "label": "quad|SSRNode.Blur 960x540|SSRNode.Blur",
+     "type": "render",
+     "msPerFrame": 62.457,
+     "perFrame": 1.82,
+     "drawsPerFrame": 1.8,
+     "trisPerFrame": 2
+    },
+    {
+     "label": "quad|rt 1920x1080|RTT",
+     "type": "render",
+     "msPerFrame": 32.737,
+     "perFrame": 0.91,
+     "drawsPerFrame": 5,
+     "trisPerFrame": 5
+    },
+    {
+     "label": "compute|Update Clustered Lights",
+     "type": "compute",
+     "msPerFrame": 22.292,
+     "perFrame": 1.58,
+     "drawsPerFrame": 0,
+     "trisPerFrame": 0
+    },
+    {
+     "label": "scene|output 1920x1080|PerspectiveCamera L1",
+     "type": "render",
+     "msPerFrame": 21.89,
+     "perFrame": 0.46,
+     "drawsPerFrame": 1007,
+     "trisPerFrame": 11234983
+    },
+    {
+     "label": "quad|GaussianBlurNode.vertical 480x270|Gaussian_blur_vertical",
+     "type": "render",
+     "msPerFrame": 16.08,
+     "perFrame": 0.46,
+     "drawsPerFrame": 0.5,
+     "trisPerFrame": 0
+    },
+    {
+     "label": "quad|GaussianBlurNode.horizontal 480x270|Gaussian_blur_horizontal",
+     "type": "render",
+     "msPerFrame": 16.056,
+     "perFrame": 0.46,
+     "drawsPerFrame": 0.5,
+     "trisPerFrame": 0
+    },
+    {
+     "label": "quad|SSRNode.Blur 960x540|SSRNode.Copy",
+     "type": "render",
+     "msPerFrame": 15.431,
+     "perFrame": 0.46,
+     "drawsPerFrame": 0.5,
+     "trisPerFrame": 0
+    },
+    {
+     "label": "quad|SSRNode.SSR 960x540|SSRNode.SSR",
+     "type": "render",
+     "msPerFrame": 15.417,
+     "perFrame": 0.46,
+     "drawsPerFrame": 0.5,
+     "trisPerFrame": 0
+    },
+    {
+     "label": "quad|UnrealBloomPass.bright 960x540|Bloom_highPass",
+     "type": "render",
+     "msPerFrame": 14.892,
+     "perFrame": 0.46,
+     "drawsPerFrame": 0.5,
+     "trisPerFrame": 0
+    },
+    {
+     "label": "quad|UnrealBloomPass.h0 960x540|Bloom_separable",
+     "type": "render",
+     "msPerFrame": 14.892,
+     "perFrame": 0.46,
+     "drawsPerFrame": 0.5,
+     "trisPerFrame": 0
+    },
+    {
+     "label": "quad|UnrealBloomPass.v0 960x540|Bloom_separable",
+     "type": "render",
+     "msPerFrame": 14.882,
+     "perFrame": 0.46,
+     "drawsPerFrame": 0.5,
+     "trisPerFrame": 0
+    },
+    {
+     "label": "quad|UnrealBloomPass.h1 480x270|Bloom_separable",
+     "type": "render",
+     "msPerFrame": 14.846,
+     "perFrame": 0.46,
+     "drawsPerFrame": 0.5,
+     "trisPerFrame": 0
+    },
+    {
+     "label": "quad|UnrealBloomPass.v1 480x270|Bloom_separable",
+     "type": "render",
+     "msPerFrame": 14.837,
+     "perFrame": 0.46,
+     "drawsPerFrame": 0.5,
+     "trisPerFrame": 0
+    },
+    {
+     "label": "quad|UnrealBloomPass.h2 240x135|Bloom_separable",
+     "type": "render",
+     "msPerFrame": 14.826,
+     "perFrame": 0.46,
+     "drawsPerFrame": 0.5,
+     "trisPerFrame": 0
+    },
+    {
+     "label": "quad|TRAANode.resolve 1920x1080|TRAA.resolve",
+     "type": "render",
+     "msPerFrame": 14.819,
+     "perFrame": 0.46,
+     "drawsPerFrame": 1012,
+     "trisPerFrame": 11234988
+    },
+    {
+     "label": "quad|UnrealBloomPass.v3 120x67|Bloom_separable",
+     "type": "render",
+     "msPerFrame": 14.805,
+     "perFrame": 0.46,
+     "drawsPerFrame": 0.5,
+     "trisPerFrame": 0
+    },
+    {
+     "label": "quad|UnrealBloomPass.h3 120x67|Bloom_separable",
+     "type": "render",
+     "msPerFrame": 14.802,
+     "perFrame": 0.46,
+     "drawsPerFrame": 0.5,
+     "trisPerFrame": 0
+    },
+    {
+     "label": "quad|UnrealBloomPass.v2 240x135|Bloom_separable",
+     "type": "render",
+     "msPerFrame": 14.794,
+     "perFrame": 0.46,
+     "drawsPerFrame": 0.5,
+     "trisPerFrame": 0
+    },
+    {
+     "label": "quad|UnrealBloomPass.h0 960x540|Bloom_comp",
+     "type": "render",
+     "msPerFrame": 12.913,
+     "perFrame": 0.46,
+     "drawsPerFrame": 0.5,
+     "trisPerFrame": 0
+    },
+    {
+     "label": "quad|UnrealBloomPass.h4 60x33|Bloom_separable",
+     "type": "render",
+     "msPerFrame": 12.73,
+     "perFrame": 0.46,
+     "drawsPerFrame": 0.5,
+     "trisPerFrame": 0
+    },
+    {
+     "label": "quad|UnrealBloomPass.v4 60x33|Bloom_separable",
+     "type": "render",
+     "msPerFrame": 12.73,
+     "perFrame": 0.46,
+     "drawsPerFrame": 0.5,
+     "trisPerFrame": 0
+    },
+    {
+     "label": "quad|canvas|RenderPipeline",
+     "type": "render",
+     "msPerFrame": 7.452,
+     "perFrame": 0.46,
+     "drawsPerFrame": 1017.9,
+     "trisPerFrame": 11234994
+    },
+    {
+     "label": "scene|rt 1152x648|PerspectiveCamera L1",
+     "type": "render",
+     "msPerFrame": 5.752,
+     "perFrame": 0.46,
+     "drawsPerFrame": 502.8,
+     "trisPerFrame": 5617490
+    },
+    {
+     "label": "compute|rainUpdate",
+     "type": "compute",
+     "msPerFrame": 0.22,
+     "perFrame": 0.53,
+     "drawsPerFrame": 0,
+     "trisPerFrame": 0
+    },
+    {
+     "label": "compute|dripUpdate",
+     "type": "compute",
+     "msPerFrame": 0.027,
+     "perFrame": 0.53,
+     "drawsPerFrame": 0,
+     "trisPerFrame": 0
+    }
+   ],
+   "pipelinesCreatedDuring": 0,
+   "pipelinesDuring": [],
+   "shaderModulesDuring": 0,
+   "bindGroupsPerFrame": 53.3,
+   "gpuTexBytesDelta": 0,
+   "gpuBufBytesDelta": 162816,
+   "heapMB": {
+    "start": 758.1,
+    "end": 761.8,
+    "max": 761.8,
+    "allocMBps": 29.17
+   },
+   "gcDrops": 2,
+   "longTasks": [
+    99,
+    102,
+    106,
+    113,
+    98,
+    84,
+    79,
+    151,
+    51,
+    73,
+    86,
+    86,
+    94,
+    90,
+    89,
+    93,
+    90,
+    98,
+    175,
+    54,
+    80,
+    88,
+    78,
+    95,
+    87,
+    87,
+    92,
+    77,
+    75,
+    82,
+    85
+   ]
+  },
+  "snap": {
+   "backend": "webgpu",
+   "timestamps": true,
+   "pixelRatio": 1,
+   "canvas": [
+    1920,
+    1080
+   ],
+   "gpuTotalMB": 1425.74,
+   "gpuTexMB": 1124.83,
+   "gpuBufMB": 300.91,
+   "gpuPeakTexMB": 1124.83,
+   "gpuPeakBufMB": 300.91,
+   "gpuTextures": 167,
+   "gpuBuffers": 14337,
+   "texCat": {
+    "rt:pmrem": {
+     "n": 1,
+     "bytes": 6291456,
+     "MB": 6
+    },
+    "rt:depth": {
+     "n": 10,
+     "bytes": 54784004,
+     "MB": 52.25
+    },
+    "tex:data": {
+     "n": 30,
+     "bytes": 55116924,
+     "MB": 52.56
+    },
+    "tex:image": {
+     "n": 92,
+     "bytes": 581379780,
+     "MB": 554.45
+    },
+    "tex:canvas": {
+     "n": 4,
+     "bytes": 274726900,
+     "MB": 262
+    },
+    "internal": {
+     "n": 2,
+     "bytes": 8294416,
+     "MB": 7.91
+    },
+    "rt:color": {
+     "n": 28,
+     "bytes": 198874296,
+     "MB": 189.66
+    }
+   },
+   "bufCat": {
+    "query-resolve": {
+     "n": 2,
+     "bytes": 32768,
+     "MB": 0.03
+    },
+    "readback": {
+     "n": 2,
+     "bytes": 32768,
+     "MB": 0.03
+    },
+    "uniform": {
+     "n": 10181,
+     "bytes": 24526728,
+     "MB": 23.39
+    },
+    "storage": {
+     "n": 10,
+     "bytes": 29818880,
+     "MB": 28.44
+    },
+    "vertex": {
+     "n": 3594,
+     "bytes": 224869468,
+     "MB": 214.45
+    },
+    "index": {
+     "n": 548,
+     "bytes": 36244824,
+     "MB": 34.57
+    }
+   },
+   "imgGroups": {
+    "tex:canvas 4096x4096 rgba8unorm-srgb": {
+     "n": 2,
+     "MB": 170.6
+    },
+    "tex:canvas 4096x4096 rgba8unorm": {
+     "n": 1,
+     "MB": 85.3
+    },
+    "/textures/buildings 4096x2048 rgba8unorm-srgb": {
+     "n": 1,
+     "MB": 42.7
+    },
+    "/textures/buildings 4096x2048 rgba8unorm": {
+     "n": 1,
+     "MB": 42.7
+    },
+    "/textures/buildings 2048x2048 rgba8unorm-srgb": {
+     "n": 1,
+     "MB": 21.3
+    },
+    "/textures/crowd 2048x2048 rgba8unorm-srgb": {
+     "n": 1,
+     "MB": 21.3
+    },
+    "/textures/landmarks 2048x1024 rgba8unorm-srgb": {
+     "n": 3,
+     "MB": 32.1
+    },
+    "/textures/signage 1024x1536 rgba8unorm": {
+     "n": 1,
+     "MB": 8
+    },
+    "/textures/ground 1254x1254 rgba8unorm-srgb": {
+     "n": 8,
+     "MB": 64
+    },
+    "/textures/ground 1254x1254 rgba8unorm": {
+     "n": 8,
+     "MB": 64
+    },
+    "/textures/ground 1134x1134 rgba8unorm-srgb": {
+     "n": 1,
+     "MB": 6.5
+    },
+    "/textures/ground 1094x1094 rgba8unorm-srgb": {
+     "n": 4,
+     "MB": 24.4
+    },
+    "/textures/ground 1094x1094 rgba8unorm": {
+     "n": 4,
+     "MB": 24.4
+    },
+    "tex:canvas 1536x768 rgba8unorm": {
+     "n": 1,
+     "MB": 6
+    },
+    "/textures/ground 1054x1054 rgba8unorm-srgb": {
+     "n": 1,
+     "MB": 5.6
+    },
+    "/textures/ground 1054x1054 rgba8unorm": {
+     "n": 1,
+     "MB": 5.6
+    },
+    "/textures/landmarks 1024x1024 rgba8unorm-srgb": {
+     "n": 6,
+     "MB": 31.8
+    },
+    "/textures/landmarks 1024x1024 rgba8unorm": {
+     "n": 8,
+     "MB": 42.4
+    },
+    "/textures/signage 1024x1024 rgba8unorm-srgb": {
+     "n": 1,
+     "MB": 5.3
+    },
+    "/textures/signage 1024x1024 rgba8unorm": {
+     "n": 1,
+     "MB": 5.3
+    },
+    "/textures/crowd 1024x1024 rgba8unorm-srgb": {
+     "n": 13,
+     "MB": 68.9
+    },
+    "tex:data 3586x100 rgba16float": {
+     "n": 2,
+     "MB": 5.4
+    },
+    "tex:data 3368x100 rgba16float": {
+     "n": 2,
+     "MB": 5.2
+    },
+    "tex:data 3205x100 rgba16float": {
+     "n": 2,
+     "MB": 4.8
+    },
+    "tex:data 2956x100 rgba16float": {
+     "n": 2,
+     "MB": 4.6
+    },
+    "tex:data 2865x100 rgba16float": {
+     "n": 2,
+     "MB": 4.4
+    },
+    "tex:data 2788x100 rgba16float": {
+     "n": 2,
+     "MB": 4.2
+    },
+    "tex:data 2715x100 rgba16float": {
+     "n": 2,
+     "MB": 4.2
+    },
+    "tex:data 2692x100 rgba16float": {
+     "n": 2,
+     "MB": 4.2
+    },
+    "tex:data 2535x100 rgba16float": {
+     "n": 2,
+     "MB": 3.8
+    },
+    "tex:data 2329x100 rgba16float": {
+     "n": 2,
+     "MB": 3.6
+    },
+    "tex:data 2275x100 rgba16float": {
+     "n": 2,
+     "MB": 3.4
+    },
+    "tex:data 1802x100 rgba16float": {
+     "n": 2,
+     "MB": 2.8
+    },
+    "tex:data 512x512 rgba8unorm": {
+     "n": 1,
+     "MB": 1.3
+    },
+    "/textures/crowd 512x512 rgba8unorm": {
+     "n": 13,
+     "MB": 16.9
+    },
+    "/textures/crowd 512x512 rgba8unorm-srgb": {
+     "n": 15,
+     "MB": 19.5
+    },
+    "tex:data 256x256 rgba8unorm": {
+     "n": 2,
+     "MB": 0.6
+    },
+    "tex:data 1024x2 rgba32float": {
+     "n": 1,
+     "MB": 0
+    },
+    "tex:data 16x16 rg16float": {
+     "n": 1,
+     "MB": 0
+    },
+    "tex:data 24x1 rgba32float": {
+     "n": 1,
+     "MB": 0
+    }
+   },
+   "texTop": [
+    {
+     "cat": "tex:canvas",
+     "w": 4096,
+     "h": 4096,
+     "z": 1,
+     "mips": 13,
+     "samples": 1,
+     "format": "rgba8unorm-srgb",
+     "label": "",
+     "name": "",
+     "src": "canvas",
+     "MB": 85.33
+    },
+    {
+     "cat": "tex:canvas",
+     "w": 4096,
+     "h": 4096,
+     "z": 1,
+     "mips": 13,
+     "samples": 1,
+     "format": "rgba8unorm-srgb",
+     "label": "",
+     "name": "",
+     "src": "canvas",
+     "MB": 85.33
+    },
+    {
+     "cat": "tex:canvas",
+     "w": 4096,
+     "h": 4096,
+     "z": 1,
+     "mips": 13,
+     "samples": 1,
+     "format": "rgba8unorm",
+     "label": "",
+     "name": "",
+     "src": "canvas",
+     "MB": 85.33
+    },
+    {
+     "cat": "tex:image",
+     "w": 4096,
+     "h": 2048,
+     "z": 1,
+     "mips": 13,
+     "samples": 1,
+     "format": "rgba8unorm-srgb",
+     "label": "",
+     "name": "",
+     "src": "/textures/buildings/atlas_albedo.png",
+     "MB": 42.67
+    },
+    {
+     "cat": "tex:image",
+     "w": 4096,
+     "h": 2048,
+     "z": 1,
+     "mips": 13,
+     "samples": 1,
+     "format": "rgba8unorm",
+     "label": "",
+     "name": "",
+     "src": "/textures/buildings/atlas_normal.png",
+     "MB": 42.67
+    },
+    {
+     "cat": "tex:image",
+     "w": 2048,
+     "h": 2048,
+     "z": 1,
+     "mips": 12,
+     "samples": 1,
+     "format": "rgba8unorm-srgb",
+     "label": "",
+     "name": "",
+     "src": "/textures/buildings/interior_atlas.png",
+     "MB": 21.33
+    },
+    {
+     "cat": "tex:image",
+     "w": 2048,
+     "h": 2048,
+     "z": 1,
+     "mips": 12,
+     "samples": 1,
+     "format": "rgba8unorm-srgb",
+     "label": "",
+     "name": "",
+     "src": "/textures/crowd/young_lightskinned_female_diffuse3.jpg",
+     "MB": 21.33
+    },
+    {
+     "cat": "rt:color",
+     "w": 1920,
+     "h": 1080,
+     "z": 1,
+     "mips": 11,
+     "samples": 1,
+     "format": "rgba16float",
+     "label": "",
+     "name": "",
+     "src": "Object",
+     "MB": 21.09
+    },
+    {
+     "cat": "rt:color",
+     "w": 1024,
+     "h": 1024,
+     "z": 1,
+     "mips": 1,
+     "samples": 1,
+     "format": "rgba32float",
+     "label": "weatherHeight",
+     "name": "weatherHeight",
+     "src": "Object",
+     "MB": 16
+    },
+    {
+     "cat": "rt:color",
+     "w": 1920,
+     "h": 1080,
+     "z": 1,
+     "mips": 1,
+     "samples": 1,
+     "format": "rgba16float",
+     "label": "output",
+     "name": "output",
+     "src": "Object",
+     "MB": 15.82
+    },
+    {
+     "cat": "rt:color",
+     "w": 1920,
+     "h": 1080,
+     "z": 1,
+     "mips": 1,
+     "samples": 1,
+     "format": "rgba16float",
+     "label": "velocity",
+     "name": "velocity",
+     "src": "Object",
+     "MB": 15.82
+    },
+    {
+     "cat": "rt:color",
+     "w": 1920,
+     "h": 1080,
+     "z": 1,
+     "mips": 1,
+     "samples": 1,
+     "format": "rgba16float",
+     "label": "",
+     "name": "",
+     "src": "Object",
+     "MB": 15.82
+    },
+    {
+     "cat": "rt:color",
+     "w": 1920,
+     "h": 1080,
+     "z": 1,
+     "mips": 1,
+     "samples": 1,
+     "format": "rgba16float",
+     "label": "",
+     "name": "",
+     "src": "Object",
+     "MB": 15.82
+    },
+    {
+     "cat": "rt:color",
+     "w": 1920,
+     "h": 1080,
+     "z": 1,
+     "mips": 1,
+     "samples": 1,
+     "format": "rgba16float",
+     "label": "TRAANode.history",
+     "name": "TRAANode.history",
+     "src": "Object",
+     "MB": 15.82
+    },
+    {
+     "cat": "rt:color",
+     "w": 1920,
+     "h": 1080,
+     "z": 1,
+     "mips": 1,
+     "samples": 1,
+     "format": "rgba16float",
+     "label": "TRAANode.resolve",
+     "name": "TRAANode.resolve",
+     "src": "Object",
+     "MB": 15.82
+    },
+    {
+     "cat": "tex:image",
+     "w": 2048,
+     "h": 1024,
+     "z": 1,
+     "mips": 12,
+     "samples": 1,
+     "format": "rgba8unorm-srgb",
+     "label": "",
+     "name": "",
+     "src": "/textures/landmarks/holo_ads2.png",
+     "MB": 10.67
+    },
+    {
+     "cat": "tex:image",
+     "w": 2048,
+     "h": 1024,
+     "z": 1,
+     "mips": 12,
+     "samples": 1,
+     "format": "rgba8unorm-srgb",
+     "label": "",
+     "name": "",
+     "src": "/textures/landmarks/holo_ads3.png",
+     "MB": 10.67
+    },
+    {
+     "cat": "tex:image",
+     "w": 2048,
+     "h": 1024,
+     "z": 1,
+     "mips": 12,
+     "samples": 1,
+     "format": "rgba8unorm-srgb",
+     "label": "",
+     "name": "",
+     "src": "/textures/landmarks/holo_ads.png",
+     "MB": 10.67
+    },
+    {
+     "cat": "tex:image",
+     "w": 1024,
+     "h": 1536,
+     "z": 1,
+     "mips": 11,
+     "samples": 1,
+     "format": "rgba8unorm",
+     "label": "",
+     "name": "",
+     "src": "/textures/signage/billboard_mirai.png",
+     "MB": 8
+    },
+    {
+     "cat": "tex:image",
+     "w": 1254,
+     "h": 1254,
+     "z": 1,
+     "mips": 11,
+     "samples": 1,
+     "format": "rgba8unorm-srgb",
+     "label": "",
+     "name": "",
+     "src": "/textures/ground/drain_grate_c.png",
+     "MB": 8
+    },
+    {
+     "cat": "tex:image",
+     "w": 1254,
+     "h": 1254,
+     "z": 1,
+     "mips": 11,
+     "samples": 1,
+     "format": "rgba8unorm-srgb",
+     "label": "",
+     "name": "",
+     "src": "/textures/ground/manhole_c.png",
+     "MB": 8
+    },
+    {
+     "cat": "tex:image",
+     "w": 1254,
+     "h": 1254,
+     "z": 1,
+     "mips": 11,
+     "samples": 1,
+     "format": "rgba8unorm",
+     "label": "",
+     "name": "",
+     "src": "/textures/ground/manhole_n.png",
+     "MB": 8
+    },
+    {
+     "cat": "tex:image",
+     "w": 1254,
+     "h": 1254,
+     "z": 1,
+     "mips": 11,
+     "samples": 1,
+     "format": "rgba8unorm",
+     "label": "",
+     "name": "",
+     "src": "/textures/ground/drain_grate_n.png",
+     "MB": 8
+    },
+    {
+     "cat": "tex:image",
+     "w": 1254,
+     "h": 1254,
+     "z": 1,
+     "mips": 11,
+     "samples": 1,
+     "format": "rgba8unorm-srgb",
+     "label": "",
+     "name": "",
+     "src": "/textures/ground/sidewalk_tiles_c.png",
+     "MB": 8
+    },
+    {
+     "cat": "tex:image",
+     "w": 1254,
+     "h": 1254,
+     "z": 1,
+     "mips": 11,
+     "samples": 1,
+     "format": "rgba8unorm",
+     "label": "",
+     "name": "",
+     "src": "/textures/ground/sidewalk_tiles_n.png",
+     "MB": 8
+    },
+    {
+     "cat": "tex:image",
+     "w": 1254,
+     "h": 1254,
+     "z": 1,
+     "mips": 11,
+     "samples": 1,
+     "format": "rgba8unorm-srgb",
+     "label": "",
+     "name": "",
+     "src": "/textures/ground/tactile_paving_c.png",
+     "MB": 8
+    },
+    {
+     "cat": "tex:image",
+     "w": 1254,
+     "h": 1254,
+     "z": 1,
+     "mips": 11,
+     "samples": 1,
+     "format": "rgba8unorm-srgb",
+     "label": "",
+     "name": "",
+     "src": "/textures/ground/tactile_dots_c.png",
+     "MB": 8
+    },
+    {
+     "cat": "tex:image",
+     "w": 1254,
+     "h": 1254,
+     "z": 1,
+     "mips": 11,
+     "samples": 1,
+     "format": "rgba8unorm",
+     "label": "",
+     "name": "",
+     "src": "/textures/ground/tactile_paving_n.png",
+     "MB": 8
+    },
+    {
+     "cat": "tex:image",
+     "w": 1254,
+     "h": 1254,
+     "z": 1,
+     "mips": 11,
+     "samples": 1,
+     "format": "rgba8unorm",
+     "label": "",
+     "name": "",
+     "src": "/textures/ground/tactile_dots_n.png",
+     "MB": 8
+    },
+    {
+     "cat": "tex:image",
+     "w": 1254,
+     "h": 1254,
+     "z": 1,
+     "mips": 11,
+     "samples": 1,
+     "format": "rgba8unorm-srgb",
+     "label": "",
+     "name": "",
+     "src": "/textures/ground/stone_pavers_c.png",
+     "MB": 8
+    },
+    {
+     "cat": "tex:image",
+     "w": 1254,
+     "h": 1254,
+     "z": 1,
+     "mips": 11,
+     "samples": 1,
+     "format": "rgba8unorm",
+     "label": "",
+     "name": "",
+     "src": "/textures/ground/stone_pavers_n.png",
+     "MB": 8
+    },
+    {
+     "cat": "tex:image",
+     "w": 1254,
+     "h": 1254,
+     "z": 1,
+     "mips": 11,
+     "samples": 1,
+     "format": "rgba8unorm-srgb",
+     "label": "",
+     "name": "",
+     "src": "/textures/ground/litter_atlas_a.png",
+     "MB": 8
+    },
+    {
+     "cat": "tex:image",
+     "w": 1254,
+     "h": 1254,
+     "z": 1,
+     "mips": 11,
+     "samples": 1,
+     "format": "rgba8unorm",
+     "label": "",
+     "name": "",
+     "src": "/textures/ground/litter_atlas_n.png",
+     "MB": 8
+    },
+    {
+     "cat": "tex:image",
+     "w": 1254,
+     "h": 1254,
+     "z": 1,
+     "mips": 11,
+     "samples": 1,
+     "format": "rgba8unorm-srgb",
+     "label": "",
+     "name": "",
+     "src": "/textures/ground/petals_atlas_a.png",
+     "MB": 8
+    },
+    {
+     "cat": "tex:image",
+     "w": 1254,
+     "h": 1254,
+     "z": 1,
+     "mips": 11,
+     "samples": 1,
+     "format": "rgba8unorm",
+     "label": "",
+     "name": "",
+     "src": "/textures/ground/petals_atlas_n.png",
+     "MB": 8
+    },
+    {
+     "cat": "internal",
+     "w": 1920,
+     "h": 1080,
+     "z": 1,
+     "mips": 1,
+     "samples": 1,
+     "format": "depth24plus",
+     "label": "depthBuffer",
+     "name": "",
+     "src": "",
+     "MB": 7.91
+    },
+    {
+     "cat": "rt:color",
+     "w": 1920,
+     "h": 1080,
+     "z": 1,
+     "mips": 1,
+     "samples": 1,
+     "format": "rgba8unorm",
+     "label": "normal",
+     "name": "normal",
+     "src": "Object",
+     "MB": 7.91
+    },
+    {
+     "cat": "rt:color",
+     "w": 1920,
+     "h": 1080,
+     "z": 1,
+     "mips": 1,
+     "samples": 1,
+     "format": "rgba8unorm",
+     "label": "metalrough",
+     "name": "metalrough",
+     "src": "Object",
+     "MB": 7.91
+    },
+    {
+     "cat": "rt:depth",
+     "w": 1920,
+     "h": 1080,
+     "z": 1,
+     "mips": 1,
+     "samples": 1,
+     "format": "depth24plus",
+     "label": "depth",
+     "name": "depth",
+     "src": "Object",
+     "MB": 7.91
+    },
+    {
+     "cat": "rt:depth",
+     "w": 1920,
+     "h": 1080,
+     "z": 1,
+     "mips": 1,
+     "samples": 1,
+     "format": "depth24plus",
+     "label": "",
+     "name": "",
+     "src": "Object",
+     "MB": 7.91
+    },
+    {
+     "cat": "rt:depth",
+     "w": 1920,
+     "h": 1080,
+     "z": 1,
+     "mips": 1,
+     "samples": 1,
+     "format": "depth24plus",
+     "label": "",
+     "name": "",
+     "src": "Object",
+     "MB": 7.91
+    },
+    {
+     "cat": "rt:depth",
+     "w": 1920,
+     "h": 1080,
+     "z": 1,
+     "mips": 1,
+     "samples": 1,
+     "format": "depth24plus",
+     "label": "",
+     "name": "",
+     "src": "Object",
+     "MB": 7.91
+    },
+    {
+     "cat": "rt:depth",
+     "w": 1920,
+     "h": 1080,
+     "z": 1,
+     "mips": 1,
+     "samples": 1,
+     "format": "depth24plus",
+     "label": "",
+     "name": "",
+     "src": "Object",
+     "MB": 7.91
+    },
+    {
+     "cat": "rt:color",
+     "w": 1152,
+     "h": 648,
+     "z": 1,
+     "mips": 11,
+     "samples": 1,
+     "format": "rgba16float",
+     "label": "",
+     "name": "",
+     "src": "Object",
+     "MB": 7.59
+    },
+    {
+     "cat": "tex:image",
+     "w": 1134,
+     "h": 1134,
+     "z": 1,
+     "mips": 11,
+     "samples": 1,
+     "format": "rgba8unorm-srgb",
+     "label": "",
+     "name": "",
+     "src": "/textures/ground/paint_wear_c.png",
+     "MB": 6.54
+    }
+   ],
+   "rtCount": 24,
+   "rts": [
+    {
+     "name": "PMREM.cubeUv",
+     "w": 768,
+     "h": 1024,
+     "n": 1,
+     "depth": false,
+     "samples": 0
+    },
+    {
+     "name": "",
+     "w": 1152,
+     "h": 648,
+     "n": 1,
+     "depth": false,
+     "samples": 0
+    },
+    {
+     "name": "",
+     "w": 1152,
+     "h": 648,
+     "n": 1,
+     "depth": true,
+     "samples": 0
+    },
+    {
+     "name": "output",
+     "w": 1920,
+     "h": 1080,
+     "n": 4,
+     "depth": true,
+     "samples": 0
+    },
+    {
+     "name": "",
+     "w": 1920,
+     "h": 1080,
+     "n": 1,
+     "depth": false,
+     "samples": 0
+    },
+    {
+     "name": "SSRNode.SSR",
+     "w": 960,
+     "h": 540,
+     "n": 1,
+     "depth": false,
+     "samples": 0
+    },
+    {
+     "name": "SSRNode.Blur",
+     "w": 960,
+     "h": 540,
+     "n": 1,
+     "depth": false,
+     "samples": 0
+    },
+    {
+     "name": "",
+     "w": 1920,
+     "h": 1080,
+     "n": 1,
+     "depth": false,
+     "samples": 0
+    },
+    {
+     "name": "GaussianBlurNode.horizontal",
+     "w": 480,
+     "h": 270,
+     "n": 1,
+     "depth": false,
+     "samples": 0
+    },
+    {
+     "name": "GaussianBlurNode.vertical",
+     "w": 480,
+     "h": 270,
+     "n": 1,
+     "depth": false,
+     "samples": 0
+    },
+    {
+     "name": "TRAANode.history",
+     "w": 1920,
+     "h": 1080,
+     "n": 1,
+     "depth": true,
+     "samples": 0
+    },
+    {
+     "name": "UnrealBloomPass.bright",
+     "w": 960,
+     "h": 540,
+     "n": 1,
+     "depth": false,
+     "samples": 0
+    },
+    {
+     "name": "UnrealBloomPass.h0",
+     "w": 960,
+     "h": 540,
+     "n": 1,
+     "depth": false,
+     "samples": 0
+    },
+    {
+     "name": "UnrealBloomPass.v0",
+     "w": 960,
+     "h": 540,
+     "n": 1,
+     "depth": false,
+     "samples": 0
+    },
+    {
+     "name": "UnrealBloomPass.h1",
+     "w": 480,
+     "h": 270,
+     "n": 1,
+     "depth": false,
+     "samples": 0
+    },
+    {
+     "name": "UnrealBloomPass.v1",
+     "w": 480,
+     "h": 270,
+     "n": 1,
+     "depth": false,
+     "samples": 0
+    },
+    {
+     "name": "UnrealBloomPass.h2",
+     "w": 240,
+     "h": 135,
+     "n": 1,
+     "depth": false,
+     "samples": 0
+    },
+    {
+     "name": "UnrealBloomPass.v2",
+     "w": 240,
+     "h": 135,
+     "n": 1,
+     "depth": false,
+     "samples": 0
+    },
+    {
+     "name": "UnrealBloomPass.h3",
+     "w": 120,
+     "h": 67,
+     "n": 1,
+     "depth": false,
+     "samples": 0
+    },
+    {
+     "name": "UnrealBloomPass.v3",
+     "w": 120,
+     "h": 67,
+     "n": 1,
+     "depth": false,
+     "samples": 0
+    },
+    {
+     "name": "UnrealBloomPass.h4",
+     "w": 60,
+     "h": 33,
+     "n": 1,
+     "depth": false,
+     "samples": 0
+    },
+    {
+     "name": "UnrealBloomPass.v4",
+     "w": 60,
+     "h": 33,
+     "n": 1,
+     "depth": false,
+     "samples": 0
+    },
+    {
+     "name": "TRAANode.resolve",
+     "w": 1920,
+     "h": 1080,
+     "n": 1,
+     "depth": false,
+     "samples": 0
+    },
+    {
+     "name": "weatherHeight",
+     "w": 1024,
+     "h": 1024,
+     "n": 1,
+     "depth": false,
+     "samples": 0
+    }
+   ],
+   "threeInfo": {
+    "attributes": 3682,
+    "attributesSize": 326443996,
+    "geometries": 1129,
+    "indexAttributes": 548,
+    "indexAttributesSize": 36244824,
+    "indirectStorageAttributes": 0,
+    "indirectStorageAttributesSize": 0,
+    "programs": 2317,
+    "programsSize": 30784953,
+    "readbackBuffers": 0,
+    "readbackBuffersSize": 0,
+    "renderTargets": 23,
+    "storageAttributes": 10,
+    "storageAttributesSize": 29818880,
+    "textures": 165,
+    "texturesSize": 1134144787,
+    "uniformBuffers": 10179,
+    "uniformBuffersSize": 24526720,
+    "total": 1581964160,
+    "texturesMB": 1081.6,
+    "attributesMB": 311.32,
+    "indexMB": 34.57,
+    "storageMB": 28.44,
+    "totalMB": 1508.68
+   },
+   "pipelinesTotal": 1963,
+   "pipelinesAsync": 418,
+   "pipelineCompileMs": 107132,
+   "shaderModules": 2336,
+   "scene": {
+    "meshes": 1973,
+    "visibleMeshes": 1335,
+    "instancedMeshes": 283,
+    "instances": 80407,
+    "batched": 0,
+    "skinned": 620,
+    "points": 0,
+    "lines": 0,
+    "sprites": 0,
+    "lights": {
+     "HemisphereLight": 1,
+     "PointLight": 490,
+     "SpotLight": 2
+    },
+    "lightsOn": 491,
+    "shadowLights": [],
+    "castShadowMeshes": 620,
+    "transparentMeshes": 115,
+    "materials": 393,
+    "materialTypes": {
+     "MeshStandardNodeMaterial": 310,
+     "MeshBasicNodeMaterial": 39,
+     "MeshPhysicalNodeMaterial": 44
+    },
+    "geometries": 1127,
+    "geomBytes": 0,
+    "staticTris": 12192021,
+    "geomMB": 270.28
+   },
+   "geoTop": [
+    {
+     "name": "buildings",
+     "meshes": 155,
+     "tris": 4107468,
+     "MB": 168.22
+    },
+    {
+     "name": "lantern_paper",
+     "meshes": 1,
+     "tris": 479232,
+     "MB": 23.58
+    },
+    {
+     "name": "signage_housing",
+     "meshes": 1,
+     "tris": 141378,
+     "MB": 11.73
+    },
+    {
+     "name": "lm_railMetal",
+     "meshes": 26,
+     "tris": 48804,
+     "MB": 4.47
+    },
+    {
+     "name": "veh_solo_av",
+     "meshes": 8,
+     "tris": 159232,
+     "MB": 3.77
+    },
+    {
+     "name": "veh_solo_hero",
+     "meshes": 27,
+     "tris": 448152,
+     "MB": 3.62
+    },
+    {
+     "name": "cherry_trunk",
+     "meshes": 4,
+     "tris": 1054808,
+     "MB": 3.61
+    },
+    {
+     "name": "veh_solo_taxi",
+     "meshes": 33,
+     "tris": 391536,
+     "MB": 3.09
+    },
+    {
+     "name": "veh_solo_kei",
+     "meshes": 27,
+     "tris": 380592,
+     "MB": 3
+    },
+    {
+     "name": "lm_post",
+     "meshes": 26,
+     "tris": 29044,
+     "MB": 2.66
+    },
+    {
+     "name": "veh_av_l0_paint",
+     "meshes": 1,
+     "tris": 0,
+     "MB": 2.59
+    },
+    {
+     "name": "veh_hero_l0_paint",
+     "meshes": 1,
+     "tris": 0,
+     "MB": 2.24
+    },
+    {
+     "name": "cherry_blossom",
+     "meshes": 4,
+     "tris": 277658,
+     "MB": 2.13
+    },
+    {
+     "name": "veh_taxi_l0_paint",
+     "meshes": 1,
+     "tris": 0,
+     "MB": 2.09
+    },
+    {
+     "name": "water_petals",
+     "meshes": 1,
+     "tris": 18000,
+     "MB": 1.99
+    },
+    {
+     "name": "veh_solo_van",
+     "meshes": 22,
+     "tris": 159976,
+     "MB": 1.93
+    },
+    {
+     "name": "veh_kei_l0_paint",
+     "meshes": 1,
+     "tris": 0,
+     "MB": 1.91
+    },
+    {
+     "name": "Mesh",
+     "meshes": 220,
+     "tris": 739776,
+     "MB": 1.6
+    },
+    {
+     "name": "outfit_m_trench",
+     "meshes": 27,
+     "tris": 77976,
+     "MB": 1.33
+    },
+    {
+     "name": "outfit_f_techwear",
+     "meshes": 44,
+     "tris": 98720,
+     "MB": 1.29
+    },
+    {
+     "name": "outfit_f_trench",
+     "meshes": 20,
+     "tris": 47408,
+     "MB": 1.24
+    },
+    {
+     "name": "outfit_m_raincoat",
+     "meshes": 27,
+     "tris": 71655,
+     "MB": 1.17
+    },
+    {
+     "name": "lm_wire",
+     "meshes": 10,
+     "tris": 12648,
+     "MB": 1.16
+    },
+    {
+     "name": "outfit_f_raincoat",
+     "meshes": 27,
+     "tris": 67410,
+     "MB": 1.15
+    },
+    {
+     "name": "veh_van_l0_paint",
+     "meshes": 1,
+     "tris": 0,
+     "MB": 1.13
+    }
+   ],
+   "heapMB": {
+    "used": 762.9,
+    "total": 890.1
+   },
+   "errors": []
+  },
+  "adapter": {
+   "vendor": "apple",
+   "architecture": "metal-3",
+   "description": ""
+  },
+  "proc": {
+   "browser": [
+    {
+     "pid": 65964,
+     "footprintMB": 66,
+     "top": [
+      {
+       "cat": "app-specific tag 14",
+       "dirtyMB": 40
+      },
+      {
+       "cat": "__DATA_CONST",
+       "dirtyMB": 12
+      },
+      {
+       "cat": "__DATA",
+       "dirtyMB": 2.8
+      },
+      {
+       "cat": "untagged (VM_ALLOCATE)",
+       "dirtyMB": 2
+      },
+      {
+       "cat": "__DATA_DIRTY",
+       "dirtyMB": 1.9
+      },
+      {
+       "cat": "MALLOC_SMALL",
+       "dirtyMB": 1.8
+      }
+     ]
+    }
+   ],
+   "renderer": [
+    {
+     "pid": 65989,
+     "footprintMB": 24,
+     "top": [
+      {
+       "cat": "__DATA_CONST",
+       "dirtyMB": 12
+      },
+      {
+       "cat": "app-specific tag 14",
+       "dirtyMB": 5.1
+      },
+      {
+       "cat": "__DATA",
+       "dirtyMB": 2
+      },
+      {
+       "cat": "app-specific tag 16",
+       "dirtyMB": 1.6
+      },
+      {
+       "cat": "page table",
+       "dirtyMB": 0.7
+      },
+      {
+       "cat": "MALLOC_SMALL",
+       "dirtyMB": 0.7
+      }
+     ]
+    },
+    {
+     "pid": 65988,
+     "footprintMB": 51,
+     "top": [
+      {
+       "cat": "app-specific tag 14",
+       "dirtyMB": 21
+      },
+      {
+       "cat": "__DATA_CONST",
+       "dirtyMB": 12
+      },
+      {
+       "cat": "app-specific tag 16",
+       "dirtyMB": 12
+      },
+      {
+       "cat": "__DATA",
+       "dirtyMB": 2.2
+      },
+      {
+       "cat": "page table",
+       "dirtyMB": 1
+      },
+      {
+       "cat": "stack",
+       "dirtyMB": 0.8
+      }
+     ]
+    },
+    {
+     "pid": 65979,
+     "footprintMB": 2033,
+     "top": [
+      {
+       "cat": "app-specific tag 16",
+       "dirtyMB": 1352
+      },
+      {
+       "cat": "app-specific tag 14",
+       "dirtyMB": 493
+      },
+      {
+       "cat": "untagged (VM_ALLOCATE)",
+       "dirtyMB": 168
+      },
+      {
+       "cat": "__DATA_CONST",
+       "dirtyMB": 12
+      },
+      {
+       "cat": "page table",
+       "dirtyMB": 2.7
+      },
+      {
+       "cat": "__DATA",
+       "dirtyMB": 2.2
+      }
+     ]
+    }
+   ],
+   "GPU": [
+    {
+     "pid": 65970,
+     "footprintMB": 5837,
+     "top": [
+      {
+       "cat": "app-specific tag 14",
+       "dirtyMB": 2943
+      },
+      {
+       "cat": "Owned physical footprint (unmapped) (graphics)",
+       "dirtyMB": 1701
+      },
+      {
+       "cat": "Owned physical footprint (unmapped)",
+       "dirtyMB": 375
+      },
+      {
+       "cat": "IOSurface",
+       "dirtyMB": 335
+      },
+      {
+       "cat": "IOAccelerator (graphics)",
+       "dirtyMB": 268
+      },
+      {
+       "cat": "untagged (VM_ALLOCATE)",
+       "dirtyMB": 167
+      }
+     ]
+    }
+   ]
+  },
+  "net": {
+   "reqs": 250,
+   "MB": 286.94,
+   "byType": {
+    "document": {
+     "n": 1,
+     "MB": 0
+    },
+    "js": {
+     "n": 109,
+     "MB": 12.05
+    },
+    "css": {
+     "n": 1,
+     "MB": 0
+    },
+    "png": {
+     "n": 71,
+     "MB": 232.39
+    },
+    "glb": {
+     "n": 36,
+     "MB": 38.79
+    },
+    "json": {
+     "n": 2,
+     "MB": 0.02
+    },
+    "jpg": {
+     "n": 30,
+     "MB": 3.68
+    }
+   }
+  },
+  "consoleErr": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ]
+ }
+]

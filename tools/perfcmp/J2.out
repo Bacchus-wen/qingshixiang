@@ -1,0 +1,16 @@
+[17:51:14] launch ["--enable-unsafe-webgpu","--use-angle=metal","--enable-precise-memory-info"]
+[17:51:17] baseline null
+[17:51:46] k-base-a run1: ready 18.4s, fps 24.2, raf p50 33.4 p95 50.1 max 66.7, >34ms 57, cpu 7.03 (p95 7.9), gpuBusy 41.86 (p95 56.74, n 118), draws 437, tris 9523982, gpuMem 1185.82MB (tex 1122.66, buf 63.16), heap 196.16MB, pipesDuring 1, net 53.68MB
+[17:52:15] k-novol run1: ready 17.4s, fps 25.6, raf p50 33.4 p95 50.1 max 66.7, >34ms 45, cpu 7.25 (p95 8.1), gpuBusy 39.63 (p95 49.76, n 125), draws 436, tris 9523970, gpuMem 1185.82MB (tex 1122.66, buf 63.15), heap 196.01MB, pipesDuring 1, net 50.13MB
+[17:52:45] k-nossr run1: ready 17.7s, fps 26, raf p50 33.3 p95 66.7 max 83.4, >34ms 40, cpu 6.64 (p95 7.9), gpuBusy 39.23 (p95 46.56, n 127), draws 431, tris 9523986, gpuMem 1176.59MB (tex 1113.44, buf 63.16), heap 216.21MB, pipesDuring 1, net 50.1MB
+[17:53:15] k-noao run1: ready 17.9s, fps 26.4, raf p50 33.4 p95 50 max 50.1, >34ms 39, cpu 7.47 (p95 8.6), gpuBusy 38.38 (p95 46.55, n 129), draws 436, tris 9523991, gpuMem 1185.32MB (tex 1122.17, buf 63.16), heap 201.83MB, pipesDuring 1, net 52.27MB
+[17:53:44] k-noghosts run1: ready 17.4s, fps 26.8, raf p50 33.4 p95 50.1 max 66.7, >34ms 37, cpu 7.1 (p95 8.1), gpuBusy 37.72 (p95 46.29, n 131), draws 433, tris 9348729, gpuMem 1143.42MB (tex 1081.29, buf 62.13), heap 189.33MB, pipesDuring 1, net 41.23MB
+[17:54:09] k-noclustered run1: ready 13.5s, fps 25.6, raf p50 33.4 p95 50.1 max 66.7, >34ms 42, cpu 6.57 (p95 7.5), gpuBusy 39.52 (p95 49.85, n 125), draws 437, tris 9523982, gpuMem 1173.87MB (tex 1122.65, buf 51.22), heap 190.82MB, pipesDuring 1, net 53.68MB
+[17:54:40] k-sbase-a run1: ready 19s, fps 34.2, raf p50 33.3 p95 33.4 max 50.1, >34ms 6, cpu 7.54 (p95 8.5), gpuBusy 29.41 (p95 37.51, n 168), draws 506, tris 3747242, gpuMem 1226.61MB (tex 1162.99, buf 63.62), heap 210.57MB, pipesDuring 0, net 53.68MB
+[17:55:08] k-snovol run1: ready 17.5s, fps 47, raf p50 16.7 p95 33.4 max 33.4, >34ms 0, cpu 6.36 (p95 7), gpuBusy 21.42 (p95 25.22, n 232), draws 390, tris 3463339, gpuMem 1226.61MB (tex 1162.99, buf 63.61), heap 262.28MB, pipesDuring 0, net 53.68MB
+[17:56:04] k-snodof run1: ready 43.8s, fps 35.8, raf p50 33.2 p95 50.1 max 66.8, >34ms 23, cpu 6.63 (p95 7.3), gpuBusy 28.19 (p95 35.28, n 176), draws 496, tris 3747232, gpuMem 1134.68MB (tex 1071.04, buf 63.64), heap 196.8MB, pipesDuring 0, net 53.68MB
+[17:56:33] k-snomodules run1: ready 17.5s, fps 36.8, raf p50 33.3 p95 33.4 max 50, >34ms 4, cpu 6.94 (p95 7.8), gpuBusy 27.38 (p95 33.81, n 181), draws 491, tris 967223, gpuMem 970.31MB (tex 922.99, buf 47.32), heap 201.22MB, pipesDuring 0, net 37.86MB
+[17:57:03] k-sbase-b run1: ready 18.8s, fps 33.4, raf p50 33.3 p95 33.4 max 50.1, >34ms 8, cpu 7.89 (p95 9.5), gpuBusy 30.05 (p95 38.12, n 164), draws 506, tris 3747242, gpuMem 1226.61MB (tex 1162.99, buf 63.62), heap 255.78MB, pipesDuring 0, net 53.68MB
+[17:57:34] k-base-b run1: ready 18.2s, fps 24, raf p50 33.4 p95 66.6 max 100, >34ms 54, cpu 7.24 (p95 8.4), gpuBusy 42.32 (p95 60.82, n 117), draws 437, tris 9523982, gpuMem 1185.82MB (tex 1122.66, buf 63.16), heap 192.46MB, pipesDuring 1, net 53.68MB
+[17:57:36] done -> /tmp/perfcmp/J2-recheck.json
+EXIT 0

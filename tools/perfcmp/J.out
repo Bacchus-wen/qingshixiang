@@ -1,0 +1,15 @@
+[17:44:49] launch ["--enable-unsafe-webgpu","--use-angle=metal","--enable-precise-memory-info"]
+[17:44:51] baseline null
+[17:45:20] j-base-a run1: ready 18.9s, fps 22.6, raf p50 49.9 p95 66.7 max 66.7, >34ms 66, cpu 8.31 (p95 10.8), gpuBusy 44.56 (p95 57.13, n 110), draws 437, tris 9523980, gpuMem 1185.82MB (tex 1122.66, buf 63.16), heap 207.12MB, pipesDuring 1, net 53.68MB
+[17:45:40] j-flatmat run1: ready 8.1s, fps 48.2, raf p50 16.7 p95 33.4 max 33.4, >34ms 0, cpu 7.76 (p95 8.4), gpuBusy 21.06 (p95 26.15, n 238), draws 335, tris 9244153, gpuMem 625.94MB (tex 570.08, buf 55.86), heap 193.36MB, pipesDuring 0, net 51.09MB
+[17:46:04] j-720p run1: ready 13.2s, fps 42.2, raf p50 16.7 p95 33.4 max 50, >34ms 2, cpu 7.12 (p95 8), gpuBusy 23.89 (p95 31.6, n 208), draws 438, tris 9523994, gpuMem 1002.66MB (tex 946.07, buf 56.59), heap 248.94MB, pipesDuring 1, net 49.21MB
+[17:46:34] j-noeyeshadow run1: ready 17.6s, fps 23.8, raf p50 49.9 p95 66.6 max 66.7, >34ms 59, cpu 7.49 (p95 8.9), gpuBusy 42.53 (p95 57.41, n 116), draws 390, tris 6605353, gpuMem 1166.6MB (tex 1103.99, buf 62.6), heap 206.62MB, pipesDuring 1, net 50.16MB
+[17:47:04] j-noscatter run1: ready 18.6s, fps 22, raf p50 49.9 p95 83.4 max 116.7, >34ms 62, cpu 8.04 (p95 11.6), gpuBusy 45.85 (p95 61.65, n 107), draws 431, tris 9523976, gpuMem 1134.4MB (tex 1071.24, buf 63.16), heap 197.62MB, pipesDuring 1, net 48.83MB
+[17:47:35] j-notraa run1: ready 18.2s, fps 23.4, raf p50 49.9 p95 66.6 max 66.7, >34ms 62, cpu 8.54 (p95 11.9), gpuBusy 43.47 (p95 58.36, n 114), draws 436, tris 9523980, gpuMem 1122.54MB (tex 1059.38, buf 63.16), heap 206.22MB, pipesDuring 1, net 49.58MB
+[17:48:05] j-nodof run1: ready 17.9s, fps 24, raf p50 33.4 p95 83.4 max 116.7, >34ms 49, cpu 7.61 (p95 10.3), gpuBusy 41.91 (p95 56.65, n 117), draws 427, tris 9523972, gpuMem 1093.87MB (tex 1030.7, buf 63.17), heap 210.37MB, pipesDuring 1, net 49.96MB
+[17:48:35] j-norain run1: ready 18s, fps 21.2, raf p50 50 p95 66.7 max 66.8, >34ms 77, cpu 8.77 (p95 12.5), gpuBusy 48.42 (p95 58.66, n 103), draws 432, tris 9397832, gpuMem 1184.85MB (tex 1122.66, buf 62.19), heap 200.87MB, pipesDuring 1, net 49.23MB
+[17:49:04] j-nomodules run1: ready 16.9s, fps 26.2, raf p50 33.4 p95 50 max 66.6, >34ms 39, cpu 7.33 (p95 9), gpuBusy 38.37 (p95 45.1, n 128), draws 400, tris 1421147, gpuMem 929.51MB (tex 882.66, buf 46.85), heap 183.81MB, pipesDuring 1, net 37.86MB
+[17:49:27] j-qlow run1: ready 12s, fps 27.2, raf p50 33.3 p95 66.7 max 100, >34ms 36, cpu 7 (p95 10.4), gpuBusy 37.06 (p95 47.38, n 133), draws 419, tris 9439558, gpuMem 1041.83MB (tex 991.25, buf 50.58), heap 196.98MB, pipesDuring 1, net 53.68MB
+[17:49:58] j-base-b run1: ready 18.7s, fps 22.8, raf p50 50 p95 66.6 max 66.7, >34ms 67, cpu 8.59 (p95 11), gpuBusy 44.38 (p95 55.38, n 111), draws 437, tris 9523980, gpuMem 1185.82MB (tex 1122.66, buf 63.16), heap 211.55MB, pipesDuring 1, net 53.68MB
+[17:50:00] done -> /tmp/perfcmp/J-recheck.json
+EXIT 0
