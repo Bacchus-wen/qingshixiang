@@ -308,6 +308,31 @@
   "ry": -40
  },
  {
+  "name": "broom",
+  "type": "proc",
+  "kind": "broom",
+  "pos": [
+   -2.22,
+   0,
+   1.72
+  ],
+  "ry": 0,
+  "roll": -13.7,
+  "on": "floor"
+ },
+ {
+  "name": "aframe",
+  "type": "proc",
+  "kind": "aframe",
+  "pos": [
+   0.78,
+   0,
+   1.92
+  ],
+  "ry": -12,
+  "on": "floor"
+ },
+ {
   "name": "toolbox",
   "glb": "toolbox.glb",
   "pos": [
@@ -1523,7 +1548,8 @@
    0,
    -1.2
   ],
-  "ry": 6
+  "ry": 6,
+  "on": "floor"
  },
  {
   "name": "floor_carton_1",
@@ -1551,10 +1577,11 @@
    0.34
   ],
   "pos": [
-   -2.1,
+   -2.3,
    0,
-   1.93
+   2.03
   ],
-  "ry": 18
+  "ry": 8,
+  "on": "floor"
  }
 ]

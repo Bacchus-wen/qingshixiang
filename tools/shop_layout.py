@@ -28,6 +28,8 @@ fixed = [
  {"name": "soldering_iron", "glb": "soldering_iron.glb", "pos": [-1.85, 0, 1.1], "ry": 15, "on": "workbench"},
  {"name": "enamel_mug", "glb": "enamel_mug.glb", "pos": [-2.25, 0, 1.15], "ry": 30, "on": "workbench"},
  {"name": "robot", "glb": "robot.glb", "pos": [-0.5, 0, 1.2], "ry": -40},
+ {"name": "broom", "type": "proc", "kind": "broom", "pos": [-2.22, 0, 1.72], "ry": 0, "roll": -13.7, "on": "floor"},
+ {"name": "aframe", "type": "proc", "kind": "aframe", "pos": [0.78, 0, 1.92], "ry": -12, "on": "floor"},
  {"name": "toolbox", "glb": "toolbox.glb", "pos": [-1.55, 0, 1.7], "ry": 14},
  {"name": "back_door", "glb": "back_door.glb", "pos": [1.75, 0, 0], "wall": "back"},
  {"name": "wall_clock", "glb": "wall_clock.glb", "pos": [2.63, 1.78, 0], "wall": "back"},
@@ -127,9 +129,10 @@ fill('shelf_left2', 'z', 0.6, 1.85, -2.95, -2.5, 4, 90, [0.56, 0.56, 0.56, 0.9])
 for f in fixed:
     if f['name'] in shelf_tags: f['tags'] = shelf_tags[f['name']]
 # cartons on the floor: a stack in the back-right corner by the door, two under the bench end
-for i, (key, x, z, ry, lvl) in enumerate([('box_a', 0.98, -1.2, 6, 0), ('box_b', 0.99, -1.2, -3, 1), ('box_b', -2.1, 1.93, 18, 0)]):
+for i, (key, x, z, ry, lvl) in enumerate([('box_a', 0.98, -1.2, 6, 0), ('box_b', 0.99, -1.2, -3, 1), ('box_b', -2.3, 2.03, 8, 0)]):
     w, h, dd = CART[key]
     it = {"name": f"floor_carton_{i}", "type": "carton", "front": key, "size": [w, h, dd], "pos": [x, 0, z], "ry": ry}
+    if lvl == 0: it["on"] = "floor"
     out.append(it)
 json.dump(out, open('assets/models/shop/layout.json', 'w'), indent=1)
 print(len(out), 'items')

@@ -18,7 +18,7 @@ export const ROOM = { w: 6.0, d: 4.5, h: 3.0 };
 // in world space so walls and floor line up without UV work. All are loaded up front (init awaits them).
 const TEX = {};
 const TEX_NAMES = ['floor_terrazzo', 'wall_upper', 'wall_dado', 'ceiling', 'facade', 'pavement', 'shutter', 'cardboard', 'pegboard',
-  'poster', 'calendar', 'price_list', 'slogan', 'sign_main', 'sign_side', 'tags', 'box_a', 'box_b', 'tv_poster', 'notice', 'street_backdrop'];
+  'poster', 'calendar', 'price_list', 'slogan', 'sign_main', 'sign_side', 'tags', 'box_a', 'box_b', 'tv_poster', 'notice', 'street_backdrop', 'sign_aframe'];
 async function loadTextures(ktx2) {
   await Promise.all(TEX_NAMES.map(async (n) => {
     try {
@@ -190,6 +190,24 @@ function procItem(kind, seed = 1) {
     }
     geo.computeVertexNormals();
     add(geo, m);
+  } else if (kind === 'broom') { // bamboo-handled straw broom, upright (lean it with roll/pitch in the layout)
+    const bamboo = pmat('bamboo', { color: 0x9a7a45, roughness: 0.6 });
+    const straw = PM.straw ??= (() => { const m = new THREE.MeshStandardNodeMaterial({ roughness: 0.95 });
+      const P = positionWorld; m.colorNode = mix(vec3(0.33, 0.24, 0.11), vec3(0.15, 0.1, 0.05), smoothstep(0.3, 0.8, mx_noise_float(vec3(P.x.mul(300), P.y.mul(8), P.z.mul(300))).mul(0.5).add(0.5))); return m; })();
+    add(new THREE.CylinderGeometry(0.012, 0.013, 0.95, 10), bamboo, 0, 0.2 + 0.475, 0);
+    for (const yy of [0.32, 0.6, 0.88]) add(new THREE.CylinderGeometry(0.0135, 0.0135, 0.012, 10), pmat('node', { color: 0x7a5c30, roughness: 0.6 }), 0, yy, 0); // bamboo nodes
+    const fan = new THREE.CylinderGeometry(0.02, 0.13, 0.3, 14, 1, false); fan.scale(1, 1, 0.32); add(fan, straw, 0, 0.15, 0);
+    add(new THREE.CylinderGeometry(0.022, 0.022, 0.03, 10), pmat('wire', { color: 0x3a3a38, roughness: 0.5, metalness: 0.6 }), 0, 0.29, 0); // binding
+  } else if (kind === 'aframe') { // sandwich-board sign: two boards hinged at the top, the painted face toward +z
+    const wood = pmat('aframe', { color: 0x2f3a33, roughness: 0.85 });
+    const face = new THREE.MeshStandardNodeMaterial({ map: tex('sign_aframe'), roughness: 0.8 });
+    const H = 0.8, Wd = 0.48, spread = 0.18;
+    for (const sz of [1, -1]) {
+      const b = new THREE.Group(); const board = new THREE.Mesh(new THREE.BoxGeometry(Wd, H, 0.018), wood); board.position.y = -H / 2; b.add(board);
+      if (sz < 0) { const p = new THREE.Mesh(new THREE.PlaneGeometry(Wd - 0.04, H - 0.04), face); p.position.set(0, -H / 2, 0.0095); b.add(p); } // the leg whose foot points at the street carries the face
+      b.position.set(0, H * Math.cos(Math.asin(spread / H)), 0); b.rotation.x = sz * Math.asin(spread / H); g.add(b);
+      b.traverse((m) => { if (m.isMesh) m.castShadow = m.receiveShadow = true; });
+    }
   } else if (kind === 'coil') { // a coil of black flex cable on the floor
     const m = pmat('flex', { color: 0x161616, roughness: 0.5 });
     for (let k = 0; k < 4; k++) add(new THREE.TorusGeometry(0.14 - k * 0.006, 0.006, 8, 40).rotateX(Math.PI / 2), m, (k % 2) * 0.006, 0.006 + k * 0.011, k * 0.004);

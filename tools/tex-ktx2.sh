@@ -19,4 +19,6 @@ ua badge_shanghai badge_shanghai 512x256; ua badge_plaque badge_plaque 512x256
 e1 tv_poster tv_poster 512x1024; ua notice notice 512x1024
 # the other side of the street (matte painting seen through the opening)
 e1 street_backdrop street_backdrop 2048x1024
+# sandwich-board sign at the entrance
+ua sign_aframe sign_aframe 512x1024
 ls -la $OUT/*.ktx2 | awk '{s+=$5} END {print "total", s}'
