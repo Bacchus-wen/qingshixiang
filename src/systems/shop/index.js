@@ -282,6 +282,20 @@ export default {
     const templates = new Map();
     for (const glb of new Set(layout.filter((i) => i.glb).map((i) => i.glb))) templates.set(glb, loader.loadAsync(`${import.meta.env.BASE_URL}models/shop/${glb}`).catch((e) => { console.warn('[shop] model failed', glb, e.message); return null; }));
     await Promise.all([loadTextures(ktx2), ...templates.values()]);
+    // CRT screens are glass: the generated texture paints them a flat grey, so the bright, unsaturated parts of the
+    // TV's colour map (screen, chrome trim) get glass-like roughness and pick up the room in reflection
+    const tvT = await templates.get('crt_tv.glb');
+    if (tvT) tvT.scene.traverse((m) => {
+      if (!m.isMesh || !m.material.map) return;
+      const src = m.material, nm = new THREE.MeshStandardNodeMaterial();
+      for (const k of ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap', 'roughness', 'metalness', 'color']) if (src[k] !== undefined) nm[k] = src[k]?.clone && k === 'color' ? src[k].clone() : src[k];
+      if (src.normalScale) nm.normalScale.copy(src.normalScale);
+      const c = texture(src.map).rgb, mx = c.r.max(c.g).max(c.b), mn = c.r.min(c.g).min(c.b);
+      const glass = smoothstep(0.32, 0.5, mx).mul(float(1).sub(smoothstep(0.08, 0.2, mx.sub(mn))));
+      const r0 = src.roughnessMap ? texture(src.roughnessMap).g.mul(src.roughness) : float(src.roughness);
+      nm.roughnessNode = mix(r0, float(0.12), glass);
+      m.material = nm;
+    });
     const root = this.root = new THREE.Group(); root.name = 'shop';
     scene.add(root);
     const { w, d, h } = ROOM;
