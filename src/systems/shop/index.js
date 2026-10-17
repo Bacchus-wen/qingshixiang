@@ -627,7 +627,7 @@ export default {
         const g = new THREE.Group(); g.position.set(x, top, Z); g.rotation.z = tilt; tools.add(g);
         const shaft = new THREE.Mesh(new THREE.BoxGeometry(0.012 + i * 0.001, L, 0.004), steelT); shaft.position.y = -L / 2; g.add(shaft);
         const ring = new THREE.Mesh(new THREE.TorusGeometry(0.009 + i * 0.0008, 0.0035, 6, 14), steelT); ring.position.y = -0.006; g.add(ring);
-        for (const sx of [-1, 1]) { const jaw = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.02, 0.004), steelT); jaw.position.set(sx * (0.009 + i * 0.0008), -L - 0.006, 0); g.add(jaw); }
+        { const jaw = new THREE.Mesh(new THREE.TorusGeometry(0.011 + i * 0.0009, 0.0042, 5, 12, Math.PI * 1.25), steelT); jaw.rotation.z = -Math.PI / 2 - Math.PI * 0.625 + Math.PI; jaw.position.set(0, -L - 0.008, 0); g.add(jaw); } // open end
         peg(x, top + 0.004);
       }
       // three pairs of pliers, red-sleeved handles
@@ -635,7 +635,7 @@ export default {
         const x = pegX - 0.06 + i * 0.075, top = pegY + 0.3, g = new THREE.Group(); g.position.set(x, top, Z); g.rotation.z = (rnd(i + 20) - 0.5) * 0.1; tools.add(g);
         const jawL = 0.045 - i * 0.008;
         for (const sx of [-1, 1]) {
-          const j = new THREE.Mesh(new THREE.BoxGeometry(0.007, jawL, 0.006), steelT); j.position.set(sx * 0.0035, -jawL / 2, 0); g.add(j);
+          const j = new THREE.Mesh(new THREE.CylinderGeometry(0.0012, 0.0045, jawL, 4), steelT); j.position.set(sx * 0.003, -jawL / 2, 0); j.rotation.z = -sx * 0.06; g.add(j);
           const hdl = new THREE.Mesh(new THREE.CylinderGeometry(0.0055, 0.0045, 0.11, 8), redG); hdl.position.set(sx * 0.012, -jawL - 0.06, 0.002); hdl.rotation.z = sx * 0.16; g.add(hdl);
         }
         const piv = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.008, 10).rotateX(Math.PI / 2), steelT); piv.position.y = -jawL; g.add(piv);
@@ -644,11 +644,16 @@ export default {
       // a claw hammer, head up on two pegs
       { const x = pegX + 0.2, top = pegY + 0.28; box(steelT, 0.1, 0.022, 0.022, x, top, Z + 0.006); const h = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.011, 0.28, 10), woodH); h.position.set(x, top - 0.15, Z + 0.006); tools.add(h); peg(x - 0.035, top - 0.015); peg(x + 0.035, top - 0.015); }
       // copper wire and black tape on hooks
-      { const c = new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.009, 8, 32), PM.copper ??= new THREE.MeshStandardNodeMaterial({ color: 0x8a4a22, roughness: 0.35, metalness: 0.8 })); c.position.set(pegX + 0.4, pegY + 0.2, Z + 0.006); tools.add(c); peg(pegX + 0.4, pegY + 0.27);
+      { const cu = PM.copper ??= new THREE.MeshStandardNodeMaterial({ color: 0x8a4a22, roughness: 0.35, metalness: 0.8 });
+        for (let t = 0; t < 6; t++) { const c = new THREE.Mesh(new THREE.TorusGeometry(0.066 + (t % 3) * 0.0035, 0.0022, 5, 40), cu); c.position.set(pegX + 0.4 + (t - 2.5) * 0.0012, pegY + 0.2 - Math.abs(t - 2.5) * 0.001, Z + 0.004 + t * 0.0026); c.rotation.z = t * 0.7; tools.add(c); }
+        const tail = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(pegX + 0.46, pegY + 0.16, Z + 0.012), new THREE.Vector3(pegX + 0.49, pegY + 0.1, Z + 0.016), new THREE.Vector3(pegX + 0.47, pegY + 0.05, Z + 0.012)]), 10, 0.0022, 5), cu); tools.add(tail);
+        peg(pegX + 0.4, pegY + 0.27);
         const t = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.012, 8, 24), PM.tape ??= new THREE.MeshStandardNodeMaterial({ color: 0x141414, roughness: 0.45 })); t.position.set(pegX + 0.4, pegY + 0.03, Z + 0.01); tools.add(t); peg(pegX + 0.4, pegY + 0.062); }
       // a hand saw at the right edge and a fan of files beside the hammer
       { const x = pegX + 0.5, top = pegY + 0.3, sawM = PM.saw ??= new THREE.MeshStandardNodeMaterial({ color: 0x9a9890, roughness: 0.4, metalness: 0.8, side: THREE.DoubleSide });
-        const sh = new THREE.Shape(); sh.moveTo(-0.055, 0); sh.lineTo(0.055, 0); sh.lineTo(0.03, -0.38); sh.lineTo(-0.02, -0.38); sh.closePath(); // wide at the handle, tapering to the toe
+        const sh = new THREE.Shape(); sh.moveTo(-0.055, 0); sh.lineTo(0.055, 0); sh.lineTo(0.03, -0.38); sh.lineTo(-0.02, -0.38); // wide at the handle, tapering to the toe
+        for (let t = 1; t <= 30; t++) { const f = t / 30, x = -0.02 + (-0.055 + 0.02) * f, y = -0.38 + 0.38 * f; sh.lineTo(x - (t % 2 ? 0.006 : 0), y); } // teeth on the cutting edge
+        sh.closePath();
         const blade = new THREE.Mesh(new THREE.ShapeGeometry(sh), sawM); blade.position.set(x, top - 0.06, Z + 0.004); tools.add(blade);
         box(woodH, 0.075, 0.07, 0.02, x, top - 0.02, Z + 0.006); peg(x, top + 0.01); }
       for (let i = 0; i < 4; i++) { const x = pegX + 0.08 + i * 0.022, top = pegY + 0.12; box(PM.file ??= new THREE.MeshStandardNodeMaterial({ color: 0x55534e, roughness: 0.6, metalness: 0.6 }), 0.012 - i * 0.001, 0.2 - i * 0.02, 0.004, x, top - 0.1 + i * 0.01, Z + 0.003, (i - 1.5) * 0.04); box(woodH, 0.016, 0.06, 0.016, x, top + 0.015 + i * 0.01, Z + 0.006, (i - 1.5) * 0.04); }
@@ -690,8 +695,8 @@ export default {
     if (lampObj) { _box.setFromObject(lampObj); this.lamp.position.set((_box.min.x + _box.max.x) / 2 + 0.1, _box.max.y - 0.05, (_box.min.z + _box.max.z) / 2); this.lamp.target.position.set(this.lamp.position.x + 0.3, 0.8, this.lamp.position.z + 0.2); }
     else { this.lamp.position.set(-1.6, 1.45, 0.1); this.lamp.target.position.set(-1.2, 0.8, 0.2); }
     // repeated generated models are drawn instanced: one draw per mesh per model type instead of one per copy
-    // (the placed copies stay, hidden, for picking and the audit). Tints become per-instance colours.
-    {
+    // (the placed copies stay, hidden, for picking and the audit). Tints become per-instance colours. ?noinst = off
+    if (ctx.params.get('noinst') === null) {
       const groups = new Map();
       for (const o of Object.values(placed)) { const L = o.userData.layout; if (!L.glb || L.glb === 'robot.glb') continue; (groups.get(L.glb) ?? groups.set(L.glb, []).get(L.glb)).push(o); }
       root.updateMatrixWorld(true);
