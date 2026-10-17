@@ -1,0 +1,65 @@
+{
+  "batch_id": "b_20261017221318",
+  "tasks": 2,
+  "submitted": 2,
+  "failed": 0,
+  "total_images": 2,
+  "items": [
+    {
+      "index": 1,
+      "prompt": "Perfectly flat orthographic front view filling the entire frame edge to edge, no perspective, no background, no shadows, even lighting, photographic: the side of an old worn brown corrugated cardboard box for a 1980s Chinese transistor radio, faded green printed Chinese brand text 红灯牌 and the words 晶体管收音机, a simple radio line drawing, a model number, torn corner, old tape, stains.",
+      "id": "img_43738",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43738/2f148d06-1fd9-4889-bfdd-10b321e89f7f.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T22%3A13%3A14Z%2F3600%2F%2F6fb78dcde7b4336a9075023e980f9141a652704c6dd381b6037851e534c6b8c5"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/boxes2/img_43738/ai_generate_43738_1.png"
+      ]
+    },
+    {
+      "index": 2,
+      "prompt": "Perfectly flat orthographic front view filling the entire frame edge to edge, no perspective, no background, no shadows, even lighting, photographic: the side of an old worn brown corrugated cardboard box for a 1980s Chinese double-cassette tape recorder, faded black and orange printed Chinese text 燕舞 and the words 双卡收录机, a line drawing of a boombox, handling marks, scuffs, water stains.",
+      "id": "img_43739",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43739/65b9a771-be97-4dd9-9b4b-561a8ea24480.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-17T22%3A13%3A17Z%2F3600%2F%2F884726648ad18d51b64be651046932e4c53df30d10aa92809240583a09b321b6"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/shop/boxes2/img_43739/ai_generate_43739_1.png"
+      ]
+    }
+  ],
+  "plan": {
+    "kind": "image",
+    "model": "gpt",
+    "version": "gpt-image-2.5-sunburst",
+    "count": 2,
+    "quota": {
+      "limit": 300,
+      "used": 76,
+      "remaining": 224,
+      "unit": "张",
+      "after": 78
+    },
+    "running": {
+      "limit": 20,
+      "current": 0
+    },
+    "allowed": true,
+    "blockers": [],
+    "cost": {
+      "amount": 0,
+      "currency": "USD",
+      "priced": false,
+      "estimated": false,
+      "note": null
+    },
+    "request": {
+      "batch": true,
+      "tasks": 2,
+      "total_images": 2,
+      "local_uploads": []
+    }
+  }
+}
