@@ -52,10 +52,10 @@ export function robotMaterial(name) {
     const low = smoothstep(0.75, 0.15, P.y);
     const chipN = mx_fractal_noise_float(P.mul(55).add(9.3), 3, 2.0, 0.5).mul(0.5).add(0.5);
     const chips = smoothstep(0.86, 0.9, chipN.add(curv.mul(0.22)).add(zone.mul(0.06)));
-    let c = grime(vec3(0.6, 0.57, 0.51)).mul(mix(float(1), float(0.75), oil()));
+    let c = grime(vec3(0.63, 0.6, 0.55)).mul(mix(float(1), float(0.75), oil()));
     c = mix(c, vec3(0.2, 0.11, 0.05), tears.mul(0.7));
     c = mix(c, vec3(0.07, 0.065, 0.055), low.mul(0.5));
-    c = mix(c, vec3(0.22, 0.17, 0.13), chips); // chipped through to bare, rust-stained metal
+    c = mix(c, vec3(0.3, 0.14, 0.06), chips); // chipped through to rust (review6)
     const pm = new THREE.MeshPhysicalNodeMaterial();
     pm.colorNode = c.add(scratches().mul(0.1)).mul(shellDim);
     pm.roughnessNode = mix(mix(wetRough(0.45), float(0.3), chips), float(0.6), tears.mul(0.5));

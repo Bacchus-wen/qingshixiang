@@ -298,7 +298,7 @@ export async function buildDetails(ctx, root, facades, M, r) {
     root.add(tube, bracket);
     ctx.lightPool?.add({ pos: new THREE.Vector3(fx + 0.45, fy - 0.15, fz), color: new THREE.Color(0.78, 0.9, 1.0), intensity: 6, distance: 7.5,
       alive: 1, importance: 1.5, power: () => {
-        const t = performance.now() / 1000, ph = t % 6.7;
+        const t = performance.now() / 1000, ph = (t + 3.1) % 6.7;
         const k = ph < 0.7 ? (Math.sin(t * 53) * Math.sin(t * 17.3) > 0.15 ? 1 : 0.08) : 0.92 + 0.08 * Math.sin(t * 120);
         tubeK.value = k * mains.value; return k;
       } });
