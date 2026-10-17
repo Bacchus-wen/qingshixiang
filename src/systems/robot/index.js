@@ -246,16 +246,16 @@ export default {
           const along = dot(q, axis);
           const rad = q.sub(axis.mul(along)).length();
           const edgeR = along.max(0.001).mul(tanA);
-          const inside = float(1).sub(smoothstep(edgeR.mul(0.7), edgeR, rad)).mul(float(1).sub(smoothstep(0, edgeR.mul(0.7), rad)).mul(0.6).add(0.4)).mul(smoothstep(0.0, 0.2, along));
-          const fall = float(1).div(along.mul(along).mul(0.2).add(0.6)).mul(float(1).sub(smoothstep(10.0, 15.0, along))); // ~1/d^2: path grows with d, so the shaft is brightest at the lens and fades along
-          const camNear = smoothstep(0.4, 2.2, p.sub(cameraPosition).length()); // no haze smeared over the lens when the camera rides next to the eye
+          const inside = float(1).sub(smoothstep(edgeR.mul(0.8), edgeR, rad)).mul(float(1).sub(smoothstep(0, edgeR.mul(0.8), rad)).mul(0.55).add(0.45)).mul(smoothstep(0.0, 0.2, along));
+          const fall = float(1).div(along.mul(along).mul(0.12).add(0.6)).mul(float(1).sub(smoothstep(10.0, 15.0, along))); // ~1/d^2: path grows with d, so the shaft is brightest at the lens and fades along
+          const camNear = smoothstep(0.2, 0.8, p.sub(cameraPosition).length()); // no haze smeared over the lens when the camera rides next to the eye
           // shafts: the cracked lens and the aperture blades throw streaks along the beam (angular noise around the axis)
           const ang = atan(dot(q, bv), dot(q, bu));
           const streak = mx_noise_float(vec3(ang.mul(2.2), along.mul(0.12), 3.1)).mul(0.55).add(0.75);
           const dust = mx_noise_float(p.mul(1.9).add(vec3(0, time.mul(-0.5), 0))).mul(0.3).add(0.85).mul(streak);
           acc.addAssign(inside.mul(fall).mul(camNear).mul(dust));
         });
-        return color(eyeColor).mul(acc.mul(dt)).mul(this.coneK).mul(0.3);
+        return color(eyeColor).mul(acc.mul(dt)).mul(this.coneK).mul(0.2);
       })();
       if (ctx.params?.get('conedebug')) { mat.colorNode = vec3(0.05, 0.02, 0.0); mat.wireframe = true; }
       this.cone = new THREE.Mesh(g, mat); this.cone.frustumCulled = false; this.cone.renderOrder = 8; this.coneL = L;

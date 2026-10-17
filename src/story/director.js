@@ -105,8 +105,9 @@ export default {
         // high over the shoulder: the lamp-lit helmet top stays just under the frame, the beam rises out of it
         // v3 (review, after targets/memory.jpg): almost at eye height, just behind and beside the helmet, which stays
         // in the left foreground as a dark wet silhouette; the beam leaves the frame towards the lower right
-        this.cam.pos.copy(eyePos).addScaledVector(m.dir, -0.95).addScaledVector(this._w, -0.46);
-        this.cam.pos.y = eyePos.y + 0.2;
+        // r19: a little further aside and higher, so the beam reads as a shaft leaving the lens, not a disc seen end-on
+        this.cam.pos.copy(eyePos).addScaledVector(m.dir, -1.0).addScaledVector(this._w, -0.7);
+        this.cam.pos.y = eyePos.y + 0.35;
         this.cam.look.copy(eyePos).addScaledVector(m.dir, 9).addScaledVector(this._w, 0.9);
         this.cam.fov = 50;
         // the door memory gets its own slow push-in toward the doorway, then eases back

@@ -17,7 +17,8 @@ export const SHOTS = {
     ctx.memory.forceOpen = true; ctx.memory.lookOverride = { x: -0.25, y: 0.02 };
     const m = ctx.memory; if (!m.origin || m.origin.lengthSq() === 0) return;
     const w = new ctx.THREE.Vector3(m.dir.z, 0, -m.dir.x).normalize(), c = ctx.camera;
-    c.position.copy(m.origin).addScaledVector(m.dir, -0.95).addScaledVector(w, -0.46); c.position.y = m.origin.y + 0.2;
+    const side = Number(ctx.params?.get('side') ?? 0.7), back = Number(ctx.params?.get('back') ?? 1.0);
+    c.position.copy(m.origin).addScaledVector(m.dir, -back).addScaledVector(w, -side); c.position.y = m.origin.y + Number(ctx.params?.get('up') ?? 0.35);
     c.lookAt(c.position.clone().copy(m.origin).addScaledVector(m.dir, 9).addScaledVector(w, 0.9)); } },
   // the lens itself, from just in front of it and a little to the side (critiques r18/review5): built from the live eye
   'eye-hero': { pos: [-3.6, 0.9, -13.4], look: [-4.4, 0.8, -13.5], fov: 20, setup: (ctx) => {
