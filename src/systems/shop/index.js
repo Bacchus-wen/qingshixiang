@@ -270,8 +270,8 @@ export default {
     // rolling shutter, half open: corrugated slats from the lintel down to 1.25 m
     {
       const slats = new THREE.Group(); const sm = shutterMat();
-      for (let y = 2.55; y > 2.3; y -= 0.075) { const s = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.07, 0.02), sm); s.position.set(0, y, d / 2 + 0.05); s.castShadow = true; slats.add(s); }
-      const bar = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.05, 0.05), sm); bar.position.set(0, 2.27, d / 2 + 0.05); slats.add(bar);
+      for (let y = 2.55; y > 2.02; y -= 0.075) { const s = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.07, 0.02), sm); s.position.set(0, y, d / 2 + 0.05); s.castShadow = true; slats.add(s); }
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.05, 0.05), sm); bar.position.set(0, 1.99, d / 2 + 0.05); slats.add(bar);
       // guide channels the shutter runs in: U-section steel on both jambs, floor to lintel
       const rail = new THREE.MeshStandardNodeMaterial({ color: 0x4a4d4f, roughness: 0.55, metalness: 0.6 });
       for (const sx of [-1, 1]) {
