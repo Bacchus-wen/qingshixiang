@@ -125,6 +125,16 @@ function carton(front, W, H, D) {
   const side = cardboardMat;
   const f = new THREE.MeshStandardNodeMaterial({ map: tex(front), roughness: 0.9 });
   const g = new THREE.BoxGeometry(W, H, D, 4, 2, 4).translate(0, H / 2, 0);
+  { // not machined boxes: the top sags a little, one top corner is crushed in (seeded by the size, so stable)
+    const p = g.attributes.position, sd = Math.sin(W * 917 + H * 311 + D * 73) * 0.5 + 0.5, cx = sd < 0.5 ? -1 : 1, cz = (sd * 7 % 1) < 0.5 ? -1 : 1;
+    for (let i = 0; i < p.count; i++) {
+      const x = p.getX(i), y = p.getY(i), z = p.getZ(i), top = y / H;
+      const sag = Math.max(0, 1 - (Math.abs(x) / (W / 2)) ** 2) * Math.max(0, 1 - (Math.abs(z) / (D / 2)) ** 2) * top ** 4 * 0.012;
+      const cd = Math.max(0, 1 - Math.hypot(x / W - cx * 0.5, z / D - cz * 0.5) * 3) * top ** 3 * (0.012 + sd * 0.02);
+      p.setY(i, y - sag - cd); p.setX(i, x - cx * cd * 0.4); p.setZ(i, z - cz * cd * 0.4);
+    }
+    g.computeVertexNormals();
+  }
   const G = g.groups; // px, nx, py, ny, pz, nz in index order: merge into two runs -> two draw calls
   g.groups = [{ start: G[0].start, count: G[4].start - G[0].start, materialIndex: 0 }, { start: G[4].start, count: G[5].start + G[5].count - G[4].start, materialIndex: 1 }];
   const o = new THREE.Mesh(g, [side, f]); o.castShadow = o.receiveShadow = true;
@@ -280,7 +290,11 @@ export default {
     const ktx2 = new KTX2Loader().setTranscoderPath(`${import.meta.env.BASE_URL}basis/`).detectSupport(ctx.renderer);
     const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).setKTX2Loader(ktx2);
     let layout = [];
-    try { layout = await (await fetch(`${import.meta.env.BASE_URL}models/shop/layout.json`, { cache: 'no-store' })).json(); } catch { layout = []; }
+    try {
+      const r = await fetch(`${import.meta.env.BASE_URL}models/shop/layout.json`, { cache: 'no-store' });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      layout = await r.json(); if (!Array.isArray(layout)) throw new Error('not a list');
+    } catch (e) { console.error('[shop] layout.json could not be loaded, the shop will be empty:', e.message); layout = []; }
     // every distinct model is fetched + parsed once (in parallel with the textures); placed items are clones that
     // share geometry, materials and GPU textures (8 boomboxes = one set of textures, not eight)
     const templates = new Map();
@@ -624,8 +638,9 @@ export default {
   update(dt, t, ctx) {
     const oc = this.controls; if (!oc) return;
     oc.update();
-    const p = ctx.camera.position, R = ROOM;
-    if (p.z < R.d / 2 + 0.3) { p.x = Math.max(-R.w / 2 + 0.12, Math.min(R.w / 2 - 0.12, p.x)); p.z = Math.max(-R.d / 2 + 0.12, p.z); p.y = Math.max(0.15, Math.min(R.h - 0.12, p.y)); }
+    const p = ctx.camera.position, R = ROOM, wallZ0 = R.d / 2 - 0.12, wallZ1 = R.d / 2 + 0.25 + 0.12;
+    if (p.z < wallZ0) { p.x = Math.max(-R.w / 2 + 0.12, Math.min(R.w / 2 - 0.12, p.x)); p.z = Math.max(-R.d / 2 + 0.12, p.z); p.y = Math.max(0.15, Math.min(R.h - 0.12, p.y)); }
+    else if (p.z < wallZ1) { p.x = Math.max(-1.68, Math.min(1.68, p.x)); p.y = Math.max(0.15, Math.min(1.85, p.y)); } // in the doorway: between the jambs, under the shutter
     else { p.y = Math.max(0.1, p.y); p.z = Math.min(p.z, 12); }
   },
 };

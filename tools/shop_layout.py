@@ -27,7 +27,7 @@ fixed = [
  {"name": "magnifier", "glb": "magnifier.glb", "pos": [-1.02, 0, 0.97], "ry": -30, "on": "workbench"},
  {"name": "soldering_iron", "glb": "soldering_iron.glb", "pos": [-1.85, 0, 1.1], "ry": 15, "on": "workbench"},
  {"name": "enamel_mug", "glb": "enamel_mug.glb", "pos": [-2.25, 0, 1.15], "ry": 30, "on": "workbench"},
- {"name": "robot", "glb": "robot.glb", "pos": [-0.52, 0, 1.18], "ry": -56},
+ {"name": "robot", "glb": "robot.glb", "pos": [-0.52, 0, 1.18], "ry": -47},
  {"name": "broom", "type": "proc", "kind": "broom", "pos": [-1.98, 0, 1.45], "ry": 0, "roll": -16.4, "on": "floor"},
  {"name": "aframe", "type": "proc", "kind": "aframe", "pos": [0.95, 0, 1.95], "ry": -16, "scale": 0.8, "on": "floor"},
  {"name": "toolbox", "glb": "toolbox.glb", "pos": [-1.55, 0, 1.7], "ry": 14},
@@ -41,14 +41,14 @@ fixed = [
  {"name": "queue_radio", "glb": "tube_radio_closed.glb", "pos": [2.75, 0, 1.42], "ry": -84},
  {"name": "meter_box", "glb": "../v2/meterbox.glb", "pos": [2.42, 1.72, 0], "ry": -90, "wall": "front-out"},
  {"name": "flat_cartons", "glb": "../v2/cardboard.glb", "pos": [2.42, 0, 1.95], "ry": 4, "scale": 0.6},
- {"name": "spare_arm", "glb": "spare_arm.glb", "pos": [2.9, 1.32, -0.92], "ry": -90, "wall": "right"},
+ {"name": "spare_arm", "glb": "spare_arm.glb", "pos": [2.9, 1.42, -0.88], "ry": -90, "wall": "right"},
  {"name": "spare_torso", "glb": "spare_torso.glb", "pos": [-1.02, 0, 1.78], "ry": 150},
- {"name": "spare_leg", "glb": "spare_leg.glb", "pos": [2.9, 1.3, -0.48], "ry": -90, "wall": "right"},
+ {"name": "spare_leg", "glb": "spare_leg.glb", "pos": [2.9, 1.12, -0.42], "ry": -90, "wall": "right"},
  {"name": "drop_carton_a", "type": "carton", "front": "box_b", "size": [0.4, 0.46, 0.34], "pos": [1.45, 0, 1.62], "ry": -14},
  {"name": "drop_carton_b", "type": "carton", "front": "box_a", "size": [0.42, 0.36, 0.38], "pos": [1.97, 0, 1.4], "ry": 8},
  {"name": "drop_fan", "glb": "desk_fan.glb", "pos": [1.97, 0, 1.4], "ry": -150, "on": "drop_carton_b", "tint": [0.95, 0.9, 0.78]},
- {"name": "stool_tv", "glb": "stool.glb", "pos": [0.45, 0, -1.05], "ry": -18},
- {"name": "tv_on_stool", "glb": "crt_tv.glb", "pos": [0.45, 0, -1.05], "ry": 32, "on": "stool_tv", "scale": 0.82, "tint": [0.62, 0.64, 0.66]},
+ {"name": "stool_tv", "glb": "stool.glb", "pos": [0.05, 0, -1.22], "ry": -18},
+ {"name": "tv_on_stool", "glb": "crt_tv.glb", "pos": [0.05, 0, -1.22], "ry": 32, "on": "stool_tv", "scale": 0.82, "tint": [0.62, 0.64, 0.66]},
  {"name": "thermos_floor", "glb": "thermos.glb", "pos": [1.25, 0, 0.55], "ry": 40, "on": "stool_2"},
  {"name": "bicycle", "glb": "bicycle.glb", "pos": [2.35, 0, 2.95], "yaw0": 35.7, "ry": 183, "roll": 10, "scale": 0.84},
 ]
@@ -114,18 +114,18 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
                 tags.append([round(cx - (x0 + x1) / 2 + random.uniform(-0.08, 0.08), 3) * (1 if along == 'x' else -1), lv,
                              random.choice(range(10)) if random.random() < 0.8 else random.choice([10, 11])])
             # sometimes a small thing stacked on top (clock on a radio), when it clears the board above
-            if g == 'tube_radio_closed.glb' and random.random() < 0.45 and H[g] * sc + 0.17 < clear[lv] - 0.02:
+            if g == 'tube_radio_closed.glb' and random.random() < 0.3 and H[g] * sc + 0.17 < clear[lv] - 0.02:
                 out.append({"name": f"{shelf}_{lv}_{k}t", "glb": random.choice(['alarm_clock.glb', 'enamel_mug.glb']), "pos": [round(pos[0], 3), 0, round(pos[2], 3)],
                             "ry": ry + random.uniform(-30, 30), "on": f"{shelf}_{lv}_{k}", "scale": 0.95})
             room = abs(front - back) - dep - 0.03   # free depth in front of the big item
             fits = [x for x in SMALL if D[x] * 0.95 <= room]
-            if fits and random.random() < 0.45:
+            if fits and random.random() < 0.32:
                 sg = random.choice(fits); fz = front - sgn * (D[sg] / 2 + 0.006)
                 fx = cx + random.uniform(-w / 3, w / 3)
                 fpos = [fx, 0, fz] if along == 'x' else [fz, 0, fx]
                 out.append({"name": f"{shelf}_{lv}_{k}s", "glb": sg, "pos": [round(fpos[0], 3), 0, round(fpos[2], 3)], "ry": ry + random.uniform(-15, 15),
                             "on": shelf, "level": lv, "scale": 0.95})
-            x += w + random.uniform(0.005, 0.025); k += 1
+            x += w + (random.uniform(0.0, 0.012) if random.random() < 0.72 else random.uniform(0.09, 0.2)); k += 1   # tight runs and real gaps
 # back shelf: x from -1.13 to 0.93, board z from -2.21 (back) to -1.72 (front)
 fill('shelf_back', 'x', -1.1, 0.9, -2.21, -1.72, 5, 0, [0.58, 0.58, 0.58, 0.58, 0.45])  # top board 2.51 m: 0.49 m to the ceiling
 # left shelf (rotated 90 deg: its local x runs along -z of the room... tags use shelf-local x): board x from -2.96 to -2.47
@@ -134,7 +134,7 @@ fill('shelf_left2', 'z', 0.6, 1.85, -2.95, -2.5, 4, 90, [0.56, 0.56, 0.56, 0.9])
 for f in fixed:
     if f['name'] in shelf_tags: f['tags'] = shelf_tags[f['name']]
 # cartons on the floor: a stack in the back-right corner by the door, two under the bench end
-for i, (key, x, z, ry, lvl) in enumerate([('box_a', 0.98, -1.2, 6, 0), ('box_b', 0.99, -1.2, -3, 1), ('box_b', -2.3, 2.03, 8, 0)]):
+for i, (key, x, z, ry, lvl) in enumerate([('box_a', 0.7, -1.48, 6, 0), ('box_b', 0.71, -1.48, -3, 1), ('box_b', -2.3, 2.03, 8, 0)]):
     w, h, dd = CART[key]
     it = {"name": f"floor_carton_{i}", "type": "carton", "front": key, "size": [w, h, dd], "pos": [x, 0, z], "ry": ry}
     if lvl == 0: it["on"] = "floor"
