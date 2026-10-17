@@ -36,8 +36,11 @@ fixed = [
  {"name": "meter_box", "glb": "../v2/meterbox.glb", "pos": [2.42, 1.72, 0], "ry": -90, "wall": "front-out"},
  {"name": "flat_cartons", "glb": "../v2/cardboard.glb", "pos": [2.42, 0, 1.95], "ry": 4, "scale": 0.6},
  {"name": "spare_arm", "glb": "spare_arm.glb", "pos": [2.9, 1.32, -0.92], "ry": -90, "wall": "right"},
- {"name": "spare_torso", "glb": "spare_torso.glb", "pos": [-0.15, 0, 0.35], "ry": 160},
- {"name": "spare_leg", "glb": "spare_leg.glb", "pos": [0.12, 0, 0.62], "ry": 75, "roll": 88},
+ {"name": "spare_torso", "glb": "spare_torso.glb", "pos": [-1.02, 0, 1.78], "ry": 150},
+ {"name": "spare_leg", "glb": "spare_leg.glb", "pos": [2.9, 1.3, -0.48], "ry": -90, "wall": "right"},
+ {"name": "drop_carton_a", "type": "carton", "front": "box_b", "size": [0.4, 0.46, 0.34], "pos": [1.45, 0, 1.62], "ry": -14},
+ {"name": "drop_carton_b", "type": "carton", "front": "box_a", "size": [0.42, 0.36, 0.38], "pos": [1.97, 0, 1.4], "ry": 8},
+ {"name": "drop_fan", "glb": "desk_fan.glb", "pos": [1.97, 0, 1.4], "ry": -150, "on": "drop_carton_b", "tint": [0.95, 0.9, 0.78]},
  {"name": "stool_tv", "glb": "stool.glb", "pos": [0.45, 0, -1.05], "ry": -18},
  {"name": "tv_on_stool", "glb": "crt_tv.glb", "pos": [0.45, 0, -1.05], "ry": 32, "on": "stool_tv", "scale": 0.82, "tint": [0.62, 0.64, 0.66]},
  {"name": "thermos_floor", "glb": "thermos.glb", "pos": [1.25, 0, 0.55], "ry": 40, "on": "stool_2"},
@@ -108,7 +111,7 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
                 sg = random.choice(fits); fz = front - sgn * (D[sg] / 2 + 0.006)
                 fx = cx + random.uniform(-w / 3, w / 3)
                 fpos = [fx, 0, fz] if along == 'x' else [fz, 0, fx]
-                out.append({"name": f"{shelf}_{lv}_{k}s", "glb": sg, "pos": [round(fpos[0], 3), 0, round(fpos[2], 3)], "ry": ry + random.uniform(-35, 35),
+                out.append({"name": f"{shelf}_{lv}_{k}s", "glb": sg, "pos": [round(fpos[0], 3), 0, round(fpos[2], 3)], "ry": ry + random.uniform(-15, 15),
                             "on": shelf, "level": lv, "scale": 0.95})
             x += w + random.uniform(0.005, 0.025); k += 1
 # back shelf: x from -1.13 to 0.93, board z from -2.21 (back) to -1.72 (front)

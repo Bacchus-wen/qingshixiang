@@ -379,7 +379,7 @@ export default {
         o.rotation.order = 'YXZ'; o.rotation.y = (it.ry || 0) * Math.PI / 180; o.rotation.x = (it.roll || 0) * Math.PI / 180; // roll: lean about the item's own long (x) axis
         o.position.set(it.pos[0], 0, it.pos[2]); o.name = it.name;
         root.add(o); o.updateMatrixWorld(true);
-        _box.setFromObject(o, !!it.wall); // precise (vertex) box for wall-mounted items: flush means flush
+        _box.setFromObject(o, true); // precise (vertex) box: flush means flush, a rotated item's loose box can sit below it
         if (it.wall) {
           // wall-mounted: back face flush with the wall plane, bottom at the given height
           const { w: W, d: D } = ROOM;
@@ -431,7 +431,7 @@ export default {
         const r = placed.robot, f = new THREE.Vector3(0, 0, 1).applyQuaternion(r.quaternion), b = f.clone().negate(), P = r.position;
         const at = (dx, y, k = 0) => [P.x + b.x * dx + f.z * k, y, P.z + b.z * dx - f.x * k];
         const sx = -1.27, sz = -d / 2;
-        tube([at(0.16, 0.5), at(0.24, 0.32), at(0.3, 0.07), at(0.36, 0.006), [P.x + 0.1, 0.006, P.z - 0.9], [-0.75, 0.006, -1.0], [-1.05, 0.006, -1.75], [sx, 0.006, sz + 0.12], [sx, 0.12, sz + 0.03], [sx, 0.24, sz + 0.035]], 0.0055, cables);
+        tube([at(0.16, 0.5), at(0.24, 0.32), at(0.3, 0.07), at(0.36, 0.006), [-0.7, 0.006, 0.6], [-0.78, 0.006, 0.2], [-0.95, 0.006, -0.8], [-1.1, 0.006, -1.75], [sx, 0.006, sz + 0.12], [sx, 0.12, sz + 0.03], [sx, 0.24, sz + 0.035]], 0.0055, cables);
         plastic.push(new THREE.BoxGeometry(0.085, 0.085, 0.022).translate(sx, 0.3, sz + 0.011)); // socket
         plastic.push(new THREE.BoxGeometry(0.04, 0.05, 0.03).translate(sx, 0.27, sz + 0.035));    // plug
       }
@@ -439,7 +439,7 @@ export default {
       const shelfItems = Object.values(placed).filter((o) => o.userData.layout.on === 'shelf_back' && /fan|tv|radio/.test(o.userData.layout.glb || '') && o.userData.layout.level >= 1);
       for (const o of shelfItems.filter((_, i) => i % 3 === 1).slice(0, 4)) {
         const bb = new THREE.Box3().setFromObject(o, true), x = (bb.min.x + bb.max.x) / 2 + 0.08, y0 = bb.min.y + 0.01, fz = -1.72 + 0.008;
-        const drop = 0.18 + ((o.id * 37) % 10) / 40;
+        const drop = 0.18 + ([...o.name].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) % 997, 7) % 10) / 40;
         tube([[x, y0, bb.max.z - 0.05], [x + 0.02, y0 + 0.006, fz - 0.01], [x + 0.03, y0 - 0.02, fz + 0.012], [x + 0.025, y0 - drop * 0.6, fz + 0.02], [x + 0.03, y0 - drop, fz + 0.016]], 0.004, cables);
         plastic.push(new THREE.BoxGeometry(0.025, 0.04, 0.018).translate(x + 0.03, y0 - drop - 0.025, fz + 0.016));
       }
@@ -447,9 +447,10 @@ export default {
       mk(cables, new THREE.MeshStandardNodeMaterial({ color: 0x101010, roughness: 0.55 }));
       mk(conduits, new THREE.MeshStandardNodeMaterial({ color: 0xc9c3b4, roughness: 0.7 }));
       mk(plastic, new THREE.MeshStandardNodeMaterial({ color: 0xd8d0bc, roughness: 0.5 }));
-      // the spare arm hangs on a wall hook: a plate on the wall and a bent rod through its shoulder joint
-      if (placed.spare_arm) {
-        const bb = new THREE.Box3().setFromObject(placed.spare_arm, true), cz = (bb.min.z + bb.max.z) / 2, top = bb.max.y - 0.03;
+      // spare limbs hang on wall hooks: a plate on the wall and a bent rod through the top joint
+      for (const part of [placed.spare_arm, placed.spare_leg]) {
+        if (!part || part.userData.layout.wall !== 'right') continue;
+        const bb = new THREE.Box3().setFromObject(part, true), cz = (bb.min.z + bb.max.z) / 2, top = bb.max.y - 0.03;
         const steelM = PM.hook ??= new THREE.MeshStandardNodeMaterial({ color: 0x2a2a28, roughness: 0.5, metalness: 0.8 });
         const plate = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.07, 0.04), steelM); plate.position.set(w / 2 - 0.003, top + 0.02, cz);
         const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, w / 2 - bb.min.x + 0.02, 8).rotateZ(Math.PI / 2), steelM);
