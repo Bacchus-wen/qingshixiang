@@ -190,6 +190,16 @@ function procItem(kind, seed = 1) {
   return g;
 }
 
+// merge a static group's meshes into one mesh per material (world transforms baked in): draw calls for clutter
+function mergeByMaterial(group) {
+  group.updateMatrixWorld(true);
+  const by = new Map();
+  group.traverse((m) => { if (!m.isMesh) return; const g = (m.geometry.index ? m.geometry.toNonIndexed() : m.geometry.clone()).applyMatrix4(m.matrixWorld); for (const k of Object.keys(g.attributes)) if (!['position', 'normal', 'uv'].includes(k)) g.deleteAttribute(k); if (!g.attributes.uv) g.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(g.attributes.position.count * 2), 2)); (by.get(m.material) ?? by.set(m.material, []).get(m.material)).push(g); });
+  const out = new THREE.Group();
+  for (const [mat, gs] of by) { const m = new THREE.Mesh(mergeGeometries(gs), mat); m.castShadow = m.receiveShadow = true; out.add(m); }
+  return out;
+}
+
 // slotted angle-iron shelving (thin repeated steel: procedural, not generated): uprights, boards, worn grey-green paint.
 // All parts of one material are merged into one mesh: steel, boards, tags = 3 draw calls per shelf unit.
 let steelMat = null, boardMat = null;
@@ -460,9 +470,16 @@ export default {
       }
       // screwdrivers and a wire coil hanging on the pegboard (in front of the printed board: real depth and shadows)
       const pegX = -1.83, pegY = 1.72, pegZ = -d / 2 + 0.012;
-      [[-0.5, 0.18], [-0.44, 0.17], [-0.38, 0.19], [0.36, 0.2], [0.42, 0.18]].forEach(([dx, dy], i) => {
-        const sd = procItem('screwdriver', i); sd.rotation.z = -Math.PI / 2; sd.position.set(pegX + dx, pegY + dy, pegZ + 0.016); root.add(sd);
-      });
+      // two staggered rows of real screwdrivers across the board (the photo stays in the gaps), slightly askew
+      const rnd = (k) => { const x = Math.sin(k * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+      let k = 0; const tools = new THREE.Group();
+      for (const [row, y0, n] of [[0, 0.2, 14], [1, -0.08, 10]]) for (let i = 0; i < n; i++, k++) {
+        const dx = -0.54 + (i + (row ? 0.5 : 0)) * (row ? 0.11 : 0.078) + (rnd(k) - 0.5) * 0.02;
+        if (row === 1 && Math.abs(dx - 0.05) < 0.14) continue; // leave the copper coil's hook clear
+        const sd = procItem('screwdriver', k); sd.rotation.z = -Math.PI / 2 + (rnd(k + 9) - 0.5) * 0.12; sd.scale.setScalar(0.85 + rnd(k + 3) * 0.3);
+        sd.position.set(pegX + dx, pegY + y0 + (rnd(k + 5) - 0.5) * 0.03, pegZ + 0.016); tools.add(sd);
+      }
+      root.add(mergeByMaterial(tools)); // ~90 small meshes -> one per material
       const coil = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.009, 8, 32), new THREE.MeshStandardNodeMaterial({ color: 0x8a4a22, roughness: 0.35, metalness: 0.8 }));
       coil.position.set(pegX + 0.05, pegY - 0.02, pegZ + 0.02); coil.castShadow = true; root.add(coil);
     }

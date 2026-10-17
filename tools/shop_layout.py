@@ -86,6 +86,7 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
             g = random.choice(cands); last = g
             sc = round(random.uniform(0.78, 0.92) if g == 'crt_tv.glb' and random.random() < 0.5 else random.uniform(0.92, 1.0), 2)  # 14-inch and 18-inch sets
             yaw = random.uniform(-12, 12) if random.random() < 0.6 else random.uniform(-4, 4)   # not a shop display: some are askew
+            if g == 'crt_tv.glb' and random.random() < 0.18: yaw += 180   # a set turned round: back cover off, under repair
             a = math.radians(yaw)
             w = (W[g] * abs(math.cos(a)) + D[g] * abs(math.sin(a))) * sc      # rotated footprint along the shelf
             dep = (W[g] * abs(math.sin(a)) + D[g] * abs(math.cos(a))) * sc    # ... and across it
