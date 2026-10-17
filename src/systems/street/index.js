@@ -5,6 +5,7 @@ import { mains, memoryMaskCPU, amberNode } from '../../materials/memory.js';
 import { buildDetails } from './details.js';
 import { setupPassingCar } from './passing.js';
 import { placeV2Props } from './v2props.js';
+import { setupPastCar } from './details.js';
 import { placeModules } from './modules.js';
 import { installGround } from '../../materials/ground.js';
 import { mergeStatic } from './merge.js';
@@ -181,7 +182,10 @@ export default {
     // v2 ground (Codex w20, cybercity textures + our wet layer); ?oldground keeps the procedural one
     try { await installGround(ctx, root, M, L); } catch (e) { console.warn('[ground] kept old ground', e); }
     await placeModules(ctx, root, windows, this.facades); // v3: Tripo facade modules replace some windows
-    if (ctx.params.get('nov2props') === null) await placeV2Props(ctx, root);
+    if (ctx.params.get('nov2props') === null) {
+      const v2 = await placeV2Props(ctx, root);
+      setupPastCar(ctx, v2.find((o) => o.userData.prop === 'v2/sedan'));
+    }
     this.passing = await setupPassingCar(ctx, root); // marks itself dynamic: never merged
     if (ctx.params.get('nomerge') === null) mergeStatic(root);
 

@@ -33,7 +33,7 @@ export async function placeV2Props(ctx, root) {
     ['bins', -(W - 0.6), c, -35.0, Math.PI / 2 + 0.2],
     ['stools', W - 0.5, c, -24.0, -0.4],
     // batch 2
-    ['sedan', 2.0, 0, -37.5, 0.12],
+    ['sedan', 0.9, 0, -18, 0.12], // r19: the abandoned car itself (was a procedural block); its open door faces the robot
     ['bottlecrates', W - 0.45, c, -25.3, 0.2],
     ['bicycle', -(W - 0.4), c, -27.2, 0.05],
     ['planters', -(W - 0.55), c, -7.4, Math.PI / 2],

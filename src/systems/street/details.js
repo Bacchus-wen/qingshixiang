@@ -58,7 +58,7 @@ export function noticeMaterial(lines, seed = 0) {
 
 // The abandoned car remembers itself: in the cone its open door swings shut around the hinge and the headlamps
 // come on; when the light leaves it falls back to the present half a beat late (driven in street update()).
-function setupPastCar(ctx, car) {
+export function setupPastCar(ctx, car) {
   if (!car) return;
   car.traverse((o) => { o.userData.dynamic = true; }); // animated: keep out of the static merge
   const door = car.getObjectByName('door_fl');
@@ -71,7 +71,16 @@ function setupPastCar(ctx, car) {
   const glow = uniform(0);
   const lampMat = new THREE.MeshStandardNodeMaterial({ color: 0x111111, roughness: 0.3 });
   lampMat.emissiveNode = amberNode().mul(glow).mul(4);
-  for (const x of [-0.58, 0.58]) {
+  if (car.userData.prop === 'v2/sedan') {
+    // r19: the Tripo Santana (door already hanging open, leaves on the roof); lamps at its grille end (local +x)
+    const ry = car.rotation.y; car.rotation.y = 0; car.updateMatrixWorld(true);
+    const b = new THREE.Box3().setFromObject(car); car.rotation.y = ry;
+    const fx = b.max.x - car.position.x, h = b.max.y - b.min.y, cz = (b.min.z + b.max.z) / 2 - car.position.z, half = (b.max.z - b.min.z) / 2;
+    for (const s of [-1, 1]) {
+      const l = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.08, 0.2), lampMat);
+      l.position.set(fx - 0.04, h * 0.42, cz + s * half * 0.62); l.userData.dynamic = true; car.add(l);
+    }
+  } else for (const x of [-0.58, 0.58]) {
     const l = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.09, 0.03), lampMat);
     l.position.set(x, 0.66, 2.09); l.userData.dynamic = true; car.add(l);
   }
@@ -234,7 +243,7 @@ export async function buildDetails(ctx, root, facades, M, r) {
   const car = new THREE.Group();
   car.position.set(0.9, 0, -18); car.rotation.y = 0.18;
   root.add(car);
-  props.push(['car', 0.9, 0, -18, 0.18 + Math.PI]);
+  if (ctx.params.get('nov2props') !== null) props.push(['car', 0.9, 0, -18, 0.18 + Math.PI]); // the old procedural car only without the Tripo props
 
   // vending machine: the only thing in the street still powered
   const vmZ = -8.5, vmX = -(L.halfRoad + L.walk) + 0.5;
@@ -354,7 +363,7 @@ export async function buildDetails(ctx, root, facades, M, r) {
   }
   const placed = await placeProps(root, props);
   // the past of two things in the present: the abandoned car (door shut, lamps on) and the dead plants (in leaf)
-  setupPastCar(ctx, placed.find((o) => o.userData.prop === 'car'));
+  if (ctx.params.get('nov2props') !== null) setupPastCar(ctx, placed.find((o) => o.userData.prop === 'car'));
   setupPastPlants(placed.find((o) => o.userData.prop === 'props2/planters'));
   // notice board papers carry the relocation texts (and vanish in the past like the other notices)
   let pi = 0;

@@ -248,7 +248,7 @@ export default {
           const edgeR = along.max(0.001).mul(tanA);
           const inside = float(1).sub(smoothstep(edgeR.mul(0.7), edgeR, rad)).mul(float(1).sub(smoothstep(0, edgeR.mul(0.7), rad)).mul(0.6).add(0.4)).mul(smoothstep(0.0, 0.2, along));
           const fall = float(1).div(along.mul(along).mul(0.2).add(0.6)).mul(float(1).sub(smoothstep(10.0, 15.0, along))); // ~1/d^2: path grows with d, so the shaft is brightest at the lens and fades along
-          const camNear = smoothstep(0.2, 0.9, p.sub(cameraPosition).length());
+          const camNear = smoothstep(0.4, 2.2, p.sub(cameraPosition).length()); // no haze smeared over the lens when the camera rides next to the eye
           // shafts: the cracked lens and the aperture blades throw streaks along the beam (angular noise around the axis)
           const ang = atan(dot(q, bv), dot(q, bu));
           const streak = mx_noise_float(vec3(ang.mul(2.2), along.mul(0.12), 3.1)).mul(0.55).add(0.75);
