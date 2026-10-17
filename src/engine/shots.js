@@ -14,7 +14,7 @@ export const SHOTS = {
   'memory-windows': { pos: [-5.0, 1.55, -12.6], look: [3, 4.5, -16], fov: 55, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.lookOverride = { x: -0.15, y: 0.55, copy() {} }; } },
   // the gameplay over-the-shoulder (director 'look'): rebuilt from the live eye each frame
   'look-beam': { pos: [-5.2, 1.0, -13.4], look: [3, 0.9, -15], fov: 50, setup: (ctx) => {
-    ctx.memory.forceOpen = true; ctx.memory.lookOverride = { x: -0.25, y: 0.02 };
+    ctx.memory.forceOpen = true; ctx.memory.lookOverride = { x: -0.25, y: Number(ctx.params?.get('ly') ?? 0.02) };
     const m = ctx.memory; if (!m.origin || m.origin.lengthSq() === 0) return;
     const w = new ctx.THREE.Vector3(m.dir.z, 0, -m.dir.x).normalize(), c = ctx.camera;
     const side = Number(ctx.params?.get('side') ?? 0.7), back = Number(ctx.params?.get('back') ?? 1.0);
