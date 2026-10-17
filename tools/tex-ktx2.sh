@@ -25,4 +25,6 @@ ua sign_aframe sign_aframe 512x1024
 ua height_marks height_marks 512x1024
 # vertical 家电维修 board on the left pillar (the photo's grey surround is cropped by UVs)
 ua sign_vertical sign_vertical 512x1024
+# bare pegboard (tiled from the print's empty strip): every tool on it is geometry
+e1 pegboard_empty pegboard_empty 1024x512
 ls -la $OUT/*.ktx2 | awk '{s+=$5} END {print "total", s}'

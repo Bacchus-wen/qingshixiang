@@ -366,11 +366,11 @@
   "name": "stool_2",
   "glb": "stool.glb",
   "pos": [
-   1.9,
+   2.6,
    0,
-   -0.55
+   -1.58
   ],
-  "ry": 8
+  "ry": 15
  },
  {
   "name": "queue_carton",
@@ -462,20 +462,20 @@
    0.26
   ],
   "pos": [
-   -0.89,
+   -0.92,
    0,
-   1.47
+   1.5
   ],
-  "ry": -40,
+  "ry": -52,
   "on": "floor"
  },
  {
   "name": "spare_torso",
   "glb": "spare_torso.glb",
   "pos": [
-   -0.89,
+   -0.92,
    0,
-   1.47
+   1.5
   ],
   "ry": 128,
   "on": "work_carton",

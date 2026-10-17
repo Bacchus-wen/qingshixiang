@@ -18,7 +18,7 @@ export const ROOM = { w: 6.0, d: 4.5, h: 3.0 };
 // in world space so walls and floor line up without UV work. All are loaded up front (init awaits them).
 const TEX = {};
 const TEX_NAMES = ['floor_terrazzo', 'wall_upper', 'wall_dado', 'ceiling', 'facade', 'pavement', 'shutter', 'cardboard', 'pegboard',
-  'poster', 'calendar', 'price_list', 'slogan', 'sign_main', 'sign_side', 'tags', 'box_a', 'box_b', 'box_c', 'box_d', 'tv_poster', 'notice', 'street_backdrop', 'sign_aframe', 'height_marks', 'sign_vertical'];
+  'poster', 'calendar', 'price_list', 'slogan', 'sign_main', 'sign_side', 'tags', 'box_a', 'box_b', 'box_c', 'box_d', 'tv_poster', 'notice', 'street_backdrop', 'sign_aframe', 'height_marks', 'sign_vertical', 'pegboard_empty'];
 async function loadTextures(ktx2) {
   await Promise.all(TEX_NAMES.map(async (n) => {
     try {
@@ -374,7 +374,7 @@ export default {
       plane.position.set(0.4, -STEP + BH / 2 - 0.05, d / 2 + 0.25 + 8.5); root.add(plane);
     }
     // printed things on the walls (generated with the company platform, docs/gen-log.md)
-    root.add(onWall(decal('pegboard', 1.14, 0.76), 'back', -1.88, 1.72, 0.0145));
+    root.add(onWall(decal('pegboard_empty', 1.14, 0.76), 'back', -1.88, 1.72, 0.0145));
     { // the pegboard is a real 6 mm board on spacers, not a sticker: its edges catch light and cast a thin shadow
       const pb = new THREE.Mesh(new THREE.BoxGeometry(1.145, 0.765, 0.006), new THREE.MeshStandardNodeMaterial({ color: 0x6b4526, roughness: 0.8 }));
       pb.position.set(-1.88, 1.72, -d / 2 + 0.0135 - 0.0032); pb.castShadow = pb.receiveShadow = true; root.add(pb);
@@ -546,14 +546,6 @@ export default {
       plastic.push(new THREE.BoxGeometry(0.03, 0.12, 0.085).translate(w / 2 - 0.015, 1.45, 0.3));
       // a wall socket under the pegboard (the robot's long power cable was removed: it read as a stray line)
       { const sx = -1.27, sz = -d / 2; plastic.push(new THREE.BoxGeometry(0.085, 0.085, 0.022).translate(sx, 0.3, sz + 0.011)); }
-      // cords off a few shelf appliances: over the board's front edge, hanging, plug at the end
-      const shelfItems = Object.values(placed).filter((o) => o.userData.layout.on === 'shelf_back' && /fan|tv|radio/.test(o.userData.layout.glb || '') && o.userData.layout.level >= 1);
-      for (const o of shelfItems.filter((_, i) => i % 3 === 1).slice(0, 4)) {
-        const bb = new THREE.Box3().setFromObject(o, true), x = (bb.min.x + bb.max.x) / 2 + 0.08, y0 = bb.min.y + 0.01, fz = -1.72 + 0.008;
-        const drop = 0.18 + ([...o.name].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) % 997, 7) % 10) / 40;
-        tube([[x, y0, bb.max.z - 0.05], [x + 0.02, y0 + 0.006, fz - 0.01], [x + 0.03, y0 - 0.02, fz + 0.012], [x + 0.025, y0 - drop * 0.6, fz + 0.02], [x + 0.03, y0 - drop, fz + 0.016]], 0.004, cables);
-        plastic.push(new THREE.BoxGeometry(0.025, 0.04, 0.018).translate(x + 0.03, y0 - drop - 0.025, fz + 0.016));
-      }
       const mk = (arr, mat) => { if (!arr.length) return; const m = new THREE.Mesh(mergeGeometries(arr.map((g) => g.index ? g.toNonIndexed() : g)), mat); m.castShadow = m.receiveShadow = true; root.add(m); };
       mk(cables, new THREE.MeshStandardNodeMaterial({ color: 0x101010, roughness: 0.55 }));
       mk(conduits, new THREE.MeshStandardNodeMaterial({ color: 0xc9c3b4, roughness: 0.7 }));
@@ -590,7 +582,7 @@ export default {
       {
         const mess = new THREE.Group(), rr = (k) => { const x = Math.sin(k * 78.233 + 4.1) * 43758.5453; return x - Math.floor(x); };
         const wireM = [PM.wireMess0 ??= new THREE.MeshStandardNodeMaterial({ color: 0x8a2a1a, roughness: 0.5 }), PM.wireMess1 ??= new THREE.MeshStandardNodeMaterial({ color: 0x1b1b1b, roughness: 0.5 }), PM.wireMess2 ??= new THREE.MeshStandardNodeMaterial({ color: 0xb87333, roughness: 0.35, metalness: 0.9 })];
-        const spots = [[-1.2, 1.38], [-0.25, 1.62], [-1.75, 1.32], [-0.05, 0.92], [-2.05, 0.35]];
+        const spots = [[-0.72, 1.72], [-1.05, 1.68], [-0.45, 1.6], [-1.75, 1.32], [-2.05, 0.35]];
         spots.forEach(([x0, z0], k) => { // a loose curl of wire, lying flat
           const pts = []; let a = rr(k) * 6.28, x = x0, z = z0;
           for (let i = 0; i < 9; i++) { a += (rr(k * 9 + i) - 0.5) * 1.6; x += Math.cos(a) * 0.035; z += Math.sin(a) * 0.035; pts.push(new THREE.Vector3(x, 0.0025, z)); }
@@ -620,18 +612,54 @@ export default {
       }
       // screwdrivers and a wire coil hanging on the pegboard (in front of the printed board: real depth and shadows)
       const pegX = -1.88, pegY = 1.72, pegZ = -d / 2 + 0.012;
-      // two staggered rows of real screwdrivers across the board (the photo stays in the gaps), slightly askew
+      // the tool wall is real: a bare printed pegboard (holes, a few empty hooks) and every tool on it is geometry
+      // hanging 1-3 cm proud of the board on its hook -- spanners, pliers, a hammer, screwdrivers, wire and tape
       const rnd = (k) => { const x = Math.sin(k * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
-      let k = 0; const tools = new THREE.Group();
-      // the printed board (pegboard2: left 40% bare holes and empty hooks) leaves its left part to these real tools
-      for (const [row, y0, n] of [[0, 0.2, 8], [1, -0.07, 6]]) for (let i = 0; i < n; i++, k++) {
-        const dx = -0.53 + (i + (row ? 0.4 : 0)) * (row ? 0.075 : 0.058) + (rnd(k) - 0.5) * 0.015;
-        const sd = procItem('screwdriver', k); sd.rotation.z = -Math.PI / 2 + (rnd(k + 9) - 0.5) * 0.12; sd.scale.setScalar(0.85 + rnd(k + 3) * 0.3);
-        sd.position.set(pegX + dx, pegY + y0 + (rnd(k + 5) - 0.5) * 0.03, pegZ + 0.016); tools.add(sd);
+      const tools = new THREE.Group(), Z = pegZ + 0.012;
+      const steelT = PM.toolSteel ??= new THREE.MeshStandardNodeMaterial({ color: 0xbdbbb4, roughness: 0.32, metalness: 0.75 });
+      const redG = PM.toolRed ??= new THREE.MeshStandardNodeMaterial({ color: 0x8e1d14, roughness: 0.55 });
+      const woodH = PM.toolWood ??= new THREE.MeshStandardNodeMaterial({ color: 0x7a5a36, roughness: 0.7 });
+      const peg = (x, y) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(0.0025, 0.0025, 0.03, 6).rotateX(Math.PI / 2), steelT); m.position.set(x, y, pegZ + 0.015); tools.add(m); };
+      const box = (m, w, h, dd, x, y, z, rz = 0) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, dd), m); o.position.set(x, y, z); o.rotation.z = rz; tools.add(o); return o; };
+      // a row of open-ended spanners, graded
+      for (let i = 0; i < 8; i++) {
+        const L = 0.12 + i * 0.012, x = pegX - 0.5 + i * 0.045, top = pegY + 0.33, tilt = (rnd(i) - 0.5) * 0.08;
+        const g = new THREE.Group(); g.position.set(x, top, Z); g.rotation.z = tilt; tools.add(g);
+        const shaft = new THREE.Mesh(new THREE.BoxGeometry(0.012 + i * 0.001, L, 0.004), steelT); shaft.position.y = -L / 2; g.add(shaft);
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(0.009 + i * 0.0008, 0.0035, 6, 14), steelT); ring.position.y = -0.006; g.add(ring);
+        for (const sx of [-1, 1]) { const jaw = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.02, 0.004), steelT); jaw.position.set(sx * (0.009 + i * 0.0008), -L - 0.006, 0); g.add(jaw); }
+        peg(x, top + 0.004);
       }
-      root.add(mergeByMaterial(tools)); // ~90 small meshes -> one per material
-      const coil = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.009, 8, 32), new THREE.MeshStandardNodeMaterial({ color: 0x8a4a22, roughness: 0.35, metalness: 0.8 }));
-      coil.position.set(pegX - 0.24, pegY - 0.27, pegZ + 0.02); coil.castShadow = true; root.add(coil);
+      // three pairs of pliers, red-sleeved handles
+      for (let i = 0; i < 3; i++) {
+        const x = pegX - 0.06 + i * 0.075, top = pegY + 0.3, g = new THREE.Group(); g.position.set(x, top, Z); g.rotation.z = (rnd(i + 20) - 0.5) * 0.1; tools.add(g);
+        const jawL = 0.045 - i * 0.008;
+        for (const sx of [-1, 1]) {
+          const j = new THREE.Mesh(new THREE.BoxGeometry(0.007, jawL, 0.006), steelT); j.position.set(sx * 0.0035, -jawL / 2, 0); g.add(j);
+          const hdl = new THREE.Mesh(new THREE.CylinderGeometry(0.0055, 0.0045, 0.11, 8), redG); hdl.position.set(sx * 0.012, -jawL - 0.06, 0.002); hdl.rotation.z = sx * 0.16; g.add(hdl);
+        }
+        const piv = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.008, 10).rotateX(Math.PI / 2), steelT); piv.position.y = -jawL; g.add(piv);
+        peg(x, top + 0.003);
+      }
+      // a claw hammer, head up on two pegs
+      { const x = pegX + 0.2, top = pegY + 0.28; box(steelT, 0.1, 0.022, 0.022, x, top, Z + 0.006); const h = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.011, 0.28, 10), woodH); h.position.set(x, top - 0.15, Z + 0.006); tools.add(h); peg(x - 0.035, top - 0.015); peg(x + 0.035, top - 0.015); }
+      // copper wire and black tape on hooks
+      { const c = new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.009, 8, 32), PM.copper ??= new THREE.MeshStandardNodeMaterial({ color: 0x8a4a22, roughness: 0.35, metalness: 0.8 })); c.position.set(pegX + 0.4, pegY + 0.2, Z + 0.006); tools.add(c); peg(pegX + 0.4, pegY + 0.27);
+        const t = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.012, 8, 24), PM.tape ??= new THREE.MeshStandardNodeMaterial({ color: 0x141414, roughness: 0.45 })); t.position.set(pegX + 0.4, pegY + 0.03, Z + 0.01); tools.add(t); peg(pegX + 0.4, pegY + 0.062); }
+      // a hand saw at the right edge and a fan of files beside the hammer
+      { const x = pegX + 0.5, top = pegY + 0.3, sawM = PM.saw ??= new THREE.MeshStandardNodeMaterial({ color: 0x9a9890, roughness: 0.4, metalness: 0.8, side: THREE.DoubleSide });
+        const sh = new THREE.Shape(); sh.moveTo(-0.055, 0); sh.lineTo(0.055, 0); sh.lineTo(0.03, -0.38); sh.lineTo(-0.02, -0.38); sh.closePath(); // wide at the handle, tapering to the toe
+        const blade = new THREE.Mesh(new THREE.ShapeGeometry(sh), sawM); blade.position.set(x, top - 0.06, Z + 0.004); tools.add(blade);
+        box(woodH, 0.075, 0.07, 0.02, x, top - 0.02, Z + 0.006); peg(x, top + 0.01); }
+      for (let i = 0; i < 4; i++) { const x = pegX + 0.08 + i * 0.022, top = pegY + 0.12; box(PM.file ??= new THREE.MeshStandardNodeMaterial({ color: 0x55534e, roughness: 0.6, metalness: 0.6 }), 0.012 - i * 0.001, 0.2 - i * 0.02, 0.004, x, top - 0.1 + i * 0.01, Z + 0.003, (i - 1.5) * 0.04); box(woodH, 0.016, 0.06, 0.016, x, top + 0.015 + i * 0.01, Z + 0.006, (i - 1.5) * 0.04); }
+      // screwdrivers along the bottom, then a few more on the right
+      let k = 0;
+      for (const [x0, y0, n, step] of [[-0.5, -0.12, 10, 0.05], [0.1, -0.16, 6, 0.055]]) for (let i = 0; i < n; i++, k++) {
+        const sd = procItem('screwdriver', k); sd.rotation.z = -Math.PI / 2 + (rnd(k + 9) - 0.5) * 0.1; sd.scale.setScalar(0.85 + rnd(k + 3) * 0.3);
+        sd.position.set(pegX + x0 + i * step, pegY + y0 + (rnd(k + 5) - 0.5) * 0.02, pegZ + 0.016); tools.add(sd);
+      }
+      tools.traverse((m) => { if (m.isMesh) m.castShadow = true; });
+      root.add(mergeByMaterial(tools)); // a few hundred small meshes -> one per material
     }
     // the robot's head droops forward and to one side while it is asleep (rest pose; the beam phases animate it later)
     const head = placed.robot?.getObjectByName('robot_head');
