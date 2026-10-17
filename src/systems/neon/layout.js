@@ -70,7 +70,7 @@ export function planSigns(facades, signs = []) {
     // r19: the story home was the one blank wall in the main (over-the-shoulder) view. Its past gets a hostel sign
     // on the second floor; the door itself stays clear (a round light box beside it read as a moon over the climax).
     if (f.home) {
-      add('upper', '红星旅社', Math.min(4.2, f.w - 1.2), 0.85, f.frontX - f.side * 0.12, 4.85, f.z + 0.6, -f.side * Math.PI / 2, 5);
+      add('upper', '红星旅社', Math.min(4.2, f.w - 1.2), 0.85, f.frontX - f.side * 0.12, 4.35, f.z + 0.6, -f.side * Math.PI / 2, 5);
     }
     if (!f.home && i % 8 === 3) add('roof', i % 2 ? '南方歌舞厅' : '金龍海鮮酒家', Math.min(5.6, f.w - 0.4), 1.4,
       f.frontX - f.side * 0.35, f.h + 1.3, f.z, -f.side * Math.PI / 2, 3);
