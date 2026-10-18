@@ -1,0 +1,74 @@
+{
+ "radio": {
+  "api": {
+   "name": "API",
+   "tris": 1897275,
+   "verts": 1010576,
+   "tex": [
+    "baseColorTexture 4096x4096 jpeg",
+    "metallicRoughnessTexture 4096x4096 jpeg",
+    "normalTexture 4096x4096 png"
+   ],
+   "mb": 65.2,
+   "rotz": "-90"
+  },
+  "cli": {
+   "name": "CLI",
+   "tris": 1896873,
+   "verts": 1235365,
+   "tex": [
+    "normalTexture 4096x4096 png",
+    "baseColorTexture 4096x4096 jpeg",
+    "metallicRoughnessTexture 4096x4096 jpeg"
+   ],
+   "mb": 70.8,
+   "rotz": "-90"
+  },
+  "prev": {
+   "name": "API earlier (tex v3.5 + delight)",
+   "tris": 1900486,
+   "verts": 1009192,
+   "tex": [
+    "baseColorTexture 4096x4096 jpeg",
+    "metallicRoughnessTexture 4096x4096 jpeg",
+    "normalTexture 4096x4096 png"
+   ],
+   "mb": 64.0,
+   "rotz": "-90"
+  },
+  "_blind_key": {
+   "A": "api",
+   "B": "cli"
+  }
+ },
+ "robot": {
+  "api": {
+   "name": "API",
+   "tris": 1973022,
+   "verts": 1057640,
+   "tex": [
+    "baseColorTexture 4096x4096 jpeg",
+    "metallicRoughnessTexture 4096x4096 jpeg",
+    "normalTexture 4096x4096 png"
+   ],
+   "mb": 68.4,
+   "rotz": "-90"
+  },
+  "cli": {
+   "name": "CLI",
+   "tris": 1961204,
+   "verts": 1118260,
+   "tex": [
+    "normalTexture 4096x4096 png",
+    "baseColorTexture 4096x4096 jpeg",
+    "metallicRoughnessTexture 4096x4096 jpeg"
+   ],
+   "mb": 70.1,
+   "rotz": "-90"
+  },
+  "_blind_key": {
+   "A": "cli",
+   "B": "api"
+  }
+ }
+}

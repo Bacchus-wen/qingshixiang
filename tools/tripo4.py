@@ -5,7 +5,7 @@ assets/generated/tripo4/<op>/ledger.json; a recorded task_id is never resubmitte
   python3 tools/tripo4.py views  <op> <image>                  # image -> 4 views (10 cr), views saved for review
   python3 tools/tripo4.py model  <op> [--geo]                  # those views -> detailed model (+HD PBR unless --geo)
   python3 tools/tripo4.py mv4    <op> <front> <left> <back> <right>   # own 4 views -> detailed model
-  python3 tools/tripo4.py single <op> <image> [--geo]          # one image -> detailed model
+  python3 tools/tripo4.py single <op> <image> [--geo|--plain]  # one image -> detailed model (--plain: no texture_version/delight)
   python3 tools/tripo4.py decimate <op> <faces>                # Tripo retopology v3.0 + smart UV + bake (35 cr)
   python3 tools/tripo4.py status <op>                          # resume / download whatever is pending (no new spend)
   python3 tools/tripo4.py credits                              # total estimated credits in all ledgers
@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parent.parent
 BASE = ROOT / 'assets/generated/tripo4'
 MODEL = 'v3.1-20260211'
 TEX = {'texture': True, 'pbr': True, 'texture_version': 'v3.5-20260815', 'texture_quality': 'detailed', 'delight': True}
+TEX_PLAIN = {'texture': True, 'pbr': True, 'texture_quality': 'detailed'}   # same fields the Tripo CLI / Studio expose (route comparison)
 GEO = {'model': MODEL, 'geometry_quality': 'detailed'}
 COST = {'views': 10, 'model': 60, 'model_geo': 40, 'single': 60, 'single_geo': 40, 'decimate': 35}
 
@@ -127,12 +128,12 @@ def cmd_mv4(op, views, geo=False, wait=1500):
     finish_model(c, rec, name, tid, wait, out=f'{name}.glb')
 
 
-def cmd_single(op, image, geo=False, wait=1500):
+def cmd_single(op, image, geo=False, wait=1500, plain=False):
     rec = ledger(op); c = client()
     if 'file_token' not in rec:
         rec['file_token'] = c.upload_image(Path(image)); rec['image'] = str(Path(image).resolve()); save(rec)
     name = 'single_geo' if geo else 'single'
-    payload = {'input': rec['file_token'], **GEO, **({'texture': False, 'pbr': False} if geo else TEX)}
+    payload = {'input': rec['file_token'], **GEO, **({'texture': False, 'pbr': False} if geo else TEX_PLAIN if plain else TEX)}
     tid = submit(c, rec, name, '/generation/image-to-model', payload, COST[name])
     finish_model(c, rec, name, tid, wait, out=f'{name}.glb')
 
@@ -167,12 +168,12 @@ def cmd_credits():
 
 if __name__ == '__main__':
     a = sys.argv[1:]
-    geo = '--geo' in a; a = [x for x in a if x != '--geo']
+    geo = '--geo' in a; plain = '--plain' in a; a = [x for x in a if x not in ('--geo', '--plain')]
     cmd = a[0]
     if cmd == 'views': cmd_views(a[1], a[2])
     elif cmd == 'model': cmd_model(a[1], geo)
     elif cmd == 'mv4': cmd_mv4(a[1], a[2:6], geo)
-    elif cmd == 'single': cmd_single(a[1], a[2], geo)
+    elif cmd == 'single': cmd_single(a[1], a[2], geo, plain=plain)
     elif cmd == 'decimate': cmd_decimate(a[1], a[2])
     elif cmd == 'status': cmd_status(a[1])
     elif cmd == 'credits': cmd_credits()

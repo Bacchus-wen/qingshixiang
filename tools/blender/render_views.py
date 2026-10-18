@@ -1,7 +1,7 @@
 """Studio views of a GLB for side-by-side review against its reference image (headless).
 
   Blender -b --factory-startup -P tools/blender/render_views.py -- --in model.glb --out sheet.png [--ref ref.png] [--size 640]
-         [--views fq,side,bq,top] [--bg 0.62]
+         [--views fq,side,bq,top] [--bg 0.62] [--rotz deg] [--zoom 1] [--tz 0..1 target height]
 
 Keeps the model's own materials (Tripo PBR), light grey seamless background like the product-render references, soft
 3-point area lights, Eevee. Writes one horizontal strip (reference first, if given) and prints triangle count and size.
@@ -16,6 +16,11 @@ VIEWS = arg('--views', 'fq,side,bq,top').split(',')
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.gltf(filepath=arg('--in'))
+if arg('--rotz'):  # turn the model about the vertical axis first (raw Tripo output faces +X; -90 brings its front to -Y)
+    from mathutils import Matrix
+    R = Matrix.Rotation(math.radians(float(arg('--rotz'))), 4, 'Z')
+    for o in [o for o in bpy.context.scene.objects if o.parent is None]: o.matrix_world = R @ o.matrix_world
+    bpy.context.view_layer.update()
 objs = [o for o in bpy.context.scene.objects if o.type == 'MESH']
 tris = sum(sum(len(p.vertices) - 2 for p in o.data.polygons) for o in objs)
 pts = [o.matrix_world @ Vector(c) for o in objs for c in o.bound_box]
@@ -39,7 +44,8 @@ for i, (e, p) in enumerate([(3.0, (1.2, -1.6, 1.4)), (1.2, (-1.6, -0.8, 0.8)), (
 cam = bpy.data.objects.new('cam', bpy.data.cameras.new('cam')); bpy.context.collection.objects.link(cam); sc.camera = cam
 cam.data.angle = math.radians(30)
 DIRS = {'fq': (0.75, -1.0, 0.45), 'front': (0, -1, 0.15), 'side': (1, 0, 0.15), 'bq': (-0.75, 1.0, 0.45), 'top': (0.3, -0.5, 1.4), 'lq': (-0.75, -1.0, 0.45),
-        'px': (1, 0, 0.2), 'nx': (-1, 0, 0.2), 'py': (0, 1, 0.2), 'ny': (0, -1, 0.2)}  # px..ny: orientation probe (which side is the front)
+        'px': (1, 0, 0.2), 'nx': (-1, 0, 0.2), 'py': (0, 1, 0.2), 'ny': (0, -1, 0.2),  # px..ny: orientation probe (which side is the front)
+        'fhi': (0, -1, 0.9), 'lqhi': (-0.6, -1, 0.75)}  # high front views: into an open top
 outs = []
 for i, v in enumerate(VIEWS):
     d = Vector(DIRS[v]).normalized()
@@ -57,6 +63,7 @@ for f in outs:
     ins += ['-i', f]
 n = len(outs) + (1 if ref else 0)
 scale = ''.join(f'[{k}:v]scale=-2:{SIZE}[s{k}];' for k in range(n))
-subprocess.run(['ffmpeg', '-v', 'error', '-y'] + ins + ['-filter_complex', scale + ''.join(f'[s{k}]' for k in range(n)) + f'hstack=inputs={n}', arg('--out')])
+fc = scale + ''.join(f'[s{k}]' for k in range(n)) + f'hstack=inputs={n}' if n > 1 else f'[0:v]scale=-2:{SIZE}'  # one view: no stacking
+subprocess.run(['ffmpeg', '-v', 'error', '-y'] + ins + ['-filter_complex', fc, arg('--out')])
 print('VIEWS', arg('--out'), 'tris', tris, 'dims_m', tuple(round(x, 3) for x in dims))
 sys.stdout.flush(); os._exit(0)

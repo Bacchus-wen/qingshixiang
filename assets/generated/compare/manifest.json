@@ -1,0 +1,164 @@
+{
+ "radio": {
+  "name": "开盖电子管收音机",
+  "ref": "refs/radio.jpg",
+  "view": [
+   0.75,
+   0.42,
+   1
+  ],
+  "models": [
+   {
+    "id": "api",
+    "label": "API",
+    "file": "api/radio.glb",
+    "yaw": -90,
+    "settings": "v3.1-20260211 · 几何 detailed · 贴图 detailed · PBR",
+    "cost": "60 积分(开放平台)",
+    "time": "3 分 18 秒",
+    "tris": 1897275,
+    "meshes": 1,
+    "textures": 3,
+    "maps": "颜色 4K · 金属/粗糙 4K · 法线 4K",
+    "mb": 65.2
+   },
+   {
+    "id": "cli",
+    "label": "CLI",
+    "file": "cli/radio.glb",
+    "yaw": -90,
+    "settings": "v3.1-20260211 · 几何 detailed · 贴图 detailed · PBR",
+    "cost": "约 55 积分(Studio 账号)",
+    "time": "3 分 13 秒",
+    "tris": 1896873,
+    "meshes": 1,
+    "textures": 3,
+    "maps": "法线 4K · 颜色 4K · 金属/粗糙 4K",
+    "mb": 70.8
+   },
+   {
+    "id": "studio-h31",
+    "label": "Studio H3.1",
+    "file": "studio/tube-h3.1-8k.glb",
+    "yaw": 0,
+    "settings": "H3.1 · 8K 贴图",
+    "cost": "—",
+    "time": "—",
+    "tris": 105201,
+    "meshes": 1,
+    "textures": 3,
+    "maps": "颜色 8K · 金属/粗糙 4K · 法线 4K",
+    "mb": 28.1
+   },
+   {
+    "id": "studio-p20",
+    "label": "Studio P2.0",
+    "file": "studio/tube-p2.0-8k.glb",
+    "yaw": 0,
+    "settings": "P2.0 · 8K 贴图",
+    "cost": "—",
+    "time": "—",
+    "tris": 50699,
+    "meshes": 1,
+    "textures": 1,
+    "maps": "颜色 8K",
+    "mb": 24.2
+   },
+   {
+    "id": "studio-h31-parts",
+    "label": "Studio H3.1 分部件",
+    "file": "studio/tube-分部件生成-h3.1.glb",
+    "yaw": 0,
+    "settings": "H3.1 · 分部件生成",
+    "cost": "—",
+    "time": "—",
+    "tris": 1913949,
+    "meshes": 49,
+    "textures": 49,
+    "maps": "颜色 8K",
+    "mb": 84.5
+   },
+   {
+    "id": "api-prev",
+    "label": "API(早先一次)",
+    "file": "api/radio-prev.glb",
+    "yaw": -90,
+    "settings": "v3.1 · 贴图 v3.5 · 去光照 · PBR",
+    "cost": "约 60 积分(开放平台)",
+    "time": "—",
+    "tris": 1900486,
+    "meshes": 1,
+    "textures": 3,
+    "maps": "颜色 4K · 金属/粗糙 4K · 法线 4K",
+    "mb": 64.0
+   }
+  ]
+ },
+ "robot": {
+  "name": "旧家电拼成的机器人",
+  "ref": "refs/robot.jpg",
+  "view": [
+   -0.75,
+   0.38,
+   1
+  ],
+  "models": [
+   {
+    "id": "api",
+    "label": "API",
+    "file": "api/robot.glb",
+    "yaw": -90,
+    "settings": "v3.1-20260211 · 几何 detailed · 贴图 detailed · PBR",
+    "cost": "60 积分(开放平台)",
+    "time": "3 分 07 秒",
+    "tris": 1973022,
+    "meshes": 1,
+    "textures": 3,
+    "maps": "颜色 4K · 金属/粗糙 4K · 法线 4K",
+    "mb": 68.4
+   },
+   {
+    "id": "cli",
+    "label": "CLI",
+    "file": "cli/robot.glb",
+    "yaw": -90,
+    "settings": "v3.1-20260211 · 几何 detailed · 贴图 detailed · PBR",
+    "cost": "约 55 积分(Studio 账号)",
+    "time": "3 分 16 秒",
+    "tris": 1961204,
+    "meshes": 1,
+    "textures": 3,
+    "maps": "法线 4K · 颜色 4K · 金属/粗糙 4K",
+    "mb": 70.1
+   },
+   {
+    "id": "studio-h31",
+    "label": "Studio H3.1",
+    "file": "studio/robot-h3.1-8k.glb",
+    "yaw": 0,
+    "settings": "H3.1 · 8K 贴图",
+    "cost": "—",
+    "time": "—",
+    "tris": 1872330,
+    "meshes": 1,
+    "textures": 3,
+    "maps": "颜色 8K · 金属/粗糙 4K · 法线 4K",
+    "mb": 78.9
+   },
+   {
+    "id": "studio-p20",
+    "label": "Studio P2.0",
+    "file": "studio/robot-p2.0-四面-8k.glb",
+    "yaw": 0,
+    "settings": "P2.0 · 四边面 · 8K 贴图",
+    "cost": "—",
+    "time": "—",
+    "tris": 51080,
+    "meshes": 1,
+    "textures": 1,
+    "maps": "颜色 8K",
+    "mb": 16.7
+   }
+  ]
+ }
+}

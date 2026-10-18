@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tripo 生成方式对比</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="/src/compare/compare.css" />
+</head>
+<body>
+  <canvas id="view"></canvas>
+  <header id="top">
+    <span class="title">Tripo 生成方式对比</span>
+    <span id="subjects"></span>
+  </header>
+  <section class="panel" id="panelL"><select id="selL"></select><div class="stats" id="statsL"></div><div class="load" id="loadL"></div></section>
+  <section class="panel right" id="panelR"><select id="selR"></select><div class="stats" id="statsR"></div><div class="load" id="loadR"></div></section>
+  <div id="divider"><div class="line"></div><div class="knob" title="拖动比较 · 双击回到中间">‹ ›</div></div>
+  <figure id="ref"><img id="refImg" alt="" /><figcaption>输入图片(各条路线相同)</figcaption></figure>
+  <footer id="tools">
+    <button id="bRotate">自动旋转</button>
+    <button id="bWire">线框</button>
+    <button id="bReset">重置视角</button>
+    <span class="hint">拖中间的分割条比较 · 左键旋转 · 右键平移 · 滚轮缩放</span>
+  </footer>
+  <div id="msg"></div>
+  <script type="module" src="/src/compare/main.js"></script>
+</body>
+</html>
