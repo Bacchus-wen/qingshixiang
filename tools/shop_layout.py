@@ -23,7 +23,7 @@ fixed = [
  {"name": "screw_tin", "type": "proc", "kind": "tin", "pos": [-1.38, 0, 1.08], "on": "workbench"},
  {"name": "rag", "type": "proc", "kind": "rag", "pos": [-1.81, 0, 1.215], "ry": -6, "on": "workbench", "noDrop": True, "y": 0.0},
  {"name": "desk_lamp", "glb": "desk_lamp.glb", "pos": [-1.78, 0, 0.66], "ry": 32, "on": "workbench"},
- {"name": "tube_radio_open", "glb": "tube_radio_open.glb", "pos": [-1.2, 0, 0.73], "ry": -38, "on": "workbench"},
+ {"name": "tube_radio_open", "glb": "tube_radio_open.glb", "pos": [-1.2, 0, 0.73], "ry": -50, "on": "workbench"},
  {"name": "magnifier", "glb": "magnifier.glb", "pos": [-1.63, 0, 0.98], "ry": 25, "on": "workbench"},
  {"name": "soldering_iron", "glb": "soldering_iron.glb", "pos": [-2.06, 0, 1.11], "ry": 12, "on": "workbench"},
  {"name": "enamel_mug", "glb": "enamel_mug.glb", "pos": [-2.22, 0, 0.6], "ry": 30, "on": "workbench"},
@@ -45,7 +45,7 @@ fixed = [
  {"name": "work_carton", "type": "carton", "front": "box_c", "uv": [0.02, 0.55, 0.98, 0.93], "tape": True, "size": [0.34, 0.14, 0.23], "pos": [-0.793, 0, 1.559], "ry": 10, "on": "floor"},
  {"name": "spare_torso", "glb": "spare_torso.glb", "pos": [-0.8, 0, 1.54], "ry": 10, "on": "work_carton", "scale": 0.92},
  {"name": "spare_leg", "glb": "spare_leg.glb", "pos": [2.9, 1.12, -0.42], "ry": -150, "wall": "right"},
- {"name": "drop_carton_a", "type": "carton", "front": "box_b", "size": [0.4, 0.46, 0.34], "pos": [0.9, 0, 1.55], "ry": 24, "on": "floor"},
+ {"name": "drop_carton_a", "type": "carton", "front": "box_b", "size": [0.4, 0.46, 0.34], "pos": [1.3, 0, 1.6], "ry": -8, "on": "floor"},
  {"name": "drop_carton_b", "type": "carton", "front": "box_a", "size": [0.42, 0.36, 0.38], "pos": [1.8, 0, 1.38], "ry": 8},
  {"name": "drop_fan", "glb": "desk_fan.glb", "pos": [1.8, 0, 1.38], "ry": -95, "on": "drop_carton_b", "tint": [0.95, 0.9, 0.78]},
   {"name": "thermos_floor", "glb": "thermos.glb", "pos": [2.55, 0, -0.98], "ry": 40, "on": "parts_cabinet"},
@@ -85,10 +85,10 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
         mode = 'gap' if lv == gapl else random.choice(['dense', 'dense', 'sparse', 'gap']) if lv > 0 else 'dense'
         xe = x1 if mode != 'gap' else x0 + (x1 - x0) * random.uniform(0.5, 0.7)   # 'gap': the rest of the board stays empty
         gap_lo, gap_hi = (0.0, 0.012) if mode == 'dense' else (0.1, 0.24) if mode == 'sparse' else (0.0, 0.03)
-        force = False
+        force = False; faceon = [False]
         while True:
             low = clear[lv] < 0.5   # the low top board: only radios stand there, so mix in (smaller) cartons
-            if force or lv == 0 or (low and random.random() < 0.5) or (lv == store and random.random() < 0.7) or (0 < lv < levels - 1 and random.random() < 0.12):
+            if force or lv == 0 or (low and random.random() < 0.5) or (lv == store and random.random() < 0.45) or (0 < lv < levels - 1 and random.random() < 0.12):
                 force = False
                 fitk = [k_ for k_ in CART if CART[k_][1] * (0.7 if low else 0.85) <= clear[lv] - 0.02]
                 # never the same print twice in a row, and the shelf's prints used in turn (no wall of one brand)
@@ -111,7 +111,7 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
             under = {m for (c0, m) in below if abs(c0 - (x + 0.22)) < 0.32}
             nfs = sum(1 for o in out if o.get('on') == shelf and o.get('glb') == 'desk_fan.glb')
             nrs = sum(1 for o in out if o.get('on') == shelf and o.get('glb') == 'tube_radio_closed.glb')
-            ok = lambda g: H[g] <= clear[lv] and not (g == 'desk_fan.glb' and (nfan >= 1 or nfs >= 2)) and not (g == 'tube_radio_closed.glb' and nrs >= 3)  # brown radios read as copies past three
+            ok = lambda g: H[g] <= clear[lv] and not (g == 'desk_fan.glb' and (nfan >= 1 or nfs >= 2)) and not (g == 'tube_radio_closed.glb' and nrs >= 4)  # brown radios read as copies past four
             onlv = {m for (_, m) in here}
             cands = ([g for g in BIG if ok(g) and g != last and g not in under and g not in onlv] or [g for g in BIG if ok(g) and g != last and g not in onlv]
                      or [g for g in BIG if ok(g) and g != last and g not in under] or [g for g in BIG if ok(g) and g != last] or [g for g in BIG if ok(g)])
@@ -124,8 +124,10 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
             yaw = random.uniform(-4, 4) if r < 0.12 else random.uniform(-14, 14) if r < 0.7 else random.uniform(-32, 32) if r < 0.9 else random.choice([-1, 1]) * random.uniform(60, 90)
             if g in ('tube_radio_closed.glb', 'cassette_recorder.glb') and random.random() < 0.5: yaw = random.choice([-1, 1]) * random.uniform(18, 34)
             if g == 'crt_tv.glb' and random.random() < 0.3: yaw += 180   # turned round: back cover off
+            if faceon[0] and abs(((yaw + 180) % 360) - 180) < 25:   # already one face-on set on this board
+                yaw = random.choice([-1, 1]) * random.uniform(28, 40) if g != 'crt_tv.glb' else 180 + random.uniform(-15, 15)
             if g == 'desk_fan.glb':
-                if faced['fan'] >= 1 or nfan == 1: yaw = random.choice([1, -1]) * random.uniform(70, 95) if random.random() < 0.75 else 180 + random.uniform(-40, -25)  # side-on (or to the wall, turned)
+                if True: yaw = random.choice([1, -1]) * random.uniform(70, 95) if random.random() < 0.75 else 180 + random.uniform(-40, -25)  # side-on (or to the wall, turned)
                 else: faced['fan'] += 1
             a = math.radians(yaw)
             w = (W[g] * abs(math.cos(a)) + D[g] * abs(math.sin(a))) * sc      # rotated footprint along the shelf
@@ -148,6 +150,7 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
             t = tint_for(g)
             if t: it["tint"] = t
             out.append(it); here.append((cx, g))
+            if abs(((yaw + 180) % 360) - 180) < 25: faceon[0] = True
             if random.random() < 0.07:   # a few hand-written tags, never the same card twice on one shelf
                 free = [t for t in range(12) if t not in tagtxt]
                 if free:

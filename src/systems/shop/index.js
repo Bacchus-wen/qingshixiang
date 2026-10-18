@@ -650,7 +650,7 @@ export default {
       // a row of open-ended spanners, graded
       for (let i = 0; i < 5; i++) {
         const L = 0.12 + i * 0.02, x = pegX - 0.5 + [0, 0.018, 0.12, 0.138, 0.25][i], top = pegY + 0.33 - (i === 3 ? 0.03 : 0), tilt = (rnd(i) - 0.5) * 0.35;
-        const g = new THREE.Group(); g.position.set(x, top, Z + (i % 2) * 0.006); g.rotation.set(0, [0, 0.7, 0, -0.65, 0][i], tilt); tools.add(g); // pairs on one peg, the front one turned out
+        const g = new THREE.Group(); g.position.set(x, top, Z + (i % 2) * 0.006); g.rotation.set(0, [0, 0.7, 0, -0.65, 0.55][i], tilt); tools.add(g); // pairs on one peg, the front one turned out
         const shaft = new THREE.Mesh(new THREE.BoxGeometry(0.012 + i * 0.001, L, 0.004), steelT); shaft.position.y = -L / 2; g.add(shaft);
         const ring = new THREE.Mesh(new THREE.TorusGeometry(0.009 + i * 0.0008, 0.0035, 6, 14), steelT); ring.position.y = -0.006; g.add(ring);
         { const jaw = new THREE.Mesh(new THREE.TorusGeometry(0.011 + i * 0.0009, 0.0042, 5, 12, Math.PI * 1.25), steelT); jaw.rotation.z = -Math.PI / 2 - Math.PI * 0.625 + Math.PI; jaw.position.set(0, -L - 0.008, 0); g.add(jaw); } // open end
@@ -701,9 +701,9 @@ export default {
         const t = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.012, 8, 24), PM.tape ??= new THREE.MeshStandardNodeMaterial({ color: 0x141414, roughness: 0.45 })); t.position.set(pegX + 0.4, pegY + 0.03, Z + 0.01); tools.add(t); peg(pegX + 0.4, pegY + 0.062); }
       // a panel saw at the right edge, hung by its closed wooden handle: tapered blade with a toothed edge, three brass rivets
       { const x = pegX + 0.5, top = pegY + 0.32, sawM = PM.saw ??= new THREE.MeshStandardNodeMaterial({ color: 0x7c7a74, roughness: 0.58, metalness: 0.75, side: THREE.DoubleSide });
-        const g = new THREE.Group(); g.position.set(x, top, Z + 0.004); g.rotation.set(0, 0.3, 0.05); tools.add(g); // toothed edge turned out
+        const g = new THREE.Group(); g.position.set(x, top, Z + 0.004); g.rotation.set(0, 0.52, 0.05); tools.add(g); // turned ~30 deg on its hook: handle thickness and the toothed edge read
         const bl = new THREE.Shape(); bl.moveTo(0.05, -0.05); bl.lineTo(0.035, -0.47); // straight back
-        const n = 84; for (let t = 0; t <= n; t++) { const f = t / n, y = -0.47 + 0.42 * f + (t % 2 ? 0.0016 : 0), xe = -0.03 + (-0.06 + 0.03) * f; bl.lineTo(xe - (t % 2 ? 0.0032 : 0), y); } // raked teeth, toe to heel
+        const n = 120; for (let t = 0; t <= n; t++) { const f = t / n, y = -0.47 + 0.42 * f - (t % 2 ? 0.0034 : 0), xe = -0.03 + (-0.06 + 0.03) * f; bl.lineTo(xe - (t % 2 ? 0.0034 : 0), y); } // sharp sawteeth: steep front, sloped back
         bl.closePath();
         g.add(new THREE.Mesh(new THREE.ExtrudeGeometry(bl, { depth: 0.0009, bevelEnabled: false }), sawM));
         const hd = new THREE.Shape(); hd.moveTo(-0.07, -0.085); hd.lineTo(0.065, -0.07); hd.quadraticCurveTo(0.07, 0.03, 0.03, 0.035); hd.lineTo(-0.035, 0.03); hd.quadraticCurveTo(-0.075, 0.02, -0.07, -0.085);
