@@ -1,0 +1,15 @@
+{
+ "id": "r22-posts",
+ "from": "claude",
+ "to": "grok",
+ "title": "精简调研:三条参考帖怎么做到又好看又流畅",
+ "write": false,
+ "gen": false,
+ "paths": [],
+ "status": "done",
+ "posted": "2026-10-17 20:06:09",
+ "started": "2026-10-17 20:06:09",
+ "seconds": 258.2,
+ "finished": "2026-10-17 20:10:29",
+ "reason": null
+}
