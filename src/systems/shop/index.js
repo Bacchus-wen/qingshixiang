@@ -701,7 +701,7 @@ export default {
         const t = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.012, 8, 24), PM.tape ??= new THREE.MeshStandardNodeMaterial({ color: 0x141414, roughness: 0.45 })); t.position.set(pegX + 0.4, pegY + 0.03, Z + 0.01); tools.add(t); peg(pegX + 0.4, pegY + 0.062); }
       // a panel saw at the right edge, hung by its closed wooden handle: tapered blade with a toothed edge, three brass rivets
       { const x = pegX + 0.5, top = pegY + 0.32, sawM = PM.saw ??= new THREE.MeshStandardNodeMaterial({ color: 0x7c7a74, roughness: 0.58, metalness: 0.75, side: THREE.DoubleSide });
-        const g = new THREE.Group(); g.position.set(x, top, Z + 0.004); g.rotation.set(0, 0.52, 0.05); tools.add(g); // turned ~30 deg on its hook: handle thickness and the toothed edge read
+        const g = new THREE.Group(); g.position.set(x, top, Z + 0.004); g.rotation.set(0, 0.8, 0.05); tools.add(g); // turned ~45 deg on its hook: handle thickness, blade edge and teeth all read
         const bl = new THREE.Shape(); bl.moveTo(0.05, -0.05); bl.lineTo(0.035, -0.47); // straight back
         const n = 120; for (let t = 0; t <= n; t++) { const f = t / n, y = -0.47 + 0.42 * f - (t % 2 ? 0.0034 : 0), xe = -0.03 + (-0.06 + 0.03) * f; bl.lineTo(xe - (t % 2 ? 0.0034 : 0), y); } // sharp sawteeth: steep front, sloped back
         bl.closePath();

@@ -144,6 +144,8 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
                 cx = x + w / 2; c = back + sgn * (dep / 2 + 0.012)
             stg = random.uniform(0.02, max(0.02, abs(front - back) - dep - 0.035)) if random.random() < 0.45 else 0   # pulled forward on the board
             c += sgn * stg
+            if faceon[0] and abs(((yaw + 180) % 360) - 180) < 25:   # the board could not take it turned far enough: turn it round
+                yaw = 180 + random.uniform(-12, 12)
             pos = [cx, 0, c] if along == 'x' else [c, 0, cx]
             it = {"name": f"{shelf}_{lv}_{k}", "glb": g, "pos": [round(pos[0], 3), 0, round(pos[2], 3)], "ry": ry + yaw,
                   "on": shelf, "level": lv, "scale": sc}

@@ -16,7 +16,8 @@ const list = await page.evaluate(() => {
   // prefer stand-alone instances (not on shelves) as the representative of each model
   // representative instance per model: a named, free-standing one where it exists
   const PREF = { 'tube_radio_closed.glb': 'queue_radio', 'crt_tv.glb': 'tv_on_stool', 'stool.glb': 'stool_2', 'desk_fan.glb': 'queue_fan', 'alarm_clock.glb': 'bench_clock', 'thermos.glb': 'thermos_floor' };
-  const rank = (o) => { const L = o.userData.layout; return (PREF[L.glb] === L.name ? -2 : 0) + (L.level != null ? 1 : 0) + (/plank|_t$/.test(L.name) || L.on === 'wall_plank' ? 1 : 0); };
+  const rank = (o) => { const L = o.userData.layout; return (PREF[L.glb] === L.name ? -2 : 0) + (L.level != null ? 1 : 0) + (/plank|_t$/.test(L.name) || L.on === 'wall_plank' ? 1 : 0)
+    + (P[L.name + 's'] || P[L.name + 't'] ? 3 : 0); }; // something stands in front of / on top of it
   const items = Object.values(P).sort((a, b) => rank(a) - rank(b));
   for (const o of items) {
     const L = o.userData.layout; const key = L.glb || (L.type === 'proc' ? 'proc_' + L.kind : null);
@@ -32,9 +33,20 @@ for (const { key, name } of list) {
   await page.evaluate(({ name }) => {
     const e = window.__engine, THREE = e.ctx.THREE, o = e.ctx.api.shop.placed[name], R = e.ctx.api.shop.ROOM;
     const b = new THREE.Box3().setFromObject(o, true), c = b.getCenter(new THREE.Vector3()), r = b.getSize(new THREE.Vector3()).length() / 2;
-    const yaw = o.rotation.y; const d = new THREE.Vector3(0.55, 0.35, 1).normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+    const yaw = o.rotation.y; const d0 = new THREE.Vector3(0.55, 0.35, 1).normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
     const cam = e.camera; e.shot = null; cam.fov = 35; cam.updateProjectionMatrix();
     const dist = Math.max(0.35, r / Math.tan((cam.fov * Math.PI / 180) / 2) * 1.15);
+    // first direction (around the 3/4 front) whose view line is clear of other objects, as the viewer's double-click does
+    const others = Object.values(e.ctx.api.shop.placed).filter((x) => x !== o), rc = new THREE.Raycaster(); let d = d0;
+    for (const da of [0, 0.35, -0.35, 0.7, -0.7, 1.1, -1.1]) {
+      const dd = d0.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), da), side = new THREE.Vector3().crossVectors(dd, new THREE.Vector3(0, 1, 0)).normalize();
+      const pc = c.clone().addScaledVector(dd, dist); let clear = true;   // centre and four points of the model's silhouette
+      for (const [sx, sy] of [[0, 0], [0.6, 0], [-0.6, 0], [0, 0.6], [0, -0.6]]) {
+        const q = c.clone().addScaledVector(side, sx * r).add(new THREE.Vector3(0, sy * r, 0)), v2 = pc.clone().sub(q);
+        rc.set(q, v2.clone().normalize()); rc.far = v2.length(); if (rc.intersectObjects(others, true).length) { clear = false; break; }
+      }
+      if (clear) { d = dd; break; }
+    }
     const p = c.clone().addScaledVector(d, dist);
     // keep the camera inside the room (or on the street for street items)
     if (c.z < R.d / 2) { // interior item: camera stays inside the room, in front of it
