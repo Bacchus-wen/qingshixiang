@@ -85,9 +85,11 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
         mode = 'gap' if lv == gapl else random.choice(['dense', 'dense', 'sparse', 'gap']) if lv > 0 else 'dense'
         xe = x1 if mode != 'gap' else x0 + (x1 - x0) * random.uniform(0.5, 0.7)   # 'gap': the rest of the board stays empty
         gap_lo, gap_hi = (0.0, 0.012) if mode == 'dense' else (0.1, 0.24) if mode == 'sparse' else (0.0, 0.03)
+        force = False
         while True:
             low = clear[lv] < 0.5   # the low top board: only radios stand there, so mix in (smaller) cartons
-            if lv == 0 or (low and random.random() < 0.5) or (lv == store and random.random() < 0.7) or (0 < lv < levels - 1 and random.random() < 0.12):
+            if force or lv == 0 or (low and random.random() < 0.5) or (lv == store and random.random() < 0.7) or (0 < lv < levels - 1 and random.random() < 0.12):
+                force = False
                 fitk = [k_ for k_ in CART if CART[k_][1] * (0.7 if low else 0.85) <= clear[lv] - 0.02]
                 # never the same print twice in a row, and the shelf's prints used in turn (no wall of one brand)
                 fitk = sorted([k_ for k_ in fitk if k_ != last] or fitk, key=lambda k_: (cart_use.get((shelf, k_), 0), random.random()))
@@ -108,11 +110,14 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
             # no same model straight above the same model on the board below (columns of identical sets read as stock)
             under = {m for (c0, m) in below if abs(c0 - (x + 0.22)) < 0.32}
             nfs = sum(1 for o in out if o.get('on') == shelf and o.get('glb') == 'desk_fan.glb')
-            ok = lambda g: H[g] <= clear[lv] and not (g == 'desk_fan.glb' and (nfan >= 1 or nfs >= 2))
+            nrs = sum(1 for o in out if o.get('on') == shelf and o.get('glb') == 'tube_radio_closed.glb')
+            ok = lambda g: H[g] <= clear[lv] and not (g == 'desk_fan.glb' and (nfan >= 1 or nfs >= 2)) and not (g == 'tube_radio_closed.glb' and nrs >= 3)  # brown radios read as copies past three
             onlv = {m for (_, m) in here}
             cands = ([g for g in BIG if ok(g) and g != last and g not in under and g not in onlv] or [g for g in BIG if ok(g) and g != last and g not in onlv]
                      or [g for g in BIG if ok(g) and g != last and g not in under] or [g for g in BIG if ok(g) and g != last] or [g for g in BIG if ok(g)])
-            if not cands: break
+            if not cands:
+                if low and x < x0 + (x1 - x0) * 0.65: force = True; continue   # nothing else fits up there: another small carton
+                break
             g = random.choice(cands); last = g
             sc = round(random.uniform(0.78, 0.92) if g == 'crt_tv.glb' and random.random() < 0.5 else random.uniform(0.92, 1.0), 2)  # 14-inch and 18-inch sets
             r = random.random()   # not a shop display: most askew, some turned well round, a few side-on

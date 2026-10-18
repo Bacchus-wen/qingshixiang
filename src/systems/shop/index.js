@@ -221,7 +221,7 @@ function procItem(kind, seed = 1) {
       const tw = t + 0.07 * Math.sin(t * 9 + x0 * 11) + 0.04 * nz(x0 * 9, t * 4);                       // uneven fold spacing
       const ridge = 0.5 + 0.5 * Math.sin(tw * Math.PI * 6 + 1.3 * Math.sin(x0 * 16 + t * 3) + 0.6 * nz(x0 * 12, t * 5));
       const env = Math.max(0, 1 - Math.abs(t - 0.3) / 0.45) * (0.6 + 0.4 * nz(x0 * 7, 1.3));            // bunched near the edge, flat behind
-      let y = 0.002 + ridge * ridge * (3 - 2 * ridge) * 0.013 * env + (0.5 + 0.5 * nz(x0 * 24, t * 9)) * 0.002;
+      let y = 0.002 + ridge * ridge * (3 - 2 * ridge) * 0.009 * env + (0.5 + 0.5 * nz(x0 * 24, t * 9)) * 0.002;
       const ux = Math.min(1, Math.max(0, (x0 + 0.075) / 0.1)), corner = ux * ux * (3 - 2 * ux) * Math.max(0, 1 - t / 0.42); // most of the front edge slides over
       if (corner > 0) { const hang = corner * 0.11; y -= hang; z += Math.min(hang, 0.014) * 0.7; }
       p.setXYZ(i, x, y, z + 0.004);
@@ -672,7 +672,7 @@ export default {
             const sh = new THREE.Shape(); const pts = [...K.jaw, ...handle(0), [0, pv + 0.004]];
             pts.forEach(([px, py], j) => (j ? sh.lineTo(sx * px, py) : sh.moveTo(sx * px, py)));
             const st = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 0.0045, bevelEnabled: true, bevelSize: 0.0006, bevelThickness: 0.0006, bevelSegments: 1 }), forged);
-            const half = new THREE.Group(); half.position.set(0, pv, 0); half.rotation.z = sx * 0.09; g.add(half); // opened ~10 deg about the rivet
+            const half = new THREE.Group(); half.position.set(0, pv, 0); half.rotation.z = sx * 0.13; g.add(half); // opened ~15 deg about the rivet
             st.position.set(sx * 0.0005, -pv, sx > 0 ? 0 : 0.0048); half.add(st);
             const sl = new THREE.Shape(); handle(0.0016).slice(0, 4).concat(handle(0.0016).slice(5)).forEach(([px, py], j) => (j ? sl.lineTo(sx * px, py) : sl.moveTo(sx * px, py)));
             const dp = new THREE.Mesh(new THREE.ExtrudeGeometry(sl, { depth: 0.0085, bevelEnabled: true, bevelSize: 0.0015, bevelThickness: 0.0015, bevelSegments: 2 }), dip[i]);
@@ -689,7 +689,7 @@ export default {
         { const eye = new THREE.Mesh(new THREE.CylinderGeometry(0.0128, 0.0128, 0.042, 8).rotateZ(Math.PI / 2), steelT); eye.rotation.x = Math.PI / 8; eye.position.set(-0.004, 0, 0); HG.add(eye); } // octagonal head
         const face = new THREE.Mesh(new THREE.CylinderGeometry(0.0125, 0.012, 0.03, 14).rotateZ(Math.PI / 2), steelT); face.position.set(-0.037, 0, 0); HG.add(face);
         const fr = new THREE.Mesh(new THREE.CylinderGeometry(0.0135, 0.0135, 0.004, 14).rotateZ(Math.PI / 2), steelT); fr.position.set(-0.053, 0, 0); HG.add(fr);
-        for (const sz of [-1, 1]) { const cl = new THREE.Mesh(new THREE.CylinderGeometry(0.0025, 0.009, 0.06, 6).rotateZ(-Math.PI / 2 - 0.35), steelT); cl.scale.z = 0.55; cl.position.set(0.042, -0.01, sz * 0.005); HG.add(cl); } // split claw: thick at the eye, tapering down to the tips
+        for (const sz of [-1, 1]) { const cl = new THREE.Mesh(new THREE.CylinderGeometry(0.0025, 0.009, 0.06, 6).rotateZ(-Math.PI / 2 - 0.35), steelT); cl.scale.z = 0.55; cl.position.set(0.042, -0.01, sz * 0.0075); HG.add(cl); } // split claw: thick at the eye, tapering down to the tips
         const h = new THREE.Mesh(new THREE.CylinderGeometry(0.0085, 0.0115, 0.28, 10), woodH); h.position.set(-0.004, -0.15, 0); HG.add(h);
         peg(x - 0.035, top - 0.017); peg(x + 0.03, top - 0.017); }
       // copper wire and black tape on hooks
