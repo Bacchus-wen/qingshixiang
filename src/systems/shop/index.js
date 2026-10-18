@@ -223,7 +223,7 @@ function procItem(kind, seed = 1) {
       const env = Math.max(0, 1 - Math.abs(t - 0.3) / 0.45) * (0.6 + 0.4 * nz(x0 * 7, 1.3));            // bunched near the edge, flat behind
       let y = 0.002 + ridge * ridge * (3 - 2 * ridge) * 0.009 * env + (0.5 + 0.5 * nz(x0 * 24, t * 9)) * 0.002;
       const ux = Math.min(1, Math.max(0, (x0 + 0.075) / 0.1)), corner = ux * ux * (3 - 2 * ux) * Math.max(0, 1 - t / 0.42); // most of the front edge slides over
-      if (corner > 0) { const hang = corner * 0.11; y -= hang; z += Math.min(hang, 0.014) * 0.7; }
+      if (corner > 0) { const hang = corner * 0.11; y -= hang; z += Math.min(hang, 0.014) * 0.7 - Math.max(0, hang - 0.06) * 0.45; } // hem tucked in under the top
       p.setXYZ(i, x, y, z + 0.004);
     }
     geo.computeVertexNormals();
@@ -650,7 +650,7 @@ export default {
       // a row of open-ended spanners, graded
       for (let i = 0; i < 5; i++) {
         const L = 0.12 + i * 0.02, x = pegX - 0.5 + [0, 0.018, 0.12, 0.138, 0.25][i], top = pegY + 0.33 - (i === 3 ? 0.03 : 0), tilt = (rnd(i) - 0.5) * 0.35;
-        const g = new THREE.Group(); g.position.set(x, top, Z + (i % 2) * 0.006); g.rotation.set(0, [0, 0.7, 0, -0.65, 0.55][i], tilt); tools.add(g); // pairs on one peg, the front one turned out
+        const g = new THREE.Group(); g.position.set(x, top, Z + (i % 2) * 0.006); g.rotation.set(0, [0, 0.7, 0, -0.65, 1.15][i], tilt); tools.add(g); // pairs on one peg, the front one turned out
         const shaft = new THREE.Mesh(new THREE.BoxGeometry(0.012 + i * 0.001, L, 0.004), steelT); shaft.position.y = -L / 2; g.add(shaft);
         const ring = new THREE.Mesh(new THREE.TorusGeometry(0.009 + i * 0.0008, 0.0035, 6, 14), steelT); ring.position.y = -0.006; g.add(ring);
         { const jaw = new THREE.Mesh(new THREE.TorusGeometry(0.011 + i * 0.0009, 0.0042, 5, 12, Math.PI * 1.25), steelT); jaw.rotation.z = -Math.PI / 2 - Math.PI * 0.625 + Math.PI; jaw.position.set(0, -L - 0.008, 0); g.add(jaw); } // open end
