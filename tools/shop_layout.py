@@ -23,12 +23,12 @@ fixed = [
  {"name": "screw_tin", "type": "proc", "kind": "tin", "pos": [-1.38, 0, 1.08], "on": "workbench"},
  {"name": "rag", "type": "proc", "kind": "rag", "pos": [-1.96, 0, 1.215], "on": "workbench", "noDrop": True, "y": 0.0},
  {"name": "desk_lamp", "glb": "desk_lamp.glb", "pos": [-1.78, 0, 0.66], "ry": 32, "on": "workbench"},
- {"name": "tube_radio_open", "glb": "tube_radio_open.glb", "pos": [-1.2, 0, 0.73], "ry": -16, "on": "workbench"},
+ {"name": "tube_radio_open", "glb": "tube_radio_open.glb", "pos": [-1.2, 0, 0.73], "ry": -31, "on": "workbench"},
  {"name": "magnifier", "glb": "magnifier.glb", "pos": [-1.63, 0, 0.98], "ry": 25, "on": "workbench"},
  {"name": "soldering_iron", "glb": "soldering_iron.glb", "pos": [-2.06, 0, 1.11], "ry": 12, "on": "workbench"},
  {"name": "enamel_mug", "glb": "enamel_mug.glb", "pos": [-2.22, 0, 0.6], "ry": 30, "on": "workbench"},
  {"name": "robot", "glb": "robot.glb", "pos": [-0.55, 0, 1.16], "ry": -51},
- {"name": "broom", "type": "proc", "kind": "broom", "pos": [-1.98, 0, 1.45], "ry": 0, "roll": -16.4, "on": "floor"},
+ {"name": "broom", "type": "proc", "kind": "broom", "pos": [-2.8, 0, 0.14], "ry": 90, "roll": -7, "on": "floor"},
  {"name": "aframe", "type": "proc", "kind": "aframe", "pos": [1.12, 0, 2.0], "ry": -28, "scale": 0.7, "on": "floor"},
  {"name": "toolbox", "glb": "toolbox.glb", "pos": [-1.55, 0, 1.7], "ry": 14},
  {"name": "back_door", "glb": "back_door.glb", "pos": [1.75, 0, 0], "wall": "back"},
@@ -95,13 +95,15 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
                 out.append({"name": f"{shelf}_{lv}_{k}", "type": "carton", "front": key, "size": [round(w0, 3), round(h * sc, 3), round(d0, 3)],
                             "pos": [round(pos[0], 3), 0, round(pos[2], 3)], "ry": ry + cyaw, "on": shelf, "level": lv})
                 x += w + random.uniform(0.01, 0.03); k += 1; continue
-            cands = [g for g in BIG if H[g] <= clear[lv] and g != last] or [g for g in BIG if H[g] <= clear[lv]]
+            nfan = sum(1 for o in out if o.get('on') == shelf and o.get('level') == lv and o.get('glb') == 'desk_fan.glb')
+            cands = [g for g in BIG if H[g] <= clear[lv] and g != last and not (g == 'desk_fan.glb' and nfan >= 2)] or [g for g in BIG if H[g] <= clear[lv] and not (g == 'desk_fan.glb' and nfan >= 2)]
             if not cands: break
             g = random.choice(cands); last = g
             sc = round(random.uniform(0.78, 0.92) if g == 'crt_tv.glb' and random.random() < 0.5 else random.uniform(0.92, 1.0), 2)  # 14-inch and 18-inch sets
             r = random.random()   # not a shop display: most askew, some turned well round, a few side-on
             yaw = random.uniform(-4, 4) if r < 0.12 else random.uniform(-14, 14) if r < 0.7 else random.uniform(-32, 32) if r < 0.9 else random.choice([-1, 1]) * random.uniform(60, 90)
-            if g == 'crt_tv.glb' and random.random() < 0.18: yaw += 180   # a set turned round: back cover off, under repair
+            if g in ('tube_radio_closed.glb', 'cassette_recorder.glb') and random.random() < 0.5: yaw = random.choice([-1, 1]) * random.uniform(18, 34)
+            if (g == 'crt_tv.glb' and random.random() < 0.3) or (g == 'desk_fan.glb' and nfan == 1): yaw += 180   # turned round: back cover off / fan to the wall
             a = math.radians(yaw)
             w = (W[g] * abs(math.cos(a)) + D[g] * abs(math.sin(a))) * sc      # rotated footprint along the shelf
             dep = (W[g] * abs(math.sin(a)) + D[g] * abs(math.cos(a))) * sc    # ... and across it

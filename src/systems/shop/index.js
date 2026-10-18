@@ -622,8 +622,8 @@ export default {
       const peg = (x, y) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(0.0025, 0.0025, 0.03, 6).rotateX(Math.PI / 2), steelT); m.position.set(x, y, pegZ + 0.015); tools.add(m); };
       const box = (m, w, h, dd, x, y, z, rz = 0) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, dd), m); o.position.set(x, y, z); o.rotation.z = rz; tools.add(o); return o; };
       // a row of open-ended spanners, graded
-      for (let i = 0; i < 8; i++) {
-        const L = 0.12 + i * 0.012, x = pegX - 0.5 + i * 0.045, top = pegY + 0.33, tilt = (rnd(i) - 0.5) * 0.08;
+      for (let i = 0; i < 5; i++) {
+        const L = 0.12 + i * 0.02, x = pegX - 0.5 + [0, 0.05, 0.12, 0.165, 0.25][i], top = pegY + 0.33 - (i === 3 ? 0.05 : 0), tilt = (rnd(i) - 0.5) * 0.35;
         const g = new THREE.Group(); g.position.set(x, top, Z); g.rotation.z = tilt; tools.add(g);
         const shaft = new THREE.Mesh(new THREE.BoxGeometry(0.012 + i * 0.001, L, 0.004), steelT); shaft.position.y = -L / 2; g.add(shaft);
         const ring = new THREE.Mesh(new THREE.TorusGeometry(0.009 + i * 0.0008, 0.0035, 6, 14), steelT); ring.position.y = -0.006; g.add(ring);
@@ -654,14 +654,14 @@ export default {
         const sh = new THREE.Shape(); sh.moveTo(-0.055, 0); sh.lineTo(0.055, 0); sh.lineTo(0.03, -0.38); sh.lineTo(-0.02, -0.38); // wide at the handle, tapering to the toe
         for (let t = 1; t <= 30; t++) { const f = t / 30, x = -0.02 + (-0.055 + 0.02) * f, y = -0.38 + 0.38 * f; sh.lineTo(x - (t % 2 ? 0.006 : 0), y); } // teeth on the cutting edge
         sh.closePath();
-        const blade = new THREE.Mesh(new THREE.ShapeGeometry(sh), sawM); blade.position.set(x, top - 0.06, Z + 0.004); tools.add(blade);
+        const blade = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 0.0012, bevelEnabled: false }), sawM); blade.position.set(x, top - 0.06, Z + 0.004); blade.rotation.y = -0.5; tools.add(blade);
         box(woodH, 0.075, 0.07, 0.02, x, top - 0.02, Z + 0.006); peg(x, top + 0.01); }
       for (let i = 0; i < 4; i++) { const x = pegX + 0.08 + i * 0.022, top = pegY + 0.12; box(PM.file ??= new THREE.MeshStandardNodeMaterial({ color: 0x55534e, roughness: 0.6, metalness: 0.6 }), 0.012 - i * 0.001, 0.2 - i * 0.02, 0.004, x, top - 0.1 + i * 0.01, Z + 0.003, (i - 1.5) * 0.04); box(woodH, 0.016, 0.06, 0.016, x, top + 0.015 + i * 0.01, Z + 0.006, (i - 1.5) * 0.04); }
       // screwdrivers along the bottom, then a few more on the right
       let k = 0;
-      for (const [x0, y0, n, step] of [[-0.5, -0.12, 10, 0.05], [0.1, -0.16, 6, 0.055]]) for (let i = 0; i < n; i++, k++) {
-        const sd = procItem('screwdriver', k); sd.rotation.z = -Math.PI / 2 + (rnd(k + 9) - 0.5) * 0.1; sd.scale.setScalar(0.85 + rnd(k + 3) * 0.3);
-        sd.position.set(pegX + x0 + i * step, pegY + y0 + (rnd(k + 5) - 0.5) * 0.02, pegZ + 0.016); tools.add(sd);
+      for (const [x0, y0, n, step] of [[-0.48, -0.12, 5, 0.06], [0.12, -0.15, 4, 0.07]]) for (let i = 0; i < n; i++, k++) {
+        const sd = procItem('screwdriver', k); sd.rotation.z = -Math.PI / 2 + (rnd(k + 9) - 0.5) * (i % 3 === 2 ? 0.7 : 0.15); sd.scale.setScalar(0.8 + rnd(k + 3) * 0.4);
+        sd.position.set(pegX + x0 + i * step + (rnd(k + 11) - 0.5) * 0.025, pegY + y0 + (rnd(k + 5) - 0.5) * 0.05, pegZ + 0.016); tools.add(sd);
       }
       tools.traverse((m) => { if (m.isMesh) m.castShadow = true; });
       root.add(mergeByMaterial(tools)); // a few hundred small meshes -> one per material
