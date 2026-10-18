@@ -221,8 +221,8 @@ function procItem(kind, seed = 1) {
       const tw = t + 0.07 * Math.sin(t * 9 + x0 * 11) + 0.04 * nz(x0 * 9, t * 4);                       // uneven fold spacing
       const ridge = 0.5 + 0.5 * Math.sin(tw * Math.PI * 6 + 1.3 * Math.sin(x0 * 16 + t * 3) + 0.6 * nz(x0 * 12, t * 5));
       const env = Math.max(0, 1 - Math.abs(t - 0.3) / 0.45) * (0.6 + 0.4 * nz(x0 * 7, 1.3));            // bunched near the edge, flat behind
-      let y = 0.002 + ridge * ridge * (3 - 2 * ridge) * 0.02 * env + (0.5 + 0.5 * nz(x0 * 24, t * 9)) * 0.0025;
-      const ux = Math.min(1, Math.max(0, (x0 + 0.03) / 0.12)), corner = ux * ux * (3 - 2 * ux) * Math.max(0, 1 - t / 0.42); // half the front edge slides over
+      let y = 0.002 + ridge * ridge * (3 - 2 * ridge) * 0.013 * env + (0.5 + 0.5 * nz(x0 * 24, t * 9)) * 0.002;
+      const ux = Math.min(1, Math.max(0, (x0 + 0.075) / 0.1)), corner = ux * ux * (3 - 2 * ux) * Math.max(0, 1 - t / 0.42); // most of the front edge slides over
       if (corner > 0) { const hang = corner * 0.11; y -= hang; z += Math.min(hang, 0.014) * 0.7; }
       p.setXYZ(i, x, y, z + 0.004);
     }
@@ -642,15 +642,15 @@ export default {
       // hanging 1-3 cm proud of the board on its hook -- spanners, pliers, a hammer, screwdrivers, wire and tape
       const rnd = (k) => { const x = Math.sin(k * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
       const tools = new THREE.Group(), Z = pegZ + 0.012;
-      const steelT = PM.toolSteel ??= new THREE.MeshStandardNodeMaterial({ color: 0xbdbbb4, roughness: 0.32, metalness: 0.75 });
+      const steelT = PM.toolSteel ??= new THREE.MeshStandardNodeMaterial({ color: 0xb4b2ab, roughness: 0.46, metalness: 0.75 }); // satin, not mirror: turned tools caught the lamp as white bars
       const redG = PM.toolRed ??= new THREE.MeshStandardNodeMaterial({ color: 0x8e1d14, roughness: 0.55 });
       const woodH = PM.toolWood ??= new THREE.MeshStandardNodeMaterial({ color: 0x7a5a36, roughness: 0.7 });
       const peg = (x, y) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(0.0025, 0.0025, 0.03, 6).rotateX(Math.PI / 2), steelT); m.position.set(x, y, pegZ + 0.015); tools.add(m); };
       const box = (m, w, h, dd, x, y, z, rz = 0) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, dd), m); o.position.set(x, y, z); o.rotation.z = rz; tools.add(o); return o; };
       // a row of open-ended spanners, graded
       for (let i = 0; i < 5; i++) {
-        const L = 0.12 + i * 0.02, x = pegX - 0.5 + [0, 0.05, 0.12, 0.165, 0.25][i], top = pegY + 0.33 - (i === 3 ? 0.05 : 0), tilt = (rnd(i) - 0.5) * 0.35;
-        const g = new THREE.Group(); g.position.set(x, top, Z); g.rotation.z = tilt; tools.add(g);
+        const L = 0.12 + i * 0.02, x = pegX - 0.5 + [0, 0.018, 0.12, 0.138, 0.25][i], top = pegY + 0.33 - (i === 3 ? 0.03 : 0), tilt = (rnd(i) - 0.5) * 0.35;
+        const g = new THREE.Group(); g.position.set(x, top, Z + (i % 2) * 0.006); g.rotation.set(0, [0, 0.7, 0, -0.65, 0][i], tilt); tools.add(g); // pairs on one peg, the front one turned out
         const shaft = new THREE.Mesh(new THREE.BoxGeometry(0.012 + i * 0.001, L, 0.004), steelT); shaft.position.y = -L / 2; g.add(shaft);
         const ring = new THREE.Mesh(new THREE.TorusGeometry(0.009 + i * 0.0008, 0.0035, 6, 14), steelT); ring.position.y = -0.006; g.add(ring);
         { const jaw = new THREE.Mesh(new THREE.TorusGeometry(0.011 + i * 0.0009, 0.0042, 5, 12, Math.PI * 1.25), steelT); jaw.rotation.z = -Math.PI / 2 - Math.PI * 0.625 + Math.PI; jaw.position.set(0, -L - 0.008, 0); g.add(jaw); } // open end
@@ -665,14 +665,14 @@ export default {
           { jaw: [[0, 0], [0.0022, 0], [0.004, -0.025], [0.007, -0.05], [0.0105, -0.068]], piv: -0.074, hl: 0.12 },
           { jaw: [[0, 0], [0.0075, -0.002], [0.012, -0.011], [0.0125, -0.022], [0.0105, -0.03]], piv: -0.036, hl: 0.11 }];
         KINDS.forEach((K, i) => {
-          const x = pegX + [-0.07, 0.01, 0.335][i], top = pegY + [0.31, 0.29, 0.24][i], g = new THREE.Group(); g.position.set(x, top, Z + 0.014); g.rotation.set(0, [0.5, -0.55, 0.45][i], [0.06, -0.38, 0.2][i]); tools.add(g);
+          const x = pegX + [-0.07, 0.01, 0.335][i], top = pegY + [0.31, 0.29, 0.24][i], g = new THREE.Group(); g.position.set(x, top, Z + 0.014); g.rotation.set(0, [0.62, -0.6, 0.55][i], [0.06, -0.38, 0.2][i]); tools.add(g);
           const pv = K.piv, hl = K.hl;
           const handle = (o) => [[0.0105 + o, pv - 0.004], [0.0125 + o, pv - 0.03], [0.0145 + o, pv - hl * 0.6], [0.0158 + o, pv - hl + 0.004], [0.0118, pv - hl - o], [0.0075 - o, pv - hl + 0.004], [0.0062 - o, pv - hl * 0.6], [0.0042 - o, pv - 0.03], [0.001, pv - 0.004]]; // closed: handle ends ~2.5 cm apart
           for (const sx of [1, -1]) {
             const sh = new THREE.Shape(); const pts = [...K.jaw, ...handle(0), [0, pv + 0.004]];
             pts.forEach(([px, py], j) => (j ? sh.lineTo(sx * px, py) : sh.moveTo(sx * px, py)));
             const st = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 0.0045, bevelEnabled: true, bevelSize: 0.0006, bevelThickness: 0.0006, bevelSegments: 1 }), forged);
-            const half = new THREE.Group(); half.position.set(0, pv, 0); half.rotation.z = sx * 0.06; g.add(half); // opened ~7 deg about the rivet
+            const half = new THREE.Group(); half.position.set(0, pv, 0); half.rotation.z = sx * 0.09; g.add(half); // opened ~10 deg about the rivet
             st.position.set(sx * 0.0005, -pv, sx > 0 ? 0 : 0.0048); half.add(st);
             const sl = new THREE.Shape(); handle(0.0016).slice(0, 4).concat(handle(0.0016).slice(5)).forEach(([px, py], j) => (j ? sl.lineTo(sx * px, py) : sl.moveTo(sx * px, py)));
             const dp = new THREE.Mesh(new THREE.ExtrudeGeometry(sl, { depth: 0.0085, bevelEnabled: true, bevelSize: 0.0015, bevelThickness: 0.0015, bevelSegments: 2 }), dip[i]);
@@ -684,12 +684,13 @@ export default {
         });
       }
       // a claw hammer, head up on two pegs
-      { const x = pegX + 0.2, top = pegY + 0.28, hz = Z + 0.006;
-        { const eye = new THREE.Mesh(new THREE.CylinderGeometry(0.0128, 0.0128, 0.042, 8).rotateZ(Math.PI / 2), steelT); eye.rotation.x = Math.PI / 8; eye.position.set(x - 0.004, top, hz); tools.add(eye); } // octagonal head
-        const face = new THREE.Mesh(new THREE.CylinderGeometry(0.0125, 0.012, 0.03, 14).rotateZ(Math.PI / 2), steelT); face.position.set(x - 0.037, top, hz); tools.add(face);
-        const fr = new THREE.Mesh(new THREE.CylinderGeometry(0.0135, 0.0135, 0.004, 14).rotateZ(Math.PI / 2), steelT); fr.position.set(x - 0.053, top, hz); tools.add(fr);
-        for (const sz of [-1, 1]) { const cl = new THREE.Mesh(new THREE.CylinderGeometry(0.0025, 0.009, 0.06, 6).rotateZ(-Math.PI / 2 - 0.35), steelT); cl.scale.z = 0.55; cl.position.set(x + 0.042, top - 0.01, hz + sz * 0.005); tools.add(cl); } // split claw: thick at the eye, tapering down to the tips
-        const h = new THREE.Mesh(new THREE.CylinderGeometry(0.0085, 0.0115, 0.28, 10), woodH); h.position.set(x - 0.004, top - 0.15, hz); tools.add(h);
+      { const x = pegX + 0.2, top = pegY + 0.28, hz = Z + 0.006, HG = new THREE.Group(); // turned ~50 deg on its pegs: the split claw shows
+        HG.position.set(x, top, hz + 0.012); HG.rotation.y = 0.85; tools.add(HG);
+        { const eye = new THREE.Mesh(new THREE.CylinderGeometry(0.0128, 0.0128, 0.042, 8).rotateZ(Math.PI / 2), steelT); eye.rotation.x = Math.PI / 8; eye.position.set(-0.004, 0, 0); HG.add(eye); } // octagonal head
+        const face = new THREE.Mesh(new THREE.CylinderGeometry(0.0125, 0.012, 0.03, 14).rotateZ(Math.PI / 2), steelT); face.position.set(-0.037, 0, 0); HG.add(face);
+        const fr = new THREE.Mesh(new THREE.CylinderGeometry(0.0135, 0.0135, 0.004, 14).rotateZ(Math.PI / 2), steelT); fr.position.set(-0.053, 0, 0); HG.add(fr);
+        for (const sz of [-1, 1]) { const cl = new THREE.Mesh(new THREE.CylinderGeometry(0.0025, 0.009, 0.06, 6).rotateZ(-Math.PI / 2 - 0.35), steelT); cl.scale.z = 0.55; cl.position.set(0.042, -0.01, sz * 0.005); HG.add(cl); } // split claw: thick at the eye, tapering down to the tips
+        const h = new THREE.Mesh(new THREE.CylinderGeometry(0.0085, 0.0115, 0.28, 10), woodH); h.position.set(-0.004, -0.15, 0); HG.add(h);
         peg(x - 0.035, top - 0.017); peg(x + 0.03, top - 0.017); }
       // copper wire and black tape on hooks
       { const cu = PM.copper ??= new THREE.MeshStandardNodeMaterial({ color: 0x8a4a22, roughness: 0.35, metalness: 0.8 });
@@ -710,7 +711,7 @@ export default {
         const h = new THREE.Mesh(new THREE.ExtrudeGeometry(hd, { depth: 0.02, bevelEnabled: true, bevelSize: 0.003, bevelThickness: 0.003, bevelSegments: 2 }), woodH); h.position.z = -0.0095; g.add(h);
         for (const [rx, ry] of [[-0.04, -0.062], [0.0, -0.06], [0.04, -0.057]]) { const r = new THREE.Mesh(new THREE.CylinderGeometry(0.0042, 0.0042, 0.027, 10).rotateX(Math.PI / 2), PM.brassRivet ??= new THREE.MeshStandardNodeMaterial({ color: 0x9a7a38, roughness: 0.35, metalness: 0.9 })); r.position.set(rx, ry, 0.0005); g.add(r); }
         peg(x, top + 0.015); }
-      for (let i = 0; i < 4; i++) { const x = pegX + 0.08 + i * 0.022, top = pegY + 0.12; box(PM.file ??= new THREE.MeshStandardNodeMaterial({ color: 0x55534e, roughness: 0.6, metalness: 0.6 }), 0.012 - i * 0.001, 0.2 - i * 0.02, 0.004, x, top - 0.1 + i * 0.01, Z + 0.003, (i - 1.5) * 0.04); box(woodH, 0.016, 0.06, 0.016, x, top + 0.015 + i * 0.01, Z + 0.006, (i - 1.5) * 0.04); }
+      for (let i = 0; i < 4; i++) { const x = pegX + 0.08 + i * 0.022, top = pegY + 0.12 + [0, -0.045, 0.02, -0.07][i]; box(PM.file ??= new THREE.MeshStandardNodeMaterial({ color: 0x55534e, roughness: 0.6, metalness: 0.6 }), 0.012 - i * 0.001, 0.2 - i * 0.02, 0.004, x, top - 0.1 + i * 0.01, Z + 0.003, (i - 1.5) * 0.04); box(woodH, 0.016, 0.06, 0.016, x, top + 0.015 + i * 0.01, Z + 0.006, (i - 1.5) * 0.04); }
       // screwdrivers along the bottom, then a few more on the right
       let k = 0;
       const TILT = [0.35, -0.04, -0.33, 0.06, -0.02, 0.3, 0.05];

@@ -23,7 +23,7 @@ fixed = [
  {"name": "screw_tin", "type": "proc", "kind": "tin", "pos": [-1.38, 0, 1.08], "on": "workbench"},
  {"name": "rag", "type": "proc", "kind": "rag", "pos": [-1.81, 0, 1.215], "ry": -6, "on": "workbench", "noDrop": True, "y": 0.0},
  {"name": "desk_lamp", "glb": "desk_lamp.glb", "pos": [-1.78, 0, 0.66], "ry": 32, "on": "workbench"},
- {"name": "tube_radio_open", "glb": "tube_radio_open.glb", "pos": [-1.2, 0, 0.73], "ry": -21, "on": "workbench"},
+ {"name": "tube_radio_open", "glb": "tube_radio_open.glb", "pos": [-1.2, 0, 0.73], "ry": -38, "on": "workbench"},
  {"name": "magnifier", "glb": "magnifier.glb", "pos": [-1.63, 0, 0.98], "ry": 25, "on": "workbench"},
  {"name": "soldering_iron", "glb": "soldering_iron.glb", "pos": [-2.06, 0, 1.11], "ry": 12, "on": "workbench"},
  {"name": "enamel_mug", "glb": "enamel_mug.glb", "pos": [-2.22, 0, 0.6], "ry": 30, "on": "workbench"},
@@ -45,7 +45,7 @@ fixed = [
  {"name": "work_carton", "type": "carton", "front": "box_c", "uv": [0.02, 0.55, 0.98, 0.93], "tape": True, "size": [0.34, 0.14, 0.23], "pos": [-0.793, 0, 1.559], "ry": 10, "on": "floor"},
  {"name": "spare_torso", "glb": "spare_torso.glb", "pos": [-0.8, 0, 1.54], "ry": 10, "on": "work_carton", "scale": 0.92},
  {"name": "spare_leg", "glb": "spare_leg.glb", "pos": [2.9, 1.12, -0.42], "ry": -150, "wall": "right"},
- {"name": "drop_carton_a", "type": "carton", "front": "box_b", "size": [0.4, 0.46, 0.34], "pos": [0.6, 0, 1.8], "ry": -30},
+ {"name": "drop_carton_a", "type": "carton", "front": "box_b", "size": [0.4, 0.46, 0.34], "pos": [0.9, 0, 1.55], "ry": 24, "on": "floor"},
  {"name": "drop_carton_b", "type": "carton", "front": "box_a", "size": [0.42, 0.36, 0.38], "pos": [1.8, 0, 1.38], "ry": 8},
  {"name": "drop_fan", "glb": "desk_fan.glb", "pos": [1.8, 0, 1.38], "ry": -95, "on": "drop_carton_b", "tint": [0.95, 0.9, 0.78]},
   {"name": "thermos_floor", "glb": "thermos.glb", "pos": [2.55, 0, -0.98], "ry": 40, "on": "parts_cabinet"},
@@ -94,7 +94,7 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
                 key = fitk[0]; cart_use[(shelf, key)] = cart_use.get((shelf, key), 0) + 1; last = key; w0, h, d0 = CART[key]
                 sc = round(min(random.uniform(0.85, 1.0), (clear[lv] - 0.02) / h), 2); w0 *= sc; d0 *= sc
                 cyaw = random.uniform(-9, 9) if lv == 0 else random.uniform(-18, 18)
-                if lv > 0 and random.random() < 0.15: w0, d0 = d0, w0; cyaw += 90   # now and then turned: a plain side to the aisle
+                # (plain cardboard sides to the aisle read as placeholder blocks: prints always face out)
                 ca = math.radians(cyaw)
                 w = w0 * abs(math.cos(ca)) + d0 * abs(math.sin(ca)); dd = w0 * abs(math.sin(ca)) + d0 * abs(math.cos(ca))
                 if dd > abs(front - back) - 0.02: cyaw = 0; w = w0; dd = d0
