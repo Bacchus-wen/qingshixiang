@@ -218,8 +218,10 @@ function procItem(kind, seed = 1) {
     for (let i = 0; i < p.count; i++) {
       const x0 = p.getX(i), t = (p.getY(i) + 0.14) / 0.28; // t: 0 = edge side, 1 = back
       let x = x0 * (0.8 + 0.12 * Math.sin(t * 5)), z = -(t * 0.28) * 0.6;       // pushed together front-to-back
-      const ridge = 0.5 + 0.5 * Math.sin(t * Math.PI * 7 + 1.4 * Math.sin(x0 * 18) + 0.4 * nz(x0 * 14, t * 5));   // folds across the push
-      let y = 0.003 + ridge * ridge * (3 - 2 * ridge) * 0.018 * (0.35 + 0.65 * Math.sin(t * Math.PI)) + (0.5 + 0.5 * nz(x0 * 24, t * 9)) * 0.003;
+      const tw = t + 0.07 * Math.sin(t * 9 + x0 * 11) + 0.04 * nz(x0 * 9, t * 4);                       // uneven fold spacing
+      const ridge = 0.5 + 0.5 * Math.sin(tw * Math.PI * 6 + 1.3 * Math.sin(x0 * 16 + t * 3) + 0.6 * nz(x0 * 12, t * 5));
+      const env = Math.max(0, 1 - Math.abs(t - 0.3) / 0.45) * (0.6 + 0.4 * nz(x0 * 7, 1.3));            // bunched near the edge, flat behind
+      let y = 0.002 + ridge * ridge * (3 - 2 * ridge) * 0.02 * env + (0.5 + 0.5 * nz(x0 * 24, t * 9)) * 0.0025;
       const ux = Math.min(1, Math.max(0, (x0 + 0.03) / 0.12)), corner = ux * ux * (3 - 2 * ux) * Math.max(0, 1 - t / 0.42); // half the front edge slides over
       if (corner > 0) { const hang = corner * 0.11; y -= hang; z += Math.min(hang, 0.014) * 0.7; }
       p.setXYZ(i, x, y, z + 0.004);
@@ -670,10 +672,11 @@ export default {
             const sh = new THREE.Shape(); const pts = [...K.jaw, ...handle(0), [0, pv + 0.004]];
             pts.forEach(([px, py], j) => (j ? sh.lineTo(sx * px, py) : sh.moveTo(sx * px, py)));
             const st = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 0.0045, bevelEnabled: true, bevelSize: 0.0006, bevelThickness: 0.0006, bevelSegments: 1 }), forged);
-            st.position.set(sx * 0.0007, 0, sx > 0 ? 0 : 0.0048); g.add(st); // hairline between the closed jaws
+            const half = new THREE.Group(); half.position.set(0, pv, 0); half.rotation.z = sx * 0.06; g.add(half); // opened ~7 deg about the rivet
+            st.position.set(sx * 0.0005, -pv, sx > 0 ? 0 : 0.0048); half.add(st);
             const sl = new THREE.Shape(); handle(0.0016).slice(0, 4).concat(handle(0.0016).slice(5)).forEach(([px, py], j) => (j ? sl.lineTo(sx * px, py) : sl.moveTo(sx * px, py)));
             const dp = new THREE.Mesh(new THREE.ExtrudeGeometry(sl, { depth: 0.0085, bevelEnabled: true, bevelSize: 0.0015, bevelThickness: 0.0015, bevelSegments: 2 }), dip[i]);
-            dp.position.z = (sx > 0 ? 0 : 0.0048) - 0.002; dp.scale.y = 1; g.add(dp);
+            dp.position.set(sx * 0.0005, -pv, (sx > 0 ? 0 : 0.0048) - 0.002); half.add(dp);
           }
           const rv = new THREE.Mesh(new THREE.CylinderGeometry(0.0045, 0.0045, 0.0115, 12).rotateX(Math.PI / 2), forged); rv.position.set(0, pv, 0.0047); g.add(rv);
           const dome = new THREE.Mesh(new THREE.SphereGeometry(0.0052, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2).rotateX(Math.PI / 2), forged); dome.scale.z = 0.45; dome.position.set(0, pv, 0.0104); g.add(dome);
@@ -682,7 +685,7 @@ export default {
       }
       // a claw hammer, head up on two pegs
       { const x = pegX + 0.2, top = pegY + 0.28, hz = Z + 0.006;
-        box(steelT, 0.04, 0.024, 0.022, x - 0.004, top, hz);                                                            // eye block
+        { const eye = new THREE.Mesh(new THREE.CylinderGeometry(0.0128, 0.0128, 0.042, 8).rotateZ(Math.PI / 2), steelT); eye.rotation.x = Math.PI / 8; eye.position.set(x - 0.004, top, hz); tools.add(eye); } // octagonal head
         const face = new THREE.Mesh(new THREE.CylinderGeometry(0.0125, 0.012, 0.03, 14).rotateZ(Math.PI / 2), steelT); face.position.set(x - 0.037, top, hz); tools.add(face);
         const fr = new THREE.Mesh(new THREE.CylinderGeometry(0.0135, 0.0135, 0.004, 14).rotateZ(Math.PI / 2), steelT); fr.position.set(x - 0.053, top, hz); tools.add(fr);
         for (const sz of [-1, 1]) { const cl = new THREE.Mesh(new THREE.CylinderGeometry(0.0025, 0.009, 0.06, 6).rotateZ(-Math.PI / 2 - 0.35), steelT); cl.scale.z = 0.55; cl.position.set(x + 0.042, top - 0.01, hz + sz * 0.005); tools.add(cl); } // split claw: thick at the eye, tapering down to the tips

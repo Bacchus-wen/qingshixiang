@@ -45,7 +45,7 @@ fixed = [
  {"name": "work_carton", "type": "carton", "front": "box_c", "uv": [0.02, 0.55, 0.98, 0.93], "tape": True, "size": [0.34, 0.14, 0.23], "pos": [-0.793, 0, 1.559], "ry": 10, "on": "floor"},
  {"name": "spare_torso", "glb": "spare_torso.glb", "pos": [-0.8, 0, 1.54], "ry": 10, "on": "work_carton", "scale": 0.92},
  {"name": "spare_leg", "glb": "spare_leg.glb", "pos": [2.9, 1.12, -0.42], "ry": -150, "wall": "right"},
- {"name": "drop_carton_a", "type": "carton", "front": "box_b", "size": [0.4, 0.46, 0.34], "pos": [0.62, 0, 1.78], "ry": -24},
+ {"name": "drop_carton_a", "type": "carton", "front": "box_b", "size": [0.4, 0.46, 0.34], "pos": [0.6, 0, 1.8], "ry": -30},
  {"name": "drop_carton_b", "type": "carton", "front": "box_a", "size": [0.42, 0.36, 0.38], "pos": [1.8, 0, 1.38], "ry": 8},
  {"name": "drop_fan", "glb": "desk_fan.glb", "pos": [1.8, 0, 1.38], "ry": -95, "on": "drop_carton_b", "tint": [0.95, 0.9, 0.78]},
   {"name": "thermos_floor", "glb": "thermos.glb", "pos": [2.55, 0, -0.98], "ry": 40, "on": "parts_cabinet"},
@@ -77,15 +77,17 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
     sgn = 1 if front > back else -1   # direction from the back edge to the front edge
     tags = shelf_tags.setdefault(shelf, [])
     below = []; faced = {'fan': 0}; tagtxt = set()   # (centre, model) of the level below; face-on fans on this shelf
+    store = random.randrange(1, levels - 1) if levels >= 5 else -1                     # a storage board, mostly cartons
+    gapl = random.choice([l for l in range(1, levels - 1) if l != store]) if levels >= 5 else -1   # a board left half empty
     for lv in range(levels):
         here = []
         x = x0 + random.uniform(0.01, 0.04); k = 0; last = None
-        mode = random.choice(['dense', 'dense', 'sparse', 'gap']) if lv > 0 else 'dense'
+        mode = 'gap' if lv == gapl else random.choice(['dense', 'dense', 'sparse', 'gap']) if lv > 0 else 'dense'
         xe = x1 if mode != 'gap' else x0 + (x1 - x0) * random.uniform(0.5, 0.7)   # 'gap': the rest of the board stays empty
         gap_lo, gap_hi = (0.0, 0.012) if mode == 'dense' else (0.1, 0.24) if mode == 'sparse' else (0.0, 0.03)
         while True:
             low = clear[lv] < 0.5   # the low top board: only radios stand there, so mix in (smaller) cartons
-            if lv == 0 or (low and random.random() < 0.5) or (0 < lv < levels - 1 and random.random() < 0.12):
+            if lv == 0 or (low and random.random() < 0.5) or (lv == store and random.random() < 0.7) or (0 < lv < levels - 1 and random.random() < 0.12):
                 fitk = [k_ for k_ in CART if CART[k_][1] * (0.7 if low else 0.85) <= clear[lv] - 0.02]
                 # never the same print twice in a row, and the shelf's prints used in turn (no wall of one brand)
                 fitk = sorted([k_ for k_ in fitk if k_ != last] or fitk, key=lambda k_: (cart_use.get((shelf, k_), 0), random.random()))
@@ -151,7 +153,7 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
                 out.append({"name": f"{shelf}_{lv}_{k}t", "glb": random.choice(['alarm_clock.glb', 'enamel_mug.glb']), "pos": [round(pos[0], 3), 0, round(pos[2], 3)],
                             "ry": ry + random.uniform(-30, 30), "on": f"{shelf}_{lv}_{k}", "scale": 0.95})
             room = abs(front - back) - dep - 0.03 - stg   # free depth in front of the big item
-            fits = [x for x in SMALL if D[x] * 0.95 <= room]
+            fits = [x for x in SMALL if D[x] * 0.95 <= room and H[x] * 0.95 <= clear[lv] - 0.02]
             if fits and random.random() < 0.32:
                 sg = random.choice(fits); fz = front - sgn * (D[sg] / 2 + 0.006)
                 fx = cx + random.uniform(-w / 3, w / 3)
