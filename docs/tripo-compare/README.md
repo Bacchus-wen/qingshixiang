@@ -24,3 +24,14 @@
 - `raw-vs-scene-budget.jpg`、`decimation-methods.jpg`:场景里近看的"碎裂、黏连"主要来自 Blender 合并减面撕开了贴图接缝,不是生成本身。
 
 文件:原始模型在 `assets/generated/compare/<api|cli|studio>/`(不入库),清单 `assets/generated/compare/manifest.json` 由 `tools/compare-manifest.py` 生成;生成脚本 `tools/tripo-compare.sh`(带余额与用时记录),静态对比图 `tools/tripo-compare-report.py`。
+
+## 盲评(2026-10-19,Grok 与 Codex,只看 `blind/` 里打乱顺序、去掉来源的图;对应关系见 `blind/key.json`)
+
+| | Codex 排名(四项共 40 分) | Grok |
+|---|---|---|
+| 收音机 | CLI 35 > API 早先(贴图 v3.5+去光照)33 > Studio H3.1 分部件 32 > API 30 > Studio H3.1 29 > Studio P2.0 23 | API 早先"结构最准",分部件"整体最自然" |
+| 机器人 | Studio H3.1 34 > Studio P2.0 32 > CLI 30 > API 29 | 选 Studio P2.0("没有问题") |
+
+- Codex 对 Studio H3.1 收音机(10.5 万面)的意见:中间那组电子管被抹平简化;对 P2.0 收音机:金属底盘大面积缺失、面板弯曲。
+- 机器人 P2.0:Codex 指出双手之间的改锥不完整、握持关系含糊(和我看到的穿插错位一致);Grok 认为它没有问题。
+- 两家与我一致的地方:主角近景的机器人选 Studio H3.1;P2.0 收音机最差。我原先认为 Studio H3.1 收音机"近看和 190 万面版本差不多",两家都不同意,已更正为"最省面数,但近看不如 190 万面的版本"。

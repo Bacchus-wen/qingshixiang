@@ -1,0 +1,16 @@
+{
+ "radio": {
+  "A": "api-prev",
+  "B": "cli",
+  "C": "studio-p20",
+  "D": "api",
+  "E": "studio-h31",
+  "F": "studio-h31-parts"
+ },
+ "robot": {
+  "A": "studio-p20",
+  "B": "api",
+  "C": "cli",
+  "D": "studio-h31"
+ }
+}

@@ -1,0 +1,15 @@
+{
+ "id": "c38-blind",
+ "from": "claude",
+ "to": "codex",
+ "title": "Tripo 模型盲评",
+ "write": false,
+ "gen": false,
+ "paths": [],
+ "status": "done",
+ "posted": "2026-10-19 02:19:54",
+ "started": "2026-10-19 02:19:54",
+ "seconds": 47.4,
+ "finished": "2026-10-19 02:20:42",
+ "reason": null
+}
