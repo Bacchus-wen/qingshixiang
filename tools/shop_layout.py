@@ -21,7 +21,7 @@ fixed = [
  {"name": "screwdriver_a", "type": "proc", "kind": "screwdriver", "seed": 1, "pos": [-1.6, 0, 1.12], "ry": 18, "on": "workbench"},
  {"name": "screwdriver_b", "type": "proc", "kind": "screwdriver", "seed": 0, "pos": [-1.42, 0, 1.17], "ry": -25, "on": "workbench"},
  {"name": "screw_tin", "type": "proc", "kind": "tin", "pos": [-1.38, 0, 1.08], "on": "workbench"},
- {"name": "rag", "type": "proc", "kind": "rag", "pos": [-1.96, 0, 1.215], "on": "workbench", "noDrop": True, "y": 0.0},
+ {"name": "rag", "type": "proc", "kind": "rag", "pos": [-1.81, 0, 1.215], "ry": -6, "on": "workbench", "noDrop": True, "y": 0.0},
  {"name": "desk_lamp", "glb": "desk_lamp.glb", "pos": [-1.78, 0, 0.66], "ry": 32, "on": "workbench"},
  {"name": "tube_radio_open", "glb": "tube_radio_open.glb", "pos": [-1.2, 0, 0.73], "ry": -21, "on": "workbench"},
  {"name": "magnifier", "glb": "magnifier.glb", "pos": [-1.63, 0, 0.98], "ry": 25, "on": "workbench"},
@@ -45,9 +45,9 @@ fixed = [
  {"name": "work_carton", "type": "carton", "front": "box_c", "uv": [0.02, 0.55, 0.98, 0.93], "tape": True, "size": [0.34, 0.14, 0.23], "pos": [-0.793, 0, 1.559], "ry": 10, "on": "floor"},
  {"name": "spare_torso", "glb": "spare_torso.glb", "pos": [-0.8, 0, 1.54], "ry": 10, "on": "work_carton", "scale": 0.92},
  {"name": "spare_leg", "glb": "spare_leg.glb", "pos": [2.9, 1.12, -0.42], "ry": -150, "wall": "right"},
- {"name": "drop_carton_a", "type": "carton", "front": "box_b", "size": [0.4, 0.46, 0.34], "pos": [1.28, 0, 1.6], "ry": -14},
+ {"name": "drop_carton_a", "type": "carton", "front": "box_b", "size": [0.4, 0.46, 0.34], "pos": [0.62, 0, 1.78], "ry": -24},
  {"name": "drop_carton_b", "type": "carton", "front": "box_a", "size": [0.42, 0.36, 0.38], "pos": [1.8, 0, 1.38], "ry": 8},
- {"name": "drop_fan", "glb": "desk_fan.glb", "pos": [1.8, 0, 1.38], "ry": -150, "on": "drop_carton_b", "tint": [0.95, 0.9, 0.78]},
+ {"name": "drop_fan", "glb": "desk_fan.glb", "pos": [1.8, 0, 1.38], "ry": -95, "on": "drop_carton_b", "tint": [0.95, 0.9, 0.78]},
   {"name": "thermos_floor", "glb": "thermos.glb", "pos": [2.55, 0, -0.98], "ry": 40, "on": "parts_cabinet"},
  {"name": "bicycle", "glb": "bicycle.glb", "pos": [2.35, 0, 2.95], "yaw0": 35.7, "ry": 183, "roll": 10, "scale": 0.84},
 ]
@@ -84,8 +84,9 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
         xe = x1 if mode != 'gap' else x0 + (x1 - x0) * random.uniform(0.5, 0.7)   # 'gap': the rest of the board stays empty
         gap_lo, gap_hi = (0.0, 0.012) if mode == 'dense' else (0.1, 0.24) if mode == 'sparse' else (0.0, 0.03)
         while True:
-            if lv == 0 or (lv == levels - 1 and clear[lv] < 0.5 and random.random() < 0.35 and x < x0 + 0.6) or (0 < lv < levels - 1 and random.random() < 0.12):
-                fitk = [k_ for k_ in CART if CART[k_][1] * 0.85 <= clear[lv] - 0.02]
+            low = clear[lv] < 0.5   # the low top board: only radios stand there, so mix in (smaller) cartons
+            if lv == 0 or (low and random.random() < 0.5) or (0 < lv < levels - 1 and random.random() < 0.12):
+                fitk = [k_ for k_ in CART if CART[k_][1] * (0.7 if low else 0.85) <= clear[lv] - 0.02]
                 # never the same print twice in a row, and the shelf's prints used in turn (no wall of one brand)
                 fitk = sorted([k_ for k_ in fitk if k_ != last] or fitk, key=lambda k_: (cart_use.get((shelf, k_), 0), random.random()))
                 key = fitk[0]; cart_use[(shelf, key)] = cart_use.get((shelf, key), 0) + 1; last = key; w0, h, d0 = CART[key]
@@ -104,8 +105,11 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
             nfan = sum(1 for o in out if o.get('on') == shelf and o.get('level') == lv and o.get('glb') == 'desk_fan.glb')
             # no same model straight above the same model on the board below (columns of identical sets read as stock)
             under = {m for (c0, m) in below if abs(c0 - (x + 0.22)) < 0.32}
-            ok = lambda g: H[g] <= clear[lv] and not (g == 'desk_fan.glb' and nfan >= 2)
-            cands = [g for g in BIG if ok(g) and g != last and g not in under] or [g for g in BIG if ok(g) and g != last] or [g for g in BIG if ok(g)]
+            nfs = sum(1 for o in out if o.get('on') == shelf and o.get('glb') == 'desk_fan.glb')
+            ok = lambda g: H[g] <= clear[lv] and not (g == 'desk_fan.glb' and (nfan >= 1 or nfs >= 2))
+            onlv = {m for (_, m) in here}
+            cands = ([g for g in BIG if ok(g) and g != last and g not in under and g not in onlv] or [g for g in BIG if ok(g) and g != last and g not in onlv]
+                     or [g for g in BIG if ok(g) and g != last and g not in under] or [g for g in BIG if ok(g) and g != last] or [g for g in BIG if ok(g)])
             if not cands: break
             g = random.choice(cands); last = g
             sc = round(random.uniform(0.78, 0.92) if g == 'crt_tv.glb' and random.random() < 0.5 else random.uniform(0.92, 1.0), 2)  # 14-inch and 18-inch sets
@@ -114,17 +118,23 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
             if g in ('tube_radio_closed.glb', 'cassette_recorder.glb') and random.random() < 0.5: yaw = random.choice([-1, 1]) * random.uniform(18, 34)
             if g == 'crt_tv.glb' and random.random() < 0.3: yaw += 180   # turned round: back cover off
             if g == 'desk_fan.glb':
-                if faced['fan'] >= 1 or nfan == 1: yaw = random.choice([180 + random.uniform(-25, 25), random.choice([-1, 1]) * random.uniform(70, 95)])  # to the wall or side-on
+                if faced['fan'] >= 1 or nfan == 1: yaw = random.choice([1, -1]) * random.uniform(70, 95) if random.random() < 0.75 else 180 + random.uniform(-40, -25)  # side-on (or to the wall, turned)
                 else: faced['fan'] += 1
             a = math.radians(yaw)
             w = (W[g] * abs(math.cos(a)) + D[g] * abs(math.sin(a))) * sc      # rotated footprint along the shelf
             dep = (W[g] * abs(math.sin(a)) + D[g] * abs(math.cos(a))) * sc    # ... and across it
             if x + w > xe: break
             cx = x + w / 2; c = back + sgn * (dep / 2 + 0.012)
-            if dep > abs(front - back) - 0.01:   # too deep turned like that for this board: stand it square
-                yaw = random.uniform(-4, 4); dep = D[g] * sc; w = W[g] * sc
+            if dep > abs(front - back) - 0.01:   # too deep turned like that for this board: turn it less (sign kept), square last
+                base = 180 if abs(yaw) > 120 else 0; rel = yaw - base
+                for f in (0.75, 0.55, 0.4, 0.25, 0):
+                    a = math.radians(rel * f); dep = (W[g] * abs(math.sin(a)) + D[g] * abs(math.cos(a))) * sc
+                    if dep <= abs(front - back) - 0.01: break
+                yaw = base + rel * f; w = (W[g] * abs(math.cos(a)) + D[g] * abs(math.sin(a))) * sc
                 if x + w > x1: break
                 cx = x + w / 2; c = back + sgn * (dep / 2 + 0.012)
+            stg = random.uniform(0.02, max(0.02, abs(front - back) - dep - 0.035)) if random.random() < 0.45 else 0   # pulled forward on the board
+            c += sgn * stg
             pos = [cx, 0, c] if along == 'x' else [c, 0, cx]
             it = {"name": f"{shelf}_{lv}_{k}", "glb": g, "pos": [round(pos[0], 3), 0, round(pos[2], 3)], "ry": ry + yaw,
                   "on": shelf, "level": lv, "scale": sc}
@@ -140,7 +150,7 @@ def fill(shelf, along, x0, x1, back, front, levels, ry, clear):
             if g == 'tube_radio_closed.glb' and random.random() < 0.3 and H[g] * sc + 0.17 < clear[lv] - 0.02:
                 out.append({"name": f"{shelf}_{lv}_{k}t", "glb": random.choice(['alarm_clock.glb', 'enamel_mug.glb']), "pos": [round(pos[0], 3), 0, round(pos[2], 3)],
                             "ry": ry + random.uniform(-30, 30), "on": f"{shelf}_{lv}_{k}", "scale": 0.95})
-            room = abs(front - back) - dep - 0.03   # free depth in front of the big item
+            room = abs(front - back) - dep - 0.03 - stg   # free depth in front of the big item
             fits = [x for x in SMALL if D[x] * 0.95 <= room]
             if fits and random.random() < 0.32:
                 sg = random.choice(fits); fz = front - sgn * (D[sg] / 2 + 0.006)

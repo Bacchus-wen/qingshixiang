@@ -207,21 +207,21 @@ function procItem(kind, seed = 1) {
     const m = PM.rag ??= (() => { // grubby striped cotton: faded blue stripes, oil/grease blotches
       const r = new THREE.MeshStandardNodeMaterial({ roughness: 0.97, side: THREE.DoubleSide });
       const P = positionWorld;
-      const stripe = smoothstep(0.35, 0.5, mx_noise_float(vec3(P.x.mul(2), 0, 0)).mul(0).add(P.x.add(P.z).mul(40).sin().mul(0.5).add(0.5)));
+      const stripe = smoothstep(0.55, 0.7, P.x.mul(0.8).add(P.z).mul(26).add(mx_noise_float(P.mul(9)).mul(1.5)).sin().mul(0.5).add(0.5)); // faded, wobbly stripes
       const grease = smoothstep(0.45, 0.8, mx_fractal_noise_float(P.mul(18), 3, 2, 0.5).mul(0.5).add(0.5));
-      r.colorNode = mix(mix(vec3(0.24, 0.22, 0.19), vec3(0.07, 0.1, 0.16), stripe.mul(0.75)), vec3(0.04, 0.032, 0.024), grease.mul(0.6)); // linear values: faded blue-striped cotton
+      r.colorNode = mix(mix(vec3(0.22, 0.2, 0.17), vec3(0.08, 0.1, 0.15), stripe.mul(0.55)), vec3(0.04, 0.032, 0.024), grease.mul(0.65)); // linear values: faded blue-striped cotton
       return r;
     })();
     // mostly on the bench, pushed into folds (crumpled where it was last wiped), one corner over the edge
-    const geo = new THREE.PlaneGeometry(0.28, 0.3, 28, 30); const p = geo.attributes.position;
+    const geo = new THREE.PlaneGeometry(0.22, 0.28, 34, 56); const p = geo.attributes.position;
     const nz = (a, b) => Math.sin(a * 1.7 + b * 0.9) * Math.sin(a * 0.6 - b * 1.3 + 1.1) + 0.5 * Math.sin(a * 3.1 + b * 2.3 + 0.4);
     for (let i = 0; i < p.count; i++) {
-      const x0 = p.getX(i), t = (p.getY(i) + 0.15) / 0.3; // t: 0 = edge side, 1 = back
-      let x = x0 * (0.8 + 0.12 * Math.sin(t * 5)), z = -(t * 0.3) * 0.6;        // pushed together front-to-back
-      const ridge = 0.5 + 0.5 * Math.sin(t * Math.PI * 9 + 1.6 * Math.sin(x0 * 22) + 0.5 * nz(x0 * 20, t * 6));   // folds across the push
-      let y = 0.003 + ridge * ridge * 0.022 * (0.35 + 0.65 * Math.sin(t * Math.PI)) + Math.max(0, nz(x0 * 38, t * 14)) * 0.004;
-      const corner = Math.max(0, (x0 - 0.02) / 0.12) * Math.max(0, 1 - t / 0.35);     // one corner slides over the edge
-      if (corner > 0) { const hang = corner * 0.09; y -= hang; z += Math.min(hang, 0.012) * 0.6; }
+      const x0 = p.getX(i), t = (p.getY(i) + 0.14) / 0.28; // t: 0 = edge side, 1 = back
+      let x = x0 * (0.8 + 0.12 * Math.sin(t * 5)), z = -(t * 0.28) * 0.6;       // pushed together front-to-back
+      const ridge = 0.5 + 0.5 * Math.sin(t * Math.PI * 7 + 1.4 * Math.sin(x0 * 18) + 0.4 * nz(x0 * 14, t * 5));   // folds across the push
+      let y = 0.003 + ridge * ridge * (3 - 2 * ridge) * 0.018 * (0.35 + 0.65 * Math.sin(t * Math.PI)) + (0.5 + 0.5 * nz(x0 * 24, t * 9)) * 0.003;
+      const ux = Math.min(1, Math.max(0, (x0 + 0.03) / 0.12)), corner = ux * ux * (3 - 2 * ux) * Math.max(0, 1 - t / 0.42); // half the front edge slides over
+      if (corner > 0) { const hang = corner * 0.11; y -= hang; z += Math.min(hang, 0.014) * 0.7; }
       p.setXYZ(i, x, y, z + 0.004);
     }
     geo.computeVertexNormals();
@@ -579,7 +579,7 @@ export default {
         const wireB = PM.wireBitsDark ??= new THREE.MeshStandardNodeMaterial({ color: 0x4a1a12, roughness: 0.55 });
         const knobM = PM.knob ??= new THREE.MeshStandardNodeMaterial({ color: 0x1a1612, roughness: 0.4 });
         for (let k = 0; k < 40; k++) {
-          const B = k % 5 >= 3, a = rr(k) * Math.PI * 2, r = 0.008 + Math.sqrt(rr(k + 50)) * (B ? 0.04 : 0.06); // two small heaps: by the chassis, by the tin
+          const B = k % 5 >= 3, a = rr(k) * Math.PI * 2, r = 0.004 + Math.sqrt(rr(k + 50)) * (B ? 0.026 : 0.038); // two tight heaps: by the chassis, by the tin
           const x = (B ? -1.31 : -1.5) + Math.cos(a) * r * 1.3, z = (B ? 1.14 : 0.94) + Math.sin(a) * r * 0.8;
           ray.set(v.set(x, 2, z), down); ray.far = 3; const hit = ray.intersectObject(wb, true)[0]; if (!hit || hit.point.y < 0.7) continue;
           const kind = k === 0 ? 5 : k % 5; let m;
@@ -656,41 +656,50 @@ export default {
       }
       // three different pliers -- combination (钢丝钳), long-nose (尖嘴钳), side cutters (斜口钳): each half is a flat
       // steel profile (jaw + handle) extruded, the two halves stacked at the riveted pivot, handles dipped in plastic
-      { const dip = [PM.toolRed ??= redG, PM.dipBlue ??= new THREE.MeshStandardNodeMaterial({ color: 0x1f3550, roughness: 0.55 }), PM.dipRed2 ??= new THREE.MeshStandardNodeMaterial({ color: 0x6e1c12, roughness: 0.6 })];
+      { const forged = PM.forged ??= new THREE.MeshStandardNodeMaterial({ color: 0x8c8b86, roughness: 0.55, metalness: 0.8 }); // drop-forged, not polished
+        const dip = [PM.toolRed ??= redG, PM.dipBlue ??= new THREE.MeshStandardNodeMaterial({ color: 0x1f3550, roughness: 0.55 }), PM.dipRed2 ??= new THREE.MeshStandardNodeMaterial({ color: 0x6e1c12, roughness: 0.6 })];
         const KINDS = [ // jaw outline (right half, from the tip down to the pivot) and handle length
           { jaw: [[0, 0], [0.0065, 0], [0.011, -0.01], [0.0125, -0.028], [0.0115, -0.044]], piv: -0.05, hl: 0.13 },
           { jaw: [[0, 0], [0.0022, 0], [0.004, -0.025], [0.007, -0.05], [0.0105, -0.068]], piv: -0.074, hl: 0.12 },
           { jaw: [[0, 0], [0.0075, -0.002], [0.012, -0.011], [0.0125, -0.022], [0.0105, -0.03]], piv: -0.036, hl: 0.11 }];
         KINDS.forEach((K, i) => {
-          const x = pegX + [-0.07, 0.01, 0.275][i], top = pegY + 0.31 - (i === 1 ? 0.02 : 0), g = new THREE.Group(); g.position.set(x, top, Z); g.rotation.z = [0.06, -0.12, 0.2][i]; tools.add(g);
+          const x = pegX + [-0.07, 0.01, 0.335][i], top = pegY + [0.31, 0.29, 0.24][i], g = new THREE.Group(); g.position.set(x, top, Z + 0.014); g.rotation.set(0, [0.5, -0.55, 0.45][i], [0.06, -0.38, 0.2][i]); tools.add(g);
           const pv = K.piv, hl = K.hl;
           const handle = (o) => [[0.0105 + o, pv - 0.004], [0.0125 + o, pv - 0.03], [0.0145 + o, pv - hl * 0.6], [0.0158 + o, pv - hl + 0.004], [0.0118, pv - hl - o], [0.0075 - o, pv - hl + 0.004], [0.0062 - o, pv - hl * 0.6], [0.0042 - o, pv - 0.03], [0.001, pv - 0.004]]; // closed: handle ends ~2.5 cm apart
           for (const sx of [1, -1]) {
             const sh = new THREE.Shape(); const pts = [...K.jaw, ...handle(0), [0, pv + 0.004]];
             pts.forEach(([px, py], j) => (j ? sh.lineTo(sx * px, py) : sh.moveTo(sx * px, py)));
-            const st = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 0.0045, bevelEnabled: true, bevelSize: 0.0006, bevelThickness: 0.0006, bevelSegments: 1 }), steelT);
-            st.position.z = sx > 0 ? 0 : 0.0048; g.add(st);
+            const st = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 0.0045, bevelEnabled: true, bevelSize: 0.0006, bevelThickness: 0.0006, bevelSegments: 1 }), forged);
+            st.position.set(sx * 0.0007, 0, sx > 0 ? 0 : 0.0048); g.add(st); // hairline between the closed jaws
             const sl = new THREE.Shape(); handle(0.0016).slice(0, 4).concat(handle(0.0016).slice(5)).forEach(([px, py], j) => (j ? sl.lineTo(sx * px, py) : sl.moveTo(sx * px, py)));
             const dp = new THREE.Mesh(new THREE.ExtrudeGeometry(sl, { depth: 0.0085, bevelEnabled: true, bevelSize: 0.0015, bevelThickness: 0.0015, bevelSegments: 2 }), dip[i]);
             dp.position.z = (sx > 0 ? 0 : 0.0048) - 0.002; dp.scale.y = 1; g.add(dp);
           }
-          const rv = new THREE.Mesh(new THREE.CylinderGeometry(0.0045, 0.0045, 0.0115, 12).rotateX(Math.PI / 2), steelT); rv.position.set(0, pv, 0.0047); g.add(rv);
+          const rv = new THREE.Mesh(new THREE.CylinderGeometry(0.0045, 0.0045, 0.0115, 12).rotateX(Math.PI / 2), forged); rv.position.set(0, pv, 0.0047); g.add(rv);
+          const dome = new THREE.Mesh(new THREE.SphereGeometry(0.0052, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2).rotateX(Math.PI / 2), forged); dome.scale.z = 0.45; dome.position.set(0, pv, 0.0104); g.add(dome);
           peg(x, top + 0.004);
         });
       }
       // a claw hammer, head up on two pegs
-      { const x = pegX + 0.2, top = pegY + 0.28; box(steelT, 0.1, 0.022, 0.022, x, top, Z + 0.006); const h = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.011, 0.28, 10), woodH); h.position.set(x, top - 0.15, Z + 0.006); tools.add(h); peg(x - 0.035, top - 0.015); peg(x + 0.035, top - 0.015); }
+      { const x = pegX + 0.2, top = pegY + 0.28, hz = Z + 0.006;
+        box(steelT, 0.04, 0.024, 0.022, x - 0.004, top, hz);                                                            // eye block
+        const face = new THREE.Mesh(new THREE.CylinderGeometry(0.0125, 0.012, 0.03, 14).rotateZ(Math.PI / 2), steelT); face.position.set(x - 0.037, top, hz); tools.add(face);
+        const fr = new THREE.Mesh(new THREE.CylinderGeometry(0.0135, 0.0135, 0.004, 14).rotateZ(Math.PI / 2), steelT); fr.position.set(x - 0.053, top, hz); tools.add(fr);
+        for (const sz of [-1, 1]) { const cl = new THREE.Mesh(new THREE.CylinderGeometry(0.0025, 0.009, 0.06, 6).rotateZ(-Math.PI / 2 - 0.35), steelT); cl.scale.z = 0.55; cl.position.set(x + 0.042, top - 0.01, hz + sz * 0.005); tools.add(cl); } // split claw: thick at the eye, tapering down to the tips
+        const h = new THREE.Mesh(new THREE.CylinderGeometry(0.0085, 0.0115, 0.28, 10), woodH); h.position.set(x - 0.004, top - 0.15, hz); tools.add(h);
+        peg(x - 0.035, top - 0.017); peg(x + 0.03, top - 0.017); }
       // copper wire and black tape on hooks
       { const cu = PM.copper ??= new THREE.MeshStandardNodeMaterial({ color: 0x8a4a22, roughness: 0.35, metalness: 0.8 });
-        for (let t = 0; t < 6; t++) { const c = new THREE.Mesh(new THREE.TorusGeometry(0.066 + (t % 3) * 0.0035, 0.0022, 5, 40), cu); c.position.set(pegX + 0.4 + (t - 2.5) * 0.0012, pegY + 0.2 - Math.abs(t - 2.5) * 0.001, Z + 0.004 + t * 0.0026); c.rotation.z = t * 0.7; tools.add(c); }
-        const tail = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(pegX + 0.46, pegY + 0.16, Z + 0.012), new THREE.Vector3(pegX + 0.49, pegY + 0.1, Z + 0.016), new THREE.Vector3(pegX + 0.47, pegY + 0.05, Z + 0.012)]), 10, 0.0022, 5), cu); tools.add(tail);
-        peg(pegX + 0.4, pegY + 0.27);
+        const cx0 = pegX - 0.09, cy0 = pegY - 0.17;
+        for (let t = 0; t < 6; t++) { const c = new THREE.Mesh(new THREE.TorusGeometry(0.066 + (t % 3) * 0.0035, 0.0022, 5, 40), cu); c.position.set(cx0 + (t - 2.5) * 0.0012, cy0 - Math.abs(t - 2.5) * 0.001, Z + 0.004 + t * 0.0026); c.rotation.z = t * 0.7; tools.add(c); }
+        const tail = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(cx0 + 0.06, cy0 - 0.04, Z + 0.012), new THREE.Vector3(cx0 + 0.09, cy0 - 0.1, Z + 0.016), new THREE.Vector3(cx0 + 0.07, cy0 - 0.15, Z + 0.012)]), 10, 0.0022, 5), cu); tools.add(tail);
+        peg(cx0, cy0 + 0.07);
         const t = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.012, 8, 24), PM.tape ??= new THREE.MeshStandardNodeMaterial({ color: 0x141414, roughness: 0.45 })); t.position.set(pegX + 0.4, pegY + 0.03, Z + 0.01); tools.add(t); peg(pegX + 0.4, pegY + 0.062); }
       // a panel saw at the right edge, hung by its closed wooden handle: tapered blade with a toothed edge, three brass rivets
-      { const x = pegX + 0.5, top = pegY + 0.32, sawM = PM.saw ??= new THREE.MeshStandardNodeMaterial({ color: 0x8f8d86, roughness: 0.42, metalness: 0.8, side: THREE.DoubleSide });
-        const g = new THREE.Group(); g.position.set(x, top, Z + 0.004); g.rotation.set(0, -0.35, 0.05); tools.add(g);
+      { const x = pegX + 0.5, top = pegY + 0.32, sawM = PM.saw ??= new THREE.MeshStandardNodeMaterial({ color: 0x7c7a74, roughness: 0.58, metalness: 0.75, side: THREE.DoubleSide });
+        const g = new THREE.Group(); g.position.set(x, top, Z + 0.004); g.rotation.set(0, 0.3, 0.05); tools.add(g); // toothed edge turned out
         const bl = new THREE.Shape(); bl.moveTo(0.05, -0.05); bl.lineTo(0.035, -0.47); // straight back
-        const n = 64; for (let t = 0; t <= n; t++) { const f = t / n, y = -0.47 + 0.42 * f, xe = -0.03 + (-0.06 + 0.03) * f; bl.lineTo(xe - (t % 2 ? 0.0045 : 0), y); } // toothed edge, toe to heel
+        const n = 84; for (let t = 0; t <= n; t++) { const f = t / n, y = -0.47 + 0.42 * f + (t % 2 ? 0.0016 : 0), xe = -0.03 + (-0.06 + 0.03) * f; bl.lineTo(xe - (t % 2 ? 0.0032 : 0), y); } // raked teeth, toe to heel
         bl.closePath();
         g.add(new THREE.Mesh(new THREE.ExtrudeGeometry(bl, { depth: 0.0009, bevelEnabled: false }), sawM));
         const hd = new THREE.Shape(); hd.moveTo(-0.07, -0.085); hd.lineTo(0.065, -0.07); hd.quadraticCurveTo(0.07, 0.03, 0.03, 0.035); hd.lineTo(-0.035, 0.03); hd.quadraticCurveTo(-0.075, 0.02, -0.07, -0.085);
