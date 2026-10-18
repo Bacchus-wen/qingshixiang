@@ -445,29 +445,29 @@
  {
   "name": "work_carton",
   "type": "carton",
-  "front": "box_c",
+  "front": "cardboard",
   "size": [
-   0.32,
-   0.3,
-   0.26
+   0.34,
+   0.14,
+   0.23
   ],
   "pos": [
-   -0.97,
+   -0.793,
    0,
-   1.5
+   1.559
   ],
-  "ry": -30,
+  "ry": 10,
   "on": "floor"
  },
  {
   "name": "spare_torso",
   "glb": "spare_torso.glb",
   "pos": [
-   -0.97,
+   -0.8,
    0,
-   1.5
+   1.54
   ],
-  "ry": 128,
+  "ry": 10,
   "on": "work_carton",
   "scale": 0.92
  },
@@ -479,7 +479,7 @@
    1.12,
    -0.42
   ],
-  "ry": -68,
+  "ry": -150,
   "wall": "right"
  },
  {

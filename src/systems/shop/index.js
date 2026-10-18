@@ -193,11 +193,11 @@ function procItem(kind, seed = 1) {
       r.colorNode = mix(mix(vec3(0.13, 0.115, 0.09), vec3(0.045, 0.06, 0.09), stripe.mul(0.7)), vec3(0.025, 0.02, 0.015), grease.mul(0.75)); // linear values
       return r;
     })();
-    const geo = new THREE.PlaneGeometry(0.26, 0.42, 12, 24); const p = geo.attributes.position;
+    const geo = new THREE.PlaneGeometry(0.26, 0.33, 12, 20); const p = geo.attributes.position;
     for (let i = 0; i < p.count; i++) {
-      const x = p.getX(i), t = (p.getY(i) + 0.21) / 0.42; // t: 0 = hanging end, 1 = end lying on the bench
+      const x = p.getX(i), t = (p.getY(i) + 0.165) / 0.33; // t: 0 = hanging end, 1 = end lying on the bench
       const lying = 0.16; // length lying on the bench (m)
-      const s = (1 - t) * 0.42;      // distance from the bench-top end
+      const s = (1 - t) * 0.33;      // distance from the bench-top end
       let y, z;
       if (s < lying) { y = 0.004 + 0.003 * Math.sin(x * 60 + s * 40); z = -(lying - s); }
       else { const a = Math.min((s - lying) / 0.03, 1) * Math.PI / 2; const r = 0.015; const hang = Math.max(s - lying - 0.03 * 0.64, 0);
@@ -550,20 +550,24 @@ export default {
       mk(cables, new THREE.MeshStandardNodeMaterial({ color: 0x101010, roughness: 0.55 }));
       mk(conduits, new THREE.MeshStandardNodeMaterial({ color: 0xc9c3b4, roughness: 0.7 }));
       mk(plastic, new THREE.MeshStandardNodeMaterial({ color: 0xd8d0bc, roughness: 0.5 }));
-      // the litter of a repair in progress on the bench top: screws, nuts, cut wire ends, a few solder blobs
+      // the litter of a repair in progress on the bench top, gathered where the work is (left of the open chassis, by
+      // the screw tin): dark screws lying flat, washers, nuts, a removed knob, cut wire ends, solder blobs
       if (placed.workbench) {
         const bits = new THREE.Group(), wb = placed.workbench, rr = (k) => { const x = Math.sin(k * 91.7 + 13.1) * 43758.5453; return x - Math.floor(x); };
-        const steelB = PM.bits ??= new THREE.MeshStandardNodeMaterial({ color: 0x9c9a94, roughness: 0.35, metalness: 1 });
-        const brass = PM.brass ??= new THREE.MeshStandardNodeMaterial({ color: 0xb08a3c, roughness: 0.3, metalness: 1 });
-        const wireB = PM.wireBits ??= new THREE.MeshStandardNodeMaterial({ color: 0xa83a24, roughness: 0.5 });
-        for (let k = 0; k < 46; k++) {
-          const x = -1.62 + rr(k) * 0.62, z = 0.95 + rr(k + 50) * 0.22;
+        const steelB = PM.bitsDark ??= new THREE.MeshStandardNodeMaterial({ color: 0x4a4740, roughness: 0.5, metalness: 0.85 });
+        const brass = PM.brassDark ??= new THREE.MeshStandardNodeMaterial({ color: 0x6e5a2e, roughness: 0.45, metalness: 0.9 });
+        const wireB = PM.wireBitsDark ??= new THREE.MeshStandardNodeMaterial({ color: 0x4a1a12, roughness: 0.55 });
+        const knobM = PM.knob ??= new THREE.MeshStandardNodeMaterial({ color: 0x1a1612, roughness: 0.4 });
+        for (let k = 0; k < 40; k++) {
+          const a = rr(k) * Math.PI * 2, r = 0.012 + Math.sqrt(rr(k + 50)) * 0.085; // denser in the middle of the heap
+          const x = -1.47 + Math.cos(a) * r * 1.3, z = 0.95 + Math.sin(a) * r * 0.8;
           ray.set(v.set(x, 2, z), down); ray.far = 3; const hit = ray.intersectObject(wb, true)[0]; if (!hit || hit.point.y < 0.7) continue;
-          const kind = k % 4; let m;
-          if (kind === 0) { m = new THREE.Mesh(new THREE.CylinderGeometry(0.0022, 0.0022, 0.012, 6).rotateZ(Math.PI / 2), steelB); m.position.y = 0.0022; }           // screw
-          else if (kind === 1) { m = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.003, 6), brass); m.position.y = 0.0015; }                              // nut
-          else if (kind === 2) { m = new THREE.Mesh(new THREE.CylinderGeometry(0.0009, 0.0009, 0.03, 4).rotateZ(Math.PI / 2), wireB); m.position.y = 0.001; }         // wire end
-          else { m = new THREE.Mesh(new THREE.SphereGeometry(0.0025, 6, 4), steelB); m.scale.y = 0.5; m.position.y = 0.001; }                                        // solder blob
+          const kind = k === 0 ? 5 : k % 5; let m;
+          if (kind === 0 || kind === 3) { m = new THREE.Mesh(new THREE.CylinderGeometry(0.0021, 0.0021, 0.011, 6).rotateZ(Math.PI / 2), steelB); m.position.y = 0.0021; } // screw
+          else if (kind === 1) { m = new THREE.Mesh(new THREE.CylinderGeometry(0.0042, 0.0042, 0.0011, 10), steelB); m.position.y = 0.0006; }                          // washer
+          else if (kind === 2) { m = new THREE.Mesh(new THREE.CylinderGeometry(0.0038, 0.0038, 0.0028, 6), brass); m.position.y = 0.0014; }                             // nut
+          else if (kind === 4) { m = new THREE.Mesh(new THREE.CylinderGeometry(0.0008, 0.0008, 0.022 + rr(k + 3) * 0.02, 4).rotateZ(Math.PI / 2), k % 2 ? wireB : knobM); m.position.y = 0.0008; } // wire end
+          else { m = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.012, 0.013, 16), knobM); m.position.y = 0.0065; }                                            // a knob pulled off
           const w0 = new THREE.Group(); w0.position.copy(hit.point); w0.rotation.y = rr(k + 7) * Math.PI * 2; w0.add(m); bits.add(w0);
         }
         root.add(mergeByMaterial(bits));
