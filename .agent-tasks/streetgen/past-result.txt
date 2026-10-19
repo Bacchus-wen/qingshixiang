@@ -1,0 +1,103 @@
+计划
+类型      图片 × 2 张
+模型      gpt / gpt-image-2.5-sunburst
+尺寸      3840x2160 · max
+模式      图生图（1 张参考图）
+提示词    The same street, the same row of buildings and exactly the same framing, camera position and horizon as the reference im…
+今日配额  已用 2/300 张 → 提交后 4/300
+费用      按实际消耗事后计费
+在途任务  0/20
+
+已上传参考图 .agent-tasks/streetgen/present-ref.jpg → ai-generate/sources/237/884437a0-b0f3-4c7f-a428-fb80278f66e9.jpg
+已提交 img_43868
+img_43868 processing 0% (0/2)
+img_43868 processing 50% (1/2)
+img_43868 completed 100% (2/2)
+已下载 /Users/wenbin/Games/新游戏/assets/generated/vmc/img_43868/ai_generate_43868_1.png
+已下载 /Users/wenbin/Games/新游戏/assets/generated/vmc/img_43868/ai_generate_43868_2.png
+{
+  "ok": true,
+  "data": {
+    "id": "img_43868",
+    "kind": "image",
+    "status": "completed",
+    "progress": 100,
+    "model": "gpt",
+    "version": "gpt-image-2.5-sunburst",
+    "prompt": "The same street, the same row of buildings and exactly the same framing, camera position and horizon as the reference image, but on a warm summer evening in the mid-1990s, before any demolition: every building is complete, including the one that is torn down in the reference; no 拆 characters, no rubble, no broken windows. The ground-floor shops are open and lit from inside with warm tungsten light spilling onto the pavement: a noodle shop with steam rising from a big pot at the door, a grocery with goods stacked outside, a barber with a striped pole, a small electronics and video shop with a glowing television in the window, a tailor; small lit light-box signs with short Chinese shop names; warm light in most upper windows, laundry hanging on bamboo poles from the balconies, potted plants; bicycles parked along the pavement; a few neighbours as soft, slightly motion-blurred figures without clear faces, sitting on low stools outside and chatting. Deep blue twilight sky. Lively, warm and nostalgic. Photorealistic documentary photograph, natural colour, crisp detail. The pavement takes only the bottom tenth of the frame. No logos, no watermarks, no captions.",
+    "size": "3840x2160",
+    "count": 2,
+    "completed": 2,
+    "failed": 0,
+    "created_at": "2026-10-19T14:13:57",
+    "completed_at": "2026-10-19T14:17:01",
+    "results": [
+      {
+        "result_id": 104888,
+        "index": 1,
+        "status": "completed",
+        "url": "https://vast-material.cdn.bcebos.com/ai-generate/results/43868/d1d5a12d-ba73-4676-a7a3-4f7276cb1485.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-19T06%3A17%3A06Z%2F3600%2F%2F6388f9eecdf4ec30637e5bc0d134e2a9e11939553930f11ebb6cf7a81eb50249",
+        "error": null
+      },
+      {
+        "result_id": 104889,
+        "index": 2,
+        "status": "completed",
+        "url": "https://vast-material.cdn.bcebos.com/ai-generate/results/43868/79218981-3b18-4dd4-8074-1c494445c304.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-19T06%3A17%3A06Z%2F3600%2F%2Fbf4cd5c1685e226770c2d3cedb21f76f099bad620264be0c787df9cad4959c93",
+        "error": null
+      }
+    ],
+    "urls": [
+      "https://vast-material.cdn.bcebos.com/ai-generate/results/43868/d1d5a12d-ba73-4676-a7a3-4f7276cb1485.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-19T06%3A17%3A06Z%2F3600%2F%2F6388f9eecdf4ec30637e5bc0d134e2a9e11939553930f11ebb6cf7a81eb50249",
+      "https://vast-material.cdn.bcebos.com/ai-generate/results/43868/79218981-3b18-4dd4-8074-1c494445c304.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-19T06%3A17%3A06Z%2F3600%2F%2Fbf4cd5c1685e226770c2d3cedb21f76f099bad620264be0c787df9cad4959c93"
+    ],
+    "files": [
+      "/Users/wenbin/Games/新游戏/assets/generated/vmc/img_43868/ai_generate_43868_1.png",
+      "/Users/wenbin/Games/新游戏/assets/generated/vmc/img_43868/ai_generate_43868_2.png"
+    ],
+    "plan": {
+      "kind": "image",
+      "model": "gpt",
+      "version": "gpt-image-2.5-sunburst",
+      "count": 2,
+      "quota": {
+        "limit": 300,
+        "used": 2,
+        "remaining": 298,
+        "unit": "张",
+        "after": 4
+      },
+      "running": {
+        "limit": 20,
+        "current": 0
+      },
+      "allowed": true,
+      "blockers": [],
+      "cost": {
+        "amount": 0,
+        "currency": "USD",
+        "priced": false,
+        "estimated": false,
+        "note": null
+      },
+      "request": {
+        "model": "gpt",
+        "mode": "img2img",
+        "prompt": "The same street, the same row of buildings and exactly the same framing, camera position and horizon as the reference image, but on a warm summer evening in the mid-1990s, before any demolition: every building is complete, including the one that is torn down in the reference; no 拆 characters, no rubble, no broken windows. The ground-floor shops are open and lit from inside with warm tungsten light spilling onto the pavement: a noodle shop with steam rising from a big pot at the door, a grocery with goods stacked outside, a barber with a striped pole, a small electronics and video shop with a glowing television in the window, a tailor; small lit light-box signs with short Chinese shop names; warm light in most upper windows, laundry hanging on bamboo poles from the balconies, potted plants; bicycles parked along the pavement; a few neighbours as soft, slightly motion-blurred figures without clear faces, sitting on low stools outside and chatting. Deep blue twilight sky. Lively, warm and nostalgic. Photorealistic documentary photograph, natural colour, crisp detail. The pavement takes only the bottom tenth of the frame. No logos, no watermarks, no captions.",
+        "reference_image_keys": [
+          "ai-generate/sources/237/884437a0-b0f3-4c7f-a428-fb80278f66e9.jpg"
+        ],
+        "size": "3840x2160",
+        "quality": "max",
+        "background": "opaque",
+        "output_format": "png",
+        "count": 2,
+        "gpt_model": "gpt-image-2.5-sunburst"
+      }
+    }
+  },
+  "meta": {
+    "version": "0.1.4",
+    "api": "https://vast-material.tripo3d.com/api"
+  }
+}

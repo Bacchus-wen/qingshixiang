@@ -1,43 +1,54 @@
 import * as THREE from 'three/webgpu';
 import { Film } from '../../ui/film.js';
 
-// The shop story (v4), start to end. Owns the camera (except ?shot= and ?review) and the pacing.
+// The shop story (v5: two acts), start to end. Owns the camera (except ?shot= and ?review) and the pacing.
 //   title   : black, the title card; a click starts the sound and the arrival
-//   arrive  : from the street, under the half-open shutter, round the robot to its face (it sits with its back to the
-//             street, facing into the dim shop)
+//   arrive  : on the street at dusk: the far side first (shuttered, 拆 on the walls, a house half torn down); then the one
+//             shop still half open; in, past the bench, round the robot sitting at its work to its face
 //   wait    : "hold"; the first hold fails (a flicker, a click), the second opens the eye
 //   waking  : close on the lens while it opens
-//   look    : over the robot's shoulder; the pointer turns its head, the beam brings the shop's past back where it
-//             falls; the power drains while the eye is open
-//   door    : the gaze settles on the wall beside the back door: a child's shadow, measured year by year, five to
-//             eleven, the pencil mark drawn each time; then the shadow is gone and the marks stay
-//   fade    : the power runs out: the beam stutters and dies, the shop goes dark
-//   end     : from inside, looking out under the shutter: the street lamp across the road comes on; black; end card
-const EYE0 = new THREE.Vector3(-0.61, 0.83, 0.94);          // the lens at rest (world), for framing before it moves
-const MARKS = new THREE.Vector3(2.62, 1.27, -2.24);         // centre of the pencil marks right of the back door
-const GIRL = new THREE.Vector3(2.6, 0.92, -1.65);           // the girl reading on the stool by the door (her head)
-const AGES = [1.10, 1.165, 1.225, 1.29, 1.345, 1.405, 1.47]; // the child's height at five .. eleven (= the marks)
-// in from the street under the shutter, past the robot's right shoulder, round in front of it to its lens side
-// in from the street under the shutter; a moment over the bench in the lamp's light (the open radio, the tools), then
-// behind the robot and round its right side to its face (the lens side)
-const ARRIVE = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(0.95, 1.62, 8.2), new THREE.Vector3(0.55, 1.52, 5.4), new THREE.Vector3(0.1, 1.3, 3.0),
-  new THREE.Vector3(-0.55, 1.5, 2.2), new THREE.Vector3(-0.62, 1.48, 2.15), new THREE.Vector3(0.95, 1.35, 1.95),
-  new THREE.Vector3(1.5, 1.2, 0.7), new THREE.Vector3(0.55, 1.02, -0.25), new THREE.Vector3(-0.98, 0.88, 0.12),
-]);
-const ARRIVE_LOOK = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(0.0, 1.75, 2.3), new THREE.Vector3(-0.8, 1.0, 0.6), new THREE.Vector3(-1.55, 0.9, 0.7),
-  new THREE.Vector3(-1.55, 0.9, 0.7), new THREE.Vector3(-0.9, 0.85, 0.9), new THREE.Vector3(-0.55, 0.8, 1.1),
-  new THREE.Vector3(-0.55, 0.5, 1.15), new THREE.Vector3(-0.6, 0.85, 0.96), EYE0.clone(), // (the whole robot, stool and feet, from its right)
-]);
-const K = (t, p, l, fov) => ({ t, p: new THREE.Vector3(...p), l: new THREE.Vector3(...l), fov });
-const ARRIVE_K = [
-  K(0, [0.95, 1.62, 8.2], [0.0, 1.75, 2.3], 46), K(4.5, [0.25, 1.28, 3.1], [-0.4, 1.05, 0.6], 46),
-  K(7.5, [-0.55, 1.5, 2.2], [-1.55, 0.9, 0.7], 44), K(10.5, [0.79, 0.86, -0.18], [-0.55, 0.52, 1.16], 40),
-  K(13.2, [0.66, 0.84, -0.28], [-0.55, 0.52, 1.16], 40), K(16.5, [-0.98, 0.88, 0.12], [-0.6, 0.76, 0.98], 38),
+//   look    : act one, the shop: over its shoulder, the pointer turns its head; where the beam falls the shop is as it was
+//             (the TVs show programmes, the radios' dials glow and play, the clock swings) -- the generated things up close
+//   turn    : the radios' song, faint, from across the road; it swivels round on its stool to face the street
+//   street  : act two: behind its head, out through the opening; where the beam falls the far side of the street is the
+//             mid-1990s again -- lit shops, laundry, neighbours on stools, their sounds. The power drains while it looks
+//   last    : its last look: back to the electronics shop the song comes from; the whole street lights up for a moment
+//   fade    : the power runs out: the beam stutters and dies, the song stops mid-phrase, the street is what it is now again
+//   end     : from inside, behind the robot: it still faces the dark street; the lamp across the road comes on; black;
+//             end card
+// act one (the layout: facing into the shop, ry 165)
+const EYE_IN = new THREE.Vector3(-0.61, 0.83, 0.94);
+const FACING_IN = new THREE.Vector3(0.2588, 0, -0.9659), LEFT_IN = new THREE.Vector3(-0.9659, 0, -0.2588);
+// act two (swivelled half a turn: ry -15, facing the street)
+const EYE0 = new THREE.Vector3(-0.493, 0.831, 1.376);
+const FACING = new THREE.Vector3(-0.2588, 0, 0.9659), LEFT = new THREE.Vector3(0.9659, 0, 0.2588);
+const TV_IN = new THREE.Vector3(0.71, 0.86, -1.42);        // the set on the cartons in the middle of the shop (a demo target)
+// the shops across the road, in the "then" photograph (world points on the backdrop plane, z 11): each has a sound
+// that plays when the beam first rests on it
+export const SPOTS = [
+  { key: 'noodles', pos: new THREE.Vector3(6.9, 1.3, 10.95), sound: 'bowls' },     // 百货面店: steam, diners
+  { key: 'hardware', pos: new THREE.Vector3(3.6, 1.3, 10.95), sound: 'tinks' },    // 金福五金
+  { key: 'barber', pos: new THREE.Vector3(0.45, 1.3, 10.95), sound: 'snips' },     // 新华理发: where the house is gone now
+  { key: 'tv', pos: new THREE.Vector3(-3.0, 1.25, 10.95), sound: 'tvshow' },        // 新兴电器: a family watching the TV in the window
+  { key: 'tailor', pos: new THREE.Vector3(-6.45, 1.3, 10.95), sound: 'sewing' },   // 日月缝纫店
 ];
+const STREET_C = new THREE.Vector3(0.3, 1.95, 11.0);          // the middle of the far side, a little above the shops
+const K = (t, p, l, fov, cut = false) => ({ t, p: new THREE.Vector3(...p), l: new THREE.Vector3(...l), fov, cut });
+const WAIT_POS = new THREE.Vector3(-0.98, 0.88, 0.12), WAIT_LOOK = new THREE.Vector3(-0.6, 0.8, 0.98); // its face, lens side
+const ARRIVE_K = [
+  K(0, [0.9, 1.55, 5.6], [1.6, 2.6, 11.0], 50),           // the far side: what is left of the street (a slow drift)
+  K(5.2, [0.2, 1.55, 6.0], [0.3, 2.4, 11.0], 48),
+  K(5.25, [0.6, 1.55, 6.6], [-0.4, 1.1, 0.8], 46, true),   // (cut) behind us, the one shop still half open, a light inside
+  K(8.5, [0.25, 1.28, 3.1], [-0.4, 1.05, 0.6], 46),        // at the shutter: someone sits inside at a bench
+  K(11.0, [-0.55, 1.5, 2.2], [-1.55, 0.9, 0.7], 44),       // in: the bench in the lamp's light
+  K(13.8, [0.99, 0.9, -0.38], [-0.55, 0.52, 1.16], 40),    // the robot whole, three-quarter (the model shown whole)
+  K(16.0, [0.84, 0.88, -0.5], [-0.55, 0.52, 1.16], 40),
+  K(18.8, WAIT_POS.toArray(), WAIT_LOOK.toArray(), 38),    // its face
+];
+const TOUCH = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches; // a phone or tablet: hints speak of fingers
 const ease = (x) => x * x * (3 - 2 * x);
 const clamp01 = (x) => Math.min(1, Math.max(0, x));
+const LOOK_POWER_S = 105; // seconds of open eye before the power is gone (both acts)
 
 export default {
   name: 'story',
@@ -45,16 +56,18 @@ export default {
     if (ctx.isShot || ctx.api.shop?.review) { this.off = true; return; }
     this.film = new Film(document.getElementById('ui'), {
       title: '青 石 巷', sub: '请戴上耳机', start: '点击画面开始',
-      credit: '屋里的每一件旧物都由 Tripo 生成 · 声音出处见 CREDITS.md',
-      card: ['刻度停在十一岁。'],
+      credit: '店里的每一件旧物都由 Tripo 生成 · 声音出处见 CREDITS.md',
+      card: ['它记得这条街亮着灯的样子。'],
     });
     this.phase = ctx.params.get('phase') || 'title';
-    this.t = 0; this.power = 1; this.lookTime = 0; this.dwell = 0;
-    this.cam = { pos: ARRIVE.getPoint(0), look: ARRIVE_LOOK.getPoint(0), fov: 46 };
+    this.t = 0; this.power = 1; this.lookTime = 0; this.streetTime = 0; this.seen = new Set(); this.dwell = {}; this.sinceSeen = 0;
+    this.cam = { pos: ARRIVE_K[0].p.clone(), look: ARRIVE_K[0].l.clone(), fov: ARRIVE_K[0].fov };
     this.curPos = this.cam.pos.clone(); this.curLook = this.cam.look.clone();
     this._v = new THREE.Vector3(); this._w = new THREE.Vector3(); this._d = new THREE.Vector3();
+    this.radioPos = SPOTS.find((s) => s.key === 'tv').pos; // (sound.js: the TV show's music comes from the shop window)
     ctx.api.story = this;
     if (this.phase === 'title') this.film.title(true); else { this.film.title(false); this.set(this.phase, true); }
+    if (['turn', 'street', 'last', 'fade', 'end'].includes(this.phase)) ctx.api.shop?.robotTurn?.(1); // (?phase= straight into act two)
     ctx.postfx.params.presentK.value = 1; // the dusty present outside the beam
   },
   set(phase, cut = false) { this.phase = phase; this.t = 0; this.cut = cut; },
@@ -62,171 +75,187 @@ export default {
   update(dt, time, ctx) {
     if (this.off) return;
     this.t += dt;
-    const m = ctx.memory, input = ctx.input, eye = ctx.api.eye, past = ctx.api.past, atmo = ctx.api.atmo, film = this.film;
+    const m = ctx.memory, input = ctx.input, eye = ctx.api.eye, atmo = ctx.api.atmo, film = this.film, audio = ctx.api.audio;
     const eyePos = m.strength > 0.01 ? m.origin : EYE0;
     switch (this.phase) {
       case 'title': {
         m.forceOpen = false; film.fade(1);
-        this.cam.pos.copy(ARRIVE.getPoint(0)); this.cam.look.copy(ARRIVE_LOOK.getPoint(0)); this.cut = true;
+        this.cam.pos.copy(ARRIVE_K[0].p); this.cam.look.copy(ARRIVE_K[0].l); this.cam.fov = ARRIVE_K[0].fov; this.cut = true;
         if (input.pointer.held || input.wasPressed('Pointer') || input.wasPressed('Space') || input.wasPressed('Enter')) { film.title(false); this.set('arrive'); }
         break;
       }
       case 'arrive': {
         m.forceOpen = false;
-        film.fade(Math.max(0, 1 - this.t / 4));
-        // timed keyframes: under the shutter, a glance at the bench, a held three-quarter view of the whole robot (head to
-        // feet, the stool and its shadow: the model shown whole), then round to its face
         let i = 0; while (i < ARRIVE_K.length - 2 && this.t > ARRIVE_K[i + 1].t) i++;
-        const A0 = ARRIVE_K[i], A1 = ARRIVE_K[i + 1], f = ease(clamp01((this.t - A0.t) / (A1.t - A0.t)));
+        const A0 = ARRIVE_K[i], A1 = ARRIVE_K[i + 1], f = A1.cut ? 0 : ease(clamp01((this.t - A0.t) / (A1.t - A0.t)));
+        if (A0.cut && this.cutAt !== A0.t) { this.cutAt = A0.t; this.cut = true; }
+        const cutK = ARRIVE_K.filter((x) => x.cut).reduce((v, x) => Math.max(v, 1 - Math.abs(this.t - x.t) / 0.35), 0); // a dip to black across a cut
+        film.fade(Math.max(0, 1 - this.t / 4, cutK));
         this.cam.pos.lerpVectors(A0.p, A1.p, f); this.cam.look.lerpVectors(A0.l, A1.l, f); this.cam.fov = A0.fov + (A1.fov - A0.fov) * f;
         if (this.t > ARRIVE_K[ARRIVE_K.length - 1].t || input.wasPressed('Enter')) this.set('wait');
         break;
       }
       case 'wait': {
-        // chest-up, three-quarter from its lens side: the head, the chest's fan and the brass shoulder in one frame,
-        // side-lit (the face light from the bench side); a slow lateral drift shows the volumes
-        m.forceOpen = undefined; film.fade(0);
-        ARRIVE.getPoint(1, this.cam.pos); this.cam.pos.x += Math.sin(this.t * 0.15) * 0.06; this.cam.pos.z -= (1 - Math.cos(this.t * 0.15)) * 0.05;
-        this.cam.look.set(-0.6, 0.76, 0.98); this.cam.fov = 40 - Math.min(3, this.t * 0.15);
-        if (this.t > 3) film.hint(eye?.failed ? (input.hold ? '松开，再按住' : '再按住一次') : '按住鼠标左键');
+        // chest-up, three-quarter from its lens side, at its work in the shop; a slow drift shows the volumes
+        m.forceOpen = undefined; film.fade(0); ctx.api.shop?.robotTurn?.(0);
+        this.cam.pos.copy(WAIT_POS).addScaledVector(LEFT_IN, Math.sin(this.t * 0.15) * 0.06).addScaledVector(FACING_IN, -(1 - Math.cos(this.t * 0.15)) * 0.05);
+        this.cam.look.copy(WAIT_LOOK); this.cam.fov = 40 - Math.min(3, this.t * 0.15);
+        if (this.t > 3) film.hint(eye?.failed ? (input.hold ? '松开，再按住' : '再按住一次') : TOUCH ? '按住屏幕' : '按住鼠标左键');
         if (eye?.failed && !this.shook) { this.shook = true; this.shake = 0.45; } // the first try: a clunk, the head jolts
         if (eye && eye.open > 0.08 && eye.attempts > 1) { film.hint(''); this.set('waking', true); }
         break;
       }
       case 'waking': {
         // three-quarter on the lens while it grinds open
-        this._d.set(0.259, 0, -0.966); // the robot's facing; its left (the lens side) is world -x
-        this.cam.pos.copy(EYE0).addScaledVector(this._d, 0.4).add(this._w.set(-0.15, 0.05, 0.04));
-        this.cam.look.copy(eyePos); this.cam.fov = 27;
+        this.cam.pos.copy(EYE_IN).addScaledVector(FACING_IN, 0.8).add(this._w.set(-0.26, 0.12, 0.06));
+        this.cam.look.copy(eyePos).add(this._w.set(0, 0.07, 0)); this.cam.fov = 36;
         if (eye && eye.open > 0.85) { this.set('look'); atmo?.flicker(1); } // the shop's dead tube stutters as the eye opens
         if (!input.hold && eye && eye.open < 0.02 && this.t > 1) this.set('wait');
         break;
       }
       case 'look': {
-        // over the robot's left shoulder (the lens side): the head's edge in the near foreground, the beam leaving the lens
+        // act one, the shop: over its right shoulder (the bench stays out of the near frame), the view following the beam
+        // round the shelves -- the TVs, the radios, the clock come back where it falls
         this._d.copy(m.dir); this._d.y = 0; this._d.normalize();
         this._w.set(this._d.z, 0, -this._d.x); // the robot's left, across the gaze
-        // over its right shoulder (the bench and its open radio stay out of the near frame; the beam rises past the head)
         this.cam.pos.copy(eyePos).addScaledVector(this._d, -1.15).addScaledVector(this._w, -0.38); this.cam.pos.y = eyePos.y + 0.5;
         this.cam.look.copy(eyePos).addScaledVector(m.dir, 3.2).addScaledVector(this._w, 0.12);
-        this.cam.fov = 50;
-        this.lookTime += dt;
-        past?.setSitting(true); // the girl on the stool by the door, in the past
-        if (this.t > 4 && !this.moved) film.hint('保持按住，移动鼠标');
-        if (!this.moved && (Math.abs(input.pointer.x) > 0.2 || Math.abs(input.pointer.y) > 0.2)) { this.moved = true; film.hint(''); }
-        // the eye's power drains while it is held open; low on power it goes back to the door by itself
-        if (eye && eye.open > 0.2) this.power = Math.max(0, this.power - dt / 140);
-        // the girl on the stool: near the beam she turns a page now and then (a cue); a gaze that rests on her (after the
-        // shop has been seen for a while) starts her memory
-        const toG = this._v.copy(GIRL).sub(m.origin).normalize(), cg = toG.dot(m.dir);
-        if (m.strength > 0.5 && cg > Math.cos(0.4) && (this.pageT = (this.pageT ?? 3) - dt) < 0) { this.pageT = 5 + Math.random() * 3; ctx.api.audio?.play('page', { pos: GIRL }); }
-        const on = m.strength > 0.5 && cg > Math.cos(0.16);
-        this.dwell = on ? this.dwell + dt : Math.max(0, this.dwell - dt * 2);
-        if (this.power < 0.32 || (this.lookTime > 40 && !this.dwell)) eye?.aim(GIRL); // left alone long enough, it looks for her itself
-        if ((this.dwell > 1.2 && this.lookTime > 14) || (this.power < 0.32 && on) || input.wasPressed('KeyD')) { film.hint(''); this.set('girl'); }
-        m.power = this.power;
-        break;
-      }
-      case 'girl': {
-        // the robot holds her in its light; the camera comes closer; she stops swinging her legs, looks up at it -- and
-        // gets up to be measured (the door phase)
-        m.forceOpen = true; eye?.aim(GIRL);
-        const k = ease(clamp01(this.t / 2.2));
-        if (!this.girlFrom) this.girlFrom = { pos: this.curPos.clone(), look: this.curLook.clone() };
-        this.cam.pos.copy(this.girlFrom.pos).lerp(this._w.set(1.25, 1.22, -0.2), k); this.cam.look.copy(this.girlFrom.look).lerp(this._d.set(2.6, 1.0, -1.8), k); this.cam.fov = 50 - 6 * k;
-        past?.setSittingPose(Math.min(1, this.t / 0.6), clamp01((this.t - 0.9) / 0.5));
-        if (this.t > 3.6) this.set('door');
-        m.power = this.power;
-        break;
-      }
-      case 'door': {
-        // the robot takes over: its eye narrows to a level -- a bright line across the wall -- and measures her, year
-        // by year, as it did then: the line rises to her height, the pencil draws the mark there, she grows
-        m.forceOpen = true; m.spotK = 1 - 0.2 * ease(clamp01(this.t / 4));
-        // first wide, over the robot's shoulder: its lens in the near foreground and the line of light it throws onto the
-        // wall in one frame; then in close to the wall; at the end in on the last mark
-        if (!this.doorWide) { // over the robot's right shoulder, looking where it looks (the wall): the robot, its line and her in one frame
-          const d = this._d.copy(MARKS).sub(eyePos).setY(0).normalize(), r = this._w.set(-d.z, 0, d.x);
-          this.doorWide = { pos: eyePos.clone().addScaledVector(d, -1.05).addScaledVector(r, 0.42).setY(eyePos.y + 0.48), look: MARKS.clone().setY(1.05) };
+        // when the beam rests on something, the view leans in to it: a slow, oblique close-up of the thing coming back
+        const px = input.pointer.x, py = input.pointer.y, mv = Math.abs(px - (this.px ?? px)) + Math.abs(py - (this.py ?? py)); this.px = px; this.py = py;
+        this.still = mv > 0.004 ? 0 : (this.still ?? 0) + dt;
+        const zk = ease(clamp01((this.still - 1.0) / 1.6)); this.zoom = (this.zoom ?? 0) + (zk - (this.zoom ?? 0)) * Math.min(1, dt * (zk > (this.zoom ?? 0) ? 1.2 : 3));
+        this.cam.pos.lerp(this._v.copy(eyePos).addScaledVector(m.dir, 1.6).addScaledVector(this._w, -0.25).setY(eyePos.y + 0.3), 0.45 * this.zoom);
+        this.cam.fov = 50 - 18 * this.zoom;
+        if (this.t > 19.6 && this.t < 27.5) { // its own radio: over its shoulder, the head turned down to the set on its bench
+          this.zoom = 0; this.cam.fov = 46; this.cam.look.lerp(this.benchPos ?? this.cam.look, 0.5);
         }
-        const wide = 1 - ease(clamp01((this.t - 9.3) / 3.5)), slow = clamp01((this.t - 12.8) / 18), last = ease(clamp01((this.t - 26.5) / 4)); // the first year whole in the wide frame
-        this._v.set(1.75, 1.33, -0.75).lerp(this._d.set(2.05, 1.3, -1.15), slow * 0.7).lerp(this._w.set(2.22, 1.42, -1.15), last).lerp(this.doorWide.pos, wide);
-        this.cam.pos.copy(this._v);
-        this.cam.look.set(2.66, 1.25, -2.25).lerp(this._w.set(2.7, 1.4, -2.25), last).lerp(this.doorWide.look, wide); this.cam.fov = 44 - 6 * slow + 6 * wide - 2 * last; // the last mark, its '十一岁' and the empty wall above, all in frame
-        // year k starts at YT[k]; the first and the last are given time, the ones between go quicker
-        const T0 = 5.5, YD = [3.8, 2.4, 2.3, 2.3, 2.3, 2.4, 3.6], YT = YD.reduce((a, d) => (a.push(a[a.length - 1] + d), a), [T0]);
-        let k = -1; while (k + 1 < YT.length && this.t >= YT[k + 1]) k++;
-        const n = AGES.length, STEP = YD[Math.max(0, Math.min(n - 1, k))];
-        m.goboMode = this.t > 3 ? 'level' : undefined;
-        const yr = Math.min(n - 1, Math.max(0, k)), within = clamp01((this.t - YT[yr]) / 0.9);
-        // the level line: settles on this year's height (it rises from last year's); after eleven it rises once more
-        let lineY = k < 0 ? AGES[0] : AGES[Math.max(0, yr - 1)] + (AGES[yr] - AGES[Math.max(0, yr - 1)]) * ease(within);
-        const after = this.t - YT[n]; // the year after eleven
-        if (after > 1.5) lineY = AGES[n - 1] + (1.53 - AGES[n - 1]) * ease(clamp01((after - 1.5) / 1.2));
-        if (after > 1.5 && !this.waitSound) { this.waitSound = true; ctx.api.audio?.play('servo'); }
-        eye?.aim(this._d.set(MARKS.x, lineY, MARKS.z));
-        past?.setSitting(this.t < T0); // she gets up to be measured
-        if (this.t > T0 && k < n) {
-          if (k !== this.year) { this.year = k; this.drawn = false; }
-          // she grows with the line; when it has settled on her crown a hand comes in and draws the mark along it
-          past?.setChild(k === 0 ? AGES[0] : lineY, 5 + k);
-          const ty = this.t - YT[k], prev = k > 0 ? AGES[k - 1] : 0;
-          past?.setChildX(k === 0 ? 2.86 - 0.42 * ease(clamp01(ty / 1.0)) : 2.44); // the first year she walks in and stands against the wall
-          const sp = STEP / 3.4, handIn = ease(clamp01((ty - 1.0 * sp) / 0.35)) * (1 - ease(clamp01((ty - 2.6 * sp) / 0.35))), stroke = ease(clamp01((ty - 1.45 * sp) / (0.9 * sp)));
-          const x = 2.41 + stroke * (0.3 + (k === n - 1 ? 0.03 : 0));
-          past?.setHand(handIn, AGES[k], x);
-          past?.setMarks(stroke > 0 ? AGES[k] : prev, prev, stroke > 0 ? x : 9);
-          if (!this.drawn && stroke > 0) { this.drawn = true; ctx.api.audio?.play('pencil', { pos: this._w.set(2.6, AGES[k], -2.2) }); }
-          if (handIn > 0.05 && this.handYear !== k) { this.handYear = k; ctx.api.audio?.play('servo'); } // the same servos as its head: it is its hand
-          // the first and the last year: she points up at the new mark ("look!"), and the robot nods
-          const show = (k === 0 || k === n - 1) ? clamp01((ty - (2.6 * sp + 0.25)) / 0.35) * (1 - clamp01((ty - (2.6 * sp + 1.6)) / 0.4)) : 0;
-          past?.setChildPoint(ease(show));
-          m.nod = (k === 0 || k === n - 1) ? clamp01((ty - (2.6 * sp + 0.6)) / 0.8) : 0;
-        } else past?.setHand(0, 1, 2.4);
-        // after eleven: she is gone. The level rises once more, to where twelve would be, and waits -- nobody comes, no
-        // hand, no mark; then the line goes out and the wall stays with its seven marks
-        if (after > 0.6) { past?.setChild(0); past?.setChildPoint(0); past?.setMarks(AGES[n - 1], AGES[n - 1], 9); m.nod = 0; }
-        if (after > 0.6) { this.cam.pos.set(2.12, 1.38, -1.0); this.cam.look.set(2.64, 1.3, -2.25); this.cam.fov = 40; } // and the camera stops: we wait with it
-        if (after > 7.2) m.goboMode = undefined;
-        if (after > 10.5) { this.set('fade'); }
+        this.lookTime += dt;
+        if (this.t > 4 && !this.moved) film.hint(TOUCH ? '保持按住，滑动手指' : '保持按住，移动鼠标');
+        if (!this.moved && (Math.abs(input.pointer.x) > 0.2 || Math.abs(input.pointer.y) > 0.2)) { this.moved = true; film.hint(''); eye?.aim(null); }
+        if (!this.moved && this.t > 9) eye?.aim(TV_IN); // left alone, it looks at the set in the middle of the shop itself
+        if (eye && eye.open > 0.2) this.power = Math.max(0, this.power - dt / LOOK_POWER_S);
+        // its own radio: after a while it looks at the half-repaired set on its bench; a crackle, and a song comes out of it.
+        // Then the song leaves the radio and answers, faint, from across the road behind it (the TV in the electronics
+        // shop window); it turns round to it
+        if (!this.benchPos) { const r = ctx.api.shop?.placed?.tube_radio_open; this.benchPos = r ? r.getWorldPosition(new THREE.Vector3()).add(this._w.set(0, 0.16, 0)) : new THREE.Vector3(-1.26, 1.0, 0.74); }
+        if (this.t > 19 && this.t < 27) eye?.aim(this.benchPos);
+        if (this.t > 20.6 && !this.crackled) { this.crackled = true; audio?.play('tvzap', { pos: this.benchPos }); }
+        this.benchTune = this.t < 21.2 ? 0 : this.t < 26 ? Math.min(1, (this.t - 21.2) / 1.2) : Math.max(0, 1 - (this.t - 26) / 2.5);
+        if (this.t > 26) this.tuneCall = Math.min(0.55, (this.tuneCall ?? 0) + dt * 0.3);
+        if (this.t > 27) eye?.aim(null);
+        if ((this.t > 30 && this.zoom < 0.2) || this.t > 34 || input.wasPressed('KeyT')) { film.hint(''); this.benchTune = 0; this.set('turn'); }
         m.power = this.power;
+        break;
+      }
+      case 'turn': {
+        // it swivels round on its stool, half a turn, to face the street; the head comes back to straight ahead.
+        // Seen from the doorway: its back first, then it comes round to us, the street's dusk on its face
+        m.forceOpen = true; eye?.aim(null); m.lookOverride = { x: 0, y: 0.15 };
+        const k = ease(clamp01((this.t - 0.4) / 3.0));
+        ctx.api.shop?.robotTurn?.(k);
+        if (this.t < 0.05) { this.cut = true; audio?.play('servo'); }
+        if (this.t > 1.2 && !this.creak) { this.creak = true; audio?.play('servo'); }
+        this.cam.pos.set(0.55, 1.08, 2.15); this.cam.look.set(-0.5, 0.72, 1.15); this.cam.fov = 42;
+        if (eye && eye.open > 0.2) this.power = Math.max(0, this.power - dt / LOOK_POWER_S);
+        if (this.t > 4.2) { m.lookOverride = undefined; this.set('street', true); }
+        this.tuneCall = 0.55;
+        m.power = this.power;
+        break;
+      }
+      case 'street': {
+        // act two: behind its head on the lens side, held still: the whole far side fills the opening (the photographs'
+        // edges just outside the frame), the head in the near corner, and the beam moves across the street -- the view
+        // only leans a little after it
+        this.cam.pos.copy(EYE0).addScaledVector(FACING, -1.3).addScaledVector(LEFT, 0.24).add(this._w.set(0, 0.28, 0)); // its head and shoulder in the lower right third
+        this.cam.look.copy(STREET_C).lerp(this._v.copy(eyePos).addScaledVector(m.dir, 10), 0.06);
+        this.cam.fov = 42;
+        this.streetTime += dt; this.tuneCall = Math.max(0, (this.tuneCall ?? 0) - dt * 0.25);
+        m.spotK = 0.4; m.beamK = 0.45; // the far side is the memory here: the beam's pool on the near road and its haze stay quiet
+        if (this.t > 2.5 && !this.moved2) film.hint(TOUCH ? '滑动手指，让它看看街对面' : '移动鼠标，让它看看街对面');
+        if (!this.moved2 && this.t > 1 && (Math.abs(input.pointer.x) > 0.25 || Math.abs(input.pointer.y) > 0.25)) { this.moved2 = true; film.hint(''); }
+        // the power failing: now and then the past drops out for a moment
+        if (this.power < 0.35 && (this.dipT = (this.dipT ?? 2) - dt) < 0) { this.dipT = 2.5 + Math.random() * 3.5; this.dip = 0.14; audio?.play('click'); }
+        if (eye && eye.open > 0.2) this.power = Math.max(0, this.power - dt / LOOK_POWER_S);
+        // the shops across the road: a beam that rests on one brings its sound back (once each)
+        let on = null;
+        for (const s of SPOTS) {
+          const c = this._v.copy(s.pos).sub(m.origin).normalize().dot(m.dir), hit = m.strength > 0.5 && c > Math.cos(0.17);
+          this.dwell[s.key] = hit ? (this.dwell[s.key] ?? 0) + dt : 0;
+          if (hit) on = s;
+          if (this.dwell[s.key] > 0.5 && !this.seen.has(s.key)) { this.seen.add(s.key); this.sinceSeen = 0; audio?.play(s.sound, { pos: s.pos }); }
+        }
+        this.sinceSeen += dt;
+        // nothing found for a while: one of the shops not yet seen calls from its side of the street (a bell)
+        if (!on && this.sinceSeen > 8 && (this.callT = (this.callT ?? 5) - dt) < 0) {
+          const s = SPOTS.find((x) => !this.seen.has(x.key)); this.callT = 7;
+          if (s) audio?.play(s.sound, { pos: s.pos }); // the shop itself calls, from its side of the street
+        }
+        // enough: three shops (and a moment with the last), or the power nearly gone -- then one last look
+        if ((this.seen.size >= 3 && this.sinceSeen > 5) || this.power < 0.14 || this.streetTime > 62 || input.wasPressed('KeyD')) { film.hint(''); this.set('last'); }
+        this.dip = Math.max(0, (this.dip ?? 0) - dt);
+        m.power = this.dip > 0 ? 0.05 : this.power;
+        break;
+      }
+      case 'last': {
+        // its last look: it turns back to the electronics shop where the song comes from; with what is left, the whole
+        // street lights up as it was, for a moment; then it cannot hold it any more
+        this.cam.pos.copy(EYE0).addScaledVector(FACING, -1.3).addScaledVector(LEFT, 0.24).add(this._w.set(0, 0.28, 0)); // its head and shoulder in the lower right third
+        this.cam.look.copy(STREET_C); this.cam.fov = 42 + 4 * ease(clamp01((this.t - 3.2) / 2));
+        m.forceOpen = true; m.spotK = 0.4; m.beamK = 0.45;
+        eye?.aim(SPOTS.find((x) => x.key === 'tv').pos);
+        m.memWide = 1 + 3.2 * ease(clamp01((this.t - 3.2) / 2.2)); // the shop alone a moment (the song), then the whole street
+        this.power = Math.max(0.03, this.power - dt * 0.03);
+        m.power = this.t > 7.4 && Math.random() < 0.25 ? 0.04 : Math.max(0.2, this.power);
+        if (this.t > 8.4) this.set('fade');
         break;
       }
       case 'fade': {
-        // the last of the power: the beam stutters and dies, then everything inside goes out. It keeps looking at the wall.
-        m.headLift = 1; m.holdGaze = true;
+        // the last of the power: the beam stutters and dies, the street goes back to what it is now. Its face as the
+        // iris closes for the last time, the dusk from the street on it
+        m.holdGaze = true;
         this.power = Math.max(0, this.power - dt / 3);
         m.power = Math.max(0.02, this.power);
         m.forceOpen = this.t < 2.2 ? true : this.t < 5 ? Math.random() > Math.min(0.92, (this.t - 2.2) * 0.33) : false;
         if (this.t > 4.5) atmo?.set('out');
-        // back to the robot: its face as the iris closes for the last time
-        if (this.t < 0.05) this.cut = true;
-        this._d.set(0.259, 0, -0.966);
-        this.cam.pos.copy(EYE0).addScaledVector(this._d, 0.85).add(this._w.set(-0.32, -0.02, 0.1)); this.cam.look.set(-0.6, 0.8, 0.98); this.cam.fov = 34;
-        if (this.t > 7.5) this.set('end');
+        // first from where we were: the whole street flickers out and the song stops mid-phrase; then its face as the iris
+        // closes for the last time
+        m.memWide = this.t < 3.4 ? 4.2 : 1;
+        if (this.t < 3.4) {
+          this.cam.pos.copy(EYE0).addScaledVector(FACING, -1.3).addScaledVector(LEFT, 0.24).add(this._w.set(0, 0.28, 0)); this.cam.look.copy(STREET_C); this.cam.fov = 46;
+        } else {
+          if (!this.faced) { this.faced = true; this.cut = true; }
+          this.cam.pos.copy(EYE0).addScaledVector(FACING, 0.78).addScaledVector(LEFT, 0.18).add(this._w.set(0, 0.03, 0));
+          this.cam.look.copy(EYE0).add(this._w.set(0, 0.02, 0)); this.cam.fov = 34;
+        }
+        if (this.t > 9) this.set('end');
         break;
       }
       case 'end': {
-        m.forceOpen = false; m.holdGaze = true;
-        // still turned to the wall; once, a servo whirs and the head starts to lift -- and stops: it is still waiting
-        m.headLift = 1 + (this.t > 9 && this.t < 10.6 ? 0.25 * Math.sin(Math.PI * (this.t - 9) / 1.6) : 0);
-        if (this.t > 9 && !this.lastTry) { this.lastTry = true; ctx.api.audio?.play('servo'); }
-        // from inside, low, looking out under the shutter: the dead robot dark against the street; the lamp comes on
-        // the robot dark on the right, the street through the opening; the lamp across the road throws its pool
-        // the robot dark against the street, face to us; behind it the lamp across the road throws its pool
-        const u = ease(clamp01(this.t / 20));
-        this.cam.pos.set(0.12 + 0.05 * u, 0.98, -0.42 - 0.4 * u);
-        this.cam.look.set(-0.5, 1.0, 5.0); this.cam.fov = 46 - 3 * u;
+        // from inside, behind it: it still faces the street, dark against it; the lamp across the road comes on over the
+        // rubble; a digger somewhere; black; the card
+        m.forceOpen = false; m.holdGaze = true; m.headLift = 1;
+        const u = ease(clamp01(this.t / 12));
+        this.cam.pos.set(0.25 - 0.06 * u, 1.1, -0.35 + 0.3 * u); // it sits on the right third, its back to us, over the lamp's pool
+        this.cam.look.set(-1.2, 1.25, 11.0); this.cam.fov = 46 - 4 * u;
         if (this.t < 0.05) this.cut = true;
-        film.fade(Math.min(1, Math.max(0, (this.t - 13) / 5)));
-        if (this.t > 18.5) film.endCard();
-        if (this.t > 45) film.replayHint();
-        if (this.t > 22 && (input.wasPressed('Pointer') || input.wasPressed('Space'))) location.reload();
+        film.fade(Math.min(1, Math.max(0, (this.t - 7) / 3)));
+        if (this.t > 12.5) film.endCard(); // (two seconds of silence first: sound.js)
+        if (this.t > 30) film.replayHint();
+        if (this.t > 14 && (input.wasPressed('Pointer') || input.wasPressed('Space'))) location.reload();
         break;
       }
     }
-    film.power(this.power, this.phase === 'look');
-    const fl = ctx.api.shop?.faceLight; if (fl) { const want = this.phase === 'wait' ? 3.2 : this.phase === 'waking' ? 2.2 : this.phase === 'fade' ? 1.6 : this.phase === 'arrive' ? 3.2 * clamp01((this.t - 9) / 4) : this.phase === 'end' ? 0.8 : 0; fl.intensity += (want - fl.intensity) * Math.min(1, dt * 1.5); }
+    film.power(this.power, this.phase === 'look' || this.phase === 'turn' || this.phase === 'street' || this.phase === 'last');
+    // a soft key on its face while we are in front of it: in the shop from the bench side (from the camera's side while
+    // we come in: the chest and legs read too); facing the street, from the street
+    const fl = ctx.api.shop?.faceLight; if (fl) {
+      const inShop = this.phase === 'arrive' || this.phase === 'wait' || this.phase === 'waking' || this.phase === 'title';
+      if (inShop) { fl.position.set(...(this.phase === 'arrive' ? [0.45, 1.25, 0.25] : [-1.35, 1.05, 0.62])); fl.target.position.set(-0.6, this.phase === 'arrive' ? 0.6 : 0.8, 0.98); }
+      else { fl.position.set(0.35, 1.25, 2.45); fl.target.position.copy(EYE0).add(this._w.set(0, -0.12, 0)); }
+      fl.target.updateMatrixWorld(); fl.angle = this.phase === 'arrive' ? 0.7 : 0.6;
+      const want = this.phase === 'wait' ? 2.6 : this.phase === 'waking' ? 2.0 : this.phase === 'fade' ? 1.4 : this.phase === 'arrive' ? 3.2 * clamp01((this.t - 11) / 3) : 0;
+      fl.intensity += (want - fl.intensity) * Math.min(1, dt * 1.5);
+    }
 
     // the camera eases toward its target, a little handheld drift on top
     const k = this.phase === 'waking' ? 3 : this.phase === 'look' ? 2.2 : 1.4;
@@ -238,6 +267,8 @@ export default {
     cam.position.x += Math.sin(time * 0.37) * 0.006; cam.position.y += Math.sin(time * 0.53) * 0.004;
     if (this.shake > 0) { this.shake -= dt; const a = Math.max(0, this.shake) * 0.012; cam.position.x += (Math.random() - 0.5) * a; cam.position.y += (Math.random() - 0.5) * a; }
     cam.lookAt(this.curLook);
-    if (Math.abs(cam.fov - this.cam.fov) > 0.01) { cam.fov += (this.cam.fov - cam.fov) * Math.min(1, dt * 2); cam.updateProjectionMatrix(); }
+    // portrait screens (phones held upright) see a narrow slice: widen the vertical angle so the same things stay in frame
+    const want = Math.min(78, this.cam.fov * (cam.aspect < 1 ? Math.min(1.6, 1 / Math.sqrt(cam.aspect)) : 1));
+    if (Math.abs(cam.fov - want) > 0.01) { cam.fov += (want - cam.fov) * Math.min(1, dt * 2); cam.updateProjectionMatrix(); }
   },
 };

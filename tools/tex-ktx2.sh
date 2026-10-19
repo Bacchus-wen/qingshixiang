@@ -17,6 +17,9 @@ ua calendar calendar 512x1024; ua price_list price_list 512x1024; ua slogan slog
 e1 tv_poster tv_poster 512x1024; ua notice notice 512x1024
 # the other side of the street (matte painting seen through the opening)
 e1 street_backdrop street_backdrop 2048x1024
+# v5: the far side now and then (3840x1920, cropped from the 3840x2160 originals: the painted road is cut; ETC1S keeps
+# the pair at ~3 MB, UASTC would be ~13 MB)
+e1 street_now street_now; e1 street_then street_then
 # sandwich-board sign at the entrance
 ua sign_aframe sign_aframe 512x1024
 # pencil height marks beside the back door (drawn as a multiply decal, so only the marks show)

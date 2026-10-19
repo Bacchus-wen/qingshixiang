@@ -38,7 +38,11 @@
 ## 第四版修理铺(2026-10-18 起)
 - 屋里的模型:全部由 Tripo 生成(API、CLI 与用户在 Tripo Studio 手动生成),原始网格直接上屏(分级细节见 docs/tripo-compare)。参考图由公司素材中台 gpt-image-2.5 生成(docs/gen-log.md)。
 - 声音:上面列出的 CC0 录音 + Web Audio 合成(钟摆的嘀嗒、收音机里的曲子(本作原创的五声音阶小调)、电视测试音、机器人的舵机与开眼声、灯管与市电的嗡声),`src/systems/shop/sound.js`,Claude 编写。
-- 顾客与孩子只以影子出现:影子由程序几何体投出(`src/systems/shop/past.js`),不生成人物模型。
+- (第四版)顾客与孩子只以影子出现,影子由程序几何体投出,不生成人物模型;第五版已去掉这些影子和身高刻度。
+
+## 第五版:对街照片(2026-10-19)
+- 马路对面那一排店铺的"现在"和"从前"两张照片(`assets/textures/shop/street_now.ktx2`、`street_then.ktx2`)由公司素材中台生成(gpt-image-2.5-sunburst,max,3840x2160;"从前"以"现在"为参考图),画面中的店名、人物都是生成的,不对应真实的店和人。提示词与任务号见 `docs/gen-log.md`。
+- 店里和门口的三维模型仍是 Tripo 生成;对街是照片,不是模型。
 
 ## 改编使用(第二版,公司内部展示)
 - 机器人外壳:Kestrel K-1 by thtbee_(https://github.com/thtbee/waggles),CC BY-NC 4.0。改动:按关节重新组装为坐姿、去掉左前臂、减面、换材质、装上我们自己的测绘机械眼(tools/blender/kestrel_robot.py)。

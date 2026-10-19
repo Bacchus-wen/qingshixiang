@@ -4,7 +4,7 @@
 // Uses Playwright's own Chromium (never the user's Chrome).
 import { createServer } from 'vite';
 import { chromium } from 'playwright';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readdirSync, unlinkSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,6 +17,7 @@ const query = opt('query', '');
 const out = path.join(root, opt('out', 'renders/play-shop'));
 const [W, H] = opt('size', '1280x720').split('x').map(Number);
 mkdirSync(path.dirname(out), { recursive: true });
+for (const f of readdirSync(path.dirname(out))) if (f.startsWith(path.basename(out) + '-') && f.endsWith('.png')) unlinkSync(path.join(path.dirname(out), f)); // no stale frames
 
 const base = opt('url', null); // e.g. http://127.0.0.1:5181/ (a production build) instead of a dev server
 const server = base ? null : await createServer({ root, logLevel: 'error', server: { port: 0 } });
@@ -34,34 +35,52 @@ try {
   const phase = () => page.evaluate(() => window.__engine?.ctx?.api?.story?.phase);
   const until = async (p, maxS = 60) => { for (let i = 0; i < maxS * 4; i++) { if ((await phase()) === p) return true; await page.waitForTimeout(250); } return false; };
   const snap = async (label) => { const f = `${out}-${String(shots.length).padStart(2, '0')}-${label}.png`; await page.screenshot({ path: f }); shots.push(f); console.log('snap', label, await phase(), 'audio', JSON.stringify(await page.evaluate(() => window.__engine?.ctx?.api?.audio?.meter?.()))); };
+  // by the story's own clock (phase + seconds into it): screenshots take real time, this does not drift
+  const ORDER = ['title', 'arrive', 'wait', 'waking', 'look', 'turn', 'street', 'last', 'fade', 'end'];
+  const at = async (p, s, maxS = 150) => {
+    for (let i = 0; i < maxS * 20; i++) {
+      const st = await page.evaluate(() => { const S = window.__engine?.ctx?.api?.story; return S ? [S.phase, S.t] : null; });
+      if (st && (ORDER.indexOf(st[0]) > ORDER.indexOf(p) || (st[0] === p && st[1] >= s))) return st[0] === p;
+      await page.waitForTimeout(40);
+    }
+    return false;
+  };
   await page.waitForTimeout(1500); await snap('title');
   await page.mouse.move(W / 2, H / 2); await page.mouse.click(W / 2, H / 2);
-  await wait(4); await snap('arrive-4s');
-  await wait(9); await snap('arrive-13s');
-  await wait(9); await snap('arrive-22s');
-  await until('wait', 40); await wait(4); await snap('wait');
+  await at('arrive', 2.5); await snap('arrive-2s-far-side');
+  await at('arrive', 7); await snap('arrive-7s-the-shop');
+  await at('arrive', 11); await snap('arrive-11s-bench');
+  await at('arrive', 14.5); await snap('arrive-14s-robot');
+  await at('wait', 4); await snap('wait');
   await page.keyboard.down('Space'); await wait(0.9); await snap('attempt1'); await wait(0.8); await page.keyboard.up('Space');
   await wait(2); await snap('after-fail');
   await page.keyboard.down('Space'); await wait(1.2); await snap('opening');
-  await until('look', 20); await wait(1); await snap('look-0');
-  await wait(4); await snap('look-centre');
-  await page.mouse.move(W * 0.15, H * 0.45, { steps: 25 }); await wait(4); await snap('look-left');
-  await page.mouse.move(W * 0.3, H * 0.2, { steps: 25 }); await wait(4); await snap('look-left-up');
-  await page.mouse.move(W * 0.62, H * 0.5, { steps: 25 }); await wait(4); await snap('look-ahead');
-  await page.mouse.move(W * 0.92, H * 0.45, { steps: 25 }); await wait(5); await snap('look-right');
-  await wait(14); await snap(`look-dwell-${await phase()}`);
-  if ((await phase()) === 'look') { await page.keyboard.press('KeyD'); }
-  await until('girl', 10); await wait(2.6); await snap('girl');
-  await until('door', 10); await wait(5); await snap('door-5s');
-  await wait(4); await snap('door-9s');
-  await wait(6); await snap('door-15s');
-  await wait(6); await snap('door-21s');
-  await wait(9); await snap('door-30s-after-eleven');
-  await until('fade', 30); await wait(2); await snap('fade');
+  // act one: the shop
+  await at('look', 1.5); await snap('look-0');
+  await page.mouse.move(W * 0.2, H * 0.4, { steps: 30 }); await at('look', 7); await snap('shop-left');
+  await page.mouse.move(W * 0.55, H * 0.35, { steps: 30 }); await at('look', 13); await snap('shop-ahead');
+  await page.mouse.move(W * 0.85, H * 0.45, { steps: 30 }); await at('look', 19); await snap('shop-right');
+  await page.mouse.move(W * 0.5, H * 0.5, { steps: 30 });
+  await at('look', 24); await snap('bench-radio');
+  await at('turn', 0.8); await snap('turn-1s');
+  await at('turn', 2.6); await snap('turn-3s');
+  // act two: the street -- sweep the far side, left to right as seen from behind it, resting on each shop
+  await at('street', 1); await snap('street-0');
+  const seen = () => page.evaluate(() => [...(window.__engine?.ctx?.api?.story?.seen || [])].join(','));
+  for (const [x, y, label] of [[0.5, 0.15, 'up'], [0.08, 0.5, 'left'], [0.3, 0.52, 'left-centre'], [0.5, 0.5, 'centre'], [0.72, 0.52, 'right-centre'], [0.93, 0.5, 'right']]) {
+    await page.mouse.move(W * x, H * y, { steps: 30 }); await wait(3.2);
+    if ((await phase()) !== 'street') break;
+    await snap(`street-${label}`); console.log('  seen:', await seen());
+  }
+  await at('last', 2.6); await snap('last-3s-the-shop');
+  await at('last', 6.2); await snap('last-6s-whole-street');
+  await at('fade', 1.6); await snap('fade-2s-street-out');
+  await at('fade', 5.5); await snap('fade-5s-face');
   await page.keyboard.up('Space');
-  await until('end', 20); await wait(6); await snap('end-6s');
-  await wait(8); await snap('end-14s');
-  await wait(7); await snap('end-card');
+  await at('end', 2.5); await snap('end-2s');
+  await at('end', 6); await snap('end-6s');
+  await at('end', 9); await snap('end-9s');
+  await at('end', 13.5); await snap('end-card');
   const perf = await page.evaluate(() => window.__perf && { frameMs: +window.__perf.frameMs.toFixed(1), calls: window.__perf.calls, tris: window.__perf.triangles });
   console.log('phase now:', await phase(), 'perf', JSON.stringify(perf));
   if (errors.length) console.log('ERRORS:\n' + [...new Set(errors)].slice(0, 12).join('\n'));

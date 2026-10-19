@@ -8,6 +8,7 @@ import { SHOTS } from '../../engine/shots.js';
 import { LodLibrary, SHADOW_LAYER, ROBOT_LAYER, ROBOT_SHADOW_LAYER } from './lod.js';
 import { HeadRig } from './rig.js';
 import { pastHooks } from './past.js';
+import { memoryMask } from '../../materials/memory.js';
 import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorld, positionLocal, smoothstep, vec2, vec3, mx_worley_noise_float, texture, normalWorldGeometry, abs, step, uniform, uv, vec4 } from 'three/tsl';
 
 // v4: the closed-down home-appliance repair shop (docs/scene-shop.md). This phase is models + layout only:
@@ -21,7 +22,7 @@ export const ROOM = { w: 6.0, d: 4.5, h: 3.0 };
 // in world space so walls and floor line up without UV work. All are loaded up front (init awaits them).
 const TEX = {};
 const TEX_NAMES = ['floor_terrazzo', 'wall_upper', 'wall_dado', 'ceiling', 'facade', 'pavement', 'shutter', 'cardboard',
-  'poster', 'calendar', 'price_list', 'slogan', 'sign_main', 'sign_side', 'tags', 'box_a', 'box_b', 'box_c', 'box_d', 'tv_poster', 'notice', 'street_backdrop', 'sign_aframe', 'sign_vertical', 'pegboard_empty'];
+  'poster', 'calendar', 'price_list', 'slogan', 'sign_main', 'sign_side', 'tags', 'box_a', 'box_b', 'box_c', 'box_d', 'tv_poster', 'notice', 'street_now', 'street_then', 'sign_aframe', 'sign_vertical', 'pegboard_empty'];
 async function loadTextures(ktx2) {
   await Promise.all(TEX_NAMES.map(async (n) => {
     try {
@@ -84,7 +85,7 @@ function facadeMat() {
 function streetMat() {
   const m = new THREE.MeshStandardNodeMaterial();
   const P = positionWorld;
-  m.colorNode = texture(tex('pavement'), P.xz.div(1.6)).rgb.mul(0.8);
+  m.colorNode = texture(tex('pavement'), P.xz.div(1.6)).rgb.mul(0.8).mul(mix(float(1), float(0.5), smoothstep(5.5, 10.6, P.z))); // the far road darker: it meets the photograph's dusk
   m.roughnessNode = float(0.8);
   return m;
 }
@@ -438,15 +439,29 @@ export default {
       }
       root.add(slats);
     }
-    // the other side of the street (seen through the shop opening from inside): a generated matte painting on a
-    // plane across the road, unlit (it carries its own dusk light), plus dark ground under it
+    // the other side of the street (seen through the shop opening): two generated photographs of the same row of
+    // shophouses (company platform, gpt-image-2.5, docs/gen-log.md) on a plane across the road, unlit (they carry their
+    // own light) -- now: shuttered, 拆 painted on the walls, the middle house half torn down; then (the mid-1990s, made
+    // from "now" as the reference, so the shops line up): lit shops, laundry, neighbours on stools. Where the robot's
+    // beam falls, "then" shows through, per pixel, by the same memory mask as everything else
     {
-      const bd = new THREE.MeshBasicNodeMaterial(); const bt = tex('street_backdrop'); bt.wrapS = bt.wrapT = THREE.ClampToEdgeWrapping;
-      const CROP = 0.13; // the painting's own road strip (bottom 13%) is cut: the buildings stand on our pavement
-      bd.colorNode = texture(bt, uv().mul(vec2(1, 1 - CROP)).add(vec2(0, CROP))).rgb.mul(0.55);
-      const BW = 16, BH = BW * 1024 / 1536 * (1 - CROP);
+      const now = tex('street_now'), then = tex('street_then');
+      for (const t of [now, then]) { t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; t.anisotropy = 8; }
+      const bd = new THREE.MeshBasicNodeMaterial(), k = memoryMask(positionWorld), far = this.farK = uniform(1); // far: dusk 1 -> night (atmo)
+      bd.colorNode = mix(texture(now, uv()).rgb.mul(far.mul(0.62)), texture(then, uv()).rgb.mul(0.9), k);
+      const BW = 16, BH = BW * 1920 / 3840;
       const plane = new THREE.Mesh(new THREE.PlaneGeometry(BW, BH), bd); plane.rotation.y = Math.PI; // faces the shop (-z)
-      plane.position.set(0.4, -STEP + BH / 2 - 0.05, d / 2 + 0.25 + 8.5); root.add(plane);
+      plane.position.set(0.4, -STEP + BH / 2 - 0.05, d / 2 + 0.25 + 8.5); root.add(plane); this.backdrop = plane;
+      // a low kerb along the far side, where the photograph's pavement begins: a line that ties our road to its ground
+      // (broken: stretches of kerb with gaps, kerbstones knocked out of line, and loose bricks -- not a straight frame line)
+      const km = new THREE.MeshStandardNodeMaterial({ color: 0x55534f, roughness: 0.9 }), bm = new THREE.MeshStandardNodeMaterial({ color: 0x6a4a3a, roughness: 0.95 });
+      const zK = d / 2 + 0.25 + 8.3, rnd = (i) => { const x = Math.sin(i * 91.7) * 43758.5453; return x - Math.floor(x); };
+      let x0 = -7.6;
+      for (const [len, gap] of [[2.6, 0.5], [3.3, 0.9], [1.4, 0.35], [2.9, 1.1], [3.1, 0.6], [2.2, 0]]) {
+        const k = new THREE.Mesh(new THREE.BoxGeometry(len, 0.13, 0.3), km); k.position.set(x0 + len / 2, -STEP + 0.065 - rnd(len) * 0.03, zK + (rnd(len * 3) - 0.5) * 0.08); k.rotation.y = (rnd(len * 7) - 0.5) * 0.03; k.receiveShadow = true; root.add(k);
+        x0 += len + gap;
+      }
+      for (let i = 0; i < 26; i++) { const b = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.06, 0.11), bm); b.position.set(-7.4 + rnd(i + 1) * 15.6, -STEP + 0.03, zK + 0.2 + rnd(i + 40) * 0.9); b.rotation.set(0, rnd(i + 80) * 6.3, (rnd(i + 120) - 0.5) * 0.4); b.receiveShadow = b.castShadow = true; root.add(b); }
     }
     // printed things on the walls (generated with the company platform, docs/gen-log.md)
     root.add(onWall(decal('pegboard_empty', 1.14, 0.76), 'back', -1.88, 1.72, 0.0145));
@@ -673,7 +688,7 @@ export default {
       // upturned tip, and a loop of wire round the joint (the review said the parts read as floating: the hook must show)
       for (const part of [placed.spare_arm, placed.spare_leg]) {
         if (!part || part.userData.layout.wall !== 'right') continue;
-        const bb = new THREE.Box3().setFromObject(part, true), cz = (bb.min.z + bb.max.z) / 2, top = bb.max.y - 0.03;
+        const bb = new THREE.Box3().setFromObject(part, true), cz = (bb.min.z + bb.max.z) / 2, top = bb.max.y + 0.004; // over the joint, not hidden behind it
         const galv = PM.hookGalv ??= new THREE.MeshStandardNodeMaterial({ color: 0x7a7872, roughness: 0.45, metalness: 0.85 });
         const plate = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.1, 0.06), galv); plate.position.set(w / 2 - 0.004, top + 0.025, cz);
         const screws = [-1, 1].map((sy) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.004, 10).rotateZ(Math.PI / 2), PM.hook ??= new THREE.MeshStandardNodeMaterial({ color: 0x2a2a28, roughness: 0.5, metalness: 0.8 })); m.position.set(w / 2 - 0.009, top + 0.025 + sy * 0.035, cz); return m; });
@@ -824,7 +839,7 @@ export default {
         for (const o of objs) o.visible = false;
       }
     }
-    ctx.api.shop = { root, placed, ROOM, lod, rig, eyeGlow, lights: { hemi, dusk, lamp: this.lamp, fill, tube: this.tubeLight, tubeGlow, robotFill: this.robotFill }, review: !ctx.isShot && ctx.params.get('review') !== null };
+    ctx.api.shop = { root, placed, ROOM, lod, rig, eyeGlow, lights: { hemi, dusk, lamp: this.lamp, fill, tube: this.tubeLight, tubeGlow, robotFill: this.robotFill }, farK: this.farK, robotTurn: (k) => { const r = placed.robot; if (!r) return; r.userData.ry0 ??= r.rotation.y; r.rotation.y = r.userData.ry0 - Math.PI * k; }, review: !ctx.isShot && ctx.params.get("review") !== null };
     ctx.postfx.memoryGrade = true; // the past inside the beam is graded per pixel (src/engine/PostFX.js)
     Object.assign(ctx.postfx.params, { bloomRadius: 0.35, bloomStrength: 0.26, bloomThreshold: 2.2 }); // a tight glow round the hottest cores only (the lamp's shade is lit point-blank: it must not flare)
     // the face light for the robot's close-ups (story: wait / waking), soft and unshadowed, off otherwise (never removed:

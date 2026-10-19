@@ -24,8 +24,9 @@ export class Engine {
 
   async init(systems, onProgress = () => {}) {
     const renderer = new THREE.WebGPURenderer({ antialias: false, powerPreference: 'high-performance', forceWebGL: this.params.get('webgl') !== null, trackTimestamp: this.params.get('gputime') !== null });
-    // internal resolution: 1x (TRAA cleans edges); lowered automatically if frames run long (see adaptResolution)
-    this.pixelRatio = this.shot ? 1 : Math.min(devicePixelRatio, parseFloat(this.params.get('dpr') || '1'));
+    // internal resolution: up to 1.5x on high-density screens (1x there is visibly soft, upscaled 2x by the browser;
+    // TRAA cleans the rest); lowered automatically if frames run long (see adaptResolution). ?dpr=2 for full density
+    this.pixelRatio = this.shot ? 1 : Math.min(devicePixelRatio, parseFloat(this.params.get('dpr') || '1.5'));
     renderer.setPixelRatio(this.pixelRatio);
     renderer.setSize(innerWidth, innerHeight);
     renderer.shadowMap.enabled = true;

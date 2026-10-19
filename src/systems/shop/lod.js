@@ -66,7 +66,7 @@ export class LodLibrary {
   busy() { return this.loading > 0 || this.instances.some((o) => o.parent && o.target >= 0 && o.cur !== o.target && !o.set.levels[o.target].failed); }
   update(camera, renderer, every = 4) {
     if (++this.frame % every !== 0) return;
-    renderer.getDrawingBufferSize(_db);
+    renderer.getSize(_db); // CSS pixels: a high-density screen renders sharper (pixel ratio), not heavier (finer levels, more memory)
     const k = (_db.y || 1080) / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2));
     _pv.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse); _frustum.setFromProjectionMatrix(_pv);
     // 1. the level each copy needs, and how much it matters (its radius on screen, in pixels; off screen = 0)

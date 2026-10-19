@@ -1,5 +1,6 @@
 html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
-#app canvas { display: block; }
+#app canvas { display: block; touch-action: none; } /* a finger held and dragged on the canvas steers the robot: the browser must not take it as a pan (pointercancel) */
+html, body { overscroll-behavior: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 #loading { position: fixed; left: 0; bottom: 0; height: 2px; width: calc(var(--p, 0) * 100%); background: #9aa4ad; transition: opacity .6s; }
 #loading.done { opacity: 0; }
 body.shot #ui { display: none; }

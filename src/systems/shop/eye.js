@@ -186,7 +186,7 @@ export default {
       // the story aims the gaze at a world point (null = back to the pointer)
       aim(p) { sys.aimAt = p ? (sys.aimAt ?? new THREE.Vector3()).copy(p) : null; },
     };
-    ctx.memory.range = 9;
+    ctx.memory.range = 22; // v5: the far side of the street is ~10 m away (memoryMask is full to 0.55 x range)
     mem.soft.value = 0.09; // the past fades in at the beam's edge (the street version keeps a sharper edge)
   },
 
@@ -224,7 +224,7 @@ export default {
       this.look.x = THREE.MathUtils.clamp(this.lookCur.x + dyaw / 0.85, -1, 1); this.look.y = THREE.MathUtils.clamp(this.lookCur.y + dpit / 0.32, -1, 1);
     } else if (m.lookOverride) this.look.set(m.lookOverride.x, m.lookOverride.y);
     else this.look.set(-input.pointer.x, input.pointer.y); // screen right = the robot's right (the camera rides behind it)
-    const k = Math.min(1, dt * (0.5 + o * 1.6)), reach = m.holdGaze ? 1 : Math.min(1, 0.2 + o); // holdGaze: it keeps looking even with the eye shut
+    const k = Math.min(1, dt * (m.headK ?? (0.5 + o * 1.6))), reach = m.holdGaze ? 1 : Math.min(1, 0.2 + o); // holdGaze: it keeps looking even with the eye shut
     this.lookCur.x += (this.look.x * reach - this.lookCur.x) * k;
     this.lookCur.y += (this.look.y * reach - this.lookCur.y) * k;
     this.lift += ((m.headLift ?? Math.min(1, this.open * 1.4)) - this.lift) * Math.min(1, dt * 1.5);
@@ -233,7 +233,8 @@ export default {
     // it lifts ~13 deg and can look up/down another ~18 deg
     rig.yaw = this.lookCur.x * 0.85 + jitter;
     rig.pitch = this.lift * 0.23 + this.lookCur.y * 0.32 - (1 - this.lift) * 0.04 * (0.5 + 0.5 * Math.sin(t * 0.7)) - 0.14 * Math.sin(Math.PI * Math.min(1, Math.max(0, m.nod ?? 0))); // nod: 0 -> 1 = one small nod
-    rig.roll = this.lift * 0.05;
+    this.tilt = (this.tilt ?? 0) + ((m.tilt ?? 0) - (this.tilt ?? 0)) * Math.min(1, dt * 1.6); // a listening tilt
+    rig.roll = this.lift * 0.05 + this.tilt;
     if (!(ctx.isShot && ctx.params.get('head'))) rig.update();
 
     // ---- the lens parts follow the head; the iris opens with the eye (a little ahead of the light: it lets it out)
@@ -242,9 +243,9 @@ export default {
     // ---- the light and the shaft follow the lens
     rig.eye(this.robot, this._p, this._d);
     const origin = this._v.copy(this._p).addScaledVector(this._d, 0.045); // just in front of the lens barrel
-    const angle = 0.1 + 0.27 * o;
-    m.origin.copy(origin); m.dir.copy(this._d); m.angle = angle * 1.12; m.strength = Math.min(1, o * 1.3) * Math.min(1, pw * 3);
-    syncMemory(m);
+    const angle = 0.07 + 0.15 * o; // v5: a searching beam -- across the road its circle holds a shop and a half, not the street
+    m.origin.copy(origin); m.dir.copy(this._d); m.angle = Math.min(1.2, angle * 1.12 * (m.memWide ?? 1)); m.strength = Math.min(1, o * 1.3) * Math.min(1, pw * 3);
+    syncMemory(m); mem.soft.value = (1 - Math.cos(m.angle)) * 0.35; // the soft edge scales with the cone (a fixed width would swallow a narrow one)
     const sp = this.spot;
     sp.position.copy(origin); sp.target.position.copy(origin).addScaledVector(this._d, 4); sp.target.updateMatrixWorld();
     sp.angle = angle; sp.penumbra = 0.7;

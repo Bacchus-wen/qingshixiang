@@ -190,7 +190,7 @@ out.append({"name": "tv_on_cartons", "glb": "crt_tv.glb", "pos": [0.71, 0, -1.48
 # v4 story (2026-10-19): the robot faces into the shop -- the shelves, the back door and the height marks beside it --
 # with its back to the street, so its gaze can reach the door. The robot and the work in front of it (the carton and
 # the spare torso its screwdriver is on) turn together about the robot's own position: the tip stays where it was.
-ROBOT_TURN = 190
+ROBOT_TURN = 190  # (story v5, 2026-10-19: two acts -- it starts facing into the shop, then swivels round on its stool to face the street: index.js robotTurn)
 def turn_group(names, deg):
     import math
     piv = next(i for i in out if i['name'] == 'robot')['pos']

@@ -13,10 +13,10 @@ import { mem } from '../../materials/memory.js';
 //   alive   : the eye is open: the tube holds, the room warms a little
 //   out     : the end -- everything inside goes out, the street lamp outside comes on
 const LEVELS = {
-  review: { hemi: 0.45, dusk: 1.4, lamp: 18, fill: 3, tube: 5.5, glow: 2.2, robot: 7, env: 0.55, street: 0 },
-  dusk:   { hemi: 0.24, dusk: 2.1, lamp: 13, fill: 0.6, tube: 0, glow: 0.02, robot: 2.2, env: 0.34, street: 0 }, // dusk light only gets in under the shutter: outside can be properly lit
-  alive:  { hemi: 0.2, dusk: 1.0, lamp: 16, fill: 1.0, tube: 4.0, glow: 1.8, robot: 2.2, env: 0.38, street: 0 },
-  out:    { hemi: 0.07, dusk: 0.55, lamp: 0, fill: 0, tube: 0, glow: 0.0, robot: 1.8, env: 0.14, street: 1 }, // the robot keeps a rim of street light: dark, not a black block
+  review: { hemi: 0.45, dusk: 1.4, lamp: 18, fill: 3, tube: 5.5, glow: 2.2, robot: 7, env: 0.55, street: 0, far: 1 },
+  dusk:   { hemi: 0.28, dusk: 2.1, lamp: 13, fill: 1.0, tube: 0, glow: 0.02, robot: 2.2, env: 0.34, street: 0, far: 1 }, // dusk light only gets in under the shutter: outside can be properly lit
+  alive:  { hemi: 0.2, dusk: 1.0, lamp: 16, fill: 1.0, tube: 4.0, glow: 1.8, robot: 2.2, env: 0.38, street: 0, far: 1 },
+  out:    { hemi: 0.07, dusk: 0.55, lamp: 0, fill: 0, tube: 0, glow: 0.0, robot: 1.8, env: 0.14, street: 1, far: 0.4 }, // (far: the street across the road goes to night) the robot keeps a rim of street light: dark, not a black block
 };
 
 export default {
@@ -59,9 +59,9 @@ export default {
       const hm = new THREE.SpriteNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
       const rr = uv().sub(0.5).length().mul(2);
       this.streakK = uniform(0);
-      hm.colorNode = vec3(1.0, 0.68, 0.32).mul(float(1).sub(smoothstep(0, 1, rr)).pow(3).mul(0.6).add(float(1).sub(smoothstep(0, 0.12, rr)).mul(5))).mul(this.streakK);
+      hm.colorNode = vec3(0.82, 0.88, 1.0).mul(float(1).sub(smoothstep(0, 1, rr)).pow(3).mul(0.6).add(float(1).sub(smoothstep(0, 0.12, rr)).mul(5))).mul(this.streakK);
       const halo = new THREE.Sprite(hm); halo.position.copy(head); halo.scale.setScalar(1.6); ctx.scene.add(halo);
-      const sl = this.streetLamp = new THREE.SpotLight(0xffb36a, 0, 30, 0.7, 0.85, 1.1); sl.position.copy(head); sl.target.position.set(1.2, -0.14, 4.6); // its pool reaches the pavement in front of the shop: seen from inside
+      const sl = this.streetLamp = new THREE.SpotLight(0xcfdcff, 0, 30, 0.7, 0.85, 1.1); // cold: a mercury lamp over an empty road sl.position.copy(head); sl.target.position.set(1.2, -0.14, 4.6); // its pool reaches the pavement in front of the shop: seen from inside
       ctx.scene.add(sl, sl.target); }
     ctx.api.atmo = { set: (s) => { if (LEVELS[s]) this.state = s; }, get state() { return this.state; }, flicker: (k = 1) => { this.burst = Math.max(this.burst, k); } };
   },
@@ -87,7 +87,8 @@ export default {
     L.tube.intensity = (this.state === 'review' ? C.tube : 5.5 * tubeOn); L.tubeGlow.value = this.state === 'review' ? C.glow : 0.02 + 2.2 * tubeOn;
     if (L.robotFill) L.robotFill.intensity = C.robot;
     ctx.scene.environmentIntensity = C.env;
-    this.streetLamp.intensity = 110 * C.street; this.streakK.value = C.street;
+    this.streetLamp.intensity = 170 * C.street; this.streakK.value = C.street; // (cold now: brighter so its pool on the empty road shows the robot dark against it)
+    if (ctx.api.shop?.farK) ctx.api.shop.farK.value = C.far;
     // the dust sees the same lights
     const lp = L.lamp; this.lampPos.value.copy(lp.position); this.lampDir.value.copy(lp.target.position).sub(lp.position).normalize();
     this.lampCos.value = Math.cos(lp.angle); this.lampK.value = lp.intensity / 18; this.duskK.value = C.dusk / 1.4;

@@ -126,7 +126,16 @@ export default {
       case 'tick': this.synthClick(this.tock ? 1650 : 2300, { pos: opts.pos, gain: 0.28 * (opts.gain ?? 1), decay: 0.06 }); this.tock = !this.tock; break;
       case 'pencil': { const a = r() * 8.2; this.shot('pencil', a, 1.2 + r() * 0.4, { pos: opts.pos, gain: 0.9 }); break; }
       case 'click': this.shot('relay_a', 0, undefined, { gain: 0.5 }); break;
-      case 'servo': this.tone(240, 420, 0.7, { gain: 0.05, type: 'sawtooth' }); break;
+      // v5: the shops across the road, each once when the beam first rests on it (synthesised: they follow the picture)
+      case 'bowls': [0, 0.17, 0.26, 0.55].forEach((d, i) => setTimeout(() => this.synthClick(2700 + 500 * (i % 3), { pos: opts.pos, gain: 0.32, decay: 0.16 }), d * 1000)); break; // china knocking on china
+      case 'tinks': [0, 0.22, 0.5].forEach((d, i) => setTimeout(() => this.synthClick(4300 + 700 * i, { pos: opts.pos, gain: 0.26, decay: 0.22 }), d * 1000)); break; // a spanner set down on a tray
+      case 'snips': for (let i = 0; i < 6; i++) setTimeout(() => this.synthClick(5200, { pos: opts.pos, gain: 0.22, decay: 0.025 }), (Math.floor(i / 2) * 0.42 + (i % 2) * 0.07) * 1000); break; // scissors
+      case 'sewing': for (let i = 0; i < 26; i++) setTimeout(() => this.synthClick(1700 + (i % 2) * 300, { pos: opts.pos, gain: 0.18, decay: 0.03 }), i * 70); break; // a treadle machine
+      case 'tvshow': this.shot('tv_on', 0.25, 1.4, { pos: opts.pos, gain: 0.35 }); break; // the set's click and hum; the show's tune follows the beam (radio)
+      case 'bell': this.shot('bike_bell', 0, 3.4, { pos: opts.pos, gain: 0.22, wet: 0.15 }); break;
+      case 'servo': opts.short ? this.tone(300, 380, 0.3, { gain: 0.035, type: 'sawtooth' }) : this.tone(240, 420, 0.7, { gain: 0.05, type: 'sawtooth' }); break;
+      case 'rattle': // a door shaken in its frame by the wind: four soft wooden knocks
+        [0, 0.09, 0.16, 0.29].forEach((d, i) => setTimeout(() => this.synthClick(190 + 60 * (i % 2), { pos: opts.pos, gain: 0.5 - 0.08 * i, decay: 0.11 }), d * 1000)); break;
       case 'whine': this.tone(900, 2600, 2.4, { gain: 0.035 }); break;
       case 'powerdown': this.tone(1800, 120, 3.2, { gain: 0.05 }); this.shot('relay_b', 0, undefined, { gain: 0.4 }); break;
       case 'streetlamp': this.shot('relay_b', 0, undefined, { gain: 0.25, rate: 0.8, wet: 0.1 }); break;
@@ -147,23 +156,29 @@ export default {
     const ac = this.ac, now = ac.currentTime, m = ctx.memory, set = (p, v, tau = 0.3) => p.setTargetAtTime(v, now, tau);
     const cam = ctx.camera.position, inside = THREE.MathUtils.smoothstep(2.6 - cam.z, -0.2, 0.6); // 0 outside .. 1 inside
     const story = ctx.api.story, phase = story?.phase, atmo = ctx.api.atmo;
-    const quiet = phase === 'title' ? 0 : phase === 'end' ? Math.max(0, 1 - Math.max(0, story.t - 12) / 6) : 1;
+    const quiet = phase === 'title' ? 0 : phase === 'end' ? Math.max(0, 1 - Math.max(0, story.t - 6.5) / 4) : 1; // the street a while into the black, then silence before the card
     // present
     set(this.duskIn.gain, 0.5 * quiet * (1 - 0.45 * inside)); set(this.duskLP.frequency, 2400 - 1600 * inside, 0.5);
     set(this.humG.gain, 0.006 * inside * quiet);
     const L = ctx.api.shop?.lights; set(this.tubeG.gain, L ? 0.012 * Math.min(1, L.tube.intensity / 5.5) * quiet : 0, 0.02);
     // past: the street, louder where the beam falls (its strength), the radio by the radios in the beam
     const past = Math.min(1, m.strength ?? 0);
-    const intimate = phase === 'door' || phase === 'girl' ? 0.3 : 1; // the climax is quiet: the pencil, the clock, the room
+    const intimate = 1;
     set(this.pastIn.gain, 0.55 * past * past * quiet * intimate, 0.6);
     let radio = 0, rpos = null;
     const shop = ctx.api.shop;
+    // the music: in the shop, the closed tube radios in the beam play it (act one); across the road, the TV show in the
+    // electronics shop's window (story.radioPos, act two)
     if (shop && past > 0.05) for (const o of Object.values(shop.placed)) {
       if (o.userData.layout?.glb !== 'tube_radio_closed.glb') continue;
       o.getWorldPosition(this._v); this._v.y += 0.2; const k = memoryMaskCPU(this._v, m); if (k > radio) { radio = k; rpos = (rpos ?? new THREE.Vector3()).copy(this._v); }
     }
+    if (story?.radioPos && past > 0.05) { const k = memoryMaskCPU(story.radioPos, m); if (k > radio) { radio = k; rpos = story.radioPos; } }
+    if (story?.benchTune > 0 && story.benchPos && story.benchTune > radio) { radio = story.benchTune; rpos = story.benchPos; } // its own radio, on the bench
     this.radioLevel = (this.radioLevel ?? 0) + (radio - (this.radioLevel ?? 0)) * Math.min(1, dt * 1.5);
-    set(this.radioG.gain, 0.32 * this.radioLevel * quiet * intimate, 0.2); if (rpos) set(this.radioPan.pan, this.pan(rpos)[0]);
+    const call = story?.tuneCall ?? 0; if (call > this.radioLevel && story?.radioPos) rpos = story.radioPos; // the song calling from across the road
+    const cut = (phase === 'fade' && story.t > 2.3) || phase === 'end'; // the light dies: the song stops mid-phrase
+    set(this.radioG.gain, cut ? 0 : 0.32 * Math.max(this.radioLevel, call) * quiet * intimate, cut ? 0.012 : 0.2); if (rpos) set(this.radioPan.pan, this.pan(rpos)[0]);
     // the tune keeps playing (silently when nobody looks), so the radio comes back mid-phrase like a real one
     while (this.tuneT < now + 0.25) {
       const [st, beats] = TUNE[this.tuneI % TUNE.length], dur = beats * 0.42;
@@ -186,14 +201,14 @@ export default {
       set(this.servoG.gain, Math.min(0.05, w * 0.03) * quiet, 0.05); set(this.servoO.frequency, 160 + Math.min(260, w * 220), 0.05); }
     // now and then: a machine on the demolition site (present), a bicycle bell going past (past)
     this.nextDemo = (this.nextDemo ?? 25) - dt; if (this.nextDemo < 0 && phase !== 'title') { this.nextDemo = 40 + Math.random() * 40; this.shot('demolition_far', 0, 13.9, { gain: 0.16 * quiet * (1 - 0.4 * inside), wet: 0 }); }
-    this.nextBell = (this.nextBell ?? 9) - dt * past; if (this.nextBell < 0) { this.nextBell = 14 + Math.random() * 16; this.shot('bike_bell', 0, 3.4, { pos: new THREE.Vector3(1.5 - Math.random() * 3, 1, 4), gain: 0.18 * past, wet: 0.15 }); }
+    this.nextBell = (this.nextBell ?? 9) - dt * past; if (this.nextBell < 0) { this.nextBell = 14 + Math.random() * 16; this.shot('bike_bell', 0, 3.4, { pos: new THREE.Vector3(5 - Math.random() * 10, 1, 8), gain: 0.18 * past, wet: 0.15 }); } // on the street
     // story moments
     if (phase !== this.lastPhase) {
       if (phase === 'fade') this.play('powerdown');
       if (phase === 'end') { this.endT = 0; }
       this.lastPhase = phase;
     }
-    if (phase === 'end') { this.endT += dt; if (this.endT > 3.5 && !this.lamped) { this.lamped = true; this.play('streetlamp'); } if (this.endT > 8 && !this.dogged) { this.dogged = true; this.play('dog'); } }
+    if (phase === 'end') { this.endT += dt; if (this.endT > 3.5 && !this.lamped) { this.lamped = true; this.play('streetlamp'); } if (this.endT > 4.5 && !this.dug) { this.dug = true; this.shot('demolition_far', 0, 6, { gain: 0.3, wet: 0 }); } } // a digger somewhere down the street // a digger somewhere down the street
     void atmo;
   },
 };

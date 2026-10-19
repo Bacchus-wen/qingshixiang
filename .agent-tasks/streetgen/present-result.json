@@ -1,0 +1,99 @@
+计划
+类型      图片 × 2 张
+模型      gpt / gpt-image-2.5-sunburst
+尺寸      3840x2160 · max
+模式      文生图
+提示词    Straight-on, eye-level elevation photograph of the far side of a narrow old street in a small southern Chinese town at d…
+今日配额  已用 0/300 张 → 提交后 2/300
+费用      按实际消耗事后计费
+在途任务  0/20
+
+已提交 img_43864
+img_43864 processing 0% (0/2)
+img_43864 processing 50% (1/2)
+img_43864 completed 100% (2/2)
+已下载 /Users/wenbin/Games/新游戏/assets/generated/vmc/img_43864/ai_generate_43864_1.png
+已下载 /Users/wenbin/Games/新游戏/assets/generated/vmc/img_43864/ai_generate_43864_2.png
+{
+  "ok": true,
+  "data": {
+    "id": "img_43864",
+    "kind": "image",
+    "status": "completed",
+    "progress": 100,
+    "model": "gpt",
+    "version": "gpt-image-2.5-sunburst",
+    "prompt": "Straight-on, eye-level elevation photograph of the far side of a narrow old street in a small southern Chinese town at dusk, present day, the facades square to the camera with almost no perspective convergence. A continuous row of five or six three-storey shophouses from the 1980s: grey and cream plaster, small white wall tiles, rusted window grilles and narrow balconies. The block is about to be demolished: every ground-floor shop has its rolled-steel shutter pulled down, rusted and dented; the red character 拆 is painted inside a hand-drawn circle on three of the walls; the upper windows are dark, several broken or boarded up; one building near the middle is already half torn down, leaving a heap of broken bricks and an exposed inner wall with faded green paint and a strip of old wallpaper; slack electric wires sag across the facades; two or three old shop signs remain, faded and unlit; one bare tree; bricks, torn plastic sheeting and debris along the pavement. No people, no vehicles. Cold blue dusk, the sky darkening, a faint orange afterglow low on the horizon, no lights on anywhere. Quiet and desolate. Photorealistic documentary photograph, natural colour, crisp detail. The pavement takes only the bottom tenth of the frame. No logos, no watermarks, no captions.",
+    "size": "3840x2160",
+    "count": 2,
+    "completed": 2,
+    "failed": 0,
+    "created_at": "2026-10-19T14:09:19",
+    "completed_at": "2026-10-19T14:11:20",
+    "results": [
+      {
+        "result_id": 104883,
+        "index": 1,
+        "status": "completed",
+        "url": "https://vast-material.cdn.bcebos.com/ai-generate/results/43864/eeff335a-6768-4a89-90bf-87e7a8ec8fb1.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-19T06%3A11%3A36Z%2F3600%2F%2F34aa82c15ee14d17041df1b27fdb7ce49e08a9094c45e85d2e3d52e68111ff12",
+        "error": null
+      },
+      {
+        "result_id": 104884,
+        "index": 2,
+        "status": "completed",
+        "url": "https://vast-material.cdn.bcebos.com/ai-generate/results/43864/26fd78e8-1c0b-4496-bffb-def151dd54f0.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-19T06%3A11%3A36Z%2F3600%2F%2Ff42a2133fb2481a794765a1bcd74ac079d407034c4a0cfa802d3b0b9686882ab",
+        "error": null
+      }
+    ],
+    "urls": [
+      "https://vast-material.cdn.bcebos.com/ai-generate/results/43864/eeff335a-6768-4a89-90bf-87e7a8ec8fb1.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-19T06%3A11%3A36Z%2F3600%2F%2F34aa82c15ee14d17041df1b27fdb7ce49e08a9094c45e85d2e3d52e68111ff12",
+      "https://vast-material.cdn.bcebos.com/ai-generate/results/43864/26fd78e8-1c0b-4496-bffb-def151dd54f0.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-19T06%3A11%3A36Z%2F3600%2F%2Ff42a2133fb2481a794765a1bcd74ac079d407034c4a0cfa802d3b0b9686882ab"
+    ],
+    "files": [
+      "/Users/wenbin/Games/新游戏/assets/generated/vmc/img_43864/ai_generate_43864_1.png",
+      "/Users/wenbin/Games/新游戏/assets/generated/vmc/img_43864/ai_generate_43864_2.png"
+    ],
+    "plan": {
+      "kind": "image",
+      "model": "gpt",
+      "version": "gpt-image-2.5-sunburst",
+      "count": 2,
+      "quota": {
+        "limit": 300,
+        "used": 0,
+        "remaining": 300,
+        "unit": "张",
+        "after": 2
+      },
+      "running": {
+        "limit": 20,
+        "current": 0
+      },
+      "allowed": true,
+      "blockers": [],
+      "cost": {
+        "amount": 0,
+        "currency": "USD",
+        "priced": false,
+        "estimated": false,
+        "note": null
+      },
+      "request": {
+        "model": "gpt",
+        "mode": "text2img",
+        "prompt": "Straight-on, eye-level elevation photograph of the far side of a narrow old street in a small southern Chinese town at dusk, present day, the facades square to the camera with almost no perspective convergence. A continuous row of five or six three-storey shophouses from the 1980s: grey and cream plaster, small white wall tiles, rusted window grilles and narrow balconies. The block is about to be demolished: every ground-floor shop has its rolled-steel shutter pulled down, rusted and dented; the red character 拆 is painted inside a hand-drawn circle on three of the walls; the upper windows are dark, several broken or boarded up; one building near the middle is already half torn down, leaving a heap of broken bricks and an exposed inner wall with faded green paint and a strip of old wallpaper; slack electric wires sag across the facades; two or three old shop signs remain, faded and unlit; one bare tree; bricks, torn plastic sheeting and debris along the pavement. No people, no vehicles. Cold blue dusk, the sky darkening, a faint orange afterglow low on the horizon, no lights on anywhere. Quiet and desolate. Photorealistic documentary photograph, natural colour, crisp detail. The pavement takes only the bottom tenth of the frame. No logos, no watermarks, no captions.",
+        "size": "3840x2160",
+        "quality": "max",
+        "background": "opaque",
+        "output_format": "png",
+        "count": 2,
+        "gpt_model": "gpt-image-2.5-sunburst"
+      }
+    }
+  },
+  "meta": {
+    "version": "0.1.4",
+    "api": "https://vast-material.tripo3d.com/api"
+  }
+}
