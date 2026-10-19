@@ -216,8 +216,10 @@ export default {
         add(new THREE.CylinderGeometry(A.shoulder * 0.42, A.dress, dTop - dBot, 16), 0, (dTop + dBot) / 2, 0);
         for (const sx of [-1, 1]) {
           const al = sh - dBot - 0.02;
-          add(new THREE.CapsuleGeometry(0.019, al, 4, 8), sx * (A.shoulder * 0.62 + 0.012), sh - 0.03 - al / 2, 0, 0, sx * 0.1); // arms, a little away
-          add(new THREE.SphereGeometry(0.024, 10, 8), sx * (A.shoulder * 0.62 + 0.03), sh - 0.06 - al, 0);                     // hands
+          // each arm on a shoulder pivot (the right one points up at the new mark once it is drawn: "look!")
+          const arm = new THREE.Group(); arm.position.set(sx * (A.shoulder * 0.62 + 0.012), sh - 0.03, 0); g.add(arm); if (sx > 0) g.userData.arm = arm;
+          const am = new THREE.Mesh(new THREE.CapsuleGeometry(0.019, al, 4, 8).rotateZ(sx * 0.1).translate(0, -al / 2, 0), dbgMat || shadowMat); am.castShadow = true; am.layers.set(CHILD_LAYER); if (dbg) am.layers.enable(0); arm.add(am);
+          const hm = new THREE.Mesh(new THREE.SphereGeometry(0.024, 10, 8), dbgMat || shadowMat); hm.position.set(sx * 0.02, -al - 0.03, 0); hm.castShadow = true; hm.layers.set(CHILD_LAYER); if (dbg) hm.layers.enable(0); arm.add(hm);
           add(new THREE.CapsuleGeometry(0.025, A.leg - 0.06, 4, 8), sx * 0.045, A.leg / 2 + 0.01, 0);                          // legs
           add(new THREE.BoxGeometry(0.05, 0.03, 0.095), sx * 0.045, 0.015, 0.02);                                               // shoes
         }
@@ -245,7 +247,8 @@ export default {
       mk(new THREE.SphereGeometry(0.082, 18, 12), head, 0, 0.12, 0.03);                                          // head
       mk(new THREE.SphereGeometry(0.087, 18, 12, 0, Math.PI * 2, 0, Math.PI * 0.55), head, 0, 0.135, 0.02);     // hair
       for (const sx of [-1, 1]) { mk(new THREE.SphereGeometry(0.03, 10, 8), head, sx * 0.095, 0.1, -0.005); mk(new THREE.CapsuleGeometry(0.019, 0.07, 4, 8), head, sx * 0.13, 0.045, -0.01, 0, sx * 0.6); } // pigtails, sticking out
-      mk(new THREE.CapsuleGeometry(0.062, 0.1, 6, 12), sit, 0, 0.8, 0, 0, Math.PI / 2);                         // shoulders
+      mk(new THREE.CylinderGeometry(0.03, 0.036, 0.1, 10), sit, 0, 0.88, 0.01);                                   // neck: head and body one figure
+      mk(new THREE.CapsuleGeometry(0.05, 0.13, 6, 12).scale(1, 0.8, 1), sit, 0, 0.8, 0, 0, Math.PI / 2);          // shoulders (flatter: not a second head)
       mk(new THREE.CylinderGeometry(0.075, 0.115, 0.3, 14), sit, 0, 0.62, 0);                                    // dress (upper)
       mk(new THREE.BoxGeometry(0.24, 0.05, 0.3), sit, 0, 0.47, 0.1);                                              // lap
       for (const sx of [-1, 1]) mk(new THREE.CapsuleGeometry(0.02, 0.25, 4, 8), sit, sx * 0.17, 0.7, 0.17, 1.2, sx * 0.3); // arms reaching out to the book's sides, clear of the body
@@ -289,7 +292,8 @@ export default {
       mk(new THREE.SphereGeometry(0.082, 18, 12), head, 0, 0.12, 0.03);                                          // head
       mk(new THREE.SphereGeometry(0.087, 18, 12, 0, Math.PI * 2, 0, Math.PI * 0.55), head, 0, 0.135, 0.02);     // hair
       for (const sx of [-1, 1]) { mk(new THREE.SphereGeometry(0.03, 10, 8), head, sx * 0.095, 0.1, -0.005); mk(new THREE.CapsuleGeometry(0.019, 0.07, 4, 8), head, sx * 0.13, 0.045, -0.01, 0, sx * 0.6); } // pigtails, sticking out
-      mk(new THREE.CapsuleGeometry(0.062, 0.1, 6, 12), sit, 0, 0.8, 0, 0, Math.PI / 2);                         // shoulders
+      mk(new THREE.CylinderGeometry(0.03, 0.036, 0.1, 10), sit, 0, 0.88, 0.01);                                   // neck: head and body one figure
+      mk(new THREE.CapsuleGeometry(0.05, 0.13, 6, 12).scale(1, 0.8, 1), sit, 0, 0.8, 0, 0, Math.PI / 2);          // shoulders (flatter: not a second head)
       mk(new THREE.CylinderGeometry(0.075, 0.115, 0.3, 14), sit, 0, 0.62, 0);                                    // dress (upper)
       mk(new THREE.BoxGeometry(0.24, 0.05, 0.3), sit, 0, 0.47, 0.1);                                              // lap
       for (const sx of [-1, 1]) mk(new THREE.CapsuleGeometry(0.02, 0.25, 4, 8), sit, sx * 0.17, 0.7, 0.17, 1.2, sx * 0.3); // arms reaching out to the book's sides, clear of the body
@@ -349,6 +353,8 @@ export default {
       // the story's beat with her: still = her legs stop (0..1), look = she looks up at the robot (0..1)
       setSittingPose(still, look) { sys.sitStill = still; sys.sitLook = look; },
       setChildX(x) { if (sys.childRoot) sys.childRoot.position.x = x; },
+      // she points up at the mark just drawn (0..1)
+      setChildPoint(k) { for (const g of sys.childAges || []) { const a = g.userData.arm; if (a) a.rotation.set(-0.35 * k, 0, 2.5 * k); } },
     };
     ctx.api.past.setChild(0);
   },

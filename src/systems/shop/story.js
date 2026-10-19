@@ -30,6 +30,12 @@ const ARRIVE_LOOK = new THREE.CatmullRomCurve3([
   new THREE.Vector3(-1.55, 0.9, 0.7), new THREE.Vector3(-0.9, 0.85, 0.9), new THREE.Vector3(-0.55, 0.8, 1.1),
   new THREE.Vector3(-0.55, 0.5, 1.15), new THREE.Vector3(-0.6, 0.85, 0.96), EYE0.clone(), // (the whole robot, stool and feet, from its right)
 ]);
+const K = (t, p, l, fov) => ({ t, p: new THREE.Vector3(...p), l: new THREE.Vector3(...l), fov });
+const ARRIVE_K = [
+  K(0, [0.95, 1.62, 8.2], [0.0, 1.75, 2.3], 46), K(4.5, [0.25, 1.28, 3.1], [-0.4, 1.05, 0.6], 46),
+  K(7.5, [-0.55, 1.5, 2.2], [-1.55, 0.9, 0.7], 44), K(10.5, [0.79, 0.86, -0.18], [-0.55, 0.52, 1.16], 40),
+  K(13.2, [0.66, 0.84, -0.28], [-0.55, 0.52, 1.16], 40), K(16.5, [-0.98, 0.88, 0.12], [-0.6, 0.76, 0.98], 38),
+];
 const ease = (x) => x * x * (3 - 2 * x);
 const clamp01 = (x) => Math.min(1, Math.max(0, x));
 
@@ -68,10 +74,12 @@ export default {
       case 'arrive': {
         m.forceOpen = false;
         film.fade(Math.max(0, 1 - this.t / 4));
-        const u = ease(clamp01(this.t / 24));
-        ARRIVE.getPoint(u, this.cam.pos); ARRIVE_LOOK.getPoint(Math.min(1, u * 1.02), this.cam.look);
-        this.cam.fov = 46 - 6 * u;
-        if (this.t > 24 || input.wasPressed('Enter')) this.set('wait');
+        // timed keyframes: under the shutter, a glance at the bench, a held three-quarter view of the whole robot (head to
+        // feet, the stool and its shadow: the model shown whole), then round to its face
+        let i = 0; while (i < ARRIVE_K.length - 2 && this.t > ARRIVE_K[i + 1].t) i++;
+        const A0 = ARRIVE_K[i], A1 = ARRIVE_K[i + 1], f = ease(clamp01((this.t - A0.t) / (A1.t - A0.t)));
+        this.cam.pos.lerpVectors(A0.p, A1.p, f); this.cam.look.lerpVectors(A0.l, A1.l, f); this.cam.fov = A0.fov + (A1.fov - A0.fov) * f;
+        if (this.t > ARRIVE_K[ARRIVE_K.length - 1].t || input.wasPressed('Enter')) this.set('wait');
         break;
       }
       case 'wait': {
@@ -114,7 +122,7 @@ export default {
         if (m.strength > 0.5 && cg > Math.cos(0.4) && (this.pageT = (this.pageT ?? 3) - dt) < 0) { this.pageT = 5 + Math.random() * 3; ctx.api.audio?.play('page', { pos: GIRL }); }
         const on = m.strength > 0.5 && cg > Math.cos(0.16);
         this.dwell = on ? this.dwell + dt : Math.max(0, this.dwell - dt * 2);
-        if (this.power < 0.32) eye?.aim(GIRL);
+        if (this.power < 0.32 || (this.lookTime > 40 && !this.dwell)) eye?.aim(GIRL); // left alone long enough, it looks for her itself
         if ((this.dwell > 1.2 && this.lookTime > 14) || (this.power < 0.32 && on) || input.wasPressed('KeyD')) { film.hint(''); this.set('girl'); }
         m.power = this.power;
         break;
@@ -169,17 +177,24 @@ export default {
           past?.setHand(handIn, AGES[k], x);
           past?.setMarks(stroke > 0 ? AGES[k] : prev, prev, stroke > 0 ? x : 9);
           if (!this.drawn && stroke > 0) { this.drawn = true; ctx.api.audio?.play('pencil', { pos: this._w.set(2.6, AGES[k], -2.2) }); }
+          if (handIn > 0.05 && this.handYear !== k) { this.handYear = k; ctx.api.audio?.play('servo'); } // the same servos as its head: it is its hand
+          // the first and the last year: she points up at the new mark ("look!"), and the robot nods
+          const show = (k === 0 || k === n - 1) ? clamp01((ty - (2.6 * sp + 0.25)) / 0.35) * (1 - clamp01((ty - (2.6 * sp + 1.6)) / 0.4)) : 0;
+          past?.setChildPoint(ease(show));
+          m.nod = (k === 0 || k === n - 1) ? clamp01((ty - (2.6 * sp + 0.6)) / 0.8) : 0;
         } else past?.setHand(0, 1, 2.4);
         // after eleven: she is gone. The level rises once more, to where twelve would be, and waits -- nobody comes, no
         // hand, no mark; then the line goes out and the wall stays with its seven marks
-        if (after > 0.6) { past?.setChild(0); past?.setMarks(AGES[n - 1], AGES[n - 1], 9); }
+        if (after > 0.6) { past?.setChild(0); past?.setChildPoint(0); past?.setMarks(AGES[n - 1], AGES[n - 1], 9); m.nod = 0; }
+        if (after > 0.6) { this.cam.pos.set(2.12, 1.38, -1.0); this.cam.look.set(2.64, 1.3, -2.25); this.cam.fov = 40; } // and the camera stops: we wait with it
         if (after > 7.2) m.goboMode = undefined;
         if (after > 10.5) { this.set('fade'); }
         m.power = this.power;
         break;
       }
       case 'fade': {
-        // the last of the power: the beam stutters and dies, then everything inside goes out
+        // the last of the power: the beam stutters and dies, then everything inside goes out. It keeps looking at the wall.
+        m.headLift = 1; m.holdGaze = true;
         this.power = Math.max(0, this.power - dt / 3);
         m.power = Math.max(0.02, this.power);
         m.forceOpen = this.t < 2.2 ? true : this.t < 5 ? Math.random() > Math.min(0.92, (this.t - 2.2) * 0.33) : false;
@@ -192,7 +207,10 @@ export default {
         break;
       }
       case 'end': {
-        m.forceOpen = false;
+        m.forceOpen = false; m.holdGaze = true;
+        // still turned to the wall; once, a servo whirs and the head starts to lift -- and stops: it is still waiting
+        m.headLift = 1 + (this.t > 9 && this.t < 10.6 ? 0.25 * Math.sin(Math.PI * (this.t - 9) / 1.6) : 0);
+        if (this.t > 9 && !this.lastTry) { this.lastTry = true; ctx.api.audio?.play('servo'); }
         // from inside, low, looking out under the shutter: the dead robot dark against the street; the lamp comes on
         // the robot dark on the right, the street through the opening; the lamp across the road throws its pool
         // the robot dark against the street, face to us; behind it the lamp across the road throws its pool
@@ -208,7 +226,7 @@ export default {
       }
     }
     film.power(this.power, this.phase === 'look');
-    const fl = ctx.api.shop?.faceLight; if (fl) { const want = this.phase === 'wait' ? 3.2 : this.phase === 'waking' ? 2.2 : this.phase === 'fade' ? 1.6 : this.phase === 'arrive' ? 3.2 * clamp01((this.t - 16) / 6) : 0; fl.intensity += (want - fl.intensity) * Math.min(1, dt * 1.5); }
+    const fl = ctx.api.shop?.faceLight; if (fl) { const want = this.phase === 'wait' ? 3.2 : this.phase === 'waking' ? 2.2 : this.phase === 'fade' ? 1.6 : this.phase === 'arrive' ? 3.2 * clamp01((this.t - 9) / 4) : this.phase === 'end' ? 0.8 : 0; fl.intensity += (want - fl.intensity) * Math.min(1, dt * 1.5); }
 
     // the camera eases toward its target, a little handheld drift on top
     const k = this.phase === 'waking' ? 3 : this.phase === 'look' ? 2.2 : 1.4;

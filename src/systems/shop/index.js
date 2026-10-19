@@ -369,7 +369,7 @@ export default {
         if (!m.material.map) return;
         const src = m.material, nm = new THREE.MeshStandardNodeMaterial();
         for (const k of ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap', 'roughness', 'metalness']) if (src[k] !== undefined) nm[k] = src[k];
-        if (src.normalScale) nm.normalScale.copy(src.normalScale);
+        if (src.normalScale) nm.normalScale.copy(src.normalScale).multiplyScalar(0.7); // softer relief: the casing read as stone under raking light
         const { position, model } = rig.nodes(m.matrixWorld);
         nm.positionNode = position;
         const c = texture(src.map).rgb;

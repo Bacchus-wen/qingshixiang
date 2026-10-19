@@ -224,15 +224,15 @@ export default {
       this.look.x = THREE.MathUtils.clamp(this.lookCur.x + dyaw / 0.85, -1, 1); this.look.y = THREE.MathUtils.clamp(this.lookCur.y + dpit / 0.32, -1, 1);
     } else if (m.lookOverride) this.look.set(m.lookOverride.x, m.lookOverride.y);
     else this.look.set(-input.pointer.x, input.pointer.y); // screen right = the robot's right (the camera rides behind it)
-    const k = Math.min(1, dt * (0.5 + o * 1.6));
-    this.lookCur.x += (this.look.x * Math.min(1, 0.2 + o) - this.lookCur.x) * k;
-    this.lookCur.y += (this.look.y * Math.min(1, 0.2 + o) - this.lookCur.y) * k;
+    const k = Math.min(1, dt * (0.5 + o * 1.6)), reach = m.holdGaze ? 1 : Math.min(1, 0.2 + o); // holdGaze: it keeps looking even with the eye shut
+    this.lookCur.x += (this.look.x * reach - this.lookCur.x) * k;
+    this.lookCur.y += (this.look.y * reach - this.lookCur.y) * k;
     this.lift += ((m.headLift ?? Math.min(1, this.open * 1.4)) - this.lift) * Math.min(1, dt * 1.5);
     const rig = this.rig, jitter = o > 0.05 ? Math.sin(t * 29) * 0.004 * o : 0;
     // yaw +-0.85 rad (49 deg) about the neck; pitch: asleep the head hangs as generated (bowed over its work), awake
     // it lifts ~13 deg and can look up/down another ~18 deg
     rig.yaw = this.lookCur.x * 0.85 + jitter;
-    rig.pitch = this.lift * 0.23 + this.lookCur.y * 0.32 - (1 - this.lift) * 0.04 * (0.5 + 0.5 * Math.sin(t * 0.7));
+    rig.pitch = this.lift * 0.23 + this.lookCur.y * 0.32 - (1 - this.lift) * 0.04 * (0.5 + 0.5 * Math.sin(t * 0.7)) - 0.14 * Math.sin(Math.PI * Math.min(1, Math.max(0, m.nod ?? 0))); // nod: 0 -> 1 = one small nod
     rig.roll = this.lift * 0.05;
     if (!(ctx.isShot && ctx.params.get('head'))) rig.update();
 

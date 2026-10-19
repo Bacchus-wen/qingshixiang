@@ -87,7 +87,7 @@ export default {
     L.tube.intensity = (this.state === 'review' ? C.tube : 5.5 * tubeOn); L.tubeGlow.value = this.state === 'review' ? C.glow : 0.02 + 2.2 * tubeOn;
     if (L.robotFill) L.robotFill.intensity = C.robot;
     ctx.scene.environmentIntensity = C.env;
-    this.streetLamp.intensity = 160 * C.street; this.streakK.value = C.street;
+    this.streetLamp.intensity = 110 * C.street; this.streakK.value = C.street;
     // the dust sees the same lights
     const lp = L.lamp; this.lampPos.value.copy(lp.position); this.lampDir.value.copy(lp.target.position).sub(lp.position).normalize();
     this.lampCos.value = Math.cos(lp.angle); this.lampK.value = lp.intensity / 18; this.duskK.value = C.dusk / 1.4;
