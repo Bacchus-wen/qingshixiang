@@ -1,0 +1,51 @@
+{
+ "name": "bicycle",
+ "source": "assets/generated/tripo4/bicycle/model.glb",
+ "size": 1.85,
+ "axis": "long",
+ "rotz": -90,
+ "dims": [
+  1.85,
+  1.3626,
+  1.3117
+ ],
+ "radius": 1.3228,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1973462,
+   "errM": 0,
+   "tex": 4096,
+   "texelsPerM": 1371.417760929462,
+   "minY": 0,
+   "bytes": 37704228
+  },
+  {
+   "file": "L1.glb",
+   "tris": 127782,
+   "errM": 0.00049,
+   "tex": 2048,
+   "texelsPerM": 685.708880464731,
+   "minY": 0.00009,
+   "bytes": 8901900
+  },
+  {
+   "file": "L2.glb",
+   "tris": 24716,
+   "errM": 0.00197,
+   "tex": 1024,
+   "texelsPerM": 342.8544402323655,
+   "minY": 0.00009,
+   "bytes": 1306332
+  },
+  {
+   "file": "L3.glb",
+   "tris": 8740,
+   "errM": 0.00599,
+   "tex": 512,
+   "texelsPerM": 171.42722011618275,
+   "minY": 0.00267,
+   "bytes": 470448
+  }
+ ]
+}

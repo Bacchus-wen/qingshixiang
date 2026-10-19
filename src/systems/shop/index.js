@@ -5,7 +5,8 @@ import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { SHOTS } from '../../engine/shots.js';
-import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorld, smoothstep, vec2, vec3, mx_worley_noise_float, texture, normalWorldGeometry, abs, step, uniform, uv, vec4 } from 'three/tsl';
+import { LodLibrary, SHADOW_LAYER } from './lod.js';
+import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorld, positionLocal, smoothstep, vec2, vec3, mx_worley_noise_float, texture, normalWorldGeometry, abs, step, uniform, uv, vec4 } from 'three/tsl';
 
 // v4: the closed-down home-appliance repair shop (docs/scene-shop.md). This phase is models + layout only:
 // a simple room shell, the Tripo models placed from /models/shop/layout.json (every item is grounded on its
@@ -321,15 +322,22 @@ export default {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       layout = await r.json(); if (!Array.isArray(layout)) throw new Error('not a list');
     } catch (e) { console.error('[shop] layout.json could not be loaded, the shop will be empty:', e.message); layout = []; }
-    // every distinct model is fetched + parsed once (in parallel with the textures); placed items are clones that
-    // share geometry, materials and GPU textures (8 boomboxes = one set of textures, not eight)
-    const templates = new Map();
-    for (const glb of new Set(layout.filter((i) => i.glb).map((i) => i.glb))) templates.set(glb, loader.loadAsync(`${import.meta.env.BASE_URL}models/shop/${glb}`).catch((e) => { console.warn('[shop] model failed', glb, e.message); return null; }));
-    await Promise.all([loadTextures(ktx2), ...templates.values()]);
+    // the generated models are shown as generated: every placed copy shows the coarsest level of detail whose error is
+    // under one screen pixel, up to the raw Tripo mesh itself up close (./lod.js, tools/lod-build.mjs). ?nolod = the old
+    // prepared (decimated) models, for comparison. Every distinct model is fetched + parsed once; copies are clones
+    // that share geometry, materials and GPU textures.
+    // GPU memory for model levels: 600 MB, 320 MB on devices that report 4 GB of memory or less; ?lodmb= overrides
+    const lod = this.lod = new LodLibrary(loader, `${import.meta.env.BASE_URL}models/shop/lod/`,
+      { budgetMB: +ctx.params.get('lodmb') || (navigator.deviceMemory && navigator.deviceMemory <= 4 ? 320 : 600) });
+    let lodNames = new Set();
+    if (ctx.params.get('nolod') === null) {
+      try { const r = await fetch(`${import.meta.env.BASE_URL}models/shop/lod/index.json`, { cache: 'no-store' }); if (r.ok) lodNames = new Set(await r.json()); } catch { /* no LOD set: old models */ }
+      for (const n of (ctx.params.get('lodskip') || '').split(',').filter(Boolean)) lodNames.delete(n); // A/B one model: ?lodskip=tube_radio_open
+      const only = (ctx.params.get('lodonly') || '').split(',').filter(Boolean); if (only.length) lodNames = new Set([...lodNames].filter((n) => only.includes(n)));
+    }
     // CRT screens are glass: the generated texture paints them a flat grey, so the bright, unsaturated parts of the
     // TV's colour map (screen, chrome trim) get glass-like roughness and pick up the room in reflection
-    const tvT = await templates.get('crt_tv.glb');
-    if (tvT) tvT.scene.traverse((m) => {
+    const glassify = (scene) => scene.traverse((m) => {
       if (!m.isMesh || !m.material.map) return;
       const src = m.material, nm = new THREE.MeshStandardNodeMaterial();
       for (const k of ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap', 'roughness', 'metalness', 'color']) if (src[k] !== undefined) nm[k] = src[k]?.clone && k === 'color' ? src[k].clone() : src[k];
@@ -340,6 +348,31 @@ export default {
       nm.roughnessNode = mix(r0, float(0.12), glass);
       m.material = nm;
     });
+    lod.hook('crt_tv', glassify);
+    // the robot's camera-lens eye: the texture's bright orange core becomes emissive, only on the face of the head
+    // (model space: top fifth of the robot, front half) so rust and brass elsewhere never glow
+    lod.hook('robot', (scene) => scene.traverse((m) => {
+      if (!m.isMesh || !m.material.map) return;
+      const src = m.material, nm = new THREE.MeshStandardNodeMaterial();
+      for (const k of ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap', 'roughness', 'metalness']) if (src[k] !== undefined) nm[k] = src[k];
+      if (src.normalScale) nm.normalScale.copy(src.normalScale);
+      const c = texture(src.map).rgb, pl = positionLocal;
+      const core = smoothstep(0.7, 0.9, c.r).mul(smoothstep(0.3, 0.5, c.g)).mul(float(1).sub(smoothstep(0.28, 0.45, c.b)));
+      const face = smoothstep(0.78, 0.82, pl.y.div(1.05)).mul(smoothstep(-0.02, 0.04, pl.z));
+      nm.emissiveNode = c.mul(core).mul(face).mul(this.eyeGlow = uniform(1.6));
+      m.material = nm;
+    }));
+    const templates = new Map();
+    for (const glb of new Set(layout.filter((i) => i.glb).map((i) => i.glb))) {
+      const name = glb.replace(/\.glb$/, '');
+      templates.set(glb, lodNames.has(name)
+        ? lod.prepare(name).then(() => ({ lod: name })).catch((e) => { console.warn('[shop] lod failed', name, e.message); return null; })
+        : loader.loadAsync(`${import.meta.env.BASE_URL}models/shop/${glb}`).catch((e) => { console.warn('[shop] model failed', glb, e.message); return null; }));
+    }
+    await Promise.all([loadTextures(ktx2), ...templates.values()]);
+    const tvT = await templates.get('crt_tv.glb');
+    if (tvT && !tvT.lod) glassify(tvT.scene);
+    ctx.busy = () => lod.busy();
     const root = this.root = new THREE.Group(); root.name = 'shop';
     scene.add(root);
     const { w, d, h } = ROOM;
@@ -434,9 +467,9 @@ export default {
     scene.add(new THREE.HemisphereLight(0x8a94a8, 0x403428, 0.45));
     const dusk = new THREE.DirectionalLight(0x9db4d6, 1.4); dusk.position.set(1.5, 2.2, 8); dusk.target.position.set(-0.5, 0, -1);
     dusk.castShadow = true; dusk.shadow.mapSize.setScalar(2048); dusk.shadow.camera.left = -5; dusk.shadow.camera.right = 5; dusk.shadow.camera.top = 5; dusk.shadow.camera.bottom = -5; dusk.shadow.bias = -0.0004;
-    scene.add(dusk, dusk.target);
-    this.lamp = new THREE.SpotLight(0xffc489, 18, 6, 0.9, 0.6, 1.5); this.lamp.castShadow = true; this.lamp.shadow.mapSize.setScalar(1024); this.lamp.shadow.bias = -0.0005;
-    scene.add(this.lamp, this.lamp.target);
+    dusk.shadow.camera.layers.enable(SHADOW_LAYER); scene.add(dusk, dusk.target); // shadow proxies of raw-mesh models (./lod.js)
+    this.lamp = new THREE.SpotLight(0xffc489, 18, 6, 0.9, 0.6, 1.5); this.lamp.castShadow = ctx.params.get('nolampshadow') === null; if (ctx.params.get('lampoff') !== null) this.lamp.intensity = 0; this.lamp.shadow.mapSize.setScalar(1024); this.lamp.shadow.bias = -0.0005;
+    this.lamp.shadow.camera.layers.enable(SHADOW_LAYER); scene.add(this.lamp, this.lamp.target);
     const fill = new THREE.PointLight(0xffd9a8, 3, 7, 1.5); fill.position.set(0, 2.7, 0); scene.add(fill);
 
     // environment for reflections (PBR metals read black without one): the room itself, coarsely -- warm dim walls,
@@ -506,14 +539,14 @@ export default {
           o.traverse((m) => { if (m.isMesh) { m.castShadow = m.receiveShadow = true; } });
         }
         else {
-          const g = await templates.get(it.glb); if (!g) continue; o = g.scene.clone(true);
+          const g = await templates.get(it.glb); if (!g) continue; o = g.lod ? lod.instance(g.lod, { tint: it.tint }) : g.scene.clone(true);
           // yaw0: the generated model sits diagonally in its own frame (bicycle): pre-rotate it inside a pivot so the
           // item's long axis is x, then ry/roll act about the real axes
           if (it.yaw0) { const piv = new THREE.Group(); o.rotation.y = it.yaw0 * Math.PI / 180; piv.add(o); o = piv; }
         }
         o.traverse((m) => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
         // per-instance tint so repeated models read as different units (black vs silver boombox, grey vs wood TV)
-        if (it.tint) o.traverse((m) => { if (m.isMesh) { m.material = m.material.clone(); m.material.color.setRGB(...it.tint); } });
+        if (it.tint && !(await templates.get(it.glb))?.lod) o.traverse((m) => { if (m.isMesh) { m.material = m.material.clone(); m.material.color.setRGB(...it.tint); } });
         if (it.scale) o.scale.setScalar(it.scale);
         o.rotation.order = 'YXZ'; o.rotation.y = (it.ry || 0) * Math.PI / 180; o.rotation.x = (it.roll || 0) * Math.PI / 180; // roll: lean about the item's own long (x) axis
         o.position.set(it.pos[0], 0, it.pos[2]); o.name = it.name;
@@ -754,7 +787,7 @@ export default {
     // (the placed copies stay, hidden, for picking and the audit). Tints become per-instance colours. ?noinst = off
     if (ctx.params.get('noinst') === null) {
       const groups = new Map();
-      for (const o of Object.values(placed)) { const L = o.userData.layout; if (!L.glb || L.glb === 'robot.glb') continue; (groups.get(L.glb) ?? groups.set(L.glb, []).get(L.glb)).push(o); }
+      for (const o of Object.values(placed)) { const L = o.userData.layout; if (!L.glb || L.glb === 'robot.glb' || (await templates.get(L.glb))?.lod) continue; (groups.get(L.glb) ?? groups.set(L.glb, []).get(L.glb)).push(o); } // LOD copies switch levels: not instanced
       root.updateMatrixWorld(true);
       const inv = root.matrixWorld.clone().invert(), col = new THREE.Color();
       for (const [glb, objs] of groups) {
@@ -776,7 +809,7 @@ export default {
         for (const o of objs) o.visible = false;
       }
     }
-    ctx.api.shop = { root, placed, ROOM };
+    ctx.api.shop = { root, placed, ROOM, lod };
     // review viewer (this phase has no story camera yet): orbit/zoom/pan with the mouse, number keys jump to the
     // review shots, the camera is kept inside the room (or out on the street in front of it)
     if (!ctx.isShot) {
@@ -818,7 +851,9 @@ export default {
         if (!p1) return;
         Object.assign(fly, { t: 0, p0: cam.position.clone(), q0: oc.target.clone(), p1, q1: c });
         let tris = 0; o.traverse((m) => { if (m.isMesh) tris += (m.geometry.index ? m.geometry.index.count : m.geometry.attributes.position.count) / 3; });
-        info.textContent = `${NAMES[o.userData.layout.glb] || o.userData.layout.glb} · ${(tris / 1000).toFixed(1)} 千三角面 · Tripo 生成`;
+        let lo = o; while (lo && !lo.isLodObject) lo = lo.children?.[0];
+        const raw = lo?.set.levels[0].tris;
+        info.textContent = `${NAMES[o.userData.layout.glb] || o.userData.layout.glb} · Tripo 生成 · ${raw ? `原始 ${(raw / 1e4).toFixed(0)} 万三角面,靠近时显示原始模型` : `${(tris / 1000).toFixed(1)} 千三角面`}`;
         info.style.opacity = '1'; clearTimeout(this._infoT); this._infoT = setTimeout(() => (info.style.opacity = '0'), 7000);
       });
       // a small, quiet hint for reviewers (bottom-left); fades after a while, any key brings it back
@@ -834,6 +869,7 @@ export default {
     }
   },
   update(dt, t, ctx) {
+    this.lod?.update(ctx.camera, ctx.renderer, ctx.isShot ? 1 : 4);
     const oc = this.controls; if (!oc) return;
     const f = this.fly;
     if (f && f.t < 1) { f.t = Math.min(1, f.t + dt / 0.9); const k = f.t * f.t * (3 - 2 * f.t); ctx.camera.position.lerpVectors(f.p0, f.p1, k); oc.target.lerpVectors(f.q0, f.q1, k); }

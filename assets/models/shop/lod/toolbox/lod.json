@@ -1,0 +1,51 @@
+{
+ "name": "toolbox",
+ "source": "assets/generated/tripo4/toolbox/model.glb",
+ "size": 0.5,
+ "axis": "long",
+ "rotz": -90,
+ "dims": [
+  0.5,
+  0.3052,
+  0.3116
+ ],
+ "radius": 0.3317,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1881606,
+   "errM": 0,
+   "tex": 4096,
+   "texelsPerM": 3565.8191783464677,
+   "minY": 0,
+   "bytes": 38052696
+  },
+  {
+   "file": "L1.glb",
+   "tris": 16646,
+   "errM": 0.0005,
+   "tex": 2048,
+   "texelsPerM": 1782.9095891732338,
+   "minY": 0.0001,
+   "bytes": 8314732
+  },
+  {
+   "file": "L2.glb",
+   "tris": 5364,
+   "errM": 0.00199,
+   "tex": 1024,
+   "texelsPerM": 891.4547945866169,
+   "minY": 0.00014,
+   "bytes": 1246612
+  },
+  {
+   "file": "L3.glb",
+   "tris": 3586,
+   "errM": 0.00595,
+   "tex": 512,
+   "texelsPerM": 445.72739729330846,
+   "minY": 0.00017,
+   "bytes": 429800
+  }
+ ]
+}

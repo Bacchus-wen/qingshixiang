@@ -1,0 +1,51 @@
+{
+ "name": "desk_lamp",
+ "source": "assets/generated/tripo4/desk_lamp/model.glb",
+ "size": 0.62,
+ "axis": "height",
+ "rotz": -90,
+ "dims": [
+  0.6373,
+  0.62,
+  0.461
+ ],
+ "radius": 0.5008,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1873340,
+   "errM": 0,
+   "tex": 4096,
+   "texelsPerM": 4601.323005343089,
+   "minY": 0,
+   "bytes": 31438848
+  },
+  {
+   "file": "L1.glb",
+   "tris": 16248,
+   "errM": 0.00049,
+   "tex": 2048,
+   "texelsPerM": 2300.6615026715444,
+   "minY": 0.0001,
+   "bytes": 6680868
+  },
+  {
+   "file": "L2.glb",
+   "tris": 3724,
+   "errM": 0.002,
+   "tex": 1024,
+   "texelsPerM": 1150.3307513357722,
+   "minY": 0.00029,
+   "bytes": 780756
+  },
+  {
+   "file": "L3.glb",
+   "tris": 1502,
+   "errM": 0.00597,
+   "tex": 512,
+   "texelsPerM": 575.1653756678861,
+   "minY": 0.00047,
+   "bytes": 280684
+  }
+ ]
+}

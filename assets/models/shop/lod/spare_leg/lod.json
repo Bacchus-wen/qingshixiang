@@ -1,0 +1,51 @@
+{
+ "name": "spare_leg",
+ "source": "assets/generated/tripo4/robot_leg/model.glb",
+ "size": 0.48,
+ "axis": "height",
+ "rotz": -90,
+ "dims": [
+  0.2197,
+  0.48,
+  0.251
+ ],
+ "radius": 0.2923,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1980652,
+   "errM": 0,
+   "tex": 4096,
+   "texelsPerM": 6778.954043819526,
+   "minY": 0,
+   "bytes": 43394420
+  },
+  {
+   "file": "L1.glb",
+   "tris": 13026,
+   "errM": 0.0005,
+   "tex": 2048,
+   "texelsPerM": 3389.477021909763,
+   "minY": 0.00017,
+   "bytes": 9670156
+  },
+  {
+   "file": "L2.glb",
+   "tris": 3390,
+   "errM": 0.00199,
+   "tex": 1024,
+   "texelsPerM": 1694.7385109548816,
+   "minY": 0.00017,
+   "bytes": 1866532
+  },
+  {
+   "file": "L3.glb",
+   "tris": 1452,
+   "errM": 0.00595,
+   "tex": 512,
+   "texelsPerM": 847.3692554774408,
+   "minY": 0.0005,
+   "bytes": 586624
+  }
+ ]
+}

@@ -18,7 +18,7 @@ for (const [k, c] of pick.entries()) {
     e.camera.position.copy(e.__cam[0]); e.camera.quaternion.copy(e.__cam[1]);
     const r = c.ry * Math.PI / 180;
     t.position.set(c.tx, c.ch - R.tminY, c.tz); t.rotation.y = r;
-    k.position.set(c.ccx, 0, c.ccz); k.rotation.y = r; k.scale.set(R.CW / 0.32, c.ch / 0.3, R.CD / 0.26);
+    const sz = k.userData.layout.size; k.position.set(c.ccx, 0, c.ccz); k.rotation.y = r; k.scale.set(R.CW / sz[0], c.ch / sz[1], R.CD / sz[2]);
     for (let i = 0; i < 6; i++) e.postfx.render(1 / 60);
   }, { c, R: { tminY: R.tminY, CW: R.CW, CD: R.CD } });
   await page.waitForTimeout(400);

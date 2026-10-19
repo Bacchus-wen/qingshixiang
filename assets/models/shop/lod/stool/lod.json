@@ -1,0 +1,51 @@
+{
+ "name": "stool",
+ "source": "assets/generated/tripo4/stool/model.glb",
+ "size": 0.42,
+ "axis": "height",
+ "rotz": -90,
+ "dims": [
+  0.4921,
+  0.42,
+  0.4761
+ ],
+ "radius": 0.4016,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1980176,
+   "errM": 0,
+   "tex": 4096,
+   "texelsPerM": 3072.448542179265,
+   "minY": 0,
+   "bytes": 35456656
+  },
+  {
+   "file": "L1.glb",
+   "tris": 11914,
+   "errM": 0.0005,
+   "tex": 2048,
+   "texelsPerM": 1536.2242710896326,
+   "minY": 0,
+   "bytes": 7523848
+  },
+  {
+   "file": "L2.glb",
+   "tris": 3396,
+   "errM": 0.00198,
+   "tex": 1024,
+   "texelsPerM": 768.1121355448163,
+   "minY": 0.00003,
+   "bytes": 1155552
+  },
+  {
+   "file": "L3.glb",
+   "tris": 2182,
+   "errM": 0.00592,
+   "tex": 512,
+   "texelsPerM": 384.05606777240814,
+   "minY": 0.00003,
+   "bytes": 374400
+  }
+ ]
+}

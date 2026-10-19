@@ -1,0 +1,51 @@
+{
+ "name": "spare_torso",
+ "source": "assets/generated/tripo4/robot_torso/model.glb",
+ "size": 0.32,
+ "axis": "width",
+ "rotz": -90,
+ "dims": [
+  0.32,
+  0.2807,
+  0.2115
+ ],
+ "radius": 0.2377,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1888286,
+   "errM": 0,
+   "tex": 4096,
+   "texelsPerM": 4103.68699469593,
+   "minY": 0,
+   "bytes": 41597476
+  },
+  {
+   "file": "L1.glb",
+   "tris": 54772,
+   "errM": 0.00049,
+   "tex": 2048,
+   "texelsPerM": 2051.843497347965,
+   "minY": 0.00016,
+   "bytes": 9430248
+  },
+  {
+   "file": "L2.glb",
+   "tris": 19720,
+   "errM": 0.00199,
+   "tex": 1024,
+   "texelsPerM": 1025.9217486739824,
+   "minY": 0.00041,
+   "bytes": 1475252
+  },
+  {
+   "file": "L3.glb",
+   "tris": 14590,
+   "errM": 0.00599,
+   "tex": 512,
+   "texelsPerM": 512.9608743369912,
+   "minY": 0.0011,
+   "bytes": 610312
+  }
+ ]
+}

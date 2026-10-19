@@ -6,6 +6,10 @@
 import * as THREE from 'three/webgpu';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { LodLibrary } from '../systems/shop/lod.js';
+import { applyThreeFixes } from '../engine/threeFixes.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 const BASE = '/generated/compare/';
@@ -20,6 +24,7 @@ const manifest = await fetch(BASE + 'manifest.json').then((r) => { if (!r.ok) th
 const canvas = $('view');
 const renderer = new THREE.WebGPURenderer({ canvas, antialias: true, alpha: true, forceWebGL: q.has('webgl') });
 await renderer.init();
+applyThreeFixes(renderer);
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight, false);
 renderer.toneMapping = THREE.NeutralToneMapping; // neutral: keeps each model's texture colours as generated
@@ -59,7 +64,8 @@ let dirty = 3;
 controls.addEventListener('change', () => (dirty = 3));
 
 // ---- models: loaded once, normalised (front to +Z, longest side 1 m, standing on y = 0, centred) ------------------
-const loader = new GLTFLoader();
+// web versions (tools/lod-build.mjs) are meshopt-compressed with KTX2 textures; raw Tripo files load as they are
+const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).setKTX2Loader(new KTX2Loader().setTranscoderPath('/basis/').detectSupport(renderer));
 const cache = new Map(); // "subject/id" -> Promise<Group>, least recently used last
 const CACHE_MAX = 4;
 function prepare(root, m) {
@@ -86,10 +92,23 @@ function dispose(obj) {
     for (const mat of [].concat(o.material)) { for (const v of Object.values(mat)) if (v && v.isTexture) v.dispose(); mat.dispose(); }
   });
 }
+// "web version, switching by distance": the scene's own level-of-detail runtime (../systems/shop/lod.js) on the
+// scene's own files, so this side shows exactly what the shop shows at the same screen size
+const lodLib = new LodLibrary(loader, '/models/shop/lod/', { budgetMB: 1500 });
+const lodOn = { L: null, R: null };
+async function makeLod(m) {
+  const set = await lodLib.prepare(m.lod), o = lodLib.instance(m.lod), k = 1 / Math.max(...set.meta.dims);
+  const wrap = new THREE.Group(); wrap.scale.setScalar(k); wrap.add(o);
+  const out = new THREE.Group(); out.add(wrap); out.updateMatrixWorld(true);
+  out.userData = { tris: set.levels[set.levels.length - 1].tris, height: set.meta.dims[1] * k, lod: o };
+  return out;
+}
+const urlOf = (m) => (m.file.startsWith('/') ? m.file : BASE + m.file);
 function load(subject, m, bar) {
+  if (m.lod) return makeLod(m); // a fresh copy per side (copies are cheap: levels are shared)
   const key = subject + '/' + m.id;
   if (!cache.has(key)) {
-    cache.set(key, new Promise((res, rej) => loader.load(BASE + encodeURI(m.file), (g) => res(prepare(g.scene, m)),
+    cache.set(key, new Promise((res, rej) => loader.load(encodeURI(urlOf(m)), (g) => res(prepare(g.scene, m)),
       (e) => { if (e.total) bar(e.loaded / e.total); }, rej)));
   }
   const p = cache.get(key); cache.delete(key); cache.set(key, p); // most recently used last
@@ -123,7 +142,7 @@ function setSplit(v) {
 function frameCamera() {
   const S = manifest[state.s], h = Math.max(shown.hL || 0.6, shown.hR || 0.6);
   const target = new THREE.Vector3(0, h * 0.48, 0), dir = new THREE.Vector3(...S.view).normalize();
-  const r = 0.5 + h * 0.2, dist = r / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * (innerWidth < innerHeight ? 1.5 : 1.0);
+  const r = 0.5 + h * 0.2, dist = +q.get('d') || r / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * (innerWidth < innerHeight ? 1.5 : 1.0); // ?d= fixed distance (review)
   controls.target.copy(target); camera.position.copy(target).addScaledVector(dir, dist); camera.updateProjectionMatrix(); controls.update(); dirty = 3;
 }
 function syncURL() {
@@ -137,8 +156,10 @@ async function show(side, keepCamera) {
   const key = state.s + '/' + m.id; shown[side] = key;
   try {
     const obj = await load(state.s, m, (f) => (bar.firstChild.style.width = Math.round(f * 100) + '%'));
-    if (shown[side] !== key) return; // the user picked something else meanwhile
-    stage.slot.clear(); const inst = obj.parent ? obj.clone() : obj;
+    if (shown[side] !== key) { if (obj.userData.lod) lodLib.release(obj.userData.lod); return; } // the user picked something else meanwhile
+    if (lodOn[side]) { lodLib.release(lodOn[side]); lodOn[side] = null; }
+    lodOn[side] = obj.userData.lod || null; lodOn[side + 'cur'] = -1;
+    stage.slot.clear(); const inst = obj.parent && !obj.userData.lod ? obj.clone() : obj;
     inst.traverse((o) => { if (o.isMesh && o.material === wireMat) o.material = o.userData.mat; }); // back to the model's own materials first
     stage.slot.add(inst);
     applyWire();
@@ -199,8 +220,15 @@ $('bReset').addEventListener('click', () => { setSplit(0.5); frameCamera(); });
 addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); dirty = 3; });
 
 // ---- render: one clear, left scene left of the divider, right scene right of it -----------------------------------
+const levelRow = (o) => { const L = o.set.levels[o.cur]; return `<div><span>当前显示</span><span><b>L${o.cur}</b> · ${fmt(L.tris)} 面 · ${L.tex >= 1024 ? L.tex / 1024 + 'K' : L.tex} 贴图${o.cur === 0 ? ' · 原始网格' : ` · 误差 ${(L.errM * 1000).toFixed(1)} mm`}</span></div>`; };
 renderer.setAnimationLoop(() => {
   const moved = controls.update();
+  lodLib.update(camera, renderer, 1);
+  for (const side of ['L', 'R']) { // level switched: redraw, refresh the panel, keep the wireframe state
+    const o = lodOn[side]; if (!o || o.cur === lodOn[side + 'cur']) continue;
+    lodOn[side + 'cur'] = o.cur; dirty = 3; applyWire();
+    const st = $('stats' + side); st.querySelector('.lvl')?.remove(); st.insertAdjacentHTML('afterbegin', `<div class="lvl">${levelRow(o)}</div>`);
+  }
   if (!moved && dirty <= 0) return;
   dirty--;
   const W = innerWidth, H = innerHeight, x = Math.round(W * state.split);
@@ -209,6 +237,6 @@ renderer.setAnimationLoop(() => {
   if (x > 0) { renderer.setScissor(0, 0, x, H); renderer.render(L.scene, camera); }
   if (x < W) { renderer.setScissor(x, 0, W - x, H); renderer.render(R.scene, camera); }
 });
-window.__compare = { state, shown, renderer, camera, controls, setSplit, setSubject, ready: () => !!(shown.hL && shown.hR) };
+window.__compare = { state, shown, renderer, camera, controls, setSplit, setSubject, lodLib, lodOn, ready: () => !!(shown.hL && shown.hR) && !lodLib.busy() };
 setSplit(0.5);
 await setSubject(state.s);

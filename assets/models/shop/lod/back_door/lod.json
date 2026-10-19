@@ -1,0 +1,51 @@
+{
+ "name": "back_door",
+ "source": "assets/generated/tripo4/back_door/model.glb",
+ "size": 2.15,
+ "axis": "height",
+ "rotz": -90,
+ "dims": [
+  1.006,
+  2.15,
+  0.293
+ ],
+ "radius": 1.1959,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1947275,
+   "errM": 0,
+   "tex": 4096,
+   "texelsPerM": 1195.0192344920447,
+   "minY": 0,
+   "bytes": 36014644
+  },
+  {
+   "file": "L1.glb",
+   "tris": 45768,
+   "errM": 0.0005,
+   "tex": 2048,
+   "texelsPerM": 597.5096172460223,
+   "minY": 0.00011,
+   "bytes": 8266788
+  },
+  {
+   "file": "L2.glb",
+   "tris": 7557,
+   "errM": 0.002,
+   "tex": 1024,
+   "texelsPerM": 298.7548086230112,
+   "minY": 0.00011,
+   "bytes": 1239768
+  },
+  {
+   "file": "L3.glb",
+   "tris": 3455,
+   "errM": 0.00598,
+   "tex": 512,
+   "texelsPerM": 149.3774043115056,
+   "minY": 0.00074,
+   "bytes": 422452
+  }
+ ]
+}

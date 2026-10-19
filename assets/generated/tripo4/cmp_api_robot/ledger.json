@@ -1,0 +1,23 @@
+{
+ "op": "cmp_api_robot",
+ "steps": {
+  "single": {
+   "state": "submitted",
+   "task_id": "e6401c3a-983a-427d-aab4-d7045cf9280e",
+   "path": "/generation/image-to-model",
+   "payload": {
+    "model": "v3.1-20260211",
+    "geometry_quality": "detailed",
+    "texture": true,
+    "pbr": true,
+    "texture_quality": "detailed"
+   },
+   "status": "success",
+   "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo4/cmp_api_robot/single.glb",
+   "sha256": "300e911bd02348a401ff53fd18eec801c55126de520a1bf78d3ebd4bc7458cc6"
+  }
+ },
+ "credits": 60,
+ "file_token": "file_8fc13f4b-6926-47fd-a1c0-5bc03a36fe3f",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/robot_full.png"
+}

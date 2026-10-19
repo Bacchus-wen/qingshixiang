@@ -1,0 +1,23 @@
+{
+ "op": "cmp_api_radio",
+ "steps": {
+  "single": {
+   "state": "submitted",
+   "task_id": "0538fb27-9542-476c-8dd4-9fed550c125e",
+   "path": "/generation/image-to-model",
+   "payload": {
+    "model": "v3.1-20260211",
+    "geometry_quality": "detailed",
+    "texture": true,
+    "pbr": true,
+    "texture_quality": "detailed"
+   },
+   "status": "success",
+   "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo4/cmp_api_radio/single.glb",
+   "sha256": "52875bb8221812a0f56c98f5fb66fe4b7b0341ae0ef42b64394fc57789b40183"
+  }
+ },
+ "credits": 60,
+ "file_token": "file_93f26cf4-e916-40de-8fa8-1165f184bbeb",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/tube_radio_open.png"
+}

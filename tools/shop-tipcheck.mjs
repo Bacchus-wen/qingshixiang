@@ -1,6 +1,6 @@
 // Distance from the robot's screwdriver tip (extreme vertex along the shaft near T) to the spare torso surface.
 import { chromium } from 'playwright';
-const T = [-0.686, 0.294, 1.456], S = [-0.45, -0.25, 0.86];
+const T = JSON.parse(process.argv[2] || '[-0.5915,0.2859,1.4666]'), S = JSON.parse(process.argv[3] || '[0.18,-0.25,0.95]'); // tip and blade direction
 const browser = await chromium.launch({ channel: 'chromium', args: ['--enable-unsafe-webgpu', '--use-angle=metal'] });
 const page = await browser.newPage({ viewport: { width: 640, height: 360 } });
 await page.goto('http://127.0.0.1:5173/?shot=shop-robotfull');

@@ -1,0 +1,51 @@
+{
+ "name": "robot",
+ "source": "assets/generated/compare/studio/robot-h3.1-8k.glb",
+ "size": 1.05,
+ "axis": "height",
+ "rotz": 0,
+ "dims": [
+  0.6097,
+  1.05,
+  0.6938
+ ],
+ "radius": 0.6992,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1872330,
+   "errM": 0,
+   "tex": 8192,
+   "texelsPerM": 3393.840375901675,
+   "minY": 0,
+   "bytes": 82433008
+  },
+  {
+   "file": "L1.glb",
+   "tris": 190633,
+   "errM": 0.0003,
+   "tex": 4096,
+   "texelsPerM": 1696.9201879508375,
+   "minY": 0,
+   "bytes": 33338464
+  },
+  {
+   "file": "L2.glb",
+   "tris": 51768,
+   "errM": 0.00099,
+   "tex": 2048,
+   "texelsPerM": 848.4600939754188,
+   "minY": 0.00085,
+   "bytes": 9305544
+  },
+  {
+   "file": "L3.glb",
+   "tris": 18158,
+   "errM": 0.00299,
+   "tex": 1024,
+   "texelsPerM": 424.2300469877094,
+   "minY": 0.00085,
+   "bytes": 1612704
+  }
+ ]
+}

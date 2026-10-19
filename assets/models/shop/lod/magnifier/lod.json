@@ -1,0 +1,51 @@
+{
+ "name": "magnifier",
+ "source": "assets/generated/tripo4/magnifier/model.glb",
+ "size": 0.34,
+ "axis": "height",
+ "rotz": -90,
+ "dims": [
+  0.328,
+  0.34,
+  0.1746
+ ],
+ "radius": 0.2518,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1959412,
+   "errM": 0,
+   "tex": 4096,
+   "texelsPerM": 8977.381909549738,
+   "minY": 0,
+   "bytes": 36362492
+  },
+  {
+   "file": "L1.glb",
+   "tris": 6650,
+   "errM": 0.0005,
+   "tex": 2048,
+   "texelsPerM": 4488.690954774869,
+   "minY": 0.00006,
+   "bytes": 8035916
+  },
+  {
+   "file": "L2.glb",
+   "tris": 1626,
+   "errM": 0.00199,
+   "tex": 1024,
+   "texelsPerM": 2244.3454773874346,
+   "minY": 0.00009,
+   "bytes": 1111344
+  },
+  {
+   "file": "L3.glb",
+   "tris": 696,
+   "errM": 0.00591,
+   "tex": 512,
+   "texelsPerM": 1122.1727386937173,
+   "minY": 0.00036,
+   "bytes": 372644
+  }
+ ]
+}

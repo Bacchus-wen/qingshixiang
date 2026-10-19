@@ -1,0 +1,51 @@
+{
+ "name": "soldering_iron",
+ "source": "assets/generated/tripo4/soldering_iron/model.glb",
+ "size": 0.28,
+ "axis": "long",
+ "rotz": -90,
+ "dims": [
+  0.28,
+  0.1803,
+  0.1665
+ ],
+ "radius": 0.1862,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1859940,
+   "errM": 0,
+   "tex": 4096,
+   "texelsPerM": 10055.070097912076,
+   "minY": 0,
+   "bytes": 38892800
+  },
+  {
+   "file": "L1.glb",
+   "tris": 8430,
+   "errM": 0.00049,
+   "tex": 2048,
+   "texelsPerM": 5027.535048956038,
+   "minY": 0.00022,
+   "bytes": 8546372
+  },
+  {
+   "file": "L2.glb",
+   "tris": 2732,
+   "errM": 0.00197,
+   "tex": 1024,
+   "texelsPerM": 2513.767524478019,
+   "minY": 0.00037,
+   "bytes": 1313428
+  },
+  {
+   "file": "L3.glb",
+   "tris": 1708,
+   "errM": 0.00593,
+   "tex": 512,
+   "texelsPerM": 1256.8837622390095,
+   "minY": 0.00097,
+   "bytes": 435600
+  }
+ ]
+}

@@ -1,0 +1,160 @@
+{
+ "_note": "Scene models built by tools/lod-build.mjs from the raw Tripo originals (no Blender decimation). size/axis/rotz as the old prep (tools/prep-shop.sh); levels err_mm:texture_px. rotz from tools/lod-orient-check.mjs (raw Tripo API models face +X: -90; Studio exports already face +Z: 0).",
+ "models": [
+  {
+   "name": "alarm_clock",
+   "in": "assets/generated/tripo4/alarm_clock/model.glb",
+   "size": 0.16,
+   "axis": "height",
+   "rotz": -90
+  },
+  {
+   "name": "back_door",
+   "in": "assets/generated/tripo4/back_door/model.glb",
+   "size": 2.15,
+   "axis": "height",
+   "rotz": -90
+  },
+  {
+   "name": "bicycle",
+   "in": "assets/generated/tripo4/bicycle/model.glb",
+   "size": 1.85,
+   "axis": "long",
+   "rotz": -90
+  },
+  {
+   "name": "cassette_recorder",
+   "in": "assets/generated/tripo4/cassette_recorder/model.glb",
+   "size": 0.5,
+   "axis": "long",
+   "rotz": -90
+  },
+  {
+   "name": "crt_tv",
+   "in": "assets/generated/tripo4/crt_tv/model.glb",
+   "size": 0.5,
+   "axis": "long",
+   "rotz": -90
+  },
+  {
+   "name": "desk_fan",
+   "in": "assets/generated/tripo4/desk_fan/model.glb",
+   "size": 0.46,
+   "axis": "height",
+   "rotz": -90
+  },
+  {
+   "name": "desk_lamp",
+   "in": "assets/generated/tripo4/desk_lamp/model.glb",
+   "size": 0.62,
+   "axis": "height",
+   "rotz": -90
+  },
+  {
+   "name": "enamel_mug",
+   "in": "assets/generated/tripo4/enamel_mug/model.glb",
+   "size": 0.1,
+   "axis": "height",
+   "rotz": -90
+  },
+  {
+   "name": "magnifier",
+   "in": "assets/generated/tripo4/magnifier/model.glb",
+   "size": 0.34,
+   "axis": "height",
+   "rotz": -90
+  },
+  {
+   "name": "parts_cabinet",
+   "in": "assets/generated/tripo4/parts_cabinet/model.glb",
+   "size": 1.05,
+   "axis": "height",
+   "rotz": -90
+  },
+  {
+   "name": "soldering_iron",
+   "in": "assets/generated/tripo4/soldering_iron/model.glb",
+   "size": 0.28,
+   "axis": "long",
+   "rotz": -90
+  },
+  {
+   "name": "spare_arm",
+   "in": "assets/generated/tripo4/robot_arm/model.glb",
+   "size": 0.46,
+   "axis": "long",
+   "rotz": -90
+  },
+  {
+   "name": "spare_leg",
+   "in": "assets/generated/tripo4/robot_leg/model.glb",
+   "size": 0.48,
+   "axis": "height",
+   "rotz": -90
+  },
+  {
+   "name": "spare_torso",
+   "in": "assets/generated/tripo4/robot_torso/model.glb",
+   "size": 0.32,
+   "axis": "width",
+   "rotz": -90
+  },
+  {
+   "name": "stool",
+   "in": "assets/generated/tripo4/stool/model.glb",
+   "size": 0.42,
+   "axis": "height",
+   "rotz": -90
+  },
+  {
+   "name": "thermos",
+   "in": "assets/generated/tripo4/thermos/model.glb",
+   "size": 0.36,
+   "axis": "height",
+   "rotz": -90
+  },
+  {
+   "name": "toolbox",
+   "in": "assets/generated/tripo4/toolbox/model.glb",
+   "size": 0.5,
+   "axis": "long",
+   "rotz": -90
+  },
+  {
+   "name": "tube_radio_closed",
+   "in": "assets/generated/tripo4/tube_radio_closed/model.glb",
+   "size": 0.5,
+   "axis": "long",
+   "rotz": -90
+  },
+  {
+   "name": "tube_radio_open",
+   "in": "assets/generated/compare/cli/radio.glb",
+   "size": 0.55,
+   "axis": "long",
+   "rotz": -90
+  },
+  {
+   "name": "wall_clock",
+   "in": "assets/generated/tripo4/wall_clock/model.glb",
+   "size": 0.72,
+   "axis": "height",
+   "rotz": -90
+  },
+  {
+   "name": "workbench",
+   "in": "assets/generated/tripo4/workbench/model.glb",
+   "size": 1.45,
+   "axis": "long",
+   "rotz": -90
+  },
+  {
+   "name": "robot",
+   "in": "assets/generated/compare/studio/robot-h3.1-8k.glb",
+   "size": 1.05,
+   "axis": "height",
+   "levels": "0.3:4096,1:2048,3:1024",
+   "rotz": 0
+  }
+ ]
+}

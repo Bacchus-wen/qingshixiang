@@ -205,11 +205,11 @@
   "name": "tube_radio_open",
   "glb": "tube_radio_open.glb",
   "pos": [
-   -1.2,
+   -1.26,
    0,
-   0.73
+   0.74
   ],
-  "ry": -50,
+  "ry": -36,
   "on": "workbench"
  },
  {
@@ -253,7 +253,7 @@
    0,
    1.16
   ],
-  "ry": -51
+  "ry": -25
  },
  {
   "name": "broom",
@@ -423,27 +423,27 @@
   ],
   "tape": true,
   "size": [
-   0.34,
+   0.24,
    0.14,
-   0.23
+   0.17
   ],
   "pos": [
-   -0.793,
+   -0.644,
    0,
-   1.559
+   1.56
   ],
-  "ry": 10,
+  "ry": 20,
   "on": "floor"
  },
  {
   "name": "spare_torso",
   "glb": "spare_torso.glb",
   "pos": [
-   -0.8,
+   -0.65,
    0,
-   1.54
+   1.55
   ],
-  "ry": 10,
+  "ry": 20,
   "on": "work_carton",
   "scale": 0.92
  },

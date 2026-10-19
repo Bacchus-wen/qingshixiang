@@ -14,13 +14,26 @@ SUBJ = {
    {'id': 'studio-h31', 'label': 'Studio H3.1', 'file': 'studio/tube-h3.1-8k.glb', 'yaw': 0, 'settings': 'H3.1 · 8K 贴图', 'cost': '—', 'time': '—'},
    {'id': 'studio-p20', 'label': 'Studio P2.0', 'file': 'studio/tube-p2.0-8k.glb', 'yaw': 0, 'settings': 'P2.0 · 8K 贴图', 'cost': '—', 'time': '—'},
    {'id': 'studio-h31-parts', 'label': 'Studio H3.1 分部件', 'file': 'studio/tube-分部件生成-h3.1.glb', 'yaw': 0, 'settings': 'H3.1 · 分部件生成', 'cost': '—', 'time': '—'},
-   {'id': 'api-prev', 'label': 'API(早先一次)', 'file': 'api/radio-prev.glb', 'yaw': -90, 'settings': 'v3.1 · 贴图 v3.5 · 去光照 · PBR', 'cost': '约 60 积分(开放平台)', 'time': '—'}]},
+   {'id': 'api-prev', 'label': 'API(早先一次)', 'file': 'api/radio-prev.glb', 'yaw': -90, 'settings': 'v3.1 · 贴图 v3.5 · 去光照 · PBR', 'cost': '约 60 积分(开放平台)', 'time': '—'},
+   {'id': 'web-auto', 'label': '网页版(随距离自动切换)', 'lod': 'tube_radio_open', 'file': '/models/shop/lod/tube_radio_open/L0.glb', 'yaw': 0, 'settings': 'CLI 原始 → 网页版:远处用简化层级,误差小于 1 像素;近处原始网格', 'cost': '—', 'time': '—', 'web': True},
+   *[{'id': f'web-L{i}', 'label': f'网页版 L{i}' + (' (=原始网格)' if i == 0 else ''), 'file': f'/models/shop/lod/tube_radio_open/L{i}.glb', 'yaw': 0, 'settings': f'CLI 原始 → 网页 L{i}', 'cost': '—', 'time': '—', 'web': True} for i in range(4)]]},
  'robot': {'name': '旧家电拼成的机器人', 'ref': 'refs/robot.jpg', 'view': [-0.75, 0.38, 1], 'models': [
    {'id': 'api', 'label': 'API', 'file': 'api/robot.glb', 'yaw': -90, 'settings': API, 'cost': '60 积分(开放平台)', 'time': '3 分 07 秒'},
    {'id': 'cli', 'label': 'CLI', 'file': 'cli/robot.glb', 'yaw': -90, 'settings': API, 'cost': '约 55 积分(Studio 账号)', 'time': '3 分 16 秒'},
    {'id': 'studio-h31', 'label': 'Studio H3.1', 'file': 'studio/robot-h3.1-8k.glb', 'yaw': 0, 'settings': 'H3.1 · 8K 贴图', 'cost': '—', 'time': '—'},
-   {'id': 'studio-p20', 'label': 'Studio P2.0', 'file': 'studio/robot-p2.0-四面-8k.glb', 'yaw': 0, 'settings': 'P2.0 · 四边面 · 8K 贴图', 'cost': '—', 'time': '—'}]},
+   {'id': 'studio-p20', 'label': 'Studio P2.0', 'file': 'studio/robot-p2.0-四面-8k.glb', 'yaw': 0, 'settings': 'P2.0 · 四边面 · 8K 贴图', 'cost': '—', 'time': '—'},
+   {'id': 'web-auto', 'label': '网页版(随距离自动切换)', 'lod': 'robot', 'file': '/models/shop/lod/robot/L0.glb', 'yaw': 0, 'settings': 'Studio H3.1 原始 → 网页版:远处用简化层级,误差小于 1 像素;近处原始网格', 'cost': '—', 'time': '—', 'web': True},
+   *[{'id': f'web-L{i}', 'label': f'网页版 L{i}' + (' (=原始网格)' if i == 0 else ''), 'file': f'/models/shop/lod/robot/L{i}.glb', 'yaw': 0, 'settings': f'Studio H3.1 原始 → 网页 L{i}', 'cost': '—', 'time': '—', 'web': True} for i in range(4)]]},
 }
+def web_stats(p, m):
+    import json as J
+    meta = J.loads((p.parent / 'lod.json').read_text())
+    if m.get('lod'):
+        Ls = meta['levels']
+        return {'tris': Ls[0]['tris'], 'meshes': 1, 'textures': 3, 'maps': f"KTX2 {Ls[0]['tex'] // 1024}K(近)… {Ls[-1]['tex']}(远)", 'mb': round(sum(L['bytes'] for L in Ls) / 1048576, 1), 'settings': m['settings'] + f" · 共 {len(Ls)} 级,开场只下载最远一级 {Ls[-1]['bytes'] / 1048576:.1f} MB"}
+    L = meta['levels'][int(p.stem[1:])]
+    note = ('简化误差 %.1f 毫米' % (L['errM'] * 1000)) if L['errM'] else '每个三角面都保留'
+    return {'tris': L['tris'], 'meshes': 1, 'textures': 3, 'maps': f"KTX2 {L['tex'] // 1024}K" if L['tex'] >= 1024 else f"KTX2 {L['tex']}", 'mb': round(p.stat().st_size / 1048576, 1), 'settings': m['settings'] + ' · ' + note}
 def stats(p):
     t = subprocess.run([GT, 'inspect', str(p), '--format', 'md'], capture_output=True, text=True, timeout=600).stdout
     tris = sum(int(x.replace(',', '')) for x in re.findall(r'\| TRIANGLES \| \d+\s+\| ([\d,]+)', t))
@@ -34,9 +47,9 @@ out = {}
 for k, s in SUBJ.items():
     ms = []
     for m in s['models']:
-        p = C / m['file']
+        p = (ROOT / 'assets' / m['file'].lstrip('/')) if m['file'].startswith('/') else C / m['file']
         if not p.exists(): print('missing', p); continue
-        ms.append({**m, **stats(p)}); print(k, m['id'], ms[-1]['tris'], ms[-1]['maps'], ms[-1]['mb'])
+        ms.append({**m, **(web_stats(p, m) if m.get('web') else stats(p))}); print(k, m['id'], ms[-1]['tris'], ms[-1]['maps'], ms[-1]['mb'])
     out[k] = {**s, 'models': ms}
 (C / 'manifest.json').write_text(json.dumps(out, ensure_ascii=False, indent=1))
 print('manifest', C / 'manifest.json')

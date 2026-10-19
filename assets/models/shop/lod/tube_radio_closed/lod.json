@@ -1,0 +1,52 @@
+{
+ "name": "tube_radio_closed",
+ "source": "assets/generated/tripo4/tube_radio_closed/model.glb",
+ "size": 0.5,
+ "axis": "long",
+ "rotz": -90,
+ "dims": [
+  0.5,
+  0.3219,
+  0.2808
+ ],
+ "radius": 0.3288,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1890044,
+   "errM": 0,
+   "tex": 4096,
+   "texelsPerM": 3016.878957314744,
+   "minY": 0,
+   "bytes": 37463008
+  },
+  {
+   "file": "L1.glb",
+   "tris": 49575,
+   "errM": 0.00049,
+   "tex": 2048,
+   "texelsPerM": 1508.439478657372,
+   "minY": 0.00009,
+   "bytes": 8193084
+  },
+  {
+   "file": "L2.glb",
+   "tris": 16493,
+   "errM": 0.002,
+   "tex": 1024,
+   "texelsPerM": 754.219739328686,
+   "minY": 0.00009,
+   "bytes": 1288892
+  },
+  {
+   "file": "L3.glb",
+   "tris": 14463,
+   "errM": 0.00594,
+   "tex": 512,
+   "texelsPerM": 377.109869664343,
+   "minY": 0.00009,
+   "permissive": true,
+   "bytes": 535152
+  }
+ ]
+}

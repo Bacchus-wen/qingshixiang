@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { ClusteredLighting } from 'three/addons/lighting/ClusteredLighting.js';
 import { LightPool } from './LightPool.js';
+import { applyThreeFixes } from './threeFixes.js';
 import { PostFX } from './PostFX.js';
 import { Input } from './Input.js';
 import { SHOTS } from './shots.js';
@@ -30,6 +31,7 @@ export class Engine {
     renderer.shadowMap.enabled = true;
     this.container.appendChild(renderer.domElement);
     await renderer.init();
+    if (this.params.get('nofix') === null) applyThreeFixes(renderer); // r186 pipeline-sharing bug, see threeFixes.js (?nofix = off, for A/B)
     const backend = renderer.backend.isWebGPUBackend ? 'webgpu' : 'webgl2';
     if (backend !== 'webgpu') console.warn('[engine] WebGPU unavailable, running on WebGL2 fallback');
     // quality: ?q=low|high; WebGL2 defaults to low (no SSR/DOF, fewer volume steps, smaller shadows)
@@ -155,7 +157,9 @@ export class Engine {
       if (this.params.get('gputime') !== null && this.frame % 10 === 0) {
         this.renderer.resolveTimestampsAsync('render').then((ms) => { if (ms) { const p = this.perf; p.gpuMs = p.gpuMs ? p.gpuMs * 0.8 + ms * 0.2 : ms; } }).catch(() => {});
       }
-      if (this.shot && this.frame === this.shotFrames) { window.__shotReady = true; this.renderer.setAnimationLoop(null); } // freeze: the capture is exactly this frame
+      // freeze: the capture is exactly this frame. A system can hold the shot while it still streams data the frame
+      // needs (ctx.busy(): e.g. finer model levels for this camera), up to 30 s
+      if (this.shot && this.frame >= this.shotFrames && !(this.ctx.busy?.() && this.frame < this.shotFrames + 1800)) { window.__shotReady = true; this.renderer.setAnimationLoop(null); }
     });
   }
 }

@@ -1,0 +1,51 @@
+{
+ "name": "wall_clock",
+ "source": "assets/generated/tripo4/wall_clock/model.glb",
+ "size": 0.72,
+ "axis": "height",
+ "rotz": -90,
+ "dims": [
+  0.3151,
+  0.72,
+  0.1856
+ ],
+ "radius": 0.4038,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1981047,
+   "errM": 0,
+   "tex": 4096,
+   "texelsPerM": 3291.289984730341,
+   "minY": 0,
+   "bytes": 32546484
+  },
+  {
+   "file": "L1.glb",
+   "tris": 21435,
+   "errM": 0.0005,
+   "tex": 2048,
+   "texelsPerM": 1645.6449923651705,
+   "minY": 0,
+   "bytes": 6815164
+  },
+  {
+   "file": "L2.glb",
+   "tris": 6185,
+   "errM": 0.00199,
+   "tex": 1024,
+   "texelsPerM": 822.8224961825853,
+   "minY": 0,
+   "bytes": 890484
+  },
+  {
+   "file": "L3.glb",
+   "tris": 3481,
+   "errM": 0.00595,
+   "tex": 512,
+   "texelsPerM": 411.41124809129263,
+   "minY": 0,
+   "bytes": 329924
+  }
+ ]
+}

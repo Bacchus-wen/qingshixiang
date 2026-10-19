@@ -1,0 +1,51 @@
+{
+ "name": "cassette_recorder",
+ "source": "assets/generated/tripo4/cassette_recorder/model.glb",
+ "size": 0.5,
+ "axis": "long",
+ "rotz": -90,
+ "dims": [
+  0.5,
+  0.3572,
+  0.1764
+ ],
+ "radius": 0.3197,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1938468,
+   "errM": 0,
+   "tex": 4096,
+   "texelsPerM": 3784.3159375663467,
+   "minY": 0,
+   "bytes": 35862600
+  },
+  {
+   "file": "L1.glb",
+   "tris": 16106,
+   "errM": 0.00049,
+   "tex": 2048,
+   "texelsPerM": 1892.1579687831734,
+   "minY": 0.00004,
+   "bytes": 8017796
+  },
+  {
+   "file": "L2.glb",
+   "tris": 5574,
+   "errM": 0.00195,
+   "tex": 1024,
+   "texelsPerM": 946.0789843915867,
+   "minY": 0.00033,
+   "bytes": 1250312
+  },
+  {
+   "file": "L3.glb",
+   "tris": 3846,
+   "errM": 0.00597,
+   "tex": 512,
+   "texelsPerM": 473.03949219579334,
+   "minY": 0.00033,
+   "bytes": 440224
+  }
+ ]
+}

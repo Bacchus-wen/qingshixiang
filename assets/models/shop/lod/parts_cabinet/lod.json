@@ -1,0 +1,51 @@
+{
+ "name": "parts_cabinet",
+ "source": "assets/generated/tripo4/parts_cabinet/model.glb",
+ "size": 1.05,
+ "axis": "height",
+ "rotz": -90,
+ "dims": [
+  1.0512,
+  1.05,
+  0.61
+ ],
+ "radius": 0.8031,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1938174,
+   "errM": 0,
+   "tex": 4096,
+   "texelsPerM": 1338.640022887966,
+   "minY": 0,
+   "bytes": 37174156
+  },
+  {
+   "file": "L1.glb",
+   "tris": 47689,
+   "errM": 0.0005,
+   "tex": 2048,
+   "texelsPerM": 669.320011443983,
+   "minY": 0.00012,
+   "bytes": 8570908
+  },
+  {
+   "file": "L2.glb",
+   "tris": 12477,
+   "errM": 0.002,
+   "tex": 1024,
+   "texelsPerM": 334.6600057219915,
+   "minY": 0.0007,
+   "bytes": 1474788
+  },
+  {
+   "file": "L3.glb",
+   "tris": 6355,
+   "errM": 0.00599,
+   "tex": 512,
+   "texelsPerM": 167.33000286099576,
+   "minY": 0.00091,
+   "bytes": 516732
+  }
+ ]
+}

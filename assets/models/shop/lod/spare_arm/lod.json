@@ -1,0 +1,51 @@
+{
+ "name": "spare_arm",
+ "source": "assets/generated/tripo4/robot_arm/model.glb",
+ "size": 0.46,
+ "axis": "long",
+ "rotz": -90,
+ "dims": [
+  0.46,
+  0.5781,
+  0.3496
+ ],
+ "radius": 0.4087,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1964020,
+   "errM": 0,
+   "tex": 4096,
+   "texelsPerM": 5362.447625975092,
+   "minY": 0,
+   "bytes": 42505468
+  },
+  {
+   "file": "L1.glb",
+   "tris": 24789,
+   "errM": 0.0005,
+   "tex": 2048,
+   "texelsPerM": 2681.223812987546,
+   "minY": 0.00029,
+   "bytes": 9428464
+  },
+  {
+   "file": "L2.glb",
+   "tris": 6651,
+   "errM": 0.002,
+   "tex": 1024,
+   "texelsPerM": 1340.611906493773,
+   "minY": 0.00149,
+   "bytes": 1764756
+  },
+  {
+   "file": "L3.glb",
+   "tris": 3535,
+   "errM": 0.00597,
+   "tex": 512,
+   "texelsPerM": 670.3059532468865,
+   "minY": 0.00031,
+   "bytes": 581908
+  }
+ ]
+}

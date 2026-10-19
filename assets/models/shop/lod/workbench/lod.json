@@ -1,0 +1,51 @@
+{
+ "name": "workbench",
+ "source": "assets/generated/tripo4/workbench/model.glb",
+ "size": 1.45,
+ "axis": "long",
+ "rotz": -90,
+ "dims": [
+  1.45,
+  0.9121,
+  0.8654
+ ],
+ "radius": 0.9596,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1886455,
+   "errM": 0,
+   "tex": 4096,
+   "texelsPerM": 1281.5325907939832,
+   "minY": 0,
+   "bytes": 38455144
+  },
+  {
+   "file": "L1.glb",
+   "tris": 48121,
+   "errM": 0.0005,
+   "tex": 2048,
+   "texelsPerM": 640.7662953969916,
+   "minY": 0.00027,
+   "bytes": 8602744
+  },
+  {
+   "file": "L2.glb",
+   "tris": 10474,
+   "errM": 0.002,
+   "tex": 1024,
+   "texelsPerM": 320.3831476984958,
+   "minY": 0.00044,
+   "bytes": 1387868
+  },
+  {
+   "file": "L3.glb",
+   "tris": 4462,
+   "errM": 0.00598,
+   "tex": 512,
+   "texelsPerM": 160.1915738492479,
+   "minY": 0.00046,
+   "bytes": 454748
+  }
+ ]
+}

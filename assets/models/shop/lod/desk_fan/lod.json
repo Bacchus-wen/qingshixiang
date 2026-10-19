@@ -1,0 +1,51 @@
+{
+ "name": "desk_fan",
+ "source": "assets/generated/tripo4/desk_fan/model.glb",
+ "size": 0.46,
+ "axis": "height",
+ "rotz": -90,
+ "dims": [
+  0.3613,
+  0.46,
+  0.3371
+ ],
+ "radius": 0.3376,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1825815,
+   "errM": 0,
+   "tex": 4096,
+   "texelsPerM": 3647.427674892511,
+   "minY": 0,
+   "bytes": 29957348
+  },
+  {
+   "file": "L1.glb",
+   "tris": 33800,
+   "errM": 0.0005,
+   "tex": 2048,
+   "texelsPerM": 1823.7138374462554,
+   "minY": 0.00002,
+   "bytes": 6405604
+  },
+  {
+   "file": "L2.glb",
+   "tris": 9834,
+   "errM": 0.00198,
+   "tex": 1024,
+   "texelsPerM": 911.8569187231277,
+   "minY": 0.00002,
+   "bytes": 768216
+  },
+  {
+   "file": "L3.glb",
+   "tris": 6306,
+   "errM": 0.00592,
+   "tex": 512,
+   "texelsPerM": 455.92845936156385,
+   "minY": 0.00002,
+   "bytes": 319820
+  }
+ ]
+}

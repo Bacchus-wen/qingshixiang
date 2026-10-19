@@ -1,0 +1,51 @@
+{
+ "name": "enamel_mug",
+ "source": "assets/generated/tripo4/enamel_mug/model.glb",
+ "size": 0.1,
+ "axis": "height",
+ "rotz": -90,
+ "dims": [
+  0.0997,
+  0.1,
+  0.0807
+ ],
+ "radius": 0.0813,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1958761,
+   "errM": 0,
+   "tex": 4096,
+   "texelsPerM": 18995.542383236083,
+   "minY": 0,
+   "bytes": 25558816
+  },
+  {
+   "file": "L1.glb",
+   "tris": 1856,
+   "errM": 0.0005,
+   "tex": 2048,
+   "texelsPerM": 9497.771191618041,
+   "minY": 0.00004,
+   "bytes": 5198404
+  },
+  {
+   "file": "L2.glb",
+   "tris": 930,
+   "errM": 0.00196,
+   "tex": 1024,
+   "texelsPerM": 4748.885595809021,
+   "minY": 0.00004,
+   "bytes": 823316
+  },
+  {
+   "file": "L3.glb",
+   "tris": 800,
+   "errM": 0.00541,
+   "tex": 512,
+   "texelsPerM": 2374.4427979045104,
+   "minY": 0.00004,
+   "bytes": 262032
+  }
+ ]
+}

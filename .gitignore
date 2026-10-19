@@ -20,3 +20,4 @@ assets/generated/shop/**/*.glb
 assets/generated/compare/**/*.glb
 assets/generated/compare/**/*.png
 assets/generated/compare/**/*.jpg
+assets/models/shop/lod/*/L*.glb

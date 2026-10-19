@@ -1,0 +1,53 @@
+{
+ "name": "tube_radio_open",
+ "source": "assets/generated/compare/cli/radio.glb",
+ "size": 0.55,
+ "axis": "long",
+ "rotz": -90,
+ "dims": [
+  0.55,
+  0.345,
+  0.2983
+ ],
+ "radius": 0.3573,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1896873,
+   "errM": 0,
+   "tex": 4096,
+   "texelsPerM": 2721.0436051741863,
+   "minY": 0,
+   "bytes": 39890148
+  },
+  {
+   "file": "L1.glb",
+   "tris": 349756,
+   "errM": 0.0005,
+   "tex": 2048,
+   "texelsPerM": 1360.5218025870931,
+   "minY": 0.00002,
+   "bytes": 11297336
+  },
+  {
+   "file": "L2.glb",
+   "tris": 25076,
+   "errM": 0.00199,
+   "tex": 1024,
+   "texelsPerM": 680.2609012935466,
+   "minY": 0.00003,
+   "permissive": true,
+   "bytes": 1309388
+  },
+  {
+   "file": "L3.glb",
+   "tris": 13864,
+   "errM": 0.00599,
+   "tex": 512,
+   "texelsPerM": 340.1304506467733,
+   "minY": 0.00003,
+   "permissive": true,
+   "bytes": 501640
+  }
+ ]
+}
