@@ -1,0 +1,202 @@
+import * as THREE from 'three/webgpu';
+import {
+  Fn, Loop, float, vec3, vec4, uniform, color, positionWorld, cameraPosition, cameraViewMatrix, cameraNear, cameraFar, normalize, dot, cross, min, max,
+  smoothstep, atan, mx_noise_float, time, viewportDepthTexture, perspectiveDepthToViewZ, uv,
+} from 'three/tsl';
+import { syncMemory } from '../../materials/memory.js';
+import { SHADOW_LAYER } from './lod.js';
+
+// The robot's eye (v4 shop): hold to open it; it projects a beam, and where the beam falls the shop's past shows.
+// Owns the eye's state (closed -> opening -> open; the first deliberate attempt fails), the head (./rig.js: the pointer
+// steers the gaze, the story can aim it), the light the lens throws (a spot light with the lens's own dirt and cracks
+// as its projected mask, casting real shadows -- the child's shadow at the door is cast by it) and the visible shaft.
+// Publishes ctx.memory (origin, dir, angle, range, strength) every frame; ../../materials/memory.js turns it into the
+// per-pixel "past" mask used by the post grade and by everything that comes alive inside the beam.
+export const BEAM_COLOR = new THREE.Color(1.0, 0.8, 0.58);
+
+// projected mask of this lens: an 8-blade aperture (one bent blade), a faint double image from the cracked element,
+// soft out-of-focus dirt. Low frequency, so it reads as a lens and not as a picture.
+function makeGobo() {
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+  let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const specks = Array.from({ length: 60 }, () => [rnd() * 220 - 110, rnd() * 220 - 110, 0.6 + rnd() * 3.2, rnd()]);
+  const wob = Array.from({ length: 48 }, () => 0.93 + rnd() * 0.1);
+  const aperture = (g, r, open) => {
+    g.beginPath();
+    for (let i = 0; i <= 48; i++) {
+      const a = (i / 48) * Math.PI * 2, blade = 0.95 + 0.05 * Math.cos(a * 8 + open * 0.7);
+      const bent = Math.abs((((a / (Math.PI * 2)) * 8) % 8) - 5.5) < 0.55 ? 0.82 : 1;
+      const rr = r * blade * bent * wob[i % 48]; g.lineTo(Math.cos(a) * rr, Math.sin(a) * rr);
+    }
+    g.closePath();
+  };
+  const draw = (open) => {
+    const g = c.getContext('2d');
+    g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = '#000'; g.fillRect(0, 0, 256, 256); g.translate(128, 128);
+    const r = 20 + 104 * open;
+    g.save(); g.translate(8, -5); aperture(g, r * 0.96, open); g.clip(); g.fillStyle = 'rgba(160,160,160,0.16)'; g.fillRect(-128, -128, 256, 256); g.restore();
+    g.save(); aperture(g, r, open); g.clip();
+    const grd = g.createRadialGradient(-6, 5, 0, 0, 0, r);
+    grd.addColorStop(0, '#fff'); grd.addColorStop(0.6, '#ececec'); grd.addColorStop(0.88, '#9a9a9a'); grd.addColorStop(1, '#303030');
+    g.fillStyle = grd; g.fillRect(-128, -128, 256, 256);
+    // dirt on the glass is far out of focus at the wall: only a faint, soft mottling (sharp specks and the cracks read
+    // as stains and wires on whatever the eye looks at)
+    g.filter = 'blur(6px)';
+    for (const [x, y, s, k] of specks) { g.fillStyle = `rgba(0,0,0,${0.05 + k * 0.07})`; g.beginPath(); g.arc(x, y, s * 3, 0, 7); g.fill(); }
+    g.filter = 'none';
+    g.restore();
+    tex.needsUpdate = true;
+  };
+  return { tex, draw };
+}
+
+// the visible shaft: a cone mesh as a proxy; each fragment of its far side marches the camera ray through the exact cone,
+// stopping at the scene's depth (an object inside the beam is not fogged over from behind), dense near the lens and
+// along the rim, streaked by the aperture blades, with slow dust
+function beamMaterial(u, noDepth = false) {
+  const m = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending, side: THREE.BackSide });
+  m.colorNode = Fn(() => {
+    const rd = normalize(positionWorld.sub(cameraPosition));
+    const CO = cameraPosition.sub(u.apex);
+    const c2 = float(1).div(u.tanA.mul(u.tanA).add(1));
+    const rdD = dot(rd, u.axis), coD = dot(CO, u.axis);
+    const qa = rdD.mul(rdD).sub(c2), qb = rdD.mul(coD).sub(c2.mul(dot(rd, CO))).mul(2), qc = coD.mul(coD).sub(c2.mul(dot(CO, CO)));
+    const disc = qb.mul(qb).sub(qa.mul(qc).mul(4)), sq = disc.max(0).sqrt();
+    const ta = qb.negate().sub(sq).div(qa.mul(2)), tb = qb.negate().add(sq).div(qa.mul(2));
+    const tn = min(ta, tb), tf = max(ta, tb), FAR = float(12);
+    const along0 = qa.greaterThan(0);
+    const tEnter = along0.select(rdD.greaterThan(0).select(disc.lessThan(0).select(float(0), tf), float(0)), tn);
+    const tExit = along0.select(rdD.greaterThan(0).select(FAR, disc.lessThan(0).select(FAR, tn)), disc.lessThan(0).select(float(-1), tf));
+    // the scene's depth along this ray (opaque surfaces end the march)
+    const sceneZ = perspectiveDepthToViewZ(viewportDepthTexture(), cameraNear, cameraFar);
+    const rdv = cameraViewMatrix.mul(vec4(rd, 0)).z;
+    const tScene = sceneZ.div(rdv.min(-1e-4));
+    const t0 = tEnter.max(0.03), t1 = min(tExit, noDepth ? FAR : min(tScene, FAR));
+    const span = t1.sub(t0).max(0), dt = span.div(14);
+    const bu = normalize(cross(u.axis, vec3(0, 1, 0.001))), bv = cross(u.axis, bu);
+    const acc = float(0).toVar();
+    Loop(14, ({ i }) => {
+      const p = cameraPosition.add(rd.mul(t0.add(dt.mul(float(i).add(0.5)))));
+      const q = p.sub(u.apex), along = dot(q, u.axis), rad = q.sub(u.axis.mul(along)).length(), edgeR = along.max(0.001).mul(u.tanA);
+      // a hollow shaft: the rim catches more dust light than the middle you look through
+      const inside = float(1).sub(smoothstep(edgeR.mul(0.78), edgeR, rad)).mul(smoothstep(edgeR.mul(0.25), edgeR.mul(0.82), rad).mul(0.75).add(0.25)).mul(smoothstep(0.0, 0.12, along));
+      const fall = float(1).div(along.mul(along).mul(0.5).add(0.3));
+      const camNear = smoothstep(0.12, 0.5, p.sub(cameraPosition).length());
+      const ang = atan(dot(q, bv), dot(q, bu));
+      const streak = mx_noise_float(vec3(ang.mul(2.6), along.mul(0.15), 1.7)).mul(0.6).add(0.7);
+      const dust = mx_noise_float(p.mul(2.3).add(vec3(0.02, -0.05, 0.015).mul(time))).mul(0.35).add(0.8);
+      acc.addAssign(inside.mul(fall).mul(camNear).mul(streak).mul(dust));
+    });
+    return color(BEAM_COLOR).mul(acc.mul(dt)).mul(u.k);
+  })();
+  return m;
+}
+
+export default {
+  name: 'eye',
+  async init(ctx) {
+    const shop = ctx.api.shop, robot = shop?.placed.robot, rig = shop?.rig;
+    if (!robot || !rig) throw new Error('eye: no robot in the shop');
+    this.robot = robot; this.rig = rig;
+    this.open = 0; this.target = 0; this.attempts = 0; this.holdT = 0; this.failT = -1; this.failed = false;
+    this.look = new THREE.Vector2(); this.lookCur = new THREE.Vector2(); this.lift = 0;
+    this._p = new THREE.Vector3(); this._d = new THREE.Vector3(); this._v = new THREE.Vector3(); this._q = new THREE.Quaternion();
+    // the lens throws a projector-like light: soft-edged, its dirt and cracks projected, shadows cast (the shadow
+    // proxies of the raw models included: SHADOW_LAYER). Constant presence: intensity 0 when shut (adding or removing a
+    // light at runtime recompiles every lit material).
+    this.gobo = makeGobo(); this.gobo.draw(0.2); this.goboOpen = 0.2;
+    const spot = this.spot = new THREE.SpotLight(BEAM_COLOR.clone(), 0, 10, 0.3, 0.45, 1.5);
+    spot.map = this.gobo.tex;
+    spot.castShadow = ctx.params.get('noeyeshadow') === null;
+    spot.shadow.mapSize.setScalar(ctx.quality === 'low' ? 512 : 1024);
+    // perspective depth: with the near plane at 4 cm a bias of -0.0008 was ~37 cm at 4 m (a child standing 20 cm from the
+    // wall cast nothing); near 0.25 m (nothing that close to the lens should shadow anyway) + a small bias = ~1 cm
+    spot.shadow.bias = -0.00012; spot.shadow.normalBias = 0.006; spot.shadow.camera.near = 0.25; spot.shadow.camera.far = 10; spot.shadow.camera.layers.enable(SHADOW_LAYER);
+    ctx.scene.add(spot, spot.target);
+    // the shaft
+    const L = 10, u = this.beamU = { apex: uniform(new THREE.Vector3()), axis: uniform(new THREE.Vector3(0, 0, -1)), tanA: uniform(0.3), k: uniform(0) };
+    const cone = this.cone = new THREE.Mesh(new THREE.CylinderGeometry(0.002, L * Math.tan(0.55), L, 40, 1, true).translate(0, -L / 2, 0), beamMaterial(u, ctx.params.get('beamnodepth') !== null));
+    cone.frustumCulled = false; cone.renderOrder = 8; ctx.scene.add(cone);
+    // the lens itself glows when the eye opens: a small soft halo on it (the shaft starts at a point of light)
+    { const hm = new THREE.SpriteNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+      const r = uv().sub(0.5).length().mul(2);
+      this.haloK = uniform(0);
+      hm.colorNode = color(BEAM_COLOR).mul(float(1).sub(smoothstep(0, 1, r)).pow(3).mul(0.4).add(float(1).sub(smoothstep(0, 0.16, r)).mul(1.6))).mul(this.haloK);
+      this.halo = new THREE.Sprite(hm); this.halo.scale.setScalar(0.07); this.halo.renderOrder = 9; ctx.scene.add(this.halo); }
+    const sys = this;
+    ctx.api.eye = {
+      get open() { return sys.open; }, get attempts() { return sys.attempts; }, get failed() { return sys.failed; },
+      spot, rig, robot,
+      // the story aims the gaze at a world point (null = back to the pointer)
+      aim(p) { sys.aimAt = p ? (sys.aimAt ?? new THREE.Vector3()).copy(p) : null; },
+    };
+    ctx.memory.range = 9;
+  },
+
+  update(dt, t, ctx) {
+    const m = ctx.memory, input = ctx.input;
+    // ---- eye state: a deliberate hold counts as an attempt; the first one fails (a flicker, then shut again)
+    const forced = m.forceOpen; // the story or a shot can force it
+    const holding = forced ?? input.hold;
+    const prev = this.holdT;
+    this.holdT = holding ? this.holdT + dt : 0;
+    if (prev < 0.25 && this.holdT >= 0.25 && forced === undefined) { this.attempts++; if (this.attempts > 1) { ctx.api.audio?.play('servo'); ctx.api.audio?.play('whine'); } }
+    if (forced !== undefined) this.target = forced ? 1 : 0;
+    else if (this.attempts <= 1 && holding && this.holdT >= 0.25) {
+      this.target = this.holdT < 1.2 ? 0.22 : 0;
+      if (this.holdT > 1.2 && this.failT < 0) { this.failT = t; ctx.api.audio?.play('click'); }
+    } else this.target = holding && this.attempts > 1 ? 1 : 0;
+    this.failed = this.failT > 0;
+    // opening is slow and stutters (a servo slipping), shutting is quicker
+    const speed = this.target > this.open ? 0.38 : 1.1, slip = this.target > this.open && Math.sin(t * 9.3) > 0.82 ? 0.12 : 1;
+    this.open += Math.sign(this.target - this.open) * Math.min(Math.abs(this.target - this.open), speed * slip * dt);
+    if (ctx.isShot && m.shotOpen !== undefined) this.open = m.shotOpen;
+    const pw = m.power ?? 1;
+    const flick = this.open > 0 && this.open < 0.3 && this.target < 0.5 ? 0.6 + 0.4 * Math.sin(t * 37) * Math.sin(t * 13) : 1; // the failing attempt sputters
+    const o = Math.min(m.openCap ?? 1, this.open * flick * Math.min(1, 0.35 + pw * 2.5));
+    this.o = o;
+
+    // ---- the head: lifts as the eye opens, the gaze follows the pointer (or the story's aim point)
+    if (this.aimAt) { // yaw/pitch that put the eye's axis on the point
+      this.rig.eye(this.robot, this._p, this._d); // current
+      const want = this._v.copy(this.aimAt).sub(this._p).normalize();
+      // error in the robot's frame -> look offsets
+      const inv = this._q.copy(this.robot.getWorldQuaternion(this._q)).invert();
+      const w = want.clone().applyQuaternion(inv), c = this._d.clone().applyQuaternion(inv);
+      const dyaw = Math.atan2(w.x, w.z) - Math.atan2(c.x, c.z), dpit = Math.asin(THREE.MathUtils.clamp(w.y, -1, 1)) - Math.asin(THREE.MathUtils.clamp(c.y, -1, 1));
+      this.look.x = THREE.MathUtils.clamp(this.lookCur.x + dyaw / 0.85, -1, 1); this.look.y = THREE.MathUtils.clamp(this.lookCur.y + dpit / 0.32, -1, 1);
+    } else if (m.lookOverride) this.look.set(m.lookOverride.x, m.lookOverride.y);
+    else this.look.set(-input.pointer.x, input.pointer.y); // screen right = the robot's right (the camera rides behind it)
+    const k = Math.min(1, dt * (0.5 + o * 1.6));
+    this.lookCur.x += (this.look.x * Math.min(1, 0.2 + o) - this.lookCur.x) * k;
+    this.lookCur.y += (this.look.y * Math.min(1, 0.2 + o) - this.lookCur.y) * k;
+    this.lift += ((m.headLift ?? Math.min(1, this.open * 1.4)) - this.lift) * Math.min(1, dt * 1.5);
+    const rig = this.rig, jitter = o > 0.05 ? Math.sin(t * 29) * 0.004 * o : 0;
+    // yaw +-0.85 rad (49 deg) about the neck; pitch: asleep the head hangs as generated (bowed over its work), awake
+    // it lifts ~13 deg and can look up/down another ~18 deg
+    rig.yaw = this.lookCur.x * 0.85 + jitter;
+    rig.pitch = this.lift * 0.23 + this.lookCur.y * 0.32 - (1 - this.lift) * 0.04 * (0.5 + 0.5 * Math.sin(t * 0.7));
+    rig.roll = this.lift * 0.05;
+    if (!(ctx.isShot && ctx.params.get('head'))) rig.update();
+
+    // ---- the light and the shaft follow the lens
+    rig.eye(this.robot, this._p, this._d);
+    const origin = this._v.copy(this._p).addScaledVector(this._d, 0.045); // just in front of the lens barrel
+    const angle = 0.1 + 0.27 * o;
+    m.origin.copy(origin); m.dir.copy(this._d); m.angle = angle * 1.12; m.strength = Math.min(1, o * 1.3) * Math.min(1, pw * 3);
+    syncMemory(m);
+    const sp = this.spot;
+    sp.position.copy(origin); sp.target.position.copy(origin).addScaledVector(this._d, 4); sp.target.updateMatrixWorld();
+    sp.angle = angle; sp.penumbra = 0.45;
+    sp.intensity = (+ctx.params.get('eyecd') || 120) * o * o * Math.min(1, pw * 2) * (m.spotK ?? 1);
+    if (Math.abs(o - this.goboOpen) > 0.03) { this.gobo.draw(o); this.goboOpen = o; }
+    const u = this.beamU;
+    u.apex.value.copy(origin); u.axis.value.copy(this._d); u.tanA.value = Math.tan(angle); u.k.value = 0.9 * o * o * Math.min(1, pw * 2) * (m.beamK ?? 1) * (+ctx.params.get('beamk') || 1);
+    this.cone.position.copy(origin); this.cone.quaternion.setFromUnitVectors(_DOWN, this._d);
+    this.halo.position.copy(this._p).addScaledVector(this._d, 0.03);
+    this.haloK.value = 0.6 * o + 0.06;
+    const shop = ctx.api.shop; if (shop?.eyeGlow) shop.eyeGlow.value = (m.eyeRest ?? 0.5) + 4.5 * o;
+  },
+};
+const _DOWN = new THREE.Vector3(0, -1, 0);

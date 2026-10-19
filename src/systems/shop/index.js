@@ -5,7 +5,9 @@ import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { SHOTS } from '../../engine/shots.js';
-import { LodLibrary, SHADOW_LAYER } from './lod.js';
+import { LodLibrary, SHADOW_LAYER, ROBOT_LAYER, ROBOT_SHADOW_LAYER } from './lod.js';
+import { HeadRig } from './rig.js';
+import { pastHooks } from './past.js';
 import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorld, positionLocal, smoothstep, vec2, vec3, mx_worley_noise_float, texture, normalWorldGeometry, abs, step, uniform, uv, vec4 } from 'three/tsl';
 
 // v4: the closed-down home-appliance repair shop (docs/scene-shop.md). This phase is models + layout only:
@@ -19,7 +21,7 @@ export const ROOM = { w: 6.0, d: 4.5, h: 3.0 };
 // in world space so walls and floor line up without UV work. All are loaded up front (init awaits them).
 const TEX = {};
 const TEX_NAMES = ['floor_terrazzo', 'wall_upper', 'wall_dado', 'ceiling', 'facade', 'pavement', 'shutter', 'cardboard',
-  'poster', 'calendar', 'price_list', 'slogan', 'sign_main', 'sign_side', 'tags', 'box_a', 'box_b', 'box_c', 'box_d', 'tv_poster', 'notice', 'street_backdrop', 'sign_aframe', 'height_marks', 'sign_vertical', 'pegboard_empty'];
+  'poster', 'calendar', 'price_list', 'slogan', 'sign_main', 'sign_side', 'tags', 'box_a', 'box_b', 'box_c', 'box_d', 'tv_poster', 'notice', 'street_backdrop', 'sign_aframe', 'sign_vertical', 'pegboard_empty'];
 async function loadTextures(ktx2) {
   await Promise.all(TEX_NAMES.map(async (n) => {
     try {
@@ -45,15 +47,16 @@ function terrazzo() {
   return m;
 }
 function wallMat() {
-  // yellowed lime plaster above, dark green gloss dado below 1.2 m with a thin darker stripe on top
+  // yellowed lime plaster above, dark green gloss dado below 1.0 m with a thin darker stripe on top (v4 story: lowered
+  // from 1.2 m so a child's pencil marks, 1.10-1.47 m, sit on pale plaster)
   const m = new THREE.MeshStandardNodeMaterial();
   const P = positionWorld, N = normalWorldGeometry;
   const u = abs(N.x).greaterThan(0.5).select(P.z, P.x);
   const uv = vec2(u.div(2.2), P.y.div(2.2).add(abs(N.x).mul(0.37)));
   const upper = texture(tex('wall_upper'), uv).rgb;
   const dado = texture(tex('wall_dado'), uv).rgb;
-  const isDado = float(1).sub(step(1.2, P.y));
-  const stripe = smoothstep(1.2, 1.205, P.y).mul(float(1).sub(smoothstep(1.225, 1.23, P.y)));
+  const isDado = float(1).sub(step(1.0, P.y));
+  const stripe = smoothstep(1.0, 1.005, P.y).mul(float(1).sub(smoothstep(1.025, 1.03, P.y)));
   let c = mix(upper, dado, isDado);
   c = mix(c, vec3(0.06, 0.12, 0.08), stripe);
   const floorDirt = smoothstep(0.35, 0.0, P.y).mul(0.35);
@@ -329,6 +332,7 @@ export default {
     // GPU memory for model levels: 600 MB, 320 MB on devices that report 4 GB of memory or less; ?lodmb= overrides
     const lod = this.lod = new LodLibrary(loader, `${import.meta.env.BASE_URL}models/shop/lod/`,
       { budgetMB: +ctx.params.get('lodmb') || (navigator.deviceMemory && navigator.deviceMemory <= 4 ? 320 : 600) });
+    pastHooks(lod); // radio dials, the clock's pendulum: on every level as it loads (./past.js)
     let lodNames = new Set();
     if (ctx.params.get('nolod') === null) {
       try { const r = await fetch(`${import.meta.env.BASE_URL}models/shop/lod/index.json`, { cache: 'no-store' }); if (r.ok) lodNames = new Set(await r.json()); } catch { /* no LOD set: old models */ }
@@ -349,19 +353,32 @@ export default {
       m.material = nm;
     });
     lod.hook('crt_tv', glassify);
-    // the robot's camera-lens eye: the texture's bright orange core becomes emissive, only on the face of the head
-    // (model space: top fifth of the robot, front half) so rust and brass elsewhere never glow
-    lod.hook('robot', (scene) => scene.traverse((m) => {
-      if (!m.isMesh || !m.material.map) return;
-      const src = m.material, nm = new THREE.MeshStandardNodeMaterial();
-      for (const k of ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap', 'roughness', 'metalness']) if (src[k] !== undefined) nm[k] = src[k];
-      if (src.normalScale) nm.normalScale.copy(src.normalScale);
-      const c = texture(src.map).rgb, pl = positionLocal;
-      const core = smoothstep(0.7, 0.9, c.r).mul(smoothstep(0.3, 0.5, c.g)).mul(float(1).sub(smoothstep(0.28, 0.45, c.b)));
-      const face = smoothstep(0.78, 0.82, pl.y.div(1.05)).mul(smoothstep(-0.02, 0.04, pl.z));
-      nm.emissiveNode = c.mul(core).mul(face).mul(this.eyeGlow = uniform(1.6));
-      m.material = nm;
-    }));
+    // the robot: a soft neck in the vertex shader (./rig.js) turns the generated head without cutting the mesh, and the
+    // camera-lens eye glows -- the texture's bright orange core becomes emissive, only on the face (model space), so
+    // rust and brass elsewhere never glow. One rig and one glow uniform shared by every level as it streams in.
+    const rig = this.rig = new HeadRig();
+    const eyeGlow = this.eyeGlow = uniform(1.6);
+    { const hp = (ctx.params.get('head') || '').split(',').map(Number); if (hp.length >= 2) { rig.yaw = THREE.MathUtils.degToRad(hp[0]); rig.pitch = THREE.MathUtils.degToRad(hp[1]); rig.update(); } }
+    lod.proxyLayers.set('robot', ROBOT_SHADOW_LAYER);
+    ctx.camera.layers.enable(ROBOT_LAYER);
+    lod.hook('robot', (scene) => {
+      scene.updateMatrixWorld(true); // mesh -> model space (the level's own minY offset included)
+      scene.traverse((m) => {
+        if (!m.isMesh) return;
+        m.layers.set(ROBOT_LAYER); // (copies made from this level keep it)
+        if (!m.material.map) return;
+        const src = m.material, nm = new THREE.MeshStandardNodeMaterial();
+        for (const k of ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap', 'roughness', 'metalness']) if (src[k] !== undefined) nm[k] = src[k];
+        if (src.normalScale) nm.normalScale.copy(src.normalScale);
+        const { position, model } = rig.nodes(m.matrixWorld);
+        nm.positionNode = position;
+        const c = texture(src.map).rgb;
+        const core = smoothstep(0.7, 0.9, c.r).mul(smoothstep(0.3, 0.5, c.g)).mul(float(1).sub(smoothstep(0.28, 0.45, c.b)));
+        const face = smoothstep(0.76, 0.79, model.y).mul(smoothstep(0.09, 0.13, model.z)); // the lens: y 0.81-0.97, z 0.15-0.21
+        nm.emissiveNode = c.mul(core).mul(face).mul(eyeGlow);
+        m.material = nm;
+      });
+    });
     const templates = new Map();
     for (const glb of new Set(layout.filter((i) => i.glb).map((i) => i.glb))) {
       const name = glb.replace(/\.glb$/, '');
@@ -385,11 +402,14 @@ export default {
     street.position.set(0, -STEP, d / 2 + 0.25 + 4.5); street.receiveShadow = true; root.add(street);
     const sill = new THREE.Mesh(new THREE.BoxGeometry(w + 0.3, STEP, 0.3), facadeMat()); sill.position.set(0, -STEP / 2, d / 2 + 0.25 + 0.15 - 0.15); sill.receiveShadow = true; root.add(sill);
     const wm = wallMat();
-    const wall = (W, H, x, y, z, ry) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(W, H), wm); m.position.set(x, y, z); m.rotation.y = ry; m.receiveShadow = true; root.add(m); return m; };
+    // walls and ceiling block light from both faces (shadowSide): the street's light only comes in under the shutter
+    wm.shadowSide = THREE.DoubleSide;
+    const wall = (W, H, x, y, z, ry) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(W, H), wm); m.position.set(x, y, z); m.rotation.y = ry; m.receiveShadow = m.castShadow = true; root.add(m); return m; };
     wall(w, h, 0, h / 2, -d / 2, 0);
     wall(d, h, -w / 2, h / 2, 0, Math.PI / 2);
     wall(d, h, w / 2, h / 2, 0, -Math.PI / 2);
     const ceil = new THREE.Mesh(new THREE.PlaneGeometry(w, d).rotateX(Math.PI / 2), ceilingMat());
+    ceil.material.shadowSide = THREE.DoubleSide; ceil.castShadow = true;
     ceil.position.y = h; root.add(ceil);
     // front wall with the shutter opening, seen from inside as dark masonry
     // front wall: pillars either side of the 3.6 m opening and the facade above it (up to 4.2 m: the sign board)
@@ -435,22 +455,12 @@ export default {
       pb.position.set(-1.88, 1.72, -d / 2 + 0.0135 - 0.0032); pb.castShadow = pb.receiveShadow = true; root.add(pb);
     }
     root.add(onWall(decal('poster', 0.46, 0.69, { curl: 0.012 }), 'left', 0.12, 1.86));
-    root.add(onWall(decal('calendar', 0.34, 0.51, { curl: 0.01 }), 'back', 2.63, 1.4));
+    root.add(onWall(decal('calendar', 0.34, 0.51, { curl: 0.01 }), 'right', -2.05, 1.12)); // v4 story: off the back wall, where the height marks are now
     root.add(onWall(decal('price_list', 0.4, 0.6, { curl: 0.01 }), 'right', -1.42, 1.78));
     root.add(onWall(decal('slogan', 0.96, 0.64), 'right', -0.5, 2.38, 0.015));
     root.add(onWall(decal('tv_poster', 0.4, 0.6, { curl: 0.012 }), 'left', 1.22, 2.36));
     root.add(onWall(decal('notice', 0.36, 0.54, { curl: 0.008 }), 'right', -1.98, 1.72));
-    { // pencil height marks beside the back door, over the years (multiply decal: the plaster in the photo is neutral,
-      // so only the pencil lines and writing darken our wall). The photo's own door frame (right 20%) is cropped off.
-      const ht = tex('height_marks'); ht.wrapS = ht.wrapT = THREE.ClampToEdgeWrapping;
-      const mm = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.MultiplyBlending, premultipliedAlpha: true });
-      const crop = 0.8, H = 1.25, W = H * (1024 * crop) / 1536;
-      const hc = texture(ht, uv().mul(vec2(crop, 1))).rgb, hl = hc.dot(vec3(0.3, 0.59, 0.11));
-      const ink = smoothstep(0.74, 0.46, hl); // only the strokes: the photo's plaster (light) multiplies by 1
-      mm.colorNode = vec4(mix(vec3(1), hc.div(0.78).min(1), ink), 1);
-      const pm = new THREE.Mesh(new THREE.PlaneGeometry(W, H), mm); pm.renderOrder = 2;
-      root.add(onWall(pm, 'back', 1.235 - W / 2, 0.55 + H / 2, 0.003));
-    }
+    // (the child's pencil height marks are on the wall right of the back door: ./past.js)
     root.add(onWall(decal('sign_main', 2.4, 1.2, { rough: 0.6 }), 'front-out', 0, 3.42, 0.01));
     root.add(onWall(decal('sign_side', 0.82, 1.64, { rough: 0.6 }), 'front-out', -2.62, 1.55, 0.01));
     { // the vertical 家电维修 board right at the opening's edge: narrow, so it reads whole in the establishing shot
@@ -464,13 +474,14 @@ export default {
       root.add(onWall(grp, 'front-out', -1.8 - W / 2 - 0.025, 1.58, 0.0125));
     }
     // review lighting: warm desk lamp key, cold dusk from the street, a weak bounce so models read
-    scene.add(new THREE.HemisphereLight(0x8a94a8, 0x403428, 0.45));
+    const hemi = new THREE.HemisphereLight(0x8a94a8, 0x403428, 0.45); scene.add(hemi);
     const dusk = new THREE.DirectionalLight(0x9db4d6, 1.4); dusk.position.set(1.5, 2.2, 8); dusk.target.position.set(-0.5, 0, -1);
     dusk.castShadow = true; dusk.shadow.mapSize.setScalar(2048); dusk.shadow.camera.left = -5; dusk.shadow.camera.right = 5; dusk.shadow.camera.top = 5; dusk.shadow.camera.bottom = -5; dusk.shadow.bias = -0.0004;
-    dusk.shadow.camera.layers.enable(SHADOW_LAYER); scene.add(dusk, dusk.target); // shadow proxies of raw-mesh models (./lod.js)
+    dusk.shadow.camera.layers.enable(SHADOW_LAYER); dusk.shadow.camera.layers.enable(ROBOT_LAYER); dusk.shadow.camera.layers.enable(ROBOT_SHADOW_LAYER); scene.add(dusk, dusk.target); // shadow proxies of raw-mesh models (./lod.js)
     this.lamp = new THREE.SpotLight(0xffc489, 18, 6, 0.9, 0.6, 1.5); this.lamp.castShadow = ctx.params.get('nolampshadow') === null; if (ctx.params.get('lampoff') !== null) this.lamp.intensity = 0; this.lamp.shadow.mapSize.setScalar(1024); this.lamp.shadow.bias = -0.0005;
-    this.lamp.shadow.camera.layers.enable(SHADOW_LAYER); scene.add(this.lamp, this.lamp.target);
+    this.lamp.shadow.camera.layers.enable(SHADOW_LAYER); this.lamp.shadow.camera.layers.enable(ROBOT_LAYER); this.lamp.shadow.camera.layers.enable(ROBOT_SHADOW_LAYER); scene.add(this.lamp, this.lamp.target);
     const fill = new THREE.PointLight(0xffd9a8, 3, 7, 1.5); fill.position.set(0, 2.7, 0); scene.add(fill);
+    const tubeGlow = uniform(2.2); // the fluorescent tube's brightness (the story makes it flicker, die, come back)
 
     // environment for reflections (PBR metals read black without one): the room itself, coarsely -- warm dim walls,
     // the fluorescent tube, the dusk-blue shop opening, the desk lamp's hot spot -- baked once into a PMREM
@@ -491,11 +502,11 @@ export default {
       const fx = new THREE.Group(); fx.position.set(0.1, h - 0.02, -0.55);
       const body = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.04, 0.09), new THREE.MeshStandardNodeMaterial({ color: 0xb9b4a6, roughness: 0.6, metalness: 0.3 }));
       body.position.y = -0.02; fx.add(body);
-      const tubeM = new THREE.MeshStandardNodeMaterial({ color: 0xffffff, roughness: 0.3 }); tubeM.emissiveNode = vec3(1.0, 1.03, 0.95).mul(2.2);
+      const tubeM = new THREE.MeshStandardNodeMaterial({ color: 0xffffff, roughness: 0.3 }); tubeM.emissiveNode = vec3(1.0, 1.03, 0.95).mul(tubeGlow);
       const tb = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 1.2, 12).rotateZ(Math.PI / 2), tubeM); tb.position.y = -0.06; fx.add(tb);
       for (const sx of [-0.62, 0.62]) { const cap = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.05, 0.05), body.material); cap.position.set(sx, -0.055, 0); fx.add(cap); }
       root.add(fx);
-      const tl = new THREE.PointLight(0xf2f0e6, 5.5, 8, 1.5); tl.position.set(0.1, h - 0.15, -0.55); scene.add(tl);
+      const tl = this.tubeLight = new THREE.PointLight(0xf2f0e6, 5.5, 8, 1.5); tl.position.set(0.1, h - 0.15, -0.55); scene.add(tl);
     }
     // models from the layout manifest; each is grounded on its support (floor, or a named surface)
     const placed = this.placed = {};
@@ -548,6 +559,7 @@ export default {
         // per-instance tint so repeated models read as different units (black vs silver boombox, grey vs wood TV)
         if (it.tint && !(await templates.get(it.glb))?.lod) o.traverse((m) => { if (m.isMesh) { m.material = m.material.clone(); m.material.color.setRGB(...it.tint); } });
         if (it.scale) o.scale.setScalar(it.scale);
+        if (it.sz) o.scale.z *= it.sz; // flattened in depth (the back door's frame: a shallower jamb throws less shadow on the wall beside it)
         o.rotation.order = 'YXZ'; o.rotation.y = (it.ry || 0) * Math.PI / 180; o.rotation.x = (it.roll || 0) * Math.PI / 180; // roll: lean about the item's own long (x) axis
         o.position.set(it.pos[0], 0, it.pos[2]); o.name = it.name;
         root.add(o); o.updateMatrixWorld(true);
@@ -767,7 +779,7 @@ export default {
         if (src.normalScale) nm.normalScale.copy(src.normalScale);
         const c = texture(src.map).rgb;
         const core = smoothstep(0.7, 0.9, c.r).mul(smoothstep(0.3, 0.5, c.g)).mul(float(1).sub(smoothstep(0.28, 0.45, c.b)));
-        nm.emissiveNode = c.mul(core).mul(this.eyeGlow = uniform(1.6));
+        nm.emissiveNode = c.mul(core).mul(eyeGlow);
         m.material = nm;
       });
     }
@@ -809,10 +821,11 @@ export default {
         for (const o of objs) o.visible = false;
       }
     }
-    ctx.api.shop = { root, placed, ROOM, lod };
+    ctx.api.shop = { root, placed, ROOM, lod, rig, eyeGlow, lights: { hemi, dusk, lamp: this.lamp, fill, tube: this.tubeLight, tubeGlow, robotFill: this.robotFill }, review: !ctx.isShot && ctx.params.get('review') !== null };
+    ctx.postfx.memoryGrade = true; // the past inside the beam is graded per pixel (src/engine/PostFX.js)
     // review viewer (this phase has no story camera yet): orbit/zoom/pan with the mouse, number keys jump to the
     // review shots, the camera is kept inside the room (or out on the street in front of it)
-    if (!ctx.isShot) {
+    if (!ctx.isShot && ctx.params.get('review') !== null) { // the free review viewer (the story owns the camera otherwise)
       const cam = ctx.camera, oc = this.controls = new OrbitControls(cam, ctx.renderer.domElement);
       oc.enableDamping = true; oc.dampingFactor = 0.08; oc.minDistance = 0.3; oc.maxDistance = 9; oc.maxPolarAngle = Math.PI * 0.53;
       const KEYS = ['shop-establish', 'shop-robotfull', 'shop-bench', 'shop-back', 'shop-left', 'shop-robotface', 'shop-front', 'shop-iso'];
@@ -825,7 +838,7 @@ export default {
         'crt_tv.glb': '显像管电视', 'desk_fan.glb': '台式电风扇', 'cassette_recorder.glb': '收录机', 'alarm_clock.glb': '闹钟', 'thermos.glb': '暖水瓶', 'enamel_mug.glb': '搪瓷杯',
         'magnifier.glb': '放大镜', 'soldering_iron.glb': '电烙铁', 'toolbox.glb': '铁皮工具箱', 'stool.glb': '木凳', 'parts_cabinet.glb': '零件抽屉柜', 'wall_clock.glb': '摆钟',
         'back_door.glb': '后屋门', 'bicycle.glb': '二八自行车', 'spare_arm.glb': '备用手臂', 'spare_leg.glb': '备用腿', 'spare_torso.glb': '备用躯干', '../v2/meterbox.glb': '电表箱', '../v2/cardboard.glb': '压扁的纸箱' };
-      const pick = new THREE.Raycaster(), ndc = new THREE.Vector2(), fly = this.fly = { t: 1 };
+      const pick = new THREE.Raycaster(), ndc = new THREE.Vector2(), fly = this.fly = { t: 1 }; pick.layers.enableAll(); // (the robot draws on its own layer)
       const info = document.createElement('div');
       Object.assign(info.style, { position: 'fixed', left: '16px', bottom: '36px', font: '15px/1.4 -apple-system, "PingFang SC", sans-serif', color: 'rgba(245,238,224,0.92)', textShadow: '0 1px 3px rgba(0,0,0,0.85)', pointerEvents: 'none', transition: 'opacity 0.6s', opacity: '0' });
       document.getElementById('ui')?.appendChild(info);

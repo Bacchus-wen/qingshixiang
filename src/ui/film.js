@@ -1,14 +1,16 @@
 // Film-edge UI: the only interface. Frame counter on the edge, a hairline for the eye's remaining power,
 // one faint hint word, a fade to black and an end card. Nothing else.
 export class Film {
-  constructor(root) {
+  // text: optional { title, sub, start, credit, card: [lines] } (v4 shop); defaults are the v3 street's
+  constructor(root, text = {}) {
+    const T = { title: '青 石 巷', sub: '请戴上耳机', start: '点击画面开始', credit: '现场录音来自 Freesound 与 Wikimedia Commons(CC0);远处的狗叫:YleArkisto,CC BY 4.0。出处见 CREDITS.md', card: ['刻度停在十一岁。', '灯灭了，门还是那么高。'], ...text };
     root.innerHTML = `
       <div class="film-edge top"><span class="fe-l"></span><span class="fe-r">ISO 400 · <b class="fe-frame">0000</b></span></div>
       <div class="film-edge bottom"><span class="fe-l fe-phase">—</span><span class="fe-power"><i></i></span></div>
       <div class="film-hint"></div>
       <div class="film-black"></div>
-      <div class="film-title"><h1>青 石 巷</h1><p>请戴上耳机</p><small>点击画面开始</small><small class="film-credit">现场录音来自 Freesound 与 Wikimedia Commons(CC0);远处的狗叫:YleArkisto,CC BY 4.0。出处见 CREDITS.md</small></div>
-      <div class="film-card"><p>刻度停在十一岁。</p><p>灯灭了，门还是那么高。</p><small class="film-replay">点击画面重看</small></div>`;
+      <div class="film-title"><h1>${T.title}</h1><p>${T.sub}</p><small>${T.start}</small><small class="film-credit">${T.credit}</small></div>
+      <div class="film-card">${T.card.map((l) => `<p>${l}</p>`).join('')}<small class="film-replay">点击画面重看</small></div>`;
     this.el = root;
     this.frameEl = root.querySelector('.fe-frame');
     this.hintEl = root.querySelector('.film-hint');

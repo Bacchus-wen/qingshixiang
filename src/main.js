@@ -12,11 +12,16 @@ import robot from './systems/robot/index.js';
 import cat from './systems/cat/index.js';
 import ghosts from './systems/ghosts/index.js';
 import shop from './systems/shop/index.js';
+import eye from './systems/shop/eye.js';
+import past from './systems/shop/past.js';
+import atmoShop from './systems/shop/atmo.js';
+import story from './systems/shop/story.js';
 
 // Scene selection: ?scene=lookdev runs the look-dev bench; default is the street.
 const q = new URLSearchParams(location.search);
-const scene = q.get('scene') || SHOTS[q.get('shot')]?.scene || 'street';
-const list = scene === 'lookdev' ? SYSTEMS : scene === 'shop' ? [shop] // v4: the repair shop (models + layout phase)
+// v4: the repair shop is the experience; ?scene=street is the v3 rainy street (its shots carry no scene: street)
+const scene = q.get('scene') || (SHOTS[q.get('shot')] ? SHOTS[q.get('shot')].scene || 'street' : 'shop');
+const list = scene === 'lookdev' ? SYSTEMS : scene === 'shop' ? [shop, eye, past, atmoShop, story] // v4: the repair shop
   : [street, atmo, robot, cat, ghosts, ...SYSTEMS.filter((s) => s.name !== 'lookdev')];
 
 const loading = document.getElementById('loading');

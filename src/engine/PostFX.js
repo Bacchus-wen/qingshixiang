@@ -10,6 +10,8 @@ import { ssr } from 'three/addons/tsl/display/SSRNode.js';
 import { dof } from 'three/addons/tsl/display/DepthOfFieldNode.js';
 import { ao } from 'three/addons/tsl/display/GTAONode.js';
 import { gaussianBlur } from 'three/addons/tsl/display/GaussianBlurNode.js';
+import { getViewPosition } from 'three/tsl';
+import { memoryMask } from '../materials/memory.js';
 
 // Post pipeline v1:
 //   opaque depth pre-pass (volumes read it for occlusion)
@@ -38,6 +40,7 @@ export class PostFX {
       // film: amber halation hugging warm highlights, gate weave (sub-pixel frame drift), density flicker
       halation: uniform(0.35), aoStrength: uniform(0.85), scatter: uniform(0.16), streak: uniform(0.08), weave: uniform(new THREE.Vector2()), flicker: uniform(0),
       ssrIntensity: uniform(1.0),
+      presentK: uniform(0), pastK: uniform(1), // v4 shop memory grade (see build)
       // depth of field, driven by the director (bokeh 0 = off)
       focus: uniform(10), focalRange: uniform(6), bokeh: uniform(0),
       bloomStrength: 0.3, bloomRadius: 0.7, bloomThreshold: 1.4, // v3: only lamp and tube cores bloom
@@ -147,7 +150,21 @@ export class PostFX {
       const streak = gaussianBlur(hot, vec2(1, 0), 14, { resolutionScale: 0.25 }).rgb;
       air = air.add(streak.mul(vec3(0.55, 0.65, 1.0)).mul(params.streak));
     }
-    const hdr = air.add(bl).add(halo).mul(params.exposure).mul(params.flicker.add(1));
+    let hdr = air.add(bl).add(halo).mul(params.exposure).mul(params.flicker.add(1));
+    // v4 shop: the past inside the robot's beam, graded per pixel from the scene depth (one place for every surface:
+    // models, room, signs). Outside the beam the present: a little greyer and colder (presentK, set by the story);
+    // inside, the colours come back warm and full (pastK). Both act on linear HDR before the tone curve.
+    if (this.memoryGrade) {
+      const projInv = uniform(camera.projectionMatrixInverse), camWorld = uniform(camera.matrixWorld);
+      const vp = getViewPosition(screenUV, depth.sample(screenUV).r, projInv);
+      const wp = camWorld.mul(vec4(vp, 1)).xyz;
+      const mm = memoryMask(wp).mul(params.pastK);
+      const c = hdr.rgb, lum = luminance(c);
+      const present = mix(c, mix(vec3(lum), c, 0.72).mul(vec3(0.93, 0.97, 1.04)).mul(0.9), params.presentK);
+      const past = mix(vec3(lum), c, 1.22).mul(vec3(1.1, 1.0, 0.86));
+      hdr = mix(present, past, mm);
+      if (dbg.includes('memmask')) hdr = vec3(mm);
+    }
     // v3 hue-preserving AgX (after cybercity): plain AgX bleaches saturated neon to white too early; blending in a
     // max-channel mapped version keeps the colour, only the hottest cores go white
     const tmFull = agxToneMapping(hdr.rgb, float(1));

@@ -12,6 +12,10 @@ const _s = new THREE.Sphere(), _frustum = new THREE.Frustum(), _pv = new THREE.M
 // draw its ~2 million triangles again into its shadow map. L1 (0.3-0.5 mm from L0, far below a shadow-map texel) casts
 // instead, on this layer only; shadow-casting lights must see it: light.shadow.camera.layers.enable(SHADOW_LAYER).
 export const SHADOW_LAYER = 5;
+// the robot draws on its own layers, so the light from its own eye can leave it out of its shadow map (a cable next to
+// the lens would throw a metre-long shadow across the wall it looks at): ROBOT_LAYER for its visible levels, enabled on
+// the main camera and on every shadow camera except the eye's; ROBOT_SHADOW_LAYER for its shadow proxy
+export const ROBOT_LAYER = 7, ROBOT_SHADOW_LAYER = 8;
 const tintCache = new Map();
 
 export class LodLibrary {
@@ -20,6 +24,7 @@ export class LodLibrary {
     this.sets = new Map();      // name -> { name, meta, levels: [{ ...meta level, promise, scene, gpu, users: Set, used }] }
     this.instances = [];        // LodObject
     this.hooks = new Map();     // name -> fn(scene, levelIndex), applied once to each level as it loads
+    this.proxyLayers = new Map(); // name -> layer of its shadow proxy (default SHADOW_LAYER)
     this.loading = 0; this.frame = 0; this.gpuBytes = 0; this.stats = { loads: 0, evictions: 0 };
   }
   hook(name, fn) { this.hooks.set(name, fn); }
@@ -151,7 +156,8 @@ class LodObject extends THREE.Group {
     if (this.proxy || this.cur !== 0) return;
     const P = this.set.levels[1]; if (!P?.scene) return;
     const p = this.tinted(P.scene.clone(true));
-    p.traverse((m) => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = false; m.layers.set(SHADOW_LAYER); } });
+    const layer = this.lib.proxyLayers.get(this.set.name) ?? SHADOW_LAYER;
+    p.traverse((m) => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = false; m.layers.set(layer); } });
     this.view.traverse((m) => { if (m.isMesh) m.castShadow = false; });
     this.add(p); this.proxy = p; p.updateMatrixWorld(true); P.users.add(this);
   }
@@ -175,9 +181,9 @@ class LodObject extends THREE.Group {
   visibleInTree() { let o = this; while (o) { if (!o.visible) return false; o = o.parent; } return true; }
 }
 
-// glTF MeshStandardMaterial -> MeshStandardNodeMaterial with the same maps and factors. Left as plain materials, the
-// renderer's automatic conversion let models whose materials compile to the same program sample one another's
-// textures under the desk lamp (r186; see docs/tripo-compare): explicit node materials do not.
+// glTF MeshStandardMaterial -> MeshStandardNodeMaterial with the same maps and factors, so every level is a node
+// material that hooks can extend (emissive masks, the robot's neck). (The "camouflage" once blamed on the automatic
+// conversion was the r186 geometry cache key: see src/engine/threeFixes.js.)
 function toNodeMaterial(src) {
   const nm = new THREE.MeshStandardNodeMaterial();
   for (const k of ['name', 'map', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap', 'aoMapIntensity', 'emissiveMap', 'roughness', 'metalness', 'transparent', 'opacity', 'alphaTest', 'side', 'vertexColors', 'envMapIntensity'])

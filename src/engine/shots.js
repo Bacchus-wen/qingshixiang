@@ -1,3 +1,4 @@
+import * as THREE from 'three/webgpu';
 // Deterministic camera shots for tools/shot.mjs (?shot=<name>). setup(ctx, t) may force story/system state.
 // `scene` picks the system set in main.js (default 'street').
 export const SHOTS = {
@@ -27,6 +28,25 @@ export const SHOTS = {
   'shop-chassis': { scene: 'shop', pos: [-1.2, 1.25, 1.75], look: [-1.38, 0.92, 0.7], fov: 38 },
   'shop-frontin': { scene: 'shop', pos: [1.6, 1.5, -1.2], look: [-1.8, 1.0, 2.2], fov: 60 },
   'shop-est3': { scene: 'shop', pos: [-0.5, 1.42, 4.5], look: [-0.62, 1.05, -1.0], fov: 52 },
+  // v4 story: the robot faces into the shop (heading 15 deg right of -z); rig checks
+  'shop-rigface': { scene: 'shop', pos: [-0.43, 0.93, 0.27], look: [-0.6, 0.82, 0.95], fov: 34 },
+  'shop-rigback': { scene: 'shop', pos: [-0.95, 1.28, 2.05], look: [0.45, 0.85, -2.6], fov: 52 },
+  'shop-rigside': { scene: 'shop', pos: [0.45, 0.95, 0.75], look: [-0.58, 0.82, 1.08], fov: 34 },
+  // beam checks: the eye forced open, aimed at a point (the head turns to it)
+  'shop-beamback': { scene: 'shop', pos: [-0.85, 1.22, 2.0], look: [0.6, 0.95, -2.3], fov: 55, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.api.eye?.aim(new THREE.Vector3(0.2, 1.1, -2.2)); } },
+  'shop-beamdoor': { scene: 'shop', pos: [-0.8, 1.25, 1.95], look: [1.6, 1.0, -2.2], fov: 50, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.api.eye?.aim(new THREE.Vector3(2.35, 1.25, -2.2)); } },
+  'shop-beamleft': { scene: 'shop', pos: [-0.3, 1.25, 1.95], look: [-2.4, 1.0, -1.2], fov: 55, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.api.eye?.aim(new THREE.Vector3(-2.5, 1.1, -1.4)); } },
+  'shop-beamside': { scene: 'shop', pos: [1.6, 1.4, 1.4], look: [-0.2, 0.95, -0.8], fov: 60, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.api.eye?.aim(new THREE.Vector3(0.2, 1.1, -2.2)); } },
+  // the climax at the door: eye open on the marks, the child's shadow at eight (h 1.29)
+  'shop-climax': { scene: 'shop', pos: [2.0, 1.3, -1.05], look: [2.66, 1.25, -2.25], fov: 42, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.api.eye?.aim(new THREE.Vector3(2.62, 1.27, -2.24)); ctx.api.past?.setChild(1.29); ctx.api.past?.setMarks(1.29); } },
+  'shop-climaxwide': { scene: 'shop', pos: [0.6, 1.4, -0.2], look: [2.3, 1.2, -2.25], fov: 55, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.api.eye?.aim(new THREE.Vector3(2.62, 1.27, -2.24)); ctx.api.past?.setChild(1.29); ctx.api.past?.setMarks(1.29); } },
+  'shop-marksnow': { scene: 'shop', pos: [1.95, 1.35, -1.35], look: [2.48, 1.25, -2.25], fov: 46 },
+  'shop-marksclose': { scene: 'shop', pos: [2.6, 1.25, -1.55], look: [2.65, 1.22, -2.25], fov: 40 },
+  'shop-climaxclose': { scene: 'shop', pos: [2.6, 1.25, -1.45], look: [2.65, 1.22, -2.25], fov: 44, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.api.eye?.aim(new THREE.Vector3(2.62, 1.27, -2.24)); ctx.api.past?.setChild(1.29); ctx.api.past?.setMarks(1.29); } },
+  'shop-customer': { scene: 'shop', pos: [-0.75, 1.3, 1.95], look: [-1.6, 1.2, -2.2], fov: 50, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.api.eye?.aim(new THREE.Vector3(-1.85, 1.3, -2.2)); } },
+  'shop-clockpast': { scene: 'shop', pos: [1.6, 1.6, -0.9], look: [2.63, 1.95, -2.2], fov: 40, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.api.eye?.aim(new THREE.Vector3(2.63, 2.0, -2.2)); } },
+  'shop-shelfpast': { scene: 'shop', pos: [-0.6, 1.35, 0.6], look: [-0.6, 1.3, -2.1], fov: 46, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.api.eye?.aim(new THREE.Vector3(-0.6, 1.25, -2.1)); } },
+  'shop-endstreet': { scene: 'shop', pos: [0.62, 1.0, -0.8], look: [-0.15, 1.05, 6.0], fov: 50, setup: (ctx) => { ctx.api.atmo?.set('out'); } },
   'shop-iso': { scene: 'shop', pos: [5.5, 6.0, 7.5], look: [0, 0.6, 0], fov: 32 },
   'street-eye': { pos: [0.6, 1.55, 10], look: [0, 1.8, -30], fov: 42 },
   'street-low': { pos: [-1.2, 0.25, 4], look: [0.5, 1.0, -25], fov: 35 },

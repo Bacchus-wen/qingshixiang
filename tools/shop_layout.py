@@ -31,7 +31,7 @@ fixed = [
  {"name": "broom", "type": "proc", "kind": "broom", "pos": [-2.8, 0, 0.36], "ry": 90, "roll": -6, "on": "floor"},
  {"name": "aframe", "type": "proc", "kind": "aframe", "pos": [1.12, 0, 2.0], "ry": -28, "scale": 0.7, "on": "floor"},
  {"name": "toolbox", "glb": "toolbox.glb", "pos": [-1.55, 0, 1.7], "ry": 14},
- {"name": "back_door", "glb": "back_door.glb", "pos": [1.75, 0, 0], "wall": "back"},
+ {"name": "back_door", "glb": "back_door.glb", "pos": [1.75, 0, 0], "wall": "back", "sz": 0.55},
  {"name": "wall_clock", "glb": "wall_clock.glb", "pos": [2.63, 1.78, 0], "wall": "back"},
  {"name": "parts_cabinet", "glb": "parts_cabinet.glb", "pos": [2.62, 0, -0.6], "ry": -90},
  {"name": "stool_2", "glb": "stool.glb", "pos": [2.6, 0, -1.58], "ry": 15},
@@ -187,5 +187,19 @@ for i, (key, x, z, ry, lvl) in enumerate([('box_a', 0.7, -1.48, 6, 0), ('box_b',
     out.append(it)
 # after the floor cartons (its support must be placed first)
 out.append({"name": "tv_on_cartons", "glb": "crt_tv.glb", "pos": [0.71, 0, -1.48], "ry": 24, "on": "floor_carton_1", "scale": 0.78, "tint": [0.62, 0.64, 0.66]})
+# v4 story (2026-10-19): the robot faces into the shop -- the shelves, the back door and the height marks beside it --
+# with its back to the street, so its gaze can reach the door. The robot and the work in front of it (the carton and
+# the spare torso its screwdriver is on) turn together about the robot's own position: the tip stays where it was.
+ROBOT_TURN = 190
+def turn_group(names, deg):
+    import math
+    piv = next(i for i in out if i['name'] == 'robot')['pos']
+    a = math.radians(deg); c, s_ = math.cos(a), math.sin(a)
+    for it in out:
+        if it['name'] not in names: continue
+        dx, dz = it['pos'][0] - piv[0], it['pos'][2] - piv[2]
+        it['pos'] = [round(piv[0] + dx * c + dz * s_, 4), it['pos'][1], round(piv[2] - dx * s_ + dz * c, 4)]  # three.js Ry
+        it['ry'] = round((it.get('ry') or 0) + deg, 3)
+turn_group({'robot', 'work_carton', 'spare_torso'}, ROBOT_TURN)
 json.dump(out, open('assets/models/shop/layout.json', 'w'), indent=1)
 print(len(out), 'items')
