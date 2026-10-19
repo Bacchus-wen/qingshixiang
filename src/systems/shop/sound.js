@@ -26,6 +26,9 @@ export default {
     ctx.api.audio = {
       play: (name, opts = {}) => (self.ac?.state === 'running' ? self.play(name, opts) : false),
       get state() { return self.ac?.state || 'locked'; },
+      // record the mix (tools/audio-capture.mjs): start() then stop() -> base64 webm/opus
+      startRecording() { const d = self.ac.createMediaStreamDestination(); self.master.connect(d); self.rec = new MediaRecorder(d.stream, { mimeType: 'audio/webm;codecs=opus', audioBitsPerSecond: 160000 }); self.recChunks = []; self.rec.ondataavailable = (e) => self.recChunks.push(e.data); self.rec.start(1000); return true; },
+      async stopRecording() { await new Promise((r) => { self.rec.onstop = r; self.rec.stop(); }); const b = new Blob(self.recChunks, { type: 'audio/webm' }); const buf = new Uint8Array(await b.arrayBuffer()); let s = ''; for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000)); return btoa(s); },
       meter() { const a = self.meterA; if (!a) return null; const d = new Float32Array(a.fftSize); a.getFloatTimeDomainData(d); let s = 0, pk = 0; for (const v of d) { s += v * v; pk = Math.max(pk, Math.abs(v)); } return { rmsDb: +(10 * Math.log10(s / d.length + 1e-12)).toFixed(1), peak: +pk.toFixed(3) }; },
     };
     this.unlock = () => {
@@ -50,7 +53,7 @@ export default {
   },
   build() {
     const ac = this.ac, g = (v = 0) => { const n = ac.createGain(); n.gain.value = v; return n; };
-    const master = this.master = g(this.muted ? 0 : 0.9);
+    const master = this.master = g(this.muted ? 0 : 1.4); // the mix sits around -26 LUFS while looking: a quiet piece, not a whisper
     const comp = ac.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 3; comp.attack.value = 0.01; comp.release.value = 0.25;
     master.connect(comp).connect(ac.destination);
     this.meterA = ac.createAnalyser(); this.meterA.fftSize = 2048; comp.connect(this.meterA); // level meter for tools (api.audio.meter)
@@ -63,7 +66,7 @@ export default {
     const lp = (f) => { const n = ac.createBiquadFilter(); n.type = 'lowpass'; n.frequency.value = f; return n; };
     this.duskIn = g(0); this.duskLP = lp(2400); this.duskIn.connect(this.duskLP).connect(master);
     this.pastIn = g(0); this.pastLP = lp(1800); this.pastIn.connect(this.pastLP).connect(master); this.pastLP.connect(g(0.4)).connect(room);
-    this.staticIn = g(0); { const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 3500; bp.Q.value = 0.6; this.staticIn.connect(bp); this.staticPan = ac.createStereoPanner(); bp.connect(this.staticPan).connect(master); this.staticPan.connect(g(0.5)).connect(room); }
+    this.staticIn = g(0); { const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 3500; bp.Q.value = 0.6; const lw = lp(9000); this.staticIn.connect(lw).connect(bp); this.staticPan = ac.createStereoPanner(); bp.connect(this.staticPan).connect(master); this.staticPan.connect(g(0.5)).connect(room); } // (low-passed: no 15.7 kHz line whine)
     // the room itself: 50 Hz mains and its harmonics, faint brown air
     { const hum = g(0); this.humG = hum; for (const [f, a] of [[50, 0.5], [100, 0.35], [150, 0.12]]) { const o = ac.createOscillator(); o.frequency.value = f; const og = g(a); o.connect(og).connect(hum); o.start(); }
       hum.connect(master);
@@ -128,6 +131,12 @@ export default {
       case 'powerdown': this.tone(1800, 120, 3.2, { gain: 0.05 }); this.shot('relay_b', 0, undefined, { gain: 0.4 }); break;
       case 'streetlamp': this.shot('relay_b', 0, undefined, { gain: 0.25, rate: 0.8, wet: 0.1 }); break;
       case 'dog': this.shot('dog_far_a', 0, undefined, { gain: 0.2, wet: 0 }); break;
+      case 'page': { // a page turned: a soft paper swish (noise swept through a band, quick)
+        const ac = this.ac, src = ac.createBufferSource(); src.buffer = this.clickBuf ??= this.noise(0.1); src.loop = true;
+        const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.4; const gg = ac.createGain(), p = ac.createStereoPanner(), [pn, dg] = this.pan(opts.pos); p.pan.value = pn;
+        const t = ac.currentTime; bp.frequency.setValueAtTime(1800, t); bp.frequency.exponentialRampToValueAtTime(5200, t + 0.28);
+        gg.gain.setValueAtTime(0, t); gg.gain.linearRampToValueAtTime(0.35 * dg, t + 0.06); gg.gain.exponentialRampToValueAtTime(0.001, t + 0.34);
+        src.connect(bp).connect(gg).connect(p).connect(this.master); const w = ac.createGain(); w.gain.value = 0.5; p.connect(w).connect(this.roomSend); src.start(t); src.stop(t + 0.4); break; }
       default: return false;
     }
     return true;
@@ -145,7 +154,7 @@ export default {
     const L = ctx.api.shop?.lights; set(this.tubeG.gain, L ? 0.012 * Math.min(1, L.tube.intensity / 5.5) * quiet : 0, 0.02);
     // past: the street, louder where the beam falls (its strength), the radio by the radios in the beam
     const past = Math.min(1, m.strength ?? 0);
-    const intimate = phase === 'door' ? 0.3 : 1; // the climax is quiet: the pencil, the clock, the room
+    const intimate = phase === 'door' || phase === 'girl' ? 0.3 : 1; // the climax is quiet: the pencil, the clock, the room
     set(this.pastIn.gain, 0.55 * past * past * quiet * intimate, 0.6);
     let radio = 0, rpos = null;
     const shop = ctx.api.shop;

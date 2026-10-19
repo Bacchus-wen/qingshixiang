@@ -669,17 +669,20 @@ export default {
         for (let k = 0; k < 9; k++) { const m = new THREE.Mesh(new THREE.CylinderGeometry(0.0022, 0.0022, 0.012, 6).rotateZ(Math.PI / 2), steelS); m.position.set(-1.45 + rr(k + 20) * 1.0, 0.0022, 1.3 + rr(k + 40) * 0.5); m.rotation.y = rr(k + 60) * 6; mess.add(m); }
         root.add(mergeByMaterial(mess));
       }
-      // spare limbs hang on wall hooks: a plate on the wall and a bent rod through the top joint
+      // spare limbs hang on wall hooks: a screwed plate on the wall, a stout galvanised rod out to the top joint with an
+      // upturned tip, and a loop of wire round the joint (the review said the parts read as floating: the hook must show)
       for (const part of [placed.spare_arm, placed.spare_leg]) {
         if (!part || part.userData.layout.wall !== 'right') continue;
         const bb = new THREE.Box3().setFromObject(part, true), cz = (bb.min.z + bb.max.z) / 2, top = bb.max.y - 0.03;
-        const steelM = PM.hook ??= new THREE.MeshStandardNodeMaterial({ color: 0x2a2a28, roughness: 0.5, metalness: 0.8 });
-        const plate = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.07, 0.04), steelM); plate.position.set(w / 2 - 0.003, top + 0.02, cz);
-        const midx = (bb.min.x + bb.max.x) / 2, rl = w / 2 - midx + 0.01; // wall to the joint's centre line only
-        const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, rl, 8).rotateZ(Math.PI / 2), steelM);
-        rod.position.set(w / 2 - rl / 2 + 0.002, top, cz);
-        const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.025, 8), steelM); tip.position.set(midx - 0.005, top + 0.01, cz);
-        for (const m of [plate, rod, tip]) { m.castShadow = true; root.add(m); }
+        const galv = PM.hookGalv ??= new THREE.MeshStandardNodeMaterial({ color: 0x7a7872, roughness: 0.45, metalness: 0.85 });
+        const plate = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.1, 0.06), galv); plate.position.set(w / 2 - 0.004, top + 0.025, cz);
+        const screws = [-1, 1].map((sy) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.004, 10).rotateZ(Math.PI / 2), PM.hook ??= new THREE.MeshStandardNodeMaterial({ color: 0x2a2a28, roughness: 0.5, metalness: 0.8 })); m.position.set(w / 2 - 0.009, top + 0.025 + sy * 0.035, cz); return m; });
+        const midx = (bb.min.x + bb.max.x) / 2, rl = w / 2 - midx + 0.012; // wall to the joint's centre line
+        const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.0075, 0.0075, rl, 10).rotateZ(Math.PI / 2), galv);
+        rod.position.set(w / 2 - rl / 2, top, cz);
+        const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.0075, 0.0075, 0.04, 10), galv); tip.position.set(midx - 0.006, top + 0.018, cz);
+        const loop = new THREE.Mesh(new THREE.TorusGeometry(0.035, 0.0025, 6, 24), galv); loop.position.set(midx, top - 0.012, cz); loop.rotation.y = Math.PI / 2; // wire round the joint
+        for (const m of [plate, ...screws, rod, tip, loop]) { m.castShadow = true; m.receiveShadow = true; root.add(m); }
       }
       // screwdrivers and a wire coil hanging on the pegboard (in front of the printed board: real depth and shadows)
       const pegX = -1.88, pegY = 1.72, pegZ = -d / 2 + 0.012;
@@ -823,7 +826,7 @@ export default {
     }
     ctx.api.shop = { root, placed, ROOM, lod, rig, eyeGlow, lights: { hemi, dusk, lamp: this.lamp, fill, tube: this.tubeLight, tubeGlow, robotFill: this.robotFill }, review: !ctx.isShot && ctx.params.get('review') !== null };
     ctx.postfx.memoryGrade = true; // the past inside the beam is graded per pixel (src/engine/PostFX.js)
-    Object.assign(ctx.postfx.params, { bloomRadius: 0.35, bloomStrength: 0.26 }); // a tight glow round the lamp bulb, not a fog
+    Object.assign(ctx.postfx.params, { bloomRadius: 0.35, bloomStrength: 0.26, bloomThreshold: 2.2 }); // a tight glow round the hottest cores only (the lamp's shade is lit point-blank: it must not flare)
     // the face light for the robot's close-ups (story: wait / waking), soft and unshadowed, off otherwise (never removed:
     // changing the light set recompiles every material)
     if (placed.robot) { const fl = this.faceLight = new THREE.SpotLight(0xffe2c0, 0, 3, 0.5, 1, 1.5); fl.castShadow = false;

@@ -51,10 +51,12 @@ try {
   await page.mouse.move(W * 0.92, H * 0.45, { steps: 25 }); await wait(5); await snap('look-right');
   await wait(14); await snap(`look-dwell-${await phase()}`);
   if ((await phase()) === 'look') { await page.keyboard.press('KeyD'); }
+  await until('girl', 10); await wait(2.6); await snap('girl');
   await until('door', 10); await wait(5); await snap('door-5s');
   await wait(4); await snap('door-9s');
   await wait(6); await snap('door-15s');
   await wait(6); await snap('door-21s');
+  await wait(9); await snap('door-30s-after-eleven');
   await until('fade', 30); await wait(2); await snap('fade');
   await page.keyboard.up('Space');
   await until('end', 20); await wait(6); await snap('end-6s');

@@ -346,6 +346,9 @@ export default {
       // the hand that marks her height: k 0 = away, 1 = pencil on the wall at height h, at x along the line
       setHand(k, h, x) { const H = sys.hand; if (!H) return; H.visible = k > 0.01; H.position.set(x + 0.05 * (1 - k), h + 0.12 * (1 - k), -2.245 + 0.18 * (1 - k)); },
       setSitting(on) { if (sys.sitting) sys.sitting.visible = !!on; },
+      // the story's beat with her: still = her legs stop (0..1), look = she looks up at the robot (0..1)
+      setSittingPose(still, look) { sys.sitStill = still; sys.sitLook = look; },
+      setChildX(x) { if (sys.childRoot) sys.childRoot.position.x = x; },
     };
     ctx.api.past.setChild(0);
   },
@@ -370,12 +373,14 @@ export default {
     } else this.tvLight.intensity = 0;
     // the sitting girl swings her legs (one, then the other, slowly)
     if (this.sitting?.visible) {
-      this.sittingLegs.forEach((k, i) => { k.rotation.x = 0.3 + 0.32 * Math.sin(t * 2.1 + i * 2.4); });
+      const still = this.sitStill ?? 0; this.legPh = (this.legPh ?? 0) + dt * 2.1 * (1 - still);
+      this.sittingLegs.forEach((k, i) => { k.rotation.x = 0.3 + 0.32 * (1 - still) * Math.sin(this.legPh + i * 2.4); });
       // when the robot's light first finds her she looks up at it for a moment, then back down at her book
       const on = memoryMaskCPU(this._sp ??= new THREE.Vector3(2.6, 0.9, -1.6), ctx.memory) > 0.4;
       if (on && this.lookUpT === undefined) this.lookUpT = t;
       const u = this.lookUpT === undefined ? 0 : Math.max(0, Math.min(1, (t - this.lookUpT - 0.6) / 0.5)) * Math.max(0, Math.min(1, (this.lookUpT + 3.4 - t) / 0.7));
-      this.sittingHead.rotation.set(0.35 - 0.75 * u, -0.35 * u, 0);
+      const look = Math.max(u, this.sitLook ?? 0);
+      this.sittingHead.rotation.set(0.35 - 0.75 * look, -0.35 * look, 0);
     }
     // pendulum: swings while the beam is on the clock (and for a while after); ~1 s period, 4 degrees
     const clock = ctx.api.shop.placed.wall_clock;

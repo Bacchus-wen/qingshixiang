@@ -52,6 +52,7 @@ reference/         参考视频(不进 git)
 
 ## 分工与信息安全(用户 2026-10-16 03:15 补充)
 - 主力是 Claude(Opus 5.5)和 Codex(gpt-6-astra):核心设计、编码、互相审查。Grok 负责调研、批量检查、第二意见。
+- **2026-10-19 起 Grok 订阅已过期,不要再给 Grok 派任务**(`team post --to others` 会派到 Grok,改用 `--to codex`);需要第二个视角时给 Codex 派两份分工不同的任务。
 - Codex 只通过本机 team-sync 调用。**不要使用 ChatGPT 的任何功能**:ChatGPT 网页/App、Codex Cloud 云端任务、ChatGPT 连接器与同步、OpenAI 图像生成。防止项目信息同步或泄露。
 - 氛围是最重要的,故事可以薄;方向自由,不限雨夜废城。主动搜索并使用一切合适的免费技术和开源工具;共享工具放 `~/Tools`(见 `~/Tools/README.md`)。
 - 技术现成能力清单见 `docs/tech-inventory.md`,参考实现见 `~/Tools/refs/three-r186-examples/`。

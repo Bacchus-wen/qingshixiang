@@ -55,6 +55,7 @@ export const SHOTS = {
   'shop-sitting': { scene: 'shop', pos: [1.2, 1.35, -0.4], look: [2.6, 1.0, -2.0], fov: 50, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.api.eye?.aim(new THREE.Vector3(2.62, 1.0, -2.2)); ctx.api.past?.setSitting(true); } },
   'shop-hand': { scene: 'shop', pos: [2.05, 1.3, -1.15], look: [2.66, 1.25, -2.25], fov: 40, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.memory.goboMode = 'level'; ctx.api.eye?.aim(new THREE.Vector3(2.62, 1.29, -2.24)); ctx.api.past?.setChild(1.29); ctx.api.past?.setHand(1, 1.29, 2.56); ctx.api.past?.setMarks(1.29, 1.225, 2.56); } },
   'shop-age': { scene: 'shop', pos: [2.05, 1.3, -1.15], look: [2.66, 1.2, -2.25], fov: 44, setup: (ctx) => { const a = +(ctx.params.get('age') ?? 8), h = [1.10, 1.165, 1.225, 1.29, 1.345, 1.405, 1.47][a - 5]; ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.memory.goboMode = 'level'; ctx.api.eye?.aim(new THREE.Vector3(2.62, h, -2.24)); ctx.api.past?.setChild(h, a); ctx.api.past?.setMarks(h); } },
+  'shop-sparewall': { scene: 'shop', pos: [1.75, 1.45, -0.45], look: [2.95, 1.3, -0.65], fov: 42 },
   'shop-iso': { scene: 'shop', pos: [5.5, 6.0, 7.5], look: [0, 0.6, 0], fov: 32 },
   'street-eye': { pos: [0.6, 1.55, 10], look: [0, 1.8, -30], fov: 42 },
   'street-low': { pos: [-1.2, 0.25, 4], look: [0.5, 1.0, -25], fov: 35 },
