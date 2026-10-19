@@ -21,13 +21,13 @@ const AGES = [1.10, 1.165, 1.225, 1.29, 1.345, 1.405, 1.47]; // the child's heig
 // behind the robot and round its right side to its face (the lens side)
 const ARRIVE = new THREE.CatmullRomCurve3([
   new THREE.Vector3(0.95, 1.62, 8.2), new THREE.Vector3(0.55, 1.52, 5.4), new THREE.Vector3(0.1, 1.3, 3.0),
-  new THREE.Vector3(-0.55, 1.5, 2.2), new THREE.Vector3(-0.62, 1.48, 2.15), new THREE.Vector3(0.1, 1.25, 2.0),
-  new THREE.Vector3(0.75, 1.12, 0.95), new THREE.Vector3(0.2, 1.06, 0.12), new THREE.Vector3(-0.84, 1.0, 0.36),
+  new THREE.Vector3(-0.55, 1.5, 2.2), new THREE.Vector3(-0.62, 1.48, 2.15), new THREE.Vector3(0.55, 1.32, 1.95),
+  new THREE.Vector3(1.15, 1.2, 0.85), new THREE.Vector3(0.45, 1.02, -0.15), new THREE.Vector3(-0.98, 0.88, 0.12),
 ]);
 const ARRIVE_LOOK = new THREE.CatmullRomCurve3([
   new THREE.Vector3(0.0, 1.75, 2.3), new THREE.Vector3(-0.8, 1.0, 0.6), new THREE.Vector3(-1.55, 0.9, 0.7),
-  new THREE.Vector3(-1.55, 0.9, 0.7), new THREE.Vector3(-1.05, 0.88, 0.9), new THREE.Vector3(-0.55, 0.88, 1.1),
-  new THREE.Vector3(-0.58, 0.88, 1.0), new THREE.Vector3(-0.6, 0.85, 0.96), EYE0.clone(),
+  new THREE.Vector3(-1.55, 0.9, 0.7), new THREE.Vector3(-0.9, 0.85, 0.9), new THREE.Vector3(-0.55, 0.8, 1.1),
+  new THREE.Vector3(-0.58, 0.85, 1.0), new THREE.Vector3(-0.6, 0.85, 0.96), EYE0.clone(),
 ]);
 const ease = (x) => x * x * (3 - 2 * x);
 const clamp01 = (x) => Math.min(1, Math.max(0, x));
@@ -74,8 +74,11 @@ export default {
         break;
       }
       case 'wait': {
+        // chest-up, three-quarter from its lens side: the head, the chest's fan and the brass shoulder in one frame,
+        // side-lit (the face light from the bench side); a slow lateral drift shows the volumes
         m.forceOpen = undefined; film.fade(0);
-        ARRIVE.getPoint(1, this.cam.pos); this.cam.look.copy(EYE0); this.cam.fov = 38 - Math.min(4, this.t * 0.2);
+        ARRIVE.getPoint(1, this.cam.pos); this.cam.pos.x += Math.sin(this.t * 0.15) * 0.06; this.cam.pos.z -= (1 - Math.cos(this.t * 0.15)) * 0.05;
+        this.cam.look.set(-0.6, 0.76, 0.98); this.cam.fov = 40 - Math.min(3, this.t * 0.15);
         if (this.t > 3) film.hint(eye?.failed && !input.hold ? '再按住一次' : eye?.failed ? '' : '按住');
         if (eye?.failed && !this.shook) { this.shook = true; this.shake = 0.45; } // the first try: a clunk, the head jolts
         if (eye && eye.open > 0.08 && eye.attempts > 1) { film.hint(''); this.set('waking', true); }
@@ -94,8 +97,9 @@ export default {
         // over the robot's left shoulder (the lens side): the head's edge in the near foreground, the beam leaving the lens
         this._d.copy(m.dir); this._d.y = 0; this._d.normalize();
         this._w.set(this._d.z, 0, -this._d.x); // the robot's left, across the gaze
-        this.cam.pos.copy(eyePos).addScaledVector(this._d, -1.0).addScaledVector(this._w, 0.42); this.cam.pos.y = eyePos.y + 0.42;
-        this.cam.look.copy(eyePos).addScaledVector(m.dir, 3.2).addScaledVector(this._w, -0.15);
+        // over its right shoulder (the bench and its open radio stay out of the near frame; the beam rises past the head)
+        this.cam.pos.copy(eyePos).addScaledVector(this._d, -1.0).addScaledVector(this._w, -0.36); this.cam.pos.y = eyePos.y + 0.44;
+        this.cam.look.copy(eyePos).addScaledVector(m.dir, 3.2).addScaledVector(this._w, 0.12);
         this.cam.fov = 50;
         this.lookTime += dt;
         past?.setSitting(true); // the girl on the stool by the door, in the past
@@ -116,11 +120,13 @@ export default {
         // the robot takes over: its eye narrows to a level -- a bright line across the wall -- and measures her, year
         // by year, as it did then: the line rises to her height, the pencil draws the mark there, she grows
         m.forceOpen = true; m.spotK = 1 - 0.2 * ease(clamp01(this.t / 4));
-        // first wide, from beside the robot: its lens in the near left, the line of light reaching the wall; then in close
-        const wide = 1 - ease(clamp01((this.t - 5.5) / 4)), slow = clamp01((this.t - 9.5) / 22);
-        this._v.set(1.75, 1.33, -0.75).lerp(this._d.set(2.05, 1.3, -1.15), slow * 0.7).lerp(this._w.set(0.3, 1.36, 1.5), wide);
+        // first wide, over the robot's shoulder: its lens in the near foreground and the line of light it throws onto the
+        // wall in one frame; then in close to the wall; at the end in on the last mark
+        if (!this.doorWide) { this.doorWide = { pos: this.curPos.clone(), look: this.curLook.clone() }; }
+        const wide = 1 - ease(clamp01((this.t - 6) / 4)), slow = clamp01((this.t - 10) / 24), last = ease(clamp01((this.t - (5.5 + 7 * 3.4)) / 4));
+        this._v.set(1.75, 1.33, -0.75).lerp(this._d.set(2.05, 1.3, -1.15), slow * 0.7).lerp(this._w.set(2.22, 1.42, -1.15), last).lerp(this.doorWide.pos, wide);
         this.cam.pos.copy(this._v);
-        this.cam.look.set(2.66, 1.25, -2.25).lerp(this._w.set(1.5, 1.05, -1.25), wide); this.cam.fov = 44 - 6 * slow + 6 * wide;
+        this.cam.look.set(2.66, 1.25, -2.25).lerp(this._w.set(2.7, 1.4, -2.25), last).lerp(this.doorWide.look, wide); this.cam.fov = 44 - 6 * slow + 6 * wide - 2 * last; // the last mark, its '十一岁' and the empty wall above, all in frame
         const T0 = 5.5, STEP = 3.4, k = Math.floor((this.t - T0) / STEP), n = AGES.length;
         m.goboMode = this.t > 3 && k < n + 1 ? 'level' : undefined;
         const yr = Math.min(n - 1, Math.max(0, k)), within = clamp01((this.t - T0 - yr * STEP) / 0.9);
@@ -131,7 +137,7 @@ export default {
         if (this.t > T0 && k < n) {
           if (k !== this.year) { this.year = k; this.drawn = false; }
           // she grows with the line; when it has settled on her crown a hand comes in and draws the mark along it
-          past?.setChild(k === 0 ? AGES[0] * (0.35 + 0.65 * ease(within)) : lineY);
+          past?.setChild(k === 0 ? AGES[0] * (0.35 + 0.65 * ease(within)) : lineY, 5 + k);
           const ty = this.t - T0 - k * STEP, prev = k > 0 ? AGES[k - 1] : 0;
           const handIn = ease(clamp01((ty - 1.0) / 0.4)) * (1 - ease(clamp01((ty - 2.6) / 0.4))), stroke = ease(clamp01((ty - 1.45) / 0.9));
           const x = 2.41 + stroke * (0.3 + (k === n - 1 ? 0.03 : 0));
@@ -154,8 +160,10 @@ export default {
         m.power = Math.max(0.02, this.power);
         m.forceOpen = this.t < 2.2 ? true : this.t < 5 ? Math.random() > Math.min(0.92, (this.t - 2.2) * 0.33) : false;
         if (this.t > 4.5) atmo?.set('out');
-        // pull back from the wall a little
-        this.cam.look.set(2.2, 1.2, -2.25);
+        // back to the robot: its face as the iris closes for the last time
+        if (this.t < 0.05) this.cut = true;
+        this._d.set(0.259, 0, -0.966);
+        this.cam.pos.copy(EYE0).addScaledVector(this._d, 0.85).add(this._w.set(-0.32, -0.02, 0.1)); this.cam.look.set(-0.6, 0.8, 0.98); this.cam.fov = 34;
         if (this.t > 7.5) this.set('end');
         break;
       }

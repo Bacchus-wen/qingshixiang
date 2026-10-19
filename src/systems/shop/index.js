@@ -455,7 +455,7 @@ export default {
       pb.position.set(-1.88, 1.72, -d / 2 + 0.0135 - 0.0032); pb.castShadow = pb.receiveShadow = true; root.add(pb);
     }
     root.add(onWall(decal('poster', 0.46, 0.69, { curl: 0.012 }), 'left', 0.12, 1.86));
-    root.add(onWall(decal('calendar', 0.34, 0.51, { curl: 0.01 }), 'right', -2.05, 1.12)); // v4 story: off the back wall, where the height marks are now
+    root.add(onWall(decal('calendar', 0.34, 0.51, { curl: 0.01 }), 'right', -1.28, 1.05)); // v4 story: off the back wall (the height marks are there), clear of the climax's frame
     root.add(onWall(decal('price_list', 0.4, 0.6, { curl: 0.01 }), 'right', -1.42, 1.78));
     root.add(onWall(decal('slogan', 0.96, 0.64), 'right', -0.5, 2.38, 0.015));
     root.add(onWall(decal('tv_poster', 0.4, 0.6, { curl: 0.012 }), 'left', 1.22, 2.36));
@@ -793,7 +793,7 @@ export default {
     }
     // the desk lamp, if placed, drives the warm key light
     const lampObj = placed.desk_lamp;
-    if (lampObj) { _box.setFromObject(lampObj); this.lamp.position.set((_box.min.x + _box.max.x) / 2 + 0.1, _box.max.y - 0.085, (_box.min.z + _box.max.z) / 2); this.lamp.target.position.set(this.lamp.position.x + 0.3, 0.8, this.lamp.position.z + 0.2); } // (under the shade's rim: the shade inside is not lit point-blank)
+    if (lampObj) { _box.setFromObject(lampObj); this.lamp.position.set((_box.min.x + _box.max.x) / 2 + 0.1, _box.max.y - 0.12, (_box.min.z + _box.max.z) / 2); this.lamp.target.position.set(this.lamp.position.x + 0.3, 0.8, this.lamp.position.z + 0.2); } // (under the shade's rim: the shade inside is not lit point-blank)
     else { this.lamp.position.set(-1.6, 1.45, 0.1); this.lamp.target.position.set(-1.2, 0.8, 0.2); }
     // repeated generated models are drawn instanced: one draw per mesh per model type instead of one per copy
     // (the placed copies stay, hidden, for picking and the audit). Tints become per-instance colours. ?noinst = off
@@ -827,7 +827,7 @@ export default {
     // the face light for the robot's close-ups (story: wait / waking), soft and unshadowed, off otherwise (never removed:
     // changing the light set recompiles every material)
     if (placed.robot) { const fl = this.faceLight = new THREE.SpotLight(0xffe2c0, 0, 3, 0.5, 1, 1.5); fl.castShadow = false;
-      fl.position.set(-0.95, 1.12, 0.3); fl.target.position.set(-0.6, 0.85, 0.94); scene.add(fl, fl.target); ctx.api.shop.faceLight = fl; }
+      fl.position.set(-1.35, 1.05, 0.62); fl.target.position.set(-0.6, 0.8, 0.98); scene.add(fl, fl.target); ctx.api.shop.faceLight = fl; } // from the bench side: a side light that shows the volumes
     // review viewer (this phase has no story camera yet): orbit/zoom/pan with the mouse, number keys jump to the
     // review shots, the camera is kept inside the room (or out on the street in front of it)
     if (!ctx.isShot && ctx.params.get('review') !== null) { // the free review viewer (the story owns the camera otherwise)

@@ -85,7 +85,7 @@ function crtMaterial(chan, on, atlas) {
     const maskRGB = vec3(sin(u.x.mul(900)).mul(0.06).add(0.97), sin(u.x.mul(900).add(2.1)).mul(0.06).add(0.97), sin(u.x.mul(900).add(4.2)).mul(0.06).add(0.97));
     const vig = float(1).sub(smoothstep(0.25, 0.75, length(c.mul(vec2(1.1, 1.3)))).mul(0.45));
     const warm = smoothstep(0.0, 0.12, on.mul(0.5).sub(abs(u.y.sub(0.5)).mul(on.lessThan(0.3).select(1, 0))));
-    return pic.mul(scan).mul(maskRGB).mul(vig).mul(2.4).mul(on.clamp(0, 1)).mul(warm.max(on.greaterThan(0.3).select(1, 0)));
+    return pic.mul(scan).mul(maskRGB).mul(vig).mul(1.35).mul(on.clamp(0, 1)).mul(warm.max(on.greaterThan(0.3).select(1, 0)));
   })();
   m.opacityNode = Fn(() => { // glass-edge mask (the picture stops at the rounded corners of the tube)
     const c = uv().sub(0.5), rr = vec2(TV.w, TV.h), q = abs(c.mul(rr)).sub(rr.mul(0.5).sub(TV.corner));
@@ -194,34 +194,41 @@ export default {
     }
     // ---- the child at the door: only a shadow (CHILD_LAYER: drawn into the eye's shadow map, never on screen).
     // Built for its silhouette, since a shadow is all of it anyone sees: a small girl standing straight to be measured,
-    // chin up, two short pigtails, a dress, thin arms held a little away from her sides, so the gaps read in the shadow.
+    // chin up, arms held a little away from her sides so the gaps read. She is not one figure scaled up: three ages, each
+    // with its own proportions and hair -- a round head and two short tufts at five or six, plaits at seven or eight, a
+    // ponytail and longer legs at nine to eleven. Each is built 1 unit tall at its own proportions and scaled to height.
     {
-      const H0 = 1.25, parts = [];
-      const add = (g, x, y, z, rx = 0, rz = 0) => { g.rotateX(rx); g.rotateZ(rz); g.translate(x, y, z); parts.push(g); };
-      add(new THREE.SphereGeometry(0.088, 20, 14), 0, 1.155, 0);                                 // head
-      add(new THREE.SphereGeometry(0.093, 20, 14, 0, Math.PI * 2, 0, Math.PI * 0.55), 0, 1.17, -0.008); // hair cap
-      for (const sx of [-1, 1]) {                                                                // pigtails
-        add(new THREE.SphereGeometry(0.03, 12, 8), sx * 0.1, 1.13, -0.03);
-        add(new THREE.CapsuleGeometry(0.022, 0.07, 4, 8), sx * 0.125, 1.07, -0.035, 0, sx * 0.5);
-      }
-      add(new THREE.CylinderGeometry(0.03, 0.034, 0.08, 10), 0, 1.05, 0);                        // neck
-      add(new THREE.CapsuleGeometry(0.075, 0.1, 6, 12), 0, 0.95, 0, 0, Math.PI / 2);             // shoulders
-      add(new THREE.CylinderGeometry(0.1, 0.17, 0.42, 16), 0, 0.72, 0);                          // dress
-      for (const sx of [-1, 1]) {
-        add(new THREE.CapsuleGeometry(0.024, 0.36, 4, 8), sx * 0.155, 0.75, 0, 0, sx * 0.12);   // arms, a little away from her sides
-        add(new THREE.SphereGeometry(0.03, 10, 8), sx * 0.185, 0.54, 0.0);                       // hands
-        add(new THREE.CapsuleGeometry(0.03, 0.4, 4, 8), sx * 0.055, 0.29, 0);                    // legs
-        add(new THREE.BoxGeometry(0.06, 0.04, 0.12), sx * 0.055, 0.02, 0.025);                    // shoes
-      }
-      // front faces into the shadow map (the default back faces of a figure touching the wall would sit behind it).
-      // One mesh per part: a merged copy of these parts cast only part of itself in r186's shadow pass.
       const dbg = ctx.params.get('childdebug') !== null;
       const shadowMat = new THREE.MeshBasicNodeMaterial(); shadowMat.shadowSide = THREE.FrontSide;
       const dbgMat = dbg ? new THREE.MeshStandardNodeMaterial({ color: 0xff00ff }) : null;
-      const child = new THREE.Group();
-      for (const g of parts) { const m = new THREE.Mesh(g, dbgMat || shadowMat); m.castShadow = true; m.layers.set(CHILD_LAYER); if (dbg) m.layers.enable(0); child.add(m); }
-      this.childH = H0;
-      this.childRoot = new THREE.Group(); this.childRoot.add(child);
+      const build = (A) => { // A: head radius, neck, shoulder width, dress, leg length (fractions of height 1)
+        const g = new THREE.Group(), add = (geo, x, y, z, rx = 0, rz = 0) => { geo.rotateX(rx); geo.rotateZ(rz); const m = new THREE.Mesh(geo, dbgMat || shadowMat); m.position.set(x, y, z); m.castShadow = true; m.layers.set(CHILD_LAYER); if (dbg) m.layers.enable(0); g.add(m); };
+        const hr = A.head, hy = 1 - hr;                                        // head top at exactly 1
+        add(new THREE.SphereGeometry(hr, 20, 14), 0, hy, 0);
+        add(new THREE.SphereGeometry(hr * 1.05, 20, 14, 0, Math.PI * 2, 0, Math.PI * 0.55), 0, hy + hr * 0.02, -hr * 0.08); // hair cap
+        if (A.hair === 'tufts') for (const sx of [-1, 1]) add(new THREE.SphereGeometry(hr * 0.42, 12, 8), sx * hr * 0.95, hy + hr * 0.45, -hr * 0.2);
+        if (A.hair === 'plaits') for (const sx of [-1, 1]) { add(new THREE.SphereGeometry(hr * 0.33, 10, 8), sx * hr * 1.08, hy - hr * 0.15, -hr * 0.3); add(new THREE.CapsuleGeometry(hr * 0.22, hr * 0.9, 4, 8), sx * hr * 1.4, hy - hr * 0.75, -hr * 0.35, 0, sx * 0.45); }
+        if (A.hair === 'ponytail') { add(new THREE.SphereGeometry(hr * 0.34, 10, 8), -hr * 0.55, hy + hr * 0.55, -hr * 0.6); add(new THREE.CapsuleGeometry(hr * 0.24, hr * 1.7, 4, 8), -hr * 1.25, hy + hr * 0.1, -hr * 0.85, -0.4, 0.75); } // tied high, swinging out to one side: it reads in a shadow
+        const sh = hy - hr - A.neck;                                           // shoulders
+        add(new THREE.CylinderGeometry(hr * 0.33, hr * 0.38, A.neck + 0.02, 10), 0, hy - hr - A.neck / 2, 0);
+        add(new THREE.CapsuleGeometry(A.shoulder * 0.3, A.shoulder * 0.6, 6, 12), 0, sh - 0.02, 0, 0, Math.PI / 2);
+        const dTop = sh - 0.04, dBot = A.leg + 0.03;
+        add(new THREE.CylinderGeometry(A.shoulder * 0.42, A.dress, dTop - dBot, 16), 0, (dTop + dBot) / 2, 0);
+        for (const sx of [-1, 1]) {
+          const al = sh - dBot - 0.02;
+          add(new THREE.CapsuleGeometry(0.019, al, 4, 8), sx * (A.shoulder * 0.62 + 0.012), sh - 0.03 - al / 2, 0, 0, sx * 0.1); // arms, a little away
+          add(new THREE.SphereGeometry(0.024, 10, 8), sx * (A.shoulder * 0.62 + 0.03), sh - 0.06 - al, 0);                     // hands
+          add(new THREE.CapsuleGeometry(0.025, A.leg - 0.06, 4, 8), sx * 0.045, A.leg / 2 + 0.01, 0);                          // legs
+          add(new THREE.BoxGeometry(0.05, 0.03, 0.095), sx * 0.045, 0.015, 0.02);                                               // shoes
+        }
+        return g;
+      };
+      const ages = this.childAges = [
+        build({ head: 0.105, neck: 0.03, shoulder: 0.2, dress: 0.15, leg: 0.36, hair: 'tufts' }),    // five, six
+        build({ head: 0.095, neck: 0.035, shoulder: 0.2, dress: 0.14, leg: 0.39, hair: 'plaits' }),  // seven, eight
+        build({ head: 0.085, neck: 0.04, shoulder: 0.19, dress: 0.12, leg: 0.43, hair: 'ponytail' }), // nine to eleven
+      ];
+      this.childRoot = new THREE.Group(); for (const a of ages) this.childRoot.add(a);
       this.childRoot.position.set(2.44, 0, -2.08); this.childRoot.rotation.y = -0.5; // a finger's width off the wall; the shadow falls to her right, on the marks
       root.add(this.childRoot);
       ctx.api.eye?.spot.shadow.camera.layers.enable(CHILD_LAYER);
@@ -241,8 +248,52 @@ export default {
       mk(new THREE.CapsuleGeometry(0.062, 0.1, 6, 12), sit, 0, 0.8, 0, 0, Math.PI / 2);                         // shoulders
       mk(new THREE.CylinderGeometry(0.075, 0.115, 0.3, 14), sit, 0, 0.62, 0);                                    // dress (upper)
       mk(new THREE.BoxGeometry(0.24, 0.05, 0.3), sit, 0, 0.47, 0.1);                                              // lap
-      for (const sx of [-1, 1]) mk(new THREE.CapsuleGeometry(0.02, 0.22, 4, 8), sit, sx * 0.15, 0.66, 0.1, 0.95, sx * 0.25); // arms, clear of the body
-      for (const sx of [-1, 1]) mk(new THREE.BoxGeometry(0.11, 0.008, 0.15), sit, sx * 0.055, 0.62, 0.24, -0.6, 0, sx * 0.35); // the open book: two pages in a V
+      for (const sx of [-1, 1]) mk(new THREE.CapsuleGeometry(0.02, 0.25, 4, 8), sit, sx * 0.17, 0.7, 0.17, 1.2, sx * 0.3); // arms reaching out to the book's sides, clear of the body
+      for (const sx of [-1, 1]) mk(new THREE.BoxGeometry(0.13, 0.008, 0.18), sit, sx * 0.066, 0.7, 0.33, -1.05, 0, sx * 0.55); // the open book: two pages in a clear V, held up and out
+      for (const [sx, fwd] of [[-1, 0.0], [1, 0.07]]) { const knee = new THREE.Group(); knee.position.set(sx * 0.065, 0.45, 0.24 + fwd); sit.add(knee); legs.push(knee);
+        mk(new THREE.CapsuleGeometry(0.025, 0.25, 4, 8), knee, 0, -0.15, 0);                                     // shins (one a little forward)
+        mk(new THREE.BoxGeometry(0.055, 0.035, 0.1), knee, 0, -0.31, 0.03); }                                     // shoes
+      sit.position.set(2.6, 0, -1.6); sit.rotation.y = -0.6; // on the stool by the door, turned toward the robot
+      sit.visible = false; root.add(sit);
+    }
+    // ---- the hand that marked her height (only its shadow): the robot's own -- a jointed metal hand like the spare one
+    // on the wall by the door, a pencil pinched between two fingers, a pipe forearm reaching in from the right
+    {
+      const mat = new THREE.MeshBasicNodeMaterial(); mat.shadowSide = THREE.FrontSide;
+      const dbg = ctx.params.get('childdebug') !== null, dm = dbg ? new THREE.MeshStandardNodeMaterial({ color: 0xffaa00 }) : null;
+      const hand = this.hand = new THREE.Group(); // origin = the pencil's tip on the wall
+      const mk = (g, x, y, z, rx = 0, ry = 0, rz = 0) => { const m = new THREE.Mesh(g, dm || mat); m.position.set(x, y, z); m.rotation.set(rx, ry, rz); m.castShadow = true; m.layers.set(CHILD_LAYER); if (dbg) m.layers.enable(0); hand.add(m); return m; };
+      mk(new THREE.CylinderGeometry(0.0032, 0.0038, 0.14, 6).translate(0, 0.07, 0), 0, 0, 0, Math.PI / 2 - 0.45, 0, -0.25); // pencil, held at a slant
+      // two fingers pinching it, each three short segments with ball knuckles; a thumb below
+      for (const [fy, fz, bend] of [[0.058, 0.07, 0.5], [0.035, 0.08, 0.7]]) {
+        let px = 0.012, py = fy, pz = fz;
+        for (let j = 0; j < 3; j++) { mk(new THREE.SphereGeometry(0.0085, 8, 6), px, py, pz); const L = 0.026 - j * 0.004;
+          mk(new THREE.CylinderGeometry(0.0055, 0.0065, L, 8).translate(0, L / 2, 0), px, py, pz, 0, 0, -0.9 - bend * j * 0.6); px += Math.sin(0.9 + bend * j * 0.6) * L; py += Math.cos(0.9 + bend * j * 0.6) * L * 0.6; }
+      }
+      mk(new THREE.CylinderGeometry(0.006, 0.007, 0.035, 8).translate(0, 0.0175, 0), 0.02, 0.02, 0.09, 0.5, 0, 0.4);   // thumb
+      mk(new THREE.BoxGeometry(0.055, 0.04, 0.045), 0.065, 0.06, 0.115, 0, 0.3, -0.5);                                   // the palm plate
+      mk(new THREE.SphereGeometry(0.02, 10, 8), 0.095, 0.085, 0.13);                                                     // wrist joint
+      mk(new THREE.CylinderGeometry(0.017, 0.02, 0.28, 10).translate(0, 0.14, 0), 0.1, 0.09, 0.14, 0, 0.3, -1.05);       // pipe forearm, up and out
+      mk(new THREE.CylinderGeometry(0.024, 0.024, 0.03, 10), 0.21, 0.15, 0.17, 0, 0, -1.05 + Math.PI / 2);                // a brass collar on it
+      hand.visible = false; root.add(hand);
+    }
+    // ---- before the climax: the same girl, younger, sitting on the stool by the door reading, swinging her legs --
+    // also only a shadow. When the robot's gaze rests on her, she gets up to be measured (the story's door phase).
+    {
+      const mat = new THREE.MeshBasicNodeMaterial(); mat.shadowSide = THREE.FrontSide;
+      const dbg = ctx.params.get('childdebug') !== null, dm = dbg ? new THREE.MeshStandardNodeMaterial({ color: 0x00ffff }) : null;
+      const sit = this.sitting = new THREE.Group(), legs = this.sittingLegs = [];
+      const mk = (g, parent, x, y, z, rx = 0, rz = 0, ry = 0) => { g.rotateX(rx); g.rotateZ(rz); g.rotateY(ry); const m = new THREE.Mesh(g, dm || mat); m.position.set(x, y, z); m.castShadow = true; m.layers.set(CHILD_LAYER); if (dbg) m.layers.enable(0); parent.add(m); return m; };
+      // seat height 0.42: hips on the stool, torso up; the head (bent over an open book) can look up at the robot
+      const head = this.sittingHead = new THREE.Group(); head.position.set(0, 0.86, 0.0); sit.add(head);
+      mk(new THREE.SphereGeometry(0.082, 18, 12), head, 0, 0.12, 0.03);                                          // head
+      mk(new THREE.SphereGeometry(0.087, 18, 12, 0, Math.PI * 2, 0, Math.PI * 0.55), head, 0, 0.135, 0.02);     // hair
+      for (const sx of [-1, 1]) { mk(new THREE.SphereGeometry(0.03, 10, 8), head, sx * 0.095, 0.1, -0.005); mk(new THREE.CapsuleGeometry(0.019, 0.07, 4, 8), head, sx * 0.13, 0.045, -0.01, 0, sx * 0.6); } // pigtails, sticking out
+      mk(new THREE.CapsuleGeometry(0.062, 0.1, 6, 12), sit, 0, 0.8, 0, 0, Math.PI / 2);                         // shoulders
+      mk(new THREE.CylinderGeometry(0.075, 0.115, 0.3, 14), sit, 0, 0.62, 0);                                    // dress (upper)
+      mk(new THREE.BoxGeometry(0.24, 0.05, 0.3), sit, 0, 0.47, 0.1);                                              // lap
+      for (const sx of [-1, 1]) mk(new THREE.CapsuleGeometry(0.02, 0.25, 4, 8), sit, sx * 0.17, 0.7, 0.17, 1.2, sx * 0.3); // arms reaching out to the book's sides, clear of the body
+      for (const sx of [-1, 1]) mk(new THREE.BoxGeometry(0.13, 0.008, 0.18), sit, sx * 0.066, 0.7, 0.33, -1.05, 0, sx * 0.55); // the open book: two pages in a clear V, held up and out
       for (const [sx, fwd] of [[-1, 0.0], [1, 0.07]]) { const knee = new THREE.Group(); knee.position.set(sx * 0.065, 0.45, 0.24 + fwd); sit.add(knee); legs.push(knee);
         mk(new THREE.CapsuleGeometry(0.025, 0.25, 4, 8), knee, 0, -0.15, 0);                                     // shins (one a little forward)
         mk(new THREE.BoxGeometry(0.055, 0.035, 0.1), knee, 0, -0.31, 0.03); }                                     // shoes
@@ -287,7 +338,9 @@ export default {
       // the child's height in metres (0 = gone); the story grows it mark by mark
       // h = her height; the figure's top is at 1.263 x scale, and the eye's light (from below her head) lifts the shadow
       // ~2 cm on the wall: scaled so the shadow's crown touches the line at h
-      setChild(h) { if (!sys.childRoot) return; const s = h > 0 ? (h - 0.022) / 1.263 : 0.0001; sys.childRoot.scale.set(s * 0.85 / (1.25 / 1.263), s, s * 0.85 / (1.25 / 1.263)); sys.childRoot.visible = h > 0; },
+      setChild(h, age = 5) { if (!sys.childRoot) return; const s = h > 0 ? h - 0.022 : 0.0001; // the light from below her head lifts the shadow ~2 cm
+        sys.childRoot.scale.set(s * 0.8, s, s * 0.8); sys.childRoot.visible = h > 0;
+        sys.childAges.forEach((g, i) => { g.visible = i === (age < 7 ? 0 : age < 9 ? 1 : 2); }); },
       get tvs() { return sys.tvs; },
       setMarks(h, prev = h, x = 9) { if (!sys.marksY) return; sys.marksY.value = h; sys.marksPrev.value = prev; sys.marksX.value = x; },
       // the hand that marks her height: k 0 = away, 1 = pencil on the wall at height h, at x along the line

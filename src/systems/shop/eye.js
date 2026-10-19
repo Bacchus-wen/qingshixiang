@@ -38,8 +38,10 @@ function makeGobo() {
     if (mode === 'level') { // the surveyor's level: a dimmer round field (enough to throw a shadow) and one bright line
       const fg = g.createRadialGradient(0, 0, 0, 0, 0, 118); fg.addColorStop(0, 'rgba(255,255,255,0.5)'); fg.addColorStop(0.75, 'rgba(255,255,255,0.42)'); fg.addColorStop(1, 'rgba(255,255,255,0)');
       g.fillStyle = fg; g.beginPath(); g.arc(0, 0, 118, 0, 7); g.fill();
+      const glow = g.createLinearGradient(0, -9, 0, 9); glow.addColorStop(0, 'rgba(255,255,255,0)'); glow.addColorStop(0.5, 'rgba(255,255,255,0.35)'); glow.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = glow; g.fillRect(-118, -9, 236, 18); // a soft halo round it (a bare line read as a scan line)
       const lg = g.createLinearGradient(0, -1.6, 0, 1.6); lg.addColorStop(0, 'rgba(255,255,255,0)'); lg.addColorStop(0.5, '#fff'); lg.addColorStop(1, 'rgba(255,255,255,0)');
-      g.fillStyle = lg; g.fillRect(-118, -1.6, 236, 3.2); // a fine line: a level, not a scan
+      g.fillStyle = lg; g.fillRect(-118, -1.6, 236, 3.2); // and a fine core: a level
       tex.needsUpdate = true; return;
     }
     const r = 20 + 104 * open;
@@ -185,7 +187,7 @@ export default {
       aim(p) { sys.aimAt = p ? (sys.aimAt ?? new THREE.Vector3()).copy(p) : null; },
     };
     ctx.memory.range = 9;
-    mem.soft.value = 0.06; // the past fades in at the beam's edge (the street version keeps a sharper edge)
+    mem.soft.value = 0.09; // the past fades in at the beam's edge (the street version keeps a sharper edge)
   },
 
   update(dt, t, ctx) {
@@ -246,7 +248,7 @@ export default {
     const sp = this.spot;
     sp.position.copy(origin); sp.target.position.copy(origin).addScaledVector(this._d, 4); sp.target.updateMatrixWorld();
     sp.angle = angle; sp.penumbra = 0.7;
-    sp.intensity = (+ctx.params.get('eyecd') || 95) * o * o * Math.min(1, pw * 2) * (m.spotK ?? 1);
+    sp.intensity = (+ctx.params.get('eyecd') || 80) * o * o * Math.min(1, pw * 2) * (m.spotK ?? 1);
     const gm = m.goboMode || 'lens';
     if (Math.abs(o - this.goboOpen) > 0.03 || gm !== this.goboMode) { this.gobo.draw(o, gm); this.goboOpen = o; this.goboMode = gm; }
     const u = this.beamU;

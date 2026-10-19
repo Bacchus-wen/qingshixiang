@@ -18,8 +18,9 @@ const out = path.join(root, opt('out', 'renders/play-shop'));
 const [W, H] = opt('size', '1280x720').split('x').map(Number);
 mkdirSync(path.dirname(out), { recursive: true });
 
-const server = await createServer({ root, logLevel: 'error', server: { port: 0 } });
-await server.listen();
+const base = opt('url', null); // e.g. http://127.0.0.1:5181/ (a production build) instead of a dev server
+const server = base ? null : await createServer({ root, logLevel: 'error', server: { port: 0 } });
+if (server) await server.listen();
 const browser = await chromium.launch({ headless: true, channel: 'chromium', args: ['--enable-unsafe-webgpu', '--ignore-gpu-blocklist'] });
 const shots = [];
 try {
@@ -27,7 +28,7 @@ try {
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') errors.push(`[${m.type()}] ${m.text()}`.slice(0, 300)); });
-  await page.goto(`http://localhost:${server.httpServer.address().port}/?speed=${speed}${query ? '&' + query : ''}`);
+  await page.goto(`${base || `http://localhost:${server.httpServer.address().port}/`}?speed=${speed}${query ? '&' + query : ''}`);
   await page.waitForFunction(() => document.getElementById('loading')?.classList.contains('done'), null, { timeout: 180000 });
   const wait = (s) => page.waitForTimeout((s / speed) * 1000);
   const phase = () => page.evaluate(() => window.__engine?.ctx?.api?.story?.phase);
@@ -63,7 +64,7 @@ try {
   console.log('phase now:', await phase(), 'perf', JSON.stringify(perf));
   if (errors.length) console.log('ERRORS:\n' + [...new Set(errors)].slice(0, 12).join('\n'));
 } finally {
-  await browser.close(); await server.close();
+  await browser.close(); await server?.close();
 }
 // contact sheet
 try { execFileSync(path.join(root, 'tools/sheet.sh'), [`${out}-sheet.jpg`, '4', '480', ...shots], { stdio: 'inherit' }); console.log('sheet', `${out}-sheet.jpg`); } catch (e) { console.log('sheet failed', e.message); }
