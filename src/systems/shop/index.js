@@ -793,7 +793,7 @@ export default {
     }
     // the desk lamp, if placed, drives the warm key light
     const lampObj = placed.desk_lamp;
-    if (lampObj) { _box.setFromObject(lampObj); this.lamp.position.set((_box.min.x + _box.max.x) / 2 + 0.1, _box.max.y - 0.05, (_box.min.z + _box.max.z) / 2); this.lamp.target.position.set(this.lamp.position.x + 0.3, 0.8, this.lamp.position.z + 0.2); }
+    if (lampObj) { _box.setFromObject(lampObj); this.lamp.position.set((_box.min.x + _box.max.x) / 2 + 0.1, _box.max.y - 0.085, (_box.min.z + _box.max.z) / 2); this.lamp.target.position.set(this.lamp.position.x + 0.3, 0.8, this.lamp.position.z + 0.2); } // (under the shade's rim: the shade inside is not lit point-blank)
     else { this.lamp.position.set(-1.6, 1.45, 0.1); this.lamp.target.position.set(-1.2, 0.8, 0.2); }
     // repeated generated models are drawn instanced: one draw per mesh per model type instead of one per copy
     // (the placed copies stay, hidden, for picking and the audit). Tints become per-instance colours. ?noinst = off
@@ -823,6 +823,11 @@ export default {
     }
     ctx.api.shop = { root, placed, ROOM, lod, rig, eyeGlow, lights: { hemi, dusk, lamp: this.lamp, fill, tube: this.tubeLight, tubeGlow, robotFill: this.robotFill }, review: !ctx.isShot && ctx.params.get('review') !== null };
     ctx.postfx.memoryGrade = true; // the past inside the beam is graded per pixel (src/engine/PostFX.js)
+    Object.assign(ctx.postfx.params, { bloomRadius: 0.35, bloomStrength: 0.26 }); // a tight glow round the lamp bulb, not a fog
+    // the face light for the robot's close-ups (story: wait / waking), soft and unshadowed, off otherwise (never removed:
+    // changing the light set recompiles every material)
+    if (placed.robot) { const fl = this.faceLight = new THREE.SpotLight(0xffe2c0, 0, 3, 0.5, 1, 1.5); fl.castShadow = false;
+      fl.position.set(-0.95, 1.12, 0.3); fl.target.position.set(-0.6, 0.85, 0.94); scene.add(fl, fl.target); ctx.api.shop.faceLight = fl; }
     // review viewer (this phase has no story camera yet): orbit/zoom/pan with the mouse, number keys jump to the
     // review shots, the camera is kept inside the room (or out on the street in front of it)
     if (!ctx.isShot && ctx.params.get('review') !== null) { // the free review viewer (the story owns the camera otherwise)

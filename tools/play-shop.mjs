@@ -32,7 +32,7 @@ try {
   const wait = (s) => page.waitForTimeout((s / speed) * 1000);
   const phase = () => page.evaluate(() => window.__engine?.ctx?.api?.story?.phase);
   const until = async (p, maxS = 60) => { for (let i = 0; i < maxS * 4; i++) { if ((await phase()) === p) return true; await page.waitForTimeout(250); } return false; };
-  const snap = async (label) => { const f = `${out}-${String(shots.length).padStart(2, '0')}-${label}.png`; await page.screenshot({ path: f }); shots.push(f); console.log('snap', label, await phase()); };
+  const snap = async (label) => { const f = `${out}-${String(shots.length).padStart(2, '0')}-${label}.png`; await page.screenshot({ path: f }); shots.push(f); console.log('snap', label, await phase(), 'audio', JSON.stringify(await page.evaluate(() => window.__engine?.ctx?.api?.audio?.meter?.()))); };
   await page.waitForTimeout(1500); await snap('title');
   await page.mouse.move(W / 2, H / 2); await page.mouse.click(W / 2, H / 2);
   await wait(4); await snap('arrive-4s');

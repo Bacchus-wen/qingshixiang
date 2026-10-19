@@ -47,6 +47,13 @@ export const SHOTS = {
   'shop-clockpast': { scene: 'shop', pos: [1.6, 1.6, -0.9], look: [2.63, 1.95, -2.2], fov: 40, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.api.eye?.aim(new THREE.Vector3(2.63, 2.0, -2.2)); } },
   'shop-shelfpast': { scene: 'shop', pos: [-0.6, 1.35, 0.6], look: [-0.6, 1.3, -2.1], fov: 46, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.api.eye?.aim(new THREE.Vector3(-0.6, 1.25, -2.1)); } },
   'shop-endstreet': { scene: 'shop', pos: [0.62, 1.0, -0.8], look: [-0.15, 1.05, 6.0], fov: 50, setup: (ctx) => { ctx.api.atmo?.set('out'); } },
+  'shop-radiopast': { scene: 'shop', pos: [-1.75, 1.45, -0.55], look: [-2.75, 1.25, -0.85], fov: 40, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.api.eye?.aim(new THREE.Vector3(-2.7, 1.2, -0.85)); } },
+  'shop-beamdust': { scene: 'shop', pos: [1.3, 1.25, 0.9], look: [-0.6, 1.0, -0.9], fov: 55, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.api.eye?.aim(new THREE.Vector3(-0.8, 1.2, -2.1)); } },
+  'shop-lampclose': { scene: 'shop', pos: [-1.2, 1.35, 1.5], look: [-1.75, 1.05, 0.6], fov: 45 },
+  // the lens up close; ?open=0..1 sets the eye (the head lifts as it opens)
+  'shop-lens': { scene: 'shop', pos: [-0.66, 0.9, 0.62], look: [-0.6, 0.85, 0.95], fov: 26, setup: (ctx) => { const o = +(ctx.params.get('open') ?? 0); ctx.memory.forceOpen = o > 0; ctx.memory.shotOpen = o; } },
+  'shop-sitting': { scene: 'shop', pos: [1.2, 1.35, -0.4], look: [2.6, 1.0, -2.0], fov: 50, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.api.eye?.aim(new THREE.Vector3(2.62, 1.0, -2.2)); ctx.api.past?.setSitting(true); } },
+  'shop-hand': { scene: 'shop', pos: [2.05, 1.3, -1.15], look: [2.66, 1.25, -2.25], fov: 40, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.memory.goboMode = 'level'; ctx.api.eye?.aim(new THREE.Vector3(2.62, 1.29, -2.24)); ctx.api.past?.setChild(1.29); ctx.api.past?.setHand(1, 1.29, 2.56); ctx.api.past?.setMarks(1.29, 1.225, 2.56); } },
   'shop-iso': { scene: 'shop', pos: [5.5, 6.0, 7.5], look: [0, 0.6, 0], fov: 32 },
   'street-eye': { pos: [0.6, 1.55, 10], look: [0, 1.8, -30], fov: 42 },
   'street-low': { pos: [-1.2, 0.25, 4], look: [0.5, 1.0, -25], fov: 35 },

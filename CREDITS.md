@@ -13,13 +13,32 @@
   - Contactor/motor overload relay noises — tt_runscript,https://freesound.org/s/807384/ (CC0)→ relay_a/b/c
   - Light Rain Distant Thunder July 5th 2016 — kvgarlic,https://commons.wikimedia.org/wiki/File:Light_Rain_Distant_Thunder_July_5th_2016.wav (CC0)→ thunder_roll
 
+- 第四版修理铺的现场录音(`assets/audio/shop/`,Claude 从 Freesound 公开搜索页按 CC0 筛选、下载 HQ 预览,剪成循环/单发、单声道、响度归一):
+  - AMB-Evening,City,Birds,Sparrow,Pigeon,Traffic,Wind — soundandmelodies,https://freesound.org/s/776137/ (CC0)→ dusk_loop(门外黄昏的街)
+  - At dusk, busy and crowded small intersection — lastraindrop,https://freesound.org/s/757820/ (CC0)→ past_street_loop(光束里过去的街)
+  - Analog CRT TV Electronic Static Noise — grcekh,https://freesound.org/s/546047/ (CC0)→ tv_static_loop
+  - Light switch fluorescent flickering electric bulb — TRP,https://freesound.org/s/574100/ (CC0)→ tube_flicker
+  - TV, CRT, turning on off, static, click (2012) — TRP,https://freesound.org/s/616850/ (CC0)→ tv_on
+  - Writing quickly - pencil on wall — Valerie-Vivegnis,https://freesound.org/s/843923/ (CC0)→ pencil
+  - bicycle-bell_19 — newagesoup,https://freesound.org/s/383631/ (CC0)→ bike_bell
+  - distant backhoe pneumatic hammer — itinerantmonk108,https://freesound.org/s/705156/ (CC0)→ demolition_far
+  - 另沿用上面第三版的 relay_a/relay_b(继电器声)与 dog_far_a(需署名,见下)。
+
 ## 需署名(CC BY 4.0)
 - Koira haukkuu kaukana, yö — YleArkisto,https://freesound.org/s/243059/ ,CC BY 4.0(https://creativecommons.org/licenses/by/4.0/)。已剪辑、滤波 → dog_far_a / dog_far_b。
+
+## 字体(SIL Open Font License 1.1)
+- Long Cang(龙藏体)— The Long Cang Project Authors,https://github.com/googlefonts/longcang ,OFL 1.1(`tools/fonts/LongCang-OFL.txt`)。只用于离线绘制门框旁的铅笔身高刻度贴图(`tools/marks-texture.mjs` → `assets/textures/shop/marks.png`),网页不加载这个字体。
 
 ## 程序生成(本项目自制)
 - 机器人、街道道具、"人曾经在这里"道具、八种人物:无界面 Blender 脚本(`tools/blender/`),由 Claude 与 Codex 编写。
 - 声音:Web Audio 程序合成(Codex 编写)为主,叠加上面列出的现场录音。
 - 招牌、通知、"拆"字、门框刻度:运行时 Canvas 绘制。通知文本基于 Grok 的调研(docs/research-relocation-grok.md)改写,地名虚构。
+
+## 第四版修理铺(2026-10-18 起)
+- 屋里的模型:全部由 Tripo 生成(API、CLI 与用户在 Tripo Studio 手动生成),原始网格直接上屏(分级细节见 docs/tripo-compare)。参考图由公司素材中台 gpt-image-2.5 生成(docs/gen-log.md)。
+- 声音:上面列出的 CC0 录音 + Web Audio 合成(钟摆的嘀嗒、收音机里的曲子(本作原创的五声音阶小调)、电视测试音、机器人的舵机与开眼声、灯管与市电的嗡声),`src/systems/shop/sound.js`,Claude 编写。
+- 顾客与孩子只以影子出现:影子由程序几何体投出(`src/systems/shop/past.js`),不生成人物模型。
 
 ## 改编使用(第二版,公司内部展示)
 - 机器人外壳:Kestrel K-1 by thtbee_(https://github.com/thtbee/waggles),CC BY-NC 4.0。改动:按关节重新组装为坐姿、去掉左前臂、减面、换材质、装上我们自己的测绘机械眼(tools/blender/kestrel_robot.py)。

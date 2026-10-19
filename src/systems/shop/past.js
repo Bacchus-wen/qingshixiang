@@ -120,7 +120,7 @@ export function pastHooks(lod) {
       const P = modelPos(m), c = texture(m.material.map).rgb;
       const cream = smoothstep(0.5, 0.62, c.r).mul(smoothstep(0.45, 0.58, c.g)).mul(smoothstep(0.3, 0.42, c.b));
       const strip = smoothstep(0.232, 0.24, P.y).mul(smoothstep(0.305, 0.297, P.y)).mul(smoothstep(0.085, 0.1, P.z));
-      m.material.emissiveNode = c.mul(vec3(1.0, 0.62, 0.3)).mul(cream).mul(strip).mul(memoryMask(positionWorld)).mul(dialK).mul(2.2);
+      m.material.emissiveNode = c.mul(vec3(1.0, 0.62, 0.3)).mul(cream).mul(strip).mul(memoryMask(positionWorld)).mul(dialK).mul(3.2);
     });
   });
   // ---- the wall clock's pendulum: rod and bob only (|x| < 6 cm, y 0.15-0.40, z -0.03..0.045 in model space), swinging
@@ -165,7 +165,7 @@ export default {
       k++;
     }
     // the glow of the brightest set on the room in front of it (one light, moved to whichever set matters most)
-    this.tvLight = new THREE.PointLight(0x9fb8ff, 0, 2.6, 1.6); ctx.scene.add(this.tvLight);
+    this.tvLight = new THREE.PointLight(0x9fb8ff, 0, 3.4, 1.4); ctx.scene.add(this.tvLight);
 
     // ---- the customer: like the child, only a shadow in the robot's light (CHILD_LAYER): a woman in a short coat with
     // permed hair, three-quarter on to the eye, holding a radio out in both hands -- cast across the shelf behind her
@@ -226,6 +226,42 @@ export default {
       root.add(this.childRoot);
       ctx.api.eye?.spot.shadow.camera.layers.enable(CHILD_LAYER);
     }
+    // ---- before the climax: the same girl, younger, sitting on the stool by the door reading, swinging her legs --
+    // also only a shadow. When the robot's gaze rests on her, she gets up to be measured (the story's door phase).
+    {
+      const mat = new THREE.MeshBasicNodeMaterial(); mat.shadowSide = THREE.FrontSide;
+      const dbg = ctx.params.get('childdebug') !== null, dm = dbg ? new THREE.MeshStandardNodeMaterial({ color: 0x00ffff }) : null;
+      const sit = this.sitting = new THREE.Group(), legs = this.sittingLegs = [];
+      const mk = (g, parent, x, y, z, rx = 0, rz = 0, ry = 0) => { g.rotateX(rx); g.rotateZ(rz); g.rotateY(ry); const m = new THREE.Mesh(g, dm || mat); m.position.set(x, y, z); m.castShadow = true; m.layers.set(CHILD_LAYER); if (dbg) m.layers.enable(0); parent.add(m); return m; };
+      // seat height 0.42: hips on the stool, torso up; the head (bent over an open book) can look up at the robot
+      const head = this.sittingHead = new THREE.Group(); head.position.set(0, 0.86, 0.0); sit.add(head);
+      mk(new THREE.SphereGeometry(0.082, 18, 12), head, 0, 0.12, 0.03);                                          // head
+      mk(new THREE.SphereGeometry(0.087, 18, 12, 0, Math.PI * 2, 0, Math.PI * 0.55), head, 0, 0.135, 0.02);     // hair
+      for (const sx of [-1, 1]) { mk(new THREE.SphereGeometry(0.03, 10, 8), head, sx * 0.095, 0.1, -0.005); mk(new THREE.CapsuleGeometry(0.019, 0.07, 4, 8), head, sx * 0.13, 0.045, -0.01, 0, sx * 0.6); } // pigtails, sticking out
+      mk(new THREE.CapsuleGeometry(0.062, 0.1, 6, 12), sit, 0, 0.8, 0, 0, Math.PI / 2);                         // shoulders
+      mk(new THREE.CylinderGeometry(0.075, 0.115, 0.3, 14), sit, 0, 0.62, 0);                                    // dress (upper)
+      mk(new THREE.BoxGeometry(0.24, 0.05, 0.3), sit, 0, 0.47, 0.1);                                              // lap
+      for (const sx of [-1, 1]) mk(new THREE.CapsuleGeometry(0.02, 0.22, 4, 8), sit, sx * 0.15, 0.66, 0.1, 0.95, sx * 0.25); // arms, clear of the body
+      for (const sx of [-1, 1]) mk(new THREE.BoxGeometry(0.11, 0.008, 0.15), sit, sx * 0.055, 0.62, 0.24, -0.6, 0, sx * 0.35); // the open book: two pages in a V
+      for (const [sx, fwd] of [[-1, 0.0], [1, 0.07]]) { const knee = new THREE.Group(); knee.position.set(sx * 0.065, 0.45, 0.24 + fwd); sit.add(knee); legs.push(knee);
+        mk(new THREE.CapsuleGeometry(0.025, 0.25, 4, 8), knee, 0, -0.15, 0);                                     // shins (one a little forward)
+        mk(new THREE.BoxGeometry(0.055, 0.035, 0.1), knee, 0, -0.31, 0.03); }                                     // shoes
+      sit.position.set(2.6, 0, -1.6); sit.rotation.y = -0.6; // on the stool by the door, turned toward the robot
+      sit.visible = false; root.add(sit);
+    }
+    // ---- the hand that marked her height (only its shadow): a forearm reaching in from the right, a pencil to the wall
+    {
+      const mat = new THREE.MeshBasicNodeMaterial(); mat.shadowSide = THREE.FrontSide;
+      const dbg = ctx.params.get('childdebug') !== null, dm = dbg ? new THREE.MeshStandardNodeMaterial({ color: 0xffaa00 }) : null;
+      const hand = this.hand = new THREE.Group(); // origin = the pencil's tip on the wall
+      const mk = (g, x, y, z, rx = 0, ry = 0, rz = 0) => { const m = new THREE.Mesh(g, dm || mat); m.position.set(x, y, z); m.rotation.set(rx, ry, rz); m.castShadow = true; m.layers.set(CHILD_LAYER); if (dbg) m.layers.enable(0); hand.add(m); return m; };
+      mk(new THREE.CylinderGeometry(0.0032, 0.0038, 0.14, 6).translate(0, 0.07, 0), 0, 0, 0, Math.PI / 2 - 0.45, 0, -0.25); // pencil, tip at the origin, held at a slant
+      mk(new THREE.SphereGeometry(0.03, 12, 8).scale(1.0, 0.7, 1.5), 0.022, 0.05, 0.085);                                 // fingers round it
+      mk(new THREE.CapsuleGeometry(0.011, 0.04, 4, 8), 0.0, 0.042, 0.07, 0.6, 0, 0.9);                                    // thumb
+      mk(new THREE.SphereGeometry(0.036, 12, 8).scale(1.2, 0.75, 1.0), 0.06, 0.07, 0.12);                                 // back of the hand
+      mk(new THREE.CylinderGeometry(0.024, 0.034, 0.3, 10).translate(0, 0.15, 0), 0.08, 0.08, 0.14, 0, 0.3, -1.05);       // forearm, tapering, up and out to the right
+      hand.visible = false; root.add(hand);
+    }
     this.childAge = 0;
     // ---- the pencil marks on the wall right of the door frame (tools/marks-texture.mjs: 0.58 x 1.0 m, bottom 0.8 m).
     // A multiply decal: graphite darkens whatever light falls on the plaster. Outside the beam (now) every mark is there,
@@ -233,11 +269,13 @@ export default {
     {
       const tx = await new THREE.TextureLoader().loadAsync(`${import.meta.env.BASE_URL}textures/shop/marks.png`);
       tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = 8;
-      const marksY = this.marksY = uniform(0);
+      const marksY = this.marksY = uniform(0), marksPrev = this.marksPrev = uniform(0), marksX = this.marksX = uniform(9);
       const mm = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.MultiplyBlending, premultipliedAlpha: true });
       const t = texture(tx, uv()), ink = t.a;
       const past = memoryMask(positionWorld);
-      const k = mix(ink.mul(0.62), ink.mul(step(positionWorld.y, marksY.add(0.02))).mul(1.05), past).clamp(0, 1);
+      // in the past: every year up to the one being measured; that year's line only as far as the pencil has gone
+      const drawn = step(positionWorld.y, marksY.add(0.02)).mul(step(positionWorld.y, marksPrev.add(0.02)).max(step(positionWorld.x, marksX)));
+      const k = mix(ink.mul(0.62), ink.mul(drawn).mul(1.05), past).clamp(0, 1);
       mm.colorNode = vec4(mix(vec3(1), t.rgb.div(0.75).min(1).mul(vec3(0.95, 0.94, 0.96)), k), 1);
       const pm = new THREE.Mesh(new THREE.PlaneGeometry(0.58, 1.0), mm); pm.renderOrder = 2;
       pm.position.set(2.40 + 0.29, 0.8 + 0.5, -ctx.api.shop.ROOM.d / 2 + 0.003); // clear of the jamb's shadow in the eye's light
@@ -247,9 +285,14 @@ export default {
     const sys = this;
     ctx.api.past = {
       // the child's height in metres (0 = gone); the story grows it mark by mark
-      setChild(h) { if (!sys.childRoot) return; const s = h > 0 ? h / sys.childH : 0.0001; sys.childRoot.scale.set(s * 0.85, s, s * 0.85); sys.childRoot.visible = h > 0; },
+      // h = her height; the figure's top is at 1.263 x scale, and the eye's light (from below her head) lifts the shadow
+      // ~2 cm on the wall: scaled so the shadow's crown touches the line at h
+      setChild(h) { if (!sys.childRoot) return; const s = h > 0 ? (h - 0.022) / 1.263 : 0.0001; sys.childRoot.scale.set(s * 0.85 / (1.25 / 1.263), s, s * 0.85 / (1.25 / 1.263)); sys.childRoot.visible = h > 0; },
       get tvs() { return sys.tvs; },
-      setMarks(h) { if (sys.marksY) sys.marksY.value = h; },
+      setMarks(h, prev = h, x = 9) { if (!sys.marksY) return; sys.marksY.value = h; sys.marksPrev.value = prev; sys.marksX.value = x; },
+      // the hand that marks her height: k 0 = away, 1 = pencil on the wall at height h, at x along the line
+      setHand(k, h, x) { const H = sys.hand; if (!H) return; H.visible = k > 0.01; H.position.set(x + 0.05 * (1 - k), h + 0.12 * (1 - k), -2.245 + 0.18 * (1 - k)); },
+      setSitting(on) { if (sys.sitting) sys.sitting.visible = !!on; },
     };
     ctx.api.past.setChild(0);
   },
@@ -270,15 +313,24 @@ export default {
     }
     if (best && bestV > 0.05) {
       this.tvLight.position.copy(best.c).add(new THREE.Vector3(0, 0, 0.3).applyQuaternion(best.o.getWorldQuaternion(new THREE.Quaternion())));
-      this.tvLight.intensity = 1.6 * bestV * (0.85 + 0.15 * Math.sin(t * 13 + best.phase) * Math.sin(t * 5.1));
+      this.tvLight.intensity = 3.2 * bestV * (0.85 + 0.15 * Math.sin(t * 13 + best.phase) * Math.sin(t * 5.1));
     } else this.tvLight.intensity = 0;
+    // the sitting girl swings her legs (one, then the other, slowly)
+    if (this.sitting?.visible) {
+      this.sittingLegs.forEach((k, i) => { k.rotation.x = 0.3 + 0.32 * Math.sin(t * 2.1 + i * 2.4); });
+      // when the robot's light first finds her she looks up at it for a moment, then back down at her book
+      const on = memoryMaskCPU(this._sp ??= new THREE.Vector3(2.6, 0.9, -1.6), ctx.memory) > 0.4;
+      if (on && this.lookUpT === undefined) this.lookUpT = t;
+      const u = this.lookUpT === undefined ? 0 : Math.max(0, Math.min(1, (t - this.lookUpT - 0.6) / 0.5)) * Math.max(0, Math.min(1, (this.lookUpT + 3.4 - t) / 0.7));
+      this.sittingHead.rotation.set(0.35 - 0.75 * u, -0.35 * u, 0);
+    }
     // pendulum: swings while the beam is on the clock (and for a while after); ~1 s period, 4 degrees
     const clock = ctx.api.shop.placed.wall_clock;
     if (clock) {
       const cw = clock.localToWorld(new THREE.Vector3(0, 0.36, 0.02));
       const want = memoryMaskCPU(cw, m);
       this.pend = (this.pend ?? 0) + (want - (this.pend ?? 0)) * Math.min(1, dt * (want > (this.pend ?? 0) ? 1.2 : 0.25));
-      pastU.swing.value = 0.07 * this.pend * Math.sin(t * Math.PI * 2 / 1.0);
+      pastU.swing.value = 0.12 * this.pend * Math.sin(t * Math.PI * 2 / 1.0); // ~7 degrees each way
       const tick = Math.floor(t * 2); if (this.pend > 0.3 && tick !== this.lastTick) { this.lastTick = tick; ctx.api.audio?.play('tick', { pos: cw, gain: this.pend }); }
     }
   },

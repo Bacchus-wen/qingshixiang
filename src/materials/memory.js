@@ -17,6 +17,7 @@ export const mem = {
   range: uniform(40),
   strength: uniform(0),
   amber: uniform(new THREE.Color(1.0, 0.58, 0.28)),
+  soft: uniform(0.025),
 };
 
 export function syncMemory(m) {
@@ -35,7 +36,7 @@ export function memoryMask(P = positionWorld) {
   const c = dot(v.div(d.max(1e-3)), mem.dir);
   const grain = mx_noise_float(P.mul(3.1)).mul(0.5).add(mx_noise_float(P.mul(17.0)).mul(0.25));
   const edge = mem.cosAngle.add(grain.mul(0.035).mul(float(1).sub(mem.strength).add(0.4)));
-  const inCone = smoothstep(edge, edge.add(0.025), c);
+  const inCone = smoothstep(edge, edge.add(mem.soft), c); // v4 shop: softer (soft = 0.06): the past fades in, it is not a torch circle
   const reach = float(1).sub(smoothstep(mem.range.mul(0.55), mem.range, d));
   return inCone.mul(reach).mul(mem.strength);
 }

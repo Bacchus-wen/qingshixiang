@@ -14,7 +14,7 @@ import { mem } from '../../materials/memory.js';
 //   out     : the end -- everything inside goes out, the street lamp outside comes on
 const LEVELS = {
   review: { hemi: 0.45, dusk: 1.4, lamp: 18, fill: 3, tube: 5.5, glow: 2.2, robot: 7, env: 0.55, street: 0 },
-  dusk:   { hemi: 0.16, dusk: 1.15, lamp: 16, fill: 0.55, tube: 0, glow: 0.02, robot: 2.2, env: 0.32, street: 0 },
+  dusk:   { hemi: 0.24, dusk: 2.1, lamp: 15, fill: 0.6, tube: 0, glow: 0.02, robot: 2.2, env: 0.34, street: 0 }, // dusk light only gets in under the shutter: outside can be properly lit
   alive:  { hemi: 0.2, dusk: 1.0, lamp: 16, fill: 1.0, tube: 4.0, glow: 1.8, robot: 2.2, env: 0.38, street: 0 },
   out:    { hemi: 0.05, dusk: 0.55, lamp: 0, fill: 0, tube: 0, glow: 0.0, robot: 0.4, env: 0.12, street: 1 },
 };
