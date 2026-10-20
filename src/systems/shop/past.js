@@ -133,9 +133,16 @@ export function pastHooks(lod) {
     scene.traverse((m) => {
       if (!m.isMesh || !m.material.map) return;
       const P = modelPos(m), c = texture(m.material.map).rgb;
-      const cream = smoothstep(0.5, 0.62, c.r).mul(smoothstep(0.45, 0.58, c.g)).mul(smoothstep(0.3, 0.42, c.b));
-      const strip = smoothstep(0.232, 0.24, P.y).mul(smoothstep(0.305, 0.297, P.y)).mul(smoothstep(0.085, 0.1, P.z));
-      m.material.emissiveNode = c.mul(vec3(1.0, 0.62, 0.3)).mul(cream).mul(strip).mul(memoryMask(positionWorld)).mul(dialK).mul(3.2);
+      // the dial window (tools/probe.sh tube_radio_closed: x -0.195..0.192, y 0.105..0.152, the front) lit from behind: the
+      // glass a dim amber, its scale lines and figures brighter. (It was y 0.236-0.30 and "cream" -- that is the speaker
+      // cloth: the judges saw "a dial still dark" and "a cream speaker like dirty cardboard", r4-r13)
+      const win = smoothstep(-0.2, -0.19, P.x).mul(smoothstep(0.197, 0.187, P.x)).mul(smoothstep(0.103, 0.11, P.y)).mul(smoothstep(0.154, 0.147, P.y)).mul(smoothstep(0.07, 0.09, P.z));
+      const lum = dot(c, vec3(0.299, 0.587, 0.114));
+      m.material.emissiveNode = vec3(1.0, 0.58, 0.24).mul(float(0.1).add(smoothstep(0.4, 0.75, lum).mul(1.1))).mul(win).mul(memoryMask(positionWorld)).mul(dialK).mul(1.5);
+      // the speaker cloth (x -0.24..0.24, y 0.16..0.297): a woven grille cloth, not a printed board -- a fine 2.5 mm weave
+      const cloth = smoothstep(0.155, 0.165, P.y).mul(smoothstep(0.3, 0.292, P.y)).mul(smoothstep(0.07, 0.09, P.z));
+      const weave = sin(P.x.mul(Math.PI * 2 / 0.0025)).mul(sin(P.y.mul(Math.PI * 2 / 0.0025))).mul(0.5).add(0.5);
+      m.material.colorNode = c.mul(mix(float(1), weave.mul(0.16).add(0.86), cloth));
     });
   });
   // ---- the wall clock's pendulum: rod and bob only (|x| < 6 cm, y 0.15-0.40, z -0.03..0.045 in model space), swinging

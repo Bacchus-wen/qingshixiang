@@ -19,6 +19,7 @@ export const ROBOT_LAYER = 7, ROBOT_SHADOW_LAYER = 8;
 // The finest level a copy may use. The web build for GitHub Pages sets VITE_LOD_MIN=1: L0 (the raw mesh, 25-40 MB a
 // model) is not shipped, L1 (0.3-0.5 mm from it) is the finest; it then casts its own shadow (no proxy). ?lodmin=1 tries
 // it locally.
+const FINE = +(new URLSearchParams(globalThis.location?.search ?? '').get('lodfine') ?? 1) || 1; // ?lodfine=8: finer levels sooner (comparisons)
 const MIN_LEVEL = Math.max(0, +(new URLSearchParams(globalThis.location?.search ?? '').get('lodmin') ?? NaN) || +(import.meta.env?.VITE_LOD_MIN ?? 0) || 0);
 const tintCache = new Map();
 
@@ -79,7 +80,7 @@ export class LodLibrary {
       if (!o.parent) continue;
       o.worldSphere(_s);
       // screen pixels per model metre at the copy's nearest point (its own scale included)
-      const d = Math.max(0.02, camera.position.distanceTo(_s.center) - _s.radius), pxPerM = (k / d) * o.matrixWorld.getMaxScaleOnAxis();
+      const d = Math.max(0.02, camera.position.distanceTo(_s.center) - _s.radius), pxPerM = (k / d) * o.matrixWorld.getMaxScaleOnAxis() * FINE;
       const lv = o.set.levels, onScreen = o.visibleInTree() && _frustum.intersectsSphere(_s);
       // coarsest level that passes both tests: geometric error under a pixel, texture at least as sharp as the screen.
       // Coarsening needs some margin (hysteresis) so a copy at the threshold does not flip every frame.

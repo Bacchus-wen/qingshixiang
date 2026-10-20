@@ -366,3 +366,7 @@
 - 2026-10-20 21:30:10 | codex | 完成：评审 key-end r12（judge-r12-key-end）
 - 2026-10-21 05:50:28 | claude | 派给 codex：盲评 三台电视模型（blind-tv-1，只读）
 - 2026-10-21 05:54:13 | codex | 完成：盲评 三台电视模型（blind-tv-1）
+- 2026-10-21 06:03:15 | claude | 派给 codex：评审 key-shelf r13（judge-r13-key-shelf，只读）
+- 2026-10-21 06:03:15 | claude | 派给 codex：评审 key-bench r13（judge-r13-key-bench，只读）
+- 2026-10-21 06:05:39 | codex | 完成：评审 key-shelf r13（judge-r13-key-shelf）
+- 2026-10-21 06:06:34 | codex | 完成：评审 key-bench r13（judge-r13-key-bench）
