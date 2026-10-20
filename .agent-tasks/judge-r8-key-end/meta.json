@@ -1,0 +1,9 @@
+{
+ "task_id": "judge-r8-key-end",
+ "agent": "codex",
+ "cwd": "/Users/wenbin/Games/新游戏",
+ "write": false,
+ "task_sha256": "6d8505b757b011cb6a4b8716d93159c8481b791876b33e48b36ce27ff2b9e954",
+ "started": "2026-10-20T20:15:03+0800",
+ "status": "running"
+}

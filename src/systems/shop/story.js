@@ -41,7 +41,7 @@ const STREET_C = new THREE.Vector3(0.3, 1.85, 11.0);          // the middle of t
 // the last look's reverse shot: in front of its face, a little to its left, at the door
 // (r6 self-review: from straight in front the warm light lit it flat, as bright as the shelves behind: now from its left,
 // the light from the electronics shop on its far cheek, the room behind it lower, the lens core and glow down)
-const MEMORY_FACE = { pos: new THREE.Vector3(-0.32, 0.9, 2.35), look: new THREE.Vector3(-0.47, 0.86, 1.4), fov: 30, mem: { coreK: 0.4, glowK: 0, doorK: 0, roomK: 0.45, lampK: 0.2, pastX: -3.6, pastAngle: 0.12 } };
+const MEMORY_FACE = { pos: new THREE.Vector3(-0.32, 0.9, 2.35), look: new THREE.Vector3(-0.47, 0.86, 1.4), fov: 30, mem: { coreK: 0.28, glowK: 0, doorK: 0, roomK: 0.45, lampK: 0.2, pastX: -3.6, pastAngle: 0.12 } };
 const ACT2_POS = new THREE.Vector3(-0.05, 1.0, -1.7), ACT2_LOOK = new THREE.Vector3(-0.4, 0.92, 11.0), ACT2_FOV = 48; // (r4: feet and stool in frame, clear of the bench)
 const ACT2_BEAM = { beamK: 1.6, beamReach: 0.25, beamNear: 0.5, spotK: 0.6, duskK: 0.2, shaftW: 0.7, doorK: 1, glowK: 1, robotFillK: 0.25, lampK: 0.4, softK: 1.8 }; // softK: a wider then/now edge (r7: a hard one read as a burnt stripe) // (lamp: from in here the bench lamp was the brightest thing in the frame) // (dusk 0.2: from in here its hard patch on the floor burnt out) // a shaft in the dusty air toward the far side; the dusk under the shutter lower (from in here its patch on the floor burns out)
 const K = (t, p, l, fov, cut = false) => ({ t, p: new THREE.Vector3(...p), l: new THREE.Vector3(...l), fov, cut });
