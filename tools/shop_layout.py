@@ -49,7 +49,7 @@ fixed = [
  {"name": "drop_carton_b", "type": "carton", "front": "box_a", "size": [0.42, 0.36, 0.38], "pos": [1.8, 0, 1.38], "ry": 8},
  {"name": "drop_fan", "glb": "desk_fan.glb", "pos": [1.8, 0, 1.38], "ry": -95, "on": "drop_carton_b", "tint": [0.95, 0.9, 0.78]},
   {"name": "thermos_floor", "glb": "thermos.glb", "pos": [2.55, 0, -0.98], "ry": 40, "on": "parts_cabinet"},
- {"name": "bicycle", "glb": "bicycle.glb", "pos": [2.35, 0, 2.95], "yaw0": 35.7, "ry": 183, "roll": 10, "scale": 0.84},
+ {"name": "bicycle", "glb": "bicycle.glb", "pos": [2.8, 0, 2.95], "yaw0": 35.7, "ry": 183, "roll": 10, "scale": 0.84},  # (x 2.8: at 2.35 its front wheel showed through the doorway from inside, hanging in the air)
 ]
 # shelf fill: heavy cartons at the bottom, mixed electronics above, never the same model twice side by side; a second
 # row of small things (clocks, mugs, thermos) in front of the big ones so the shelves read deep and lived-in.

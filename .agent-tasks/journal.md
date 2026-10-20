@@ -344,3 +344,9 @@
 - 2026-10-20 21:04:26 | codex | 完成：评审 key-climax r10（judge-r10-key-climax）
 - 2026-10-20 21:05:40 | codex | 完成：评审 key-memory r10（judge-r10-key-memory）
 - 2026-10-20 21:06:54 | codex | 完成：评审 key-end r10（judge-r10-key-end）
+- 2026-10-20 21:12:41 | claude | 派给 codex：评审 key-street r11（judge-r11-key-street，只读）
+- 2026-10-20 21:12:41 | claude | 派给 codex：评审 key-climax r11（judge-r11-key-climax，只读）
+- 2026-10-20 21:12:41 | claude | 派给 codex：评审 key-end r11（judge-r11-key-end，只读）
+- 2026-10-20 21:14:13 | codex | 完成：评审 key-street r11（judge-r11-key-street）
+- 2026-10-20 21:15:42 | codex | 完成：评审 key-climax r11（judge-r11-key-climax）
+- 2026-10-20 21:16:56 | codex | 完成：评审 key-end r11（judge-r11-key-end）
