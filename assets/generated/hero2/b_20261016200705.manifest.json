@@ -1,0 +1,113 @@
+{
+  "batch_id": "b_20261016200705",
+  "tasks": 6,
+  "submitted": 6,
+  "failed": 0,
+  "total_images": 6,
+  "items": [
+    {
+      "index": 1,
+      "prompt": "Single isolated object for 3D reconstruction, three-quarter front view from slightly above, entire object visible and centred, plain light grey seamless background, soft even studio lighting with no harsh shadows, photorealistic, highly detailed weathered materials, no text, no watermark, no people. Object: an open concrete balcony of a 1990s southern Chinese apartment: concrete slab with rusty railing, a bamboo laundry pole with hanging clothes, towels and a quilt, potted plants, a broom, plastic buckets, water stains",
+      "id": "img_43561",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43561/1013fca7-c7cb-4795-ba2d-2dc967b64579.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T20%3A06%3A09Z%2F3600%2F%2F9b6a1c1d01e2d11bcc8976b36e197e7654e0025c5678bb70537621b5bd991d3a"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/hero2/img_43561/ai_generate_43561_1.png"
+      ]
+    },
+    {
+      "index": 2,
+      "prompt": "Single isolated object for 3D reconstruction, three-quarter front view from slightly above, entire object visible and centred, plain light grey seamless background, soft even studio lighting with no harsh shadows, photorealistic, highly detailed weathered materials, no text, no watermark, no people. Object: a cluster of three old air-conditioner outdoor units stacked on rusty wall brackets with tangled copper pipes and drain hoses, black water streaks below, a small rusty rain cover on top",
+      "id": "img_43562",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43562/ed3e9bb5-e312-4347-bcf1-0eb9b1fe0e22.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T20%3A06%3A05Z%2F3600%2F%2F278662ede6f3695fc93f22a8a49620e583cc660b9f84b83819eb475fc241c6aa"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/hero2/img_43562/ai_generate_43562_1.png"
+      ]
+    },
+    {
+      "index": 3,
+      "prompt": "Single isolated object for 3D reconstruction, three-quarter front view from slightly above, entire object visible and centred, plain light grey seamless background, soft even studio lighting with no harsh shadows, photorealistic, highly detailed weathered materials, no text, no watermark, no people. Object: a small rooftop tin shack built on a flat roof: corrugated rusty metal walls and roof, a wooden door, a TV antenna and a satellite dish, plastic chairs and potted plants beside it",
+      "id": "img_43563",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43563/2ddb253e-bf1e-4794-9fd5-303b5e9156ad.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T20%3A07%3A00Z%2F3600%2F%2Fe0281d64208f936265cde31208b882b3cd600397672cea227de1eadd27e31e13"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/hero2/img_43563/ai_generate_43563_1.png"
+      ]
+    },
+    {
+      "index": 4,
+      "prompt": "Single isolated object for 3D reconstruction, three-quarter front view from slightly above, entire object visible and centred, plain light grey seamless background, soft even studio lighting with no harsh shadows, photorealistic, highly detailed weathered materials, no text, no watermark, no people. Object: a wall-mounted cluster of grey electrical junction boxes and old electric meters with dozens of black cables bundled and drooping out of them, cable ties, torn stickers",
+      "id": "img_43564",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43564/4fc69ce7-84c0-4abd-851e-38d327064c64.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T20%3A06%3A07Z%2F3600%2F%2Fb81d301c27ed36d52f24fa259ab9c65d33c80d4b3fe655123c997eb0ca74261f"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/hero2/img_43564/ai_generate_43564_1.png"
+      ]
+    },
+    {
+      "index": 5,
+      "prompt": "Single isolated object for 3D reconstruction, three-quarter front view from slightly above, entire object visible and centred, plain light grey seamless background, soft even studio lighting with no harsh shadows, photorealistic, highly detailed weathered materials, no text, no watermark, no people. Object: a vertical rectangular shop light-box sign on a rusty steel bracket projecting from a wall, cracked white plastic face with faded red and blue Chinese characters, a broken fluorescent tube visible inside",
+      "id": "img_43565",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43565/cde93bb3-6008-43e4-879e-655d4feaba2c.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T20%3A06%3A21Z%2F3600%2F%2F23fd7cbb44d6833de46fe9fffc3c882ea8e2604435dc66cf7b38636b985c6eba"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/hero2/img_43565/ai_generate_43565_1.png"
+      ]
+    },
+    {
+      "index": 6,
+      "prompt": "Single isolated object for 3D reconstruction, three-quarter front view from slightly above, entire object visible and centred, plain light grey seamless background, soft even studio lighting with no harsh shadows, photorealistic, highly detailed weathered materials, no text, no watermark, no people. Object: a long vertical rusty cast-iron drainpipe segment with brackets and a funnel head, moss and black water streaks, a few tangled cables clipped to it, about four metres tall",
+      "id": "img_43566",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43566/1327724c-9761-4f08-aeed-bd210b3a52db.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T20%3A06%3A03Z%2F3600%2F%2F8c29188432f5fbf6572b69d59ffd4c14848414206da2542900cd0b992894b36a"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/hero2/img_43566/ai_generate_43566_1.png"
+      ]
+    }
+  ],
+  "plan": {
+    "kind": "image",
+    "model": "gpt",
+    "version": "gpt-image-2.5-sunburst",
+    "count": 6,
+    "quota": {
+      "limit": 300,
+      "used": 11,
+      "remaining": 289,
+      "unit": "张",
+      "after": 17
+    },
+    "running": {
+      "limit": 20,
+      "current": 0
+    },
+    "allowed": true,
+    "blockers": [],
+    "cost": {
+      "amount": 0,
+      "currency": "USD",
+      "priced": false,
+      "estimated": false,
+      "note": null
+    },
+    "request": {
+      "batch": true,
+      "tasks": 6,
+      "total_images": 6,
+      "local_uploads": []
+    }
+  }
+}

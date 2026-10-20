@@ -1,0 +1,15 @@
+{
+ "task_id": "r18-story-grok",
+ "agent": "grok",
+ "cwd": "/Users/wenbin/Games/新游戏",
+ "write": false,
+ "task_sha256": "2b695f224dec160dc5b7e3457a8efe6866fb3df87496deedf9067e4f7327906a",
+ "started": "2026-10-19T10:51:39+0800",
+ "status": "failed",
+ "returncode": 1,
+ "session_id": null,
+ "turns": null,
+ "reported_cost_usd": null,
+ "stop_reason": null,
+ "seconds": 8.5
+}

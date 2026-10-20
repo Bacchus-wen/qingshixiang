@@ -1,0 +1,19 @@
+{
+ "op": "v3-drainpipe",
+ "steps": {
+  "multiview": {
+   "state": "submitted",
+   "task_id": "e14c18d8-1478-45f7-9ca1-00f65a4ee031",
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "4e4ce8a7-140f-4980-afd7-c7da52202507",
+   "status": "success"
+  }
+ },
+ "file_token": "file_17cdcc6b-fec8-43c8-b009-a37165734258",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/hero2/named/drainpipe.png",
+ "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo3/v3-drainpipe.glb",
+ "glb_sha256": "8d73250700804118630d8ffbad84d53e5e5aad6beb3ea4c0dd94eca893e5003b"
+}

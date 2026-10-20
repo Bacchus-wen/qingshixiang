@@ -218,3 +218,51 @@
 - 2026-10-19 18:13:52 | claude | 派给 codex：r26 故事与体验复审（r26-story，只读）
 - 2026-10-19 18:17:28 | codex | 完成：r26 画面与模型复审（r26-models）
 - 2026-10-19 18:18:33 | codex | 完成：r26 故事与体验复审（r26-story）
+- 2026-10-20 06:37:12 | claude | 派给 codex：评审 key-shelf r0（judge-r0-key-shelf，只读）
+- 2026-10-20 06:37:12 | claude | 派给 codex：评审 key-bench r0（judge-r0-key-bench，只读）
+- 2026-10-20 06:37:12 | claude | 派给 codex：评审 key-turn r0（judge-r0-key-turn，只读）
+- 2026-10-20 06:37:12 | claude | 派给 codex：评审 key-street r0（judge-r0-key-street，只读）
+- 2026-10-20 06:37:12 | claude | 派给 codex：评审 key-climax r0（judge-r0-key-climax，只读）
+- 2026-10-20 06:37:12 | claude | 派给 codex：评审 key-end r0（judge-r0-key-end，只读）
+- 2026-10-20 06:40:06 | codex | 完成：评审 key-shelf r0（judge-r0-key-shelf）
+- 2026-10-20 06:40:52 | codex | 完成：评审 key-bench r0（judge-r0-key-bench）
+- 2026-10-20 06:41:42 | codex | 完成：评审 key-turn r0（judge-r0-key-turn）
+- 2026-10-20 06:42:29 | codex | 完成：评审 key-street r0（judge-r0-key-street）
+- 2026-10-20 06:43:19 | codex | 完成：评审 key-climax r0（judge-r0-key-climax）
+- 2026-10-20 06:44:04 | codex | 完成：评审 key-end r0（judge-r0-key-end）
+- 2026-10-20 12:40:55 | claude | 派给 codex：评审 key-shelf r1（judge-r1-key-shelf，只读）
+- 2026-10-20 12:40:55 | claude | 派给 codex：评审 key-bench r1（judge-r1-key-bench，只读）
+- 2026-10-20 12:40:55 | claude | 派给 codex：评审 key-turn r1（judge-r1-key-turn，只读）
+- 2026-10-20 12:40:55 | claude | 派给 codex：评审 key-street r1（judge-r1-key-street，只读）
+- 2026-10-20 12:40:55 | claude | 派给 codex：评审 key-climax r1（judge-r1-key-climax，只读）
+- 2026-10-20 12:40:55 | claude | 派给 codex：评审 key-end r1（judge-r1-key-end，只读）
+- 2026-10-20 12:42:45 | codex | 完成：评审 key-shelf r1（judge-r1-key-shelf）
+- 2026-10-20 12:43:39 | codex | 完成：评审 key-bench r1（judge-r1-key-bench）
+- 2026-10-20 12:44:36 | codex | 完成：评审 key-turn r1（judge-r1-key-turn）
+- 2026-10-20 12:45:30 | codex | 完成：评审 key-street r1（judge-r1-key-street）
+- 2026-10-20 12:46:31 | codex | 完成：评审 key-climax r1（judge-r1-key-climax）
+- 2026-10-20 12:47:29 | codex | 完成：评审 key-end r1（judge-r1-key-end）
+- 2026-10-20 12:51:43 | claude | 派给 codex：评审 key-shelf r2（judge-r2-key-shelf，只读）
+- 2026-10-20 12:51:43 | claude | 派给 codex：评审 key-bench r2（judge-r2-key-bench，只读）
+- 2026-10-20 12:51:43 | claude | 派给 codex：评审 key-turn r2（judge-r2-key-turn，只读）
+- 2026-10-20 12:51:43 | claude | 派给 codex：评审 key-street r2（judge-r2-key-street，只读）
+- 2026-10-20 12:51:43 | claude | 派给 codex：评审 key-climax r2（judge-r2-key-climax，只读）
+- 2026-10-20 12:51:43 | claude | 派给 codex：评审 key-end r2（judge-r2-key-end，只读）
+- 2026-10-20 12:52:38 | codex | 完成：评审 key-shelf r2（judge-r2-key-shelf）
+- 2026-10-20 12:53:37 | codex | 完成：评审 key-bench r2（judge-r2-key-bench）
+- 2026-10-20 12:54:27 | codex | 完成：评审 key-turn r2（judge-r2-key-turn）
+- 2026-10-20 12:55:19 | codex | 完成：评审 key-street r2（judge-r2-key-street）
+- 2026-10-20 12:56:09 | codex | 完成：评审 key-climax r2（judge-r2-key-climax）
+- 2026-10-20 12:57:06 | codex | 完成：评审 key-end r2（judge-r2-key-end）
+- 2026-10-20 13:05:19 | claude | 派给 codex：评审 key-shelf r3（judge-r3-key-shelf，只读）
+- 2026-10-20 13:05:19 | claude | 派给 codex：评审 key-bench r3（judge-r3-key-bench，只读）
+- 2026-10-20 13:05:19 | claude | 派给 codex：评审 key-turn r3（judge-r3-key-turn，只读）
+- 2026-10-20 13:05:19 | claude | 派给 codex：评审 key-street r3（judge-r3-key-street，只读）
+- 2026-10-20 13:05:20 | claude | 派给 codex：评审 key-climax r3（judge-r3-key-climax，只读）
+- 2026-10-20 13:05:20 | claude | 派给 codex：评审 key-end r3（judge-r3-key-end，只读）
+- 2026-10-20 13:06:16 | codex | 完成：评审 key-shelf r3（judge-r3-key-shelf）
+- 2026-10-20 13:08:30 | codex | 完成：评审 key-bench r3（judge-r3-key-bench）
+- 2026-10-20 13:09:33 | codex | 完成：评审 key-turn r3（judge-r3-key-turn）
+- 2026-10-20 13:10:28 | codex | 完成：评审 key-street r3（judge-r3-key-street）
+- 2026-10-20 13:11:19 | codex | 完成：评审 key-climax r3（judge-r3-key-climax）
+- 2026-10-20 13:12:09 | codex | 完成：评审 key-end r3（judge-r3-key-end）

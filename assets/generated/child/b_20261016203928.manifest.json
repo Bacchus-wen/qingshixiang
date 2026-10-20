@@ -1,0 +1,53 @@
+{
+  "batch_id": "b_20261016203928",
+  "tasks": 1,
+  "submitted": 1,
+  "failed": 0,
+  "total_images": 1,
+  "items": [
+    {
+      "index": 1,
+      "prompt": "Single isolated object for 3D reconstruction: a smooth matte grey featureless articulated artist's mannequin with small, slender proportions, standing upright, arms relaxed at the sides, wearing a simple small backpack and a cloth cap, facing the camera, entire figure visible and centred, plain light grey seamless background, soft even studio lighting, product photo, no text",
+      "id": "img_43569",
+      "status": "completed",
+      "urls": [
+        "https://vast-material.cdn.bcebos.com/ai-generate/results/43569/7a669be8-290a-4e1c-968e-cf29d72ab242.png?authorization=bce-auth-v1%2FALTAKraGHU56ZFEaI2oW9TnwKX%2F2026-10-16T20%3A39%3A25Z%2F3600%2F%2F99df69755c205fc75decc810993802a438f2ceccae4689f5d507af672a62112c"
+      ],
+      "files": [
+        "/Users/wenbin/Games/新游戏/assets/generated/child/img_43569/ai_generate_43569_1.png"
+      ]
+    }
+  ],
+  "plan": {
+    "kind": "image",
+    "model": "gpt",
+    "version": "gpt-image-2.5-sunburst",
+    "count": 1,
+    "quota": {
+      "limit": 300,
+      "used": 19,
+      "remaining": 281,
+      "unit": "张",
+      "after": 20
+    },
+    "running": {
+      "limit": 20,
+      "current": 0
+    },
+    "allowed": true,
+    "blockers": [],
+    "cost": {
+      "amount": 0,
+      "currency": "USD",
+      "priced": false,
+      "estimated": false,
+      "note": null
+    },
+    "request": {
+      "batch": true,
+      "tasks": 1,
+      "total_images": 1,
+      "local_uploads": []
+    }
+  }
+}

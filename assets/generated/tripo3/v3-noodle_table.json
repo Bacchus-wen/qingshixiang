@@ -1,0 +1,19 @@
+{
+ "op": "v3-noodle_table",
+ "steps": {
+  "multiview": {
+   "state": "submitted",
+   "task_id": "a96aa094-18e7-4717-8bef-bf6ec3abf3d6",
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "65798ca2-a619-4c71-b6ea-128c63d76c7a",
+   "status": "success"
+  }
+ },
+ "file_token": "file_abdf7a8c-d93f-4145-95ba-65803d3740b1",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/hero3/named/noodle_table.png",
+ "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo3/v3-noodle_table.glb",
+ "glb_sha256": "171c1239982832751a3e6f255d8192df685eb0e3725407105d4ed27c4b6d7f2f"
+}

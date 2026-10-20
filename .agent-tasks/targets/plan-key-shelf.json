@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "error": {
+    "code": "INTERNAL_ERROR",
+    "message": "unknown certificate verification error"
+  },
+  "meta": {
+    "version": "0.1.4",
+    "api": "https://vast-material.tripo3d.com/api"
+  }
+}

@@ -1453,5 +1453,82 @@
    0.64,
    0.66
   ]
+ },
+ {
+  "name": "street_stool_tv",
+  "glb": "stool.glb",
+  "pos": [
+   -2.4,
+   0,
+   6.6
+  ],
+  "ry": 18
+ },
+ {
+  "name": "street_tv",
+  "glb": "crt_tv.glb",
+  "pos": [
+   -2.4,
+   0,
+   6.6
+  ],
+  "ry": 196,
+  "scale": 0.9,
+  "on": "street_stool_tv"
+ },
+ {
+  "name": "street_radio",
+  "glb": "tube_radio_closed.glb",
+  "pos": [
+   -0.95,
+   0,
+   7.4
+  ],
+  "ry": 168,
+  "roll": 5,
+  "scale": 0.95
+ },
+ {
+  "name": "street_fan",
+  "glb": "desk_fan.glb",
+  "pos": [
+   1.45,
+   0,
+   6.3
+  ],
+  "ry": 205,
+  "roll": -78,
+  "scale": 1.0
+ },
+ {
+  "name": "street_cassette",
+  "glb": "cassette_recorder.glb",
+  "pos": [
+   2.95,
+   0,
+   7.1
+  ],
+  "ry": 196,
+  "roll": 4
+ },
+ {
+  "name": "street_stool",
+  "glb": "stool.glb",
+  "pos": [
+   0.55,
+   0,
+   7.7
+  ],
+  "ry": -24
+ },
+ {
+  "name": "street_carton",
+  "glb": "../v2/cardboard.glb",
+  "pos": [
+   3.95,
+   0,
+   6.5
+  ],
+  "ry": 12
  }
 ]

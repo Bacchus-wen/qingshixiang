@@ -1,0 +1,48 @@
+{
+  "batch_id": "b_20261016203015",
+  "tasks": 1,
+  "submitted": 1,
+  "failed": 1,
+  "total_images": 1,
+  "items": [
+    {
+      "index": 1,
+      "prompt": "Single isolated full-body figure for 3D reconstruction: a slim Chinese child about ten years old standing straight and still, arms relaxed at the sides, facing the camera, wearing a loose school tracksuit and canvas shoes, a small backpack, short hair, simple clear silhouette, plain light grey seamless background, soft even studio lighting, photorealistic, entire body visible and centred, no text",
+      "id": "img_43568",
+      "status": "failed",
+      "error": "任务 img_43568 failed：AI生成失败: Error code: 400 - {'error': {'message': 'The request is invalid. Please check your input and try again.', 'type': 'invalid_request_error', 'code': 'invalid_request'}}"
+    }
+  ],
+  "plan": {
+    "kind": "image",
+    "model": "gpt",
+    "version": "gpt-image-2.5-sunburst",
+    "count": 1,
+    "quota": {
+      "limit": 300,
+      "used": 18,
+      "remaining": 282,
+      "unit": "张",
+      "after": 19
+    },
+    "running": {
+      "limit": 20,
+      "current": 0
+    },
+    "allowed": true,
+    "blockers": [],
+    "cost": {
+      "amount": 0,
+      "currency": "USD",
+      "priced": false,
+      "estimated": false,
+      "note": null
+    },
+    "request": {
+      "batch": true,
+      "tasks": 1,
+      "total_images": 1,
+      "local_uploads": []
+    }
+  }
+}

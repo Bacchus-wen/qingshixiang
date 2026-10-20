@@ -32,7 +32,7 @@ export class PostFX {
     this.params = {
       exposure: uniform(1.05), // v3: real lights now carry the street
       vignette: uniform(0.5),
-      grain: uniform(0.035),
+      grain: uniform(0.02),
       saturation: uniform(1.12), hueKeep: uniform(0.45),
       contrast: uniform(0.45),
       blackPoint: uniform(0.02),

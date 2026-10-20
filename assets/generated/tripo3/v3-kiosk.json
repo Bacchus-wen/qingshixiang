@@ -1,0 +1,19 @@
+{
+ "op": "v3-kiosk",
+ "steps": {
+  "multiview": {
+   "state": "submitted",
+   "task_id": "fd1a12d5-639e-4a04-aa76-a67eff48431e",
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "6b693e6d-9e70-4d9c-96b5-1a32e43b8b74",
+   "status": "success"
+  }
+ },
+ "file_token": "file_b819f7e4-a06b-4db6-b80a-592868537fe5",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/hero3/named/kiosk.png",
+ "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo3/v3-kiosk.glb",
+ "glb_sha256": "bbd110503e3461e79061a9faf274c01ff0568e722718823dfdf3fa6b130744fc"
+}

@@ -1,0 +1,19 @@
+{
+ "op": "v3-cable_box",
+ "steps": {
+  "multiview": {
+   "state": "submitted",
+   "task_id": "d4e2f131-2fa0-46e7-b0a9-ba8267a33fc7",
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "9949a249-e544-4414-a492-10692232a534",
+   "status": "success"
+  }
+ },
+ "file_token": "file_8ca6af1e-4cf5-44d0-8cb6-a0cc935d1822",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/hero2/named/cable_box.png",
+ "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo3/v3-cable_box.glb",
+ "glb_sha256": "70972e3b7d726a7f68c909e00595bf7ee0e8c7f6a474bc73ac0eefabdb0deffd"
+}

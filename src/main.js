@@ -31,6 +31,7 @@ try {
   await engine.init(list, (p) => { loading.style.setProperty('--p', p); });
   loading.classList.add('done');
   engine.start();
+  if (engine.ctx.params.get('studio') !== null) import('./ui/studio.js').then((m) => m.studio(engine.ctx)); // live tuning panel
 } catch (e) {
   console.error(e);
   const msg = /核心系统/.test(e.message) ? `${e.message}` : '这个浏览器无法运行 WebGPU 或 WebGL2';

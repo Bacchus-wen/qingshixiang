@@ -8,7 +8,7 @@ import { SHOTS } from '../../engine/shots.js';
 import { LodLibrary, SHADOW_LAYER, ROBOT_LAYER, ROBOT_SHADOW_LAYER } from './lod.js';
 import { HeadRig } from './rig.js';
 import { pastHooks } from './past.js';
-import { memoryMask } from '../../materials/memory.js';
+import { memoryMask, mem } from '../../materials/memory.js';
 import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorld, positionLocal, smoothstep, vec2, vec3, mx_worley_noise_float, texture, normalWorldGeometry, abs, step, uniform, uv, vec4 } from 'three/tsl';
 
 // v4: the closed-down home-appliance repair shop (docs/scene-shop.md). This phase is models + layout only:
@@ -85,8 +85,10 @@ function facadeMat() {
 function streetMat() {
   const m = new THREE.MeshStandardNodeMaterial();
   const P = positionWorld;
-  m.colorNode = texture(tex('pavement'), P.xz.div(1.6)).rgb.mul(0.8).mul(mix(float(1), float(0.5), smoothstep(5.5, 10.6, P.z))); // the far road darker: it meets the photograph's dusk
-  m.roughnessNode = float(0.8);
+  // worn: patches of grime and dust; the far road darker where it meets the photograph's dusk
+  const grime = mx_fractal_noise_float(vec3(P.x.mul(0.45), 0, P.z.mul(0.45)), 3, 2.0, 0.5).mul(0.5).add(0.5);
+  m.colorNode = texture(tex('pavement'), P.xz.div(1.6)).rgb.mul(0.8).mul(mix(float(0.72), float(1.12), grime)).mul(mix(float(1), float(0.5), smoothstep(5.5, 10.6, P.z)));
+  m.roughnessNode = mix(float(0.62), float(0.95), grime);
   return m;
 }
 let railMat = null;
@@ -448,20 +450,25 @@ export default {
       const now = tex('street_now'), then = tex('street_then');
       for (const t of [now, then]) { t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; t.anisotropy = 8; }
       const bd = new THREE.MeshBasicNodeMaterial(), k = memoryMask(positionWorld), far = this.farK = uniform(1); // far: dusk 1 -> night (atmo)
-      bd.colorNode = mix(texture(now, uv()).rgb.mul(far.mul(0.62)), texture(then, uv()).rgb.mul(0.9), k);
+      const toP = positionWorld.sub(mem.origin).normalize(), core = smoothstep(mem.coreCos.sub(0.012), mem.coreCos.add(0.02), toP.dot(mem.dir));
+      bd.colorNode = mix(texture(now, uv()).rgb.mul(far.mul(0.62)), texture(then, uv()).rgb.mul(mix(float(0.36), float(0.98), core)), k); // what the beam itself touches stays brightest
       const BW = 16, BH = BW * 1920 / 3840;
       const plane = new THREE.Mesh(new THREE.PlaneGeometry(BW, BH), bd); plane.rotation.y = Math.PI; // faces the shop (-z)
       plane.position.set(0.4, -STEP + BH / 2 - 0.05, d / 2 + 0.25 + 8.5); root.add(plane); this.backdrop = plane;
       // a low kerb along the far side, where the photograph's pavement begins: a line that ties our road to its ground
-      // (broken: stretches of kerb with gaps, kerbstones knocked out of line, and loose bricks -- not a straight frame line)
-      const km = new THREE.MeshStandardNodeMaterial({ color: 0x55534f, roughness: 0.9 }), bm = new THREE.MeshStandardNodeMaterial({ color: 0x6a4a3a, roughness: 0.95 });
+      // a continuous worn concrete kerb with a gutter in front, and rubble from the far side spilling over it onto our road
+      // (bricks and broken concrete across the line where the photograph meets the 3D street, with contact shadows)
+      const km = new THREE.MeshStandardNodeMaterial({ color: 0x7c776e, roughness: 0.92 }), bm = new THREE.MeshStandardNodeMaterial({ color: 0x7a4c3a, roughness: 0.95 }), cm = new THREE.MeshStandardNodeMaterial({ color: 0x8d8a83, roughness: 0.97 });
       const zK = d / 2 + 0.25 + 8.3, rnd = (i) => { const x = Math.sin(i * 91.7) * 43758.5453; return x - Math.floor(x); };
-      let x0 = -7.6;
-      for (const [len, gap] of [[2.6, 0.5], [3.3, 0.9], [1.4, 0.35], [2.9, 1.1], [3.1, 0.6], [2.2, 0]]) {
-        const k = new THREE.Mesh(new THREE.BoxGeometry(len, 0.13, 0.3), km); k.position.set(x0 + len / 2, -STEP + 0.065 - rnd(len) * 0.03, zK + (rnd(len * 3) - 0.5) * 0.08); k.rotation.y = (rnd(len * 7) - 0.5) * 0.03; k.receiveShadow = true; root.add(k);
-        x0 += len + gap;
+      const kerb = new THREE.Mesh(new THREE.BoxGeometry(16.2, 0.15, 0.32), km); kerb.position.set(0.4, -STEP + 0.075, zK); kerb.castShadow = kerb.receiveShadow = true; root.add(kerb);
+      const gutter = new THREE.Mesh(new THREE.PlaneGeometry(16.2, 0.38).rotateX(-Math.PI / 2), new THREE.MeshStandardNodeMaterial({ color: 0x2c2b29, roughness: 0.6 })); gutter.position.set(0.4, -STEP + 0.003, zK - 0.34); gutter.receiveShadow = true; root.add(gutter);
+      for (let i = 0; i < 90; i++) {
+        const big = rnd(i + 300) > 0.72, w = big ? 0.18 + rnd(i + 7) * 0.22 : 0.2, h = big ? 0.06 + rnd(i + 8) * 0.12 : 0.055, dd = big ? 0.12 + rnd(i + 9) * 0.2 : 0.1;
+        const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, dd), big ? cm : bm);
+        const pile = rnd(i + 500) < 0.55, x = pile ? 0.45 + (rnd(i + 1) - 0.5) * 3.2 : -7.4 + rnd(i + 1) * 15.6; // most of it in front of the half-demolished house
+        b.position.set(x, -STEP + h / 2 + (rnd(i + 2) < 0.3 ? 0.15 : 0), zK - 0.25 + rnd(i + 40) * (pile ? 1.1 : 0.7));
+        b.rotation.set((rnd(i + 60) - 0.5) * 0.5, rnd(i + 80) * 6.3, (rnd(i + 120) - 0.5) * 0.6); b.castShadow = b.receiveShadow = true; root.add(b);
       }
-      for (let i = 0; i < 26; i++) { const b = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.06, 0.11), bm); b.position.set(-7.4 + rnd(i + 1) * 15.6, -STEP + 0.03, zK + 0.2 + rnd(i + 40) * 0.9); b.rotation.set(0, rnd(i + 80) * 6.3, (rnd(i + 120) - 0.5) * 0.4); b.receiveShadow = b.castShadow = true; root.add(b); }
     }
     // printed things on the walls (generated with the company platform, docs/gen-log.md)
     root.add(onWall(decal('pegboard_empty', 1.14, 0.76), 'back', -1.88, 1.72, 0.0145));

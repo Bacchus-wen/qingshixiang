@@ -1,0 +1,19 @@
+{
+ "op": "v3-ac_cluster",
+ "steps": {
+  "multiview": {
+   "state": "submitted",
+   "task_id": "d1877545-9bf1-4b3b-9d23-641937b4629e",
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "6949d8a9-3798-4e74-a973-50b2bc00a0c5",
+   "status": "success"
+  }
+ },
+ "file_token": "file_6da103b1-9fdf-4481-94c9-29be786b9fc4",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/hero2/named/ac_cluster.png",
+ "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo3/v3-ac_cluster.glb",
+ "glb_sha256": "13c323b05131949a7757e22cb477896f187e3413fedaffaf48ad6f4dc1fa5ac8"
+}

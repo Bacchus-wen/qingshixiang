@@ -1,0 +1,19 @@
+{
+ "op": "v3-fruit_stall",
+ "steps": {
+  "multiview": {
+   "state": "submitted",
+   "task_id": "1d94be67-4dd7-46ce-b964-13c9be2e90ed",
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "6df826a0-a826-43c6-babb-124788496191",
+   "status": "success"
+  }
+ },
+ "file_token": "file_bdcb56a2-744a-44d4-8672-2c4540de1906",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/hero3/named/fruit_stall.png",
+ "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo3/v3-fruit_stall.glb",
+ "glb_sha256": "8cd4e6bcbde6caa3801b51b51fd285eafccc9cf91e772f638cb691b4ea7f4e7e"
+}

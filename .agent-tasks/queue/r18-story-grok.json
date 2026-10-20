@@ -1,0 +1,15 @@
+{
+ "id": "r18-story-grok",
+ "from": "claude",
+ "to": "grok",
+ "title": "修理铺故事第一版 苛刻批判",
+ "write": false,
+ "gen": false,
+ "paths": [],
+ "status": "failed",
+ "posted": "2026-10-19 10:51:39",
+ "started": "2026-10-19 10:51:39",
+ "seconds": 8.5,
+ "finished": "2026-10-19 10:51:48",
+ "reason": null
+}

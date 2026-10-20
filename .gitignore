@@ -21,3 +21,10 @@ assets/generated/compare/**/*.glb
 assets/generated/compare/**/*.png
 assets/generated/compare/**/*.jpg
 assets/models/shop/lod/*/L*.glb
+# raw generation downloads stay local (the shipped versions are the converted KTX2/JPG; manifests/JSON are committed)
+assets/generated/vmc/**/*.png
+assets/generated/hero2/**/*.png
+assets/generated/child/**/*.png
+assets/generated/compare/**/*.out
+# throwaway debug probes
+tools/_*.mjs

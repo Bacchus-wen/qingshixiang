@@ -1,0 +1,19 @@
+{
+ "op": "v3-lightbox_wall",
+ "steps": {
+  "multiview": {
+   "state": "submitted",
+   "task_id": "fc734f10-3187-49c5-806f-aee4ddf17f08",
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "6a4095b4-42d7-4333-8a36-30b5eb83d667",
+   "status": "success"
+  }
+ },
+ "file_token": "file_c0da818a-b6a7-4fa8-b73d-cea9c57e84ba",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/hero2/named/lightbox_wall.png",
+ "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo3/v3-lightbox_wall.glb",
+ "glb_sha256": "a67910184ef112b32ad3a09fa3d5f2922a94f22274d5cf6147640b0096198215"
+}

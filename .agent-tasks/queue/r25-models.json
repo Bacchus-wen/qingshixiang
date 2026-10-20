@@ -1,0 +1,15 @@
+{
+ "id": "r25-models",
+ "from": "claude",
+ "to": "codex",
+ "title": "r25 画面与模型(两幕+看外面,最严格)",
+ "write": false,
+ "gen": false,
+ "paths": [],
+ "status": "done",
+ "posted": "2026-10-19 17:59:25",
+ "started": "2026-10-19 17:59:27",
+ "seconds": 81.0,
+ "finished": "2026-10-19 18:00:49",
+ "reason": null
+}

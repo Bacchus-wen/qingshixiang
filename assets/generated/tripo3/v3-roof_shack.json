@@ -1,0 +1,19 @@
+{
+ "op": "v3-roof_shack",
+ "steps": {
+  "multiview": {
+   "state": "submitted",
+   "task_id": "71f210ff-5fc9-4898-8ca3-bfd6aca75fc4",
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "790d568e-8f4a-41c7-b133-183179c182fe",
+   "status": "success"
+  }
+ },
+ "file_token": "file_22eaccda-196e-4911-b57a-4d75442aaf54",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/hero2/named/roof_shack.png",
+ "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo3/v3-roof_shack.glb",
+ "glb_sha256": "8bc33765d8b1b2f52347a3e4f8b1dcda8bb023d608c77fdbe7158c384dee8eaf"
+}

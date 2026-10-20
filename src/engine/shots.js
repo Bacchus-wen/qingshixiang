@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 // Deterministic camera shots for tools/shot.mjs (?shot=<name>). setup(ctx, t) may force story/system state.
 // `scene` picks the system set in main.js (default 'street').
+const camOverride = (ctx) => { const c = ctx.params.get('cam')?.split(',').map(Number); if (!c || c.length < 6) return; ctx.camera.position.set(c[0], c[1], c[2]); if (c[6]) { ctx.camera.fov = c[6]; ctx.camera.updateProjectionMatrix(); } ctx.camera.lookAt(c[3], c[4], c[5]); };
 export const SHOTS = {
   sandbox: { scene: 'lookdev', pos: [0, 1.6, 8], look: [0, 1, 0], fov: 50 },
   lookdev: { scene: 'lookdev', pos: [1.5, 1.4, 9], look: [0, 1.6, -8], fov: 45 },
@@ -54,6 +55,13 @@ export const SHOTS = {
   'shop-farside': { scene: 'shop', pos: [0.9, 1.55, 5.6], look: [1.6, 2.6, 11.0], fov: 50 },
   'shop-robotfront': { scene: 'shop', pos: [0.45, 0.95, 2.6], look: [-0.5, 0.55, 1.25], fov: 40, setup: (ctx) => ctx.api.shop?.robotTurn?.(1) },
   'shop-endout': { scene: 'shop', pos: [0.25, 1.1, -0.35], look: [-1.2, 1.25, 11.0], fov: 46, setup: (ctx) => { ctx.api.shop?.robotTurn?.(1); ctx.api.atmo?.set('out', true); } },
+  // ---- the six key frames of the story (v5), judged every round against their targets (tools/judge.mjs, docs/judge/)
+  'key-shelf': { scene: 'shop', pos: [-0.85, 1.12, 1.55], look: [0.71, 0.86, -1.42], fov: 36, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.api.eye?.aim(new THREE.Vector3(0.71, 0.86, -1.42)); const P = ctx.postfx.params; P.focus.value = 3.35; P.focalRange.value = 1.2; P.bokeh.value = 2.0;  camOverride(ctx);} },
+  'key-bench': { scene: 'shop', pos: [-1.85, 1.15, 1.5], look: [-0.95, 0.88, 0.85], fov: 54, setup: (ctx) => { ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.memory.spotK = 0.3; ctx.api.eye?.aim(new THREE.Vector3(-1.26, 0.98, 0.74));  camOverride(ctx);} },
+  'key-turn': { scene: 'shop', pos: [0.95, 0.8, 2.9], look: [-0.5, 0.55, 1.2], fov: 40, setup: (ctx) => { ctx.api.shop?.robotTurn?.(0.85); ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.memory.lookOverride = { x: 0, y: 0.15 }; ctx.memory.coreK = 0.45; ctx.memory.spotK = 0.5; ctx.memory.lampK = 0.45;  const fl = ctx.api.shop?.faceLight; if (fl) { fl.position.set(0.35, 1.25, 2.45); fl.target.position.set(-0.493, 0.711, 1.376); fl.target.updateMatrixWorld(); fl.angle = 0.9; fl.intensity = 5.0; } camOverride(ctx);} },
+  'key-street': { scene: 'shop', pos: [-0.02, 1.1, 0.42], look: [0.3, 1.85, 11.0], fov: 48, setup: (ctx) => { ctx.api.shop?.robotTurn?.(1); ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.api.eye?.aim(new THREE.Vector3(0.45, 1.3, 10.95)); ctx.memory.spotK = 0.25; ctx.memory.beamK = 0.9; const fl = ctx.api.shop?.faceLight; if (fl) { fl.position.set(0.35, 1.25, 2.45); fl.target.position.set(-0.493, 0.711, 1.376); fl.target.updateMatrixWorld(); fl.angle = 0.28; fl.intensity = 1.6; } camOverride(ctx);} },
+  'key-climax': { scene: 'shop', pos: [-0.02, 1.1, 0.42], look: [0.3, 1.85, 11.0], fov: 51, setup: (ctx) => { ctx.api.shop?.robotTurn?.(1); ctx.memory.forceOpen = true; ctx.memory.shotOpen = 1; ctx.api.eye?.aim(new THREE.Vector3(-3.0, 1.25, 10.95)); ctx.memory.memWide = 4.2; ctx.memory.spotK = 0.25; ctx.memory.beamK = 0.9; const fl = ctx.api.shop?.faceLight; if (fl) { fl.position.set(0.35, 1.25, 2.45); fl.target.position.set(-0.493, 0.711, 1.376); fl.target.updateMatrixWorld(); fl.angle = 0.28; fl.intensity = 1.6; } camOverride(ctx);} },
+  'key-end': { scene: 'shop', pos: [-0.25, 0.82, -1.05], look: [-0.9, 1.7, 11.0], fov: 52, setup: (ctx) => { ctx.api.shop?.robotTurn?.(1); ctx.api.atmo?.set('out', true); ctx.memory.forceOpen = false; ctx.memory.shotOpen = 0;  camOverride(ctx);} },
   'shop-sparewall': { scene: 'shop', pos: [1.75, 1.45, -0.45], look: [2.95, 1.3, -0.65], fov: 42 },
   'shop-iso': { scene: 'shop', pos: [5.5, 6.0, 7.5], look: [0, 0.6, 0], fov: 32 },
   'street-eye': { pos: [0.6, 1.55, 10], look: [0, 1.8, -30], fov: 42 },

@@ -1,0 +1,19 @@
+{
+ "op": "v3-lanterns",
+ "steps": {
+  "multiview": {
+   "state": "submitted",
+   "task_id": "6f1cfc98-d5cb-4a35-b443-d65b290f83d3",
+   "status": "success"
+  },
+  "model": {
+   "state": "submitted",
+   "task_id": "d93baf03-68db-4563-85e7-db9286af3e48",
+   "status": "success"
+  }
+ },
+ "file_token": "file_4fdf3e0d-f788-4599-b187-be92e3271220",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/hero3/named/lanterns.png",
+ "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo3/v3-lanterns.glb",
+ "glb_sha256": "1de10016251142498cc7a092eaa8f5b2e949e53c3520f864b67df3596a1740ce"
+}

@@ -16,7 +16,7 @@ const LEVELS = {
   review: { hemi: 0.45, dusk: 1.4, lamp: 18, fill: 3, tube: 5.5, glow: 2.2, robot: 7, env: 0.55, street: 0, far: 1 },
   dusk:   { hemi: 0.28, dusk: 2.1, lamp: 13, fill: 1.0, tube: 0, glow: 0.02, robot: 2.2, env: 0.34, street: 0, far: 1 }, // dusk light only gets in under the shutter: outside can be properly lit
   alive:  { hemi: 0.2, dusk: 1.0, lamp: 16, fill: 1.0, tube: 4.0, glow: 1.8, robot: 2.2, env: 0.38, street: 0, far: 1 },
-  out:    { hemi: 0.07, dusk: 0.55, lamp: 0, fill: 0, tube: 0, glow: 0.0, robot: 1.8, env: 0.14, street: 1, far: 0.4 }, // (far: the street across the road goes to night) the robot keeps a rim of street light: dark, not a black block
+  out:    { hemi: 0.07, dusk: 0.55, lamp: 0, fill: 0, tube: 0, glow: 0.0, robot: 0.6, env: 0.14, street: 1, far: 0.4 }, // (far: the street across the road goes to night) the robot keeps a rim of street light: dark, not a black block
 };
 
 export default {
@@ -53,17 +53,29 @@ export default {
     mat.scaleNode = float(0.0035).add(seed.y.mul(0.003));
     const dust = this.dust = new THREE.Sprite(mat); dust.count = N; dust.frustumCulled = false; dust.renderOrder = 7;
     if (ctx.params.get('nodust') === null) ctx.scene.add(dust);
-    // ---- the street lamp across the road (a cobra-head on the pole in the backdrop painting, ~6.5 m up): its glowing
-    // head, a soft halo, and the warm pool it throws on the road and the shutter
-    { const head = new THREE.Vector3(6.78, 6.5, 10.9);
+    // ---- the street lamp across the road: a concrete post standing in front of the far side's photograph (a 3D thing
+    // between our road and the picture), its head, a soft halo, and the cold pool it throws on the empty road. On only
+    // at the end (street = 1 in the 'out' state)
+    {
+      const head = new THREE.Vector3(-4.5, 4.6, 10.35); // the post stands at the pillar between the electronics shop and the tailor's (no sign covered)
       const hm = new THREE.SpriteNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
       const rr = uv().sub(0.5).length().mul(2);
       this.streakK = uniform(0);
       hm.colorNode = vec3(0.82, 0.88, 1.0).mul(float(1).sub(smoothstep(0, 1, rr)).pow(3).mul(0.6).add(float(1).sub(smoothstep(0, 0.12, rr)).mul(5))).mul(this.streakK);
-      const halo = new THREE.Sprite(hm); halo.position.copy(head); halo.scale.setScalar(1.6); ctx.scene.add(halo);
-      const sl = this.streetLamp = new THREE.SpotLight(0xcfdcff, 0, 30, 0.7, 0.85, 1.1); // cold: a mercury lamp over an empty road sl.position.copy(head); sl.target.position.set(1.2, -0.14, 4.6); // its pool reaches the pavement in front of the shop: seen from inside
-      ctx.scene.add(sl, sl.target); }
-    ctx.api.atmo = { set: (s) => { if (LEVELS[s]) this.state = s; }, get state() { return this.state; }, flicker: (k = 1) => { this.burst = Math.max(this.burst, k); } };
+      const halo = new THREE.Sprite(hm); halo.position.copy(head).add(new THREE.Vector3(0, -0.04, 0)); halo.scale.setScalar(0.8); ctx.scene.add(halo);
+      // cold: a mercury lamp over an empty road
+      const sl = this.streetLamp = new THREE.SpotLight(0xcfdcff, 0, 30, 0.75, 0.85, 1.1);
+      sl.position.copy(head); sl.target.position.set(-3.2, -0.14, 7.4);
+      ctx.scene.add(sl, sl.target);
+      const pm = new THREE.MeshStandardNodeMaterial({ color: 0x8a877f, roughness: 0.85 });
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.1, 4.75, 10), pm); pole.position.set(head.x - 0.72, 4.75 / 2 - 0.14, head.z + 0.04);
+      const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.78, 8).rotateZ(Math.PI / 2), pm); arm.position.set(head.x - 0.36, head.y + 0.1, head.z);
+      const lampMat = new THREE.MeshStandardNodeMaterial({ color: 0x3a3c40, roughness: 0.6 });
+      lampMat.emissiveNode = vec3(0.85, 0.9, 1.0).mul(this.streakK.mul(3.5));
+      const lampHead = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.1, 0.22), lampMat); lampHead.position.copy(head).add(new THREE.Vector3(0, 0.05, 0));
+      for (const o of [pole, arm, lampHead]) { o.castShadow = true; o.receiveShadow = true; ctx.scene.add(o); }
+    }
+    ctx.api.atmo = { levels: LEVELS, set: (s) => { if (LEVELS[s]) this.state = s; }, get state() { return this.state; }, flicker: (k = 1) => { this.burst = Math.max(this.burst, k); } };
   },
 
   update(dt, t, ctx) {
@@ -83,7 +95,7 @@ export default {
       this.wasOn = on;
     }
     if (ctx.isShot && ctx.params.get('tube') !== null) tubeOn = +ctx.params.get('tube');
-    L.hemi.intensity = C.hemi; L.dusk.intensity = C.dusk; L.lamp.intensity = C.lamp * (ctx.params.get('lampoff') !== null ? 0 : 1); L.fill.intensity = C.fill;
+    L.hemi.intensity = C.hemi; L.dusk.intensity = C.dusk; L.lamp.intensity = C.lamp * (ctx.params.get('lampoff') !== null ? 0 : 1) * (ctx.memory.lampK ?? 1); L.fill.intensity = C.fill;
     L.tube.intensity = (this.state === 'review' ? C.tube : 5.5 * tubeOn); L.tubeGlow.value = this.state === 'review' ? C.glow : 0.02 + 2.2 * tubeOn;
     if (L.robotFill) L.robotFill.intensity = C.robot;
     ctx.scene.environmentIntensity = C.env;

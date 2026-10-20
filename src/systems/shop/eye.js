@@ -221,7 +221,8 @@ export default {
       const inv = this._q.copy(this.robot.getWorldQuaternion(this._q)).invert();
       const w = want.clone().applyQuaternion(inv), c = this._d.clone().applyQuaternion(inv);
       const dyaw = Math.atan2(w.x, w.z) - Math.atan2(c.x, c.z), dpit = Math.asin(THREE.MathUtils.clamp(w.y, -1, 1)) - Math.asin(THREE.MathUtils.clamp(c.y, -1, 1));
-      this.look.x = THREE.MathUtils.clamp(this.lookCur.x + dyaw / 0.85, -1, 1); this.look.y = THREE.MathUtils.clamp(this.lookCur.y + dpit / 0.32, -1, 1);
+      // (directed looks may turn further than the pointer can: up to ~66 deg, e.g. to the radio on its bench)
+      this.look.x = THREE.MathUtils.clamp(this.lookCur.x + dyaw / 0.85, -1.35, 1.35); this.look.y = THREE.MathUtils.clamp(this.lookCur.y + dpit / 0.32, -1, 1);
     } else if (m.lookOverride) this.look.set(m.lookOverride.x, m.lookOverride.y);
     else this.look.set(-input.pointer.x, input.pointer.y); // screen right = the robot's right (the camera rides behind it)
     const k = Math.min(1, dt * (m.headK ?? (0.5 + o * 1.6))), reach = m.holdGaze ? 1 : Math.min(1, 0.2 + o); // holdGaze: it keeps looking even with the eye shut
@@ -239,13 +240,13 @@ export default {
 
     // ---- the lens parts follow the head; the iris opens with the eye (a little ahead of the light: it lets it out)
     this.lens.matrix.multiplyMatrices(this.robot.matrixWorld, this._lm.multiplyMatrices(rig.mat.value, LENS_FRAME)); this.lens.matrixWorldNeedsUpdate = true;
-    const lu = this.lensU; lu.aperture.value = 0.06 + 0.4 * Math.min(1, o * 1.15); lu.twist.value = o * 0.18; lu.coreK.value = (m.eyeRest ?? 0.35) * (1 - o) + 3.2 * o * Math.min(1, pw * 2);
+    const lu = this.lensU; lu.aperture.value = 0.06 + 0.4 * Math.min(1, o * 1.15); lu.twist.value = o * 0.18; lu.coreK.value = ((m.eyeRest ?? 0.35) * (1 - o) + 3.2 * o * Math.min(1, pw * 2)) * (m.coreK ?? 1);
     // ---- the light and the shaft follow the lens
     rig.eye(this.robot, this._p, this._d);
     const origin = this._v.copy(this._p).addScaledVector(this._d, 0.045); // just in front of the lens barrel
     const angle = 0.07 + 0.15 * o; // v5: a searching beam -- across the road its circle holds a shop and a half, not the street
     m.origin.copy(origin); m.dir.copy(this._d); m.angle = Math.min(1.2, angle * 1.12 * (m.memWide ?? 1)); m.strength = Math.min(1, o * 1.3) * Math.min(1, pw * 3);
-    syncMemory(m); mem.soft.value = (1 - Math.cos(m.angle)) * 0.35; // the soft edge scales with the cone (a fixed width would swallow a narrow one)
+    syncMemory(m); mem.soft.value = (1 - Math.cos(m.angle)) * 0.35; mem.coreCos.value = Math.cos(angle * 1.12); // the soft edge scales with the cone (a fixed width would swallow a narrow one)
     const sp = this.spot;
     sp.position.copy(origin); sp.target.position.copy(origin).addScaledVector(this._d, 4); sp.target.updateMatrixWorld();
     sp.angle = angle; sp.penumbra = 0.7;

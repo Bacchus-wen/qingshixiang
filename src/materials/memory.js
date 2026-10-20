@@ -18,6 +18,7 @@ export const mem = {
   strength: uniform(0),
   amber: uniform(new THREE.Color(1.0, 0.58, 0.28)),
   soft: uniform(0.025),
+  coreCos: uniform(Math.cos(0.3)), // the beam itself (the memory can be wider at the climax: the shops it lights directly stay brightest)
 };
 
 export function syncMemory(m) {
