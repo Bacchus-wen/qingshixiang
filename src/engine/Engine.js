@@ -111,7 +111,7 @@ export class Engine {
   // Steps down only (no oscillation); each step is a one-off render-target reallocation.
   adaptResolution(now) {
     const p = this.perf;
-    if (!p || p.n < 120 || this.params.get('dpr')) return;
+    if (!p || p.n < 120 || this.params.get('dpr') || this.shot) return; // (shots: fixed resolution -- the first seconds of a capture compile shaders and stream models, and stepping down there handed the judges a blurred, grainy frame)
     this._slowSince ??= null;
     // slow = long frames AND a long render call (a 30 Hz display alone is not slow: render returns quickly there)
     if (document.hidden) { this._slowSince = null; return; }

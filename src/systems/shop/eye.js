@@ -91,12 +91,13 @@ function beamMaterial(u, noDepth = false) {
       const p = cameraPosition.add(rd.mul(t0.add(dt.mul(float(i).add(0.5)))));
       const q = p.sub(u.apex), along = dot(q, u.axis), rad = q.sub(u.axis.mul(along)).length(), edgeR = along.max(0.001).mul(u.tanA);
       // light in dusty air, not a solid cone: a soft edge (no hard rim), uneven dust, fading with distance
-      const inside = float(1).sub(smoothstep(edgeR.mul(0.45), edgeR, rad)).mul(smoothstep(0.0, u.near, along)); // near: how far from the lens the shaft fades in (act two, seen from behind: no fog ball round the head)
+      const inside = float(1).sub(smoothstep(edgeR.mul(0.45), edgeR, rad)).mul(smoothstep(0.0, u.near, along)).mul(float(1).sub(smoothstep(u.far.mul(0.55), u.far, along))); // far: thins out before what it lights (r8: a milk-white cloud over the barber's door) // near: how far from the lens the shaft fades in (act two, seen from behind: no fog ball round the head)
       const fall = float(1).div(along.mul(along).mul(u.reach.mul(0.7)).add(0.3)); // reach < 1: the shaft carries further (act two: across the road)
       const camNear = smoothstep(0.12, 0.5, p.sub(cameraPosition).length());
       const ang = atan(dot(q, bv), dot(q, bu));
       const streak = mx_noise_float(vec3(ang.mul(2.6), along.mul(0.15), 1.7)).mul(0.6).add(0.7);
-      const dust = mx_noise_float(p.mul(2.3).add(vec3(0.02, -0.05, 0.015).mul(time))).mul(0.5).add(0.6).mul(mx_noise_float(p.mul(7.0).add(vec3(0.0, -0.03, 0.0).mul(time))).mul(0.3).add(0.8));
+      // (judges r4-r8: "a yellow fog", "grain over the left half": the fine 7/m noise read as speckle -- slow broad drift only)
+      const dust = mx_noise_float(p.mul(2.3).add(vec3(0.02, -0.05, 0.015).mul(time))).mul(0.3).add(0.75).mul(mx_noise_float(p.mul(7.0).add(vec3(0.0, -0.03, 0.0).mul(time))).mul(0.08).add(0.95));
       acc.addAssign(inside.mul(fall).mul(camNear).mul(streak).mul(dust));
     });
     return color(BEAM_COLOR).mul(acc.mul(dt)).mul(u.k).add(u.dbg); // dbg: a flat tint over the proxy (?beamdbg)
@@ -190,7 +191,7 @@ export default {
     // (closed at the far end: seen from behind the lens, along the beam, a camera ray leaves an open cone through its
     // mouth without meeting a back face -- the whole shaft went undrawn from act two's camera; 14 m reaches past the
     // far side's photograph)
-    const L = 14, u = this.beamU = { apex: uniform(new THREE.Vector3()), axis: uniform(new THREE.Vector3(0, 0, -1)), tanA: uniform(0.3), k: uniform(0), reach: uniform(1), near: uniform(0.12), dbg: uniform(ctx.params.get('beamdbg') !== null ? 0.25 : 0) };
+    const L = 14, u = this.beamU = { apex: uniform(new THREE.Vector3()), axis: uniform(new THREE.Vector3(0, 0, -1)), tanA: uniform(0.3), k: uniform(0), reach: uniform(1), near: uniform(0.12), far: uniform(100), dbg: uniform(ctx.params.get('beamdbg') !== null ? 0.25 : 0) };
     const cone = this.cone = new THREE.Mesh(new THREE.CylinderGeometry(0.002, L * Math.tan(0.55), L, 40, 1, false).translate(0, -L / 2, 0), beamMaterial(u, ctx.params.get('beamnodepth') !== null));
     cone.frustumCulled = false; cone.renderOrder = 8; ctx.scene.add(cone);
     // the lens itself glows when the eye opens: a small soft halo on it (the shaft starts at a point of light)
@@ -284,7 +285,7 @@ export default {
     const gm = m.goboMode || 'lens';
     if (Math.abs(o - this.goboOpen) > 0.03 || gm !== this.goboMode) { this.gobo.draw(o, gm); this.goboOpen = o; this.goboMode = gm; }
     const u = this.beamU;
-    u.apex.value.copy(origin); u.axis.value.copy(this._d); u.reach.value = +ctx.params.get('beamreach') || (m.beamReach ?? 1); u.near.value = m.beamNear ?? 0.12; u.tanA.value = Math.tan(angle) * (m.shaftW ?? 1); /* shaftW: the visible shaft narrower than the circle it brings back (act two looks along it: a full-width cone read as fog) */ u.k.value = 0.55 * o * o * Math.min(1, pw * 2) * (m.beamK ?? 1) * (+ctx.params.get('beamk') || 1);
+    u.apex.value.copy(origin); u.axis.value.copy(this._d); u.reach.value = +ctx.params.get('beamreach') || (m.beamReach ?? 1); u.near.value = m.beamNear ?? 0.12; u.far.value = m.beamFar ?? 100; u.tanA.value = Math.tan(angle) * (m.shaftW ?? 1); /* shaftW: the visible shaft narrower than the circle it brings back (act two looks along it: a full-width cone read as fog) */ u.k.value = 0.55 * o * o * Math.min(1, pw * 2) * (m.beamK ?? 1) * (+ctx.params.get('beamk') || 1);
     this.cone.position.copy(origin); this.cone.quaternion.setFromUnitVectors(_DOWN, this._d);
     this.halo.position.copy(this._p).addScaledVector(this._d, 0.03);
     this.haloK.value = (0.6 * o + 0.06) * Math.min(1, m.coreK ?? 1);

@@ -91,7 +91,7 @@ export default {
       ctx.scene.add(pl, pl.target);
       // and a low, wide spill from the doorway into the dark shop (act two looks over it: the fan, the radios, the sets
       // only read as silhouettes) -- memory.doorK; no shadows
-      const df = this.doorFill = new THREE.SpotLight(0xd9c7ae, 0, 0, 1.05, 1, 0);
+      const df = this.doorFill = new THREE.SpotLight(0xc4ccd8, 0, 0, 1.2, 1, 0); // dusk-cool, wide and soft (r8: the fan, the cartons, the cabinet black)
       df.position.set(0.0, 2.2, 2.6); df.target.position.set(0.0, 1.15, -1.9); ctx.scene.add(df, df.target); // aimed at the shelves, not the floor by the door
     }
     ctx.api.atmo = { levels: LEVELS, set: (s, snap) => { if (LEVELS[s]) { this.state = s; if (snap) Object.assign(this.cur, LEVELS[s]); } }, get state() { return this.state; }, flicker: (k = 1) => { this.burst = Math.max(this.burst, k); } };
@@ -129,7 +129,7 @@ export default {
       this.pastX = (this.pastX ?? hx) + (hx - (this.pastX ?? hx)) * Math.min(1, dt * (ctx.isShot ? 60 : 3));
       this.pastLight.position.set(this.pastX, 2.25, 10.3);
     }
-    this.doorK = (this.doorK ?? 0) + ((m.doorK ?? 0) - (this.doorK ?? 0)) * ek; this.doorFill.intensity = 0.6 * this.doorK;
+    this.doorK = (this.doorK ?? 0) + ((m.doorK ?? 0) - (this.doorK ?? 0)) * ek; this.doorFill.intensity = 1.1 * this.doorK;
     this.pastLight.angle = m.pastAngle ?? (0.24 + 0.32 * Math.min(1, Math.max(0, ((m.memWide ?? 1) - 1) / 2))); // the whole street: its light comes in across the road, not as a spot on the robot
     this.pastLight.intensity = 2.6 * this.pastK * Math.min(1, (m.power ?? 1) * 4) * Math.min(1, (m.strength ?? 1) * 1.5) * (+ctx.params.get('pastk') || 1);
     // the dust sees the same lights

@@ -177,6 +177,12 @@ fill('shelf_back', 'x', -1.17, 1.11, -2.21, -1.72, 6, 0, [0.5, 0.5, 0.5, 0.5, 0.
 # left shelf (rotated 90 deg: its local x runs along -z of the room... tags use shelf-local x): board x from -2.96 to -2.47
 fill('shelf_left', 'z', -1.85, -0.25, -2.96, -2.47, 6, 90, [0.5, 0.5, 0.5, 0.5, 0.5, 0.33])
 fill('shelf_left2', 'z', 0.6, 1.85, -2.95, -2.5, 4, 90, [0.56, 0.56, 0.56, 0.9])
+# (judge r8, the shelf close-up: the two sets it lights were split by a carton between them -- the valve radio goes
+# above the set on the cartons, the carton to its old place)
+def swap_x(a, b):
+    A = next(o for o in out if o['name'] == a); B = next(o for o in out if o['name'] == b)
+    A['pos'][0], B['pos'][0] = B['pos'][0], A['pos'][0]
+swap_x('shelf_back_2_2', 'shelf_back_2_3')
 for f in fixed:
     if f['name'] in shelf_tags: f['tags'] = shelf_tags[f['name']]
 # cartons on the floor: a stack in the back-right corner by the door, two under the bench end

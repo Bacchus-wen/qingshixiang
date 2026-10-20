@@ -75,9 +75,10 @@ function crtMaterial(chan, on, atlas, prog) {
       const R = prog.rects, k = chan.sub(3);
       let rect = vec4(...R[0]);
       for (let i = 1; i < R.length; i++) rect = mix(rect, vec4(...R[i]), step(i - 0.5, k));
-      const img = texture(prog.tex, rect.xy.add(u.mul(rect.zw))).bias(1.2).rgb; // (a soft broadcast picture)
+      const img = texture(prog.tex, rect.xy.add(u.mul(rect.zw))).rgb;
       const lum = dot(img, vec3(0.299, 0.587, 0.114));
-      pic = mix(pic, mix(vec3(lum), img, 0.85), step(2.5, chan));
+      // (r8: soft and dim it read as the shop reflected in the glass, not a set playing) sharp, brighter, more contrast
+      pic = mix(pic, clamp(mix(vec3(lum), img, 0.9).sub(0.06).mul(1.55), 0, 1.2), step(2.5, chan));
     }
     if (atlas) { // programme stills: one row of N images
       const n = float(atlas.n), k = chan.sub(3).clamp(0, atlas.n - 1);
@@ -88,7 +89,7 @@ function crtMaterial(chan, on, atlas, prog) {
     const weak = float(1).sub(on).clamp(0, 1);
     pic = mix(pic.mul(roll.mul(weak).add(float(1).sub(weak))), vec3(snow), weak.mul(0.55));
     // phosphor: scanlines, a faint shadow mask, soft vignette; warm-up: the picture blooms out from the centre line
-    const scan = sin(u.y.mul(Math.PI * 2 * 150)).mul(0.5).add(0.5).mul(0.16).add(0.84); // ~150 soft lines: finer ones alias at room distance
+    const scan = sin(u.y.mul(Math.PI * 2 * 150)).mul(0.5).add(0.5).mul(0.1).add(0.9); // ~150 soft lines: finer ones alias at room distance
     const maskRGB = vec3(sin(u.x.mul(900)).mul(0.06).add(0.97), sin(u.x.mul(900).add(2.1)).mul(0.06).add(0.97), sin(u.x.mul(900).add(4.2)).mul(0.06).add(0.97));
     const vig = float(1).sub(smoothstep(0.25, 0.75, length(c.mul(vec2(1.1, 1.3)))).mul(0.45));
     const warm = smoothstep(0.0, 0.12, on.mul(0.5).sub(abs(u.y.sub(0.5)).mul(on.lessThan(0.3).select(1, 0))));

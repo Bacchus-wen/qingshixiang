@@ -24,7 +24,7 @@ const EYE0 = new THREE.Vector3(-0.493, 0.831, 1.376);
 const FACING = new THREE.Vector3(-0.2588, 0, 0.9659), LEFT = new THREE.Vector3(0.9659, 0, 0.2588);
 const TV_IN = new THREE.Vector3(0.71, 0.86, -1.42);        // the set on the cartons in the middle of the shop (a demo target)
 // its close-up: past the robot's head along the beam, the set and the valve radio above it filling the frame
-const TV_SHOT = { pos: new THREE.Vector3(0.355, 1.095, -0.068), look: new THREE.Vector3(0.47, 1.09, -1.65), fov: 34, aim: new THREE.Vector3(0.4, 1.16, -1.66) }; // aim between the set and the valve radio: both come back (r4: the dial stayed dark)
+const TV_SHOT = { pos: new THREE.Vector3(0.42, 1.12, -0.12), look: new THREE.Vector3(0.62, 1.16, -1.7), fov: 31, aim: new THREE.Vector3(0.66, 1.2, -1.66) }; // the set and, above it, the valve radio // aim between the set and the valve radio: both come back (r4: the dial stayed dark)
 // the shops across the road, in the "then" photograph (world points on the backdrop plane, z 11): each has a sound
 // that plays when the beam first rests on it
 export const SPOTS = [
@@ -43,7 +43,7 @@ const STREET_C = new THREE.Vector3(0.3, 1.85, 11.0);          // the middle of t
 // the light from the electronics shop on its far cheek, the room behind it lower, the lens core and glow down)
 const MEMORY_FACE = { pos: new THREE.Vector3(-0.32, 0.9, 2.35), look: new THREE.Vector3(-0.47, 0.86, 1.4), fov: 30, mem: { coreK: 0.28, glowK: 0, doorK: 0, roomK: 0.45, lampK: 0.2, pastX: -3.6, pastAngle: 0.12 } };
 const ACT2_POS = new THREE.Vector3(-0.05, 1.0, -1.7), ACT2_LOOK = new THREE.Vector3(-0.4, 0.92, 11.0), ACT2_FOV = 48; // (r4: feet and stool in frame, clear of the bench)
-const ACT2_BEAM = { beamK: 1.6, beamReach: 0.25, beamNear: 0.5, spotK: 0.6, duskK: 0.2, shaftW: 0.7, doorK: 1, glowK: 1, robotFillK: 0.25, lampK: 0.4, softK: 1.8 }; // softK: a wider then/now edge (r7: a hard one read as a burnt stripe) // (lamp: from in here the bench lamp was the brightest thing in the frame) // (dusk 0.2: from in here its hard patch on the floor burnt out) // a shaft in the dusty air toward the far side; the dusk under the shutter lower (from in here its patch on the floor burns out)
+const ACT2_BEAM = { beamK: 0.65, beamReach: 0.25, beamNear: 0.5, beamFar: 9, spotK: 0.6, duskK: 0.2, shaftW: 0.7, doorK: 1, glowK: 1, robotFillK: 0.25, lampK: 0.4, softK: 1.8 }; // softK: a wider then/now edge (r7: a hard one read as a burnt stripe) // (lamp: from in here the bench lamp was the brightest thing in the frame) // (dusk 0.2: from in here its hard patch on the floor burnt out) // a shaft in the dusty air toward the far side; the dusk under the shutter lower (from in here its patch on the floor burns out)
 const K = (t, p, l, fov, cut = false) => ({ t, p: new THREE.Vector3(...p), l: new THREE.Vector3(...l), fov, cut });
 const WAIT_POS = new THREE.Vector3(-0.98, 0.88, 0.12), WAIT_LOOK = new THREE.Vector3(-0.6, 0.8, 0.98); // its face, lens side
 const ARRIVE_K = [
@@ -142,6 +142,7 @@ export default {
         if (this.t > 19.6 && this.t < 27.5) { // its own radio: from in front of the open set, the robot's eye turned to it beyond
           this.zoom = 0; this.cam.pos.set(-1.85, 1.15, 1.5); this.cam.look.set(-0.95, 0.88, 0.85); this.cam.fov = 54; m.spotK = 0.3;
         } else m.spotK = 0.65; // (at 2-3 m on pale plaster the full lamp burnt its circle white)
+        m.beamK = 0.55; // act one's shaft: a trace in the air, not a fog over the shelves
         // a photographer's lens on the close-ups: the thing in the beam sharp, the shelf behind it soft (as if f/2)
         const P = ctx.postfx.params, bench = this.t > 19.6 && this.t < 27.5 && this.benchPos;
         const fd = bench ? this.curPos.distanceTo(this.benchPos) : this.tvShot ? this.curPos.distanceTo(TV_IN) : this.curPos.distanceTo(this._v.copy(eyePos).addScaledVector(m.dir, 2.4));
