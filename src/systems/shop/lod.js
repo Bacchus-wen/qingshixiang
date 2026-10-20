@@ -16,6 +16,10 @@ export const SHADOW_LAYER = 5;
 // the lens would throw a metre-long shadow across the wall it looks at): ROBOT_LAYER for its visible levels, enabled on
 // the main camera and on every shadow camera except the eye's; ROBOT_SHADOW_LAYER for its shadow proxy
 export const ROBOT_LAYER = 7, ROBOT_SHADOW_LAYER = 8;
+// The finest level a copy may use. The web build for GitHub Pages sets VITE_LOD_MIN=1: L0 (the raw mesh, 25-40 MB a
+// model) is not shipped, L1 (0.3-0.5 mm from it) is the finest; it then casts its own shadow (no proxy). ?lodmin=1 tries
+// it locally.
+const MIN_LEVEL = Math.max(0, +(new URLSearchParams(globalThis.location?.search ?? '').get('lodmin') ?? NaN) || +(import.meta.env?.VITE_LOD_MIN ?? 0) || 0);
 const tintCache = new Map();
 
 export class LodLibrary {
@@ -83,6 +87,7 @@ export class LodLibrary {
       let t = 0;
       for (let i = lv.length - 1; i >= 0; i--) if (ok(lv[i], i > o.cur && o.cur >= 0 ? 0.85 : 1.0)) { t = i; break; }
       if (!onScreen) t = Math.max(t, o.cur); // off screen: keep what it has, never load finer for it
+      t = Math.max(t, Math.min(MIN_LEVEL, lv.length - 1));
       items.push({ o, t, pri: onScreen ? _s.radius * k / d : 0 });
     }
     // 2. GPU budget: biggest on screen first; each level costs once however many copies show it. A copy whose level

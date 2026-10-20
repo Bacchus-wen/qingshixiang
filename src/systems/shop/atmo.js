@@ -75,6 +75,19 @@ export default {
       const lampHead = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.1, 0.22), lampMat); lampHead.position.copy(head).add(new THREE.Vector3(0, 0.05, 0));
       for (const o of [pole, arm, lampHead]) { o.castShadow = true; o.receiveShadow = true; ctx.scene.add(o); }
     }
+    // ---- the past's light: when the far side comes back (the beam resting on a shop; the whole street at the last look)
+    // its warm evening falls back across the road and in under the shutter -- on the robot's back and shoulders, its
+    // shadow long on the shop floor toward us. Driven by memory.pastK (the story); always present (no recompiles)
+    {
+      const pl = this.pastLight = new THREE.SpotLight(0xffb472, 0, 0, 0.24, 0.95, 0);
+      pl.position.set(-1.1, 2.25, 10.3); pl.target.position.set(-0.45, 0.8, 1.0); // on the robot: its back and shoulders, the floor behind it
+      pl.castShadow = ctx.params.get('nopastshadow') === null; pl.shadow.mapSize.setScalar(ctx.quality === 'low' ? 512 : 1024);
+      pl.shadow.bias = -0.0004; pl.shadow.normalBias = 0.01; pl.shadow.camera.near = 4; pl.shadow.camera.far = 14;
+      // only the robot casts it (its visible levels are on lod.js ROBOT_LAYER, 7): every frame redrawing the whole shop's
+      // raw meshes into one more shadow map took a shot from 6 to 30 s and stalled the story when the shop came in
+      pl.shadow.camera.layers.set(7);
+      ctx.scene.add(pl, pl.target);
+    }
     ctx.api.atmo = { levels: LEVELS, set: (s) => { if (LEVELS[s]) this.state = s; }, get state() { return this.state; }, flicker: (k = 1) => { this.burst = Math.max(this.burst, k); } };
   },
 
@@ -95,12 +108,22 @@ export default {
       this.wasOn = on;
     }
     if (ctx.isShot && ctx.params.get('tube') !== null) tubeOn = +ctx.params.get('tube');
-    L.hemi.intensity = C.hemi; L.dusk.intensity = C.dusk; L.lamp.intensity = C.lamp * (ctx.params.get('lampoff') !== null ? 0 : 1) * (ctx.memory.lampK ?? 1); L.fill.intensity = C.fill;
+    L.hemi.intensity = C.hemi; L.dusk.intensity = C.dusk * (ctx.memory.duskK ?? 1); L.lamp.intensity = C.lamp * (ctx.params.get('lampoff') !== null ? 0 : 1) * (ctx.memory.lampK ?? 1); L.fill.intensity = C.fill;
     L.tube.intensity = (this.state === 'review' ? C.tube : 5.5 * tubeOn); L.tubeGlow.value = this.state === 'review' ? C.glow : 0.02 + 2.2 * tubeOn;
     if (L.robotFill) L.robotFill.intensity = C.robot;
     ctx.scene.environmentIntensity = C.env;
     this.streetLamp.intensity = 170 * C.street; this.streakK.value = C.street; // (cold now: brighter so its pool on the empty road shows the robot dark against it)
     if (ctx.api.shop?.farK) ctx.api.shop.farK.value = C.far;
+    // the past's light comes from where the beam brings the far side back (the whole street: from its middle)
+    const m = ctx.memory, pk = m.pastK ?? 0, ek = Math.min(1, dt * (ctx.isShot ? 60 : 2.5));
+    this.pastK = (this.pastK ?? 0) + (pk - (this.pastK ?? 0)) * ek;
+    if (m.origin && m.dir && m.dir.z > 0.05) {
+      const s = (10.3 - m.origin.z) / m.dir.z, wide = Math.min(1, Math.max(0, ((m.memWide ?? 1) - 1) / 2));
+      const hx = Math.max(-6.5, Math.min(6.5, m.origin.x + m.dir.x * s)) * (1 - wide) + 0.3 * wide;
+      this.pastX = (this.pastX ?? hx) + (hx - (this.pastX ?? hx)) * Math.min(1, dt * (ctx.isShot ? 60 : 3));
+      this.pastLight.position.set(this.pastX, 2.25, 10.3);
+    }
+    this.pastLight.intensity = 4.5 * this.pastK * Math.min(1, (m.power ?? 1) * 4) * Math.min(1, (m.strength ?? 1) * 1.5) * (+ctx.params.get('pastk') || 1);
     // the dust sees the same lights
     const lp = L.lamp; this.lampPos.value.copy(lp.position); this.lampDir.value.copy(lp.target.position).sub(lp.position).normalize();
     this.lampCos.value = Math.cos(lp.angle); this.lampK.value = lp.intensity / 18; this.duskK.value = C.dusk / 1.4;

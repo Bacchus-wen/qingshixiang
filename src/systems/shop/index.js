@@ -43,8 +43,11 @@ function terrazzo() {
   const seg = (ax, az, bx, bz) => { const pa = vec2(P.x.sub(ax), P.z.sub(az)), ba = vec2(bx - ax, bz - az); const h = pa.dot(ba).div(ba.dot(ba)).clamp(0, 1); return pa.sub(ba.mul(h)).length(); };
   const dPath = seg(0.1, 2.3, -0.2, 0.3).min(seg(-0.2, 0.3, 1.2, -1.7));
   const trod = smoothstep(0.75, 0.15, dPath).mul(mx_noise_float(vec3(P.x.mul(2.2), 3, P.z.mul(2.2))).mul(0.3).add(0.7));
-  m.colorNode = T.rgb.mul(mix(float(1.0), float(0.7), grime)).mul(mix(float(1), float(0.78), trod));
-  m.roughnessNode = mix(float(0.32), float(0.7), grime);  // polished where nobody walks, dull along the paths
+  // street grit blown in under the shutter: the first metre inside the threshold is dusty and dull, not polished (act
+  // two looks out over it: a polished floor there threw the street's light back as a burnt-out sheet)
+  const grit = smoothstep(0.9, 2.1, P.z).mul(mx_noise_float(vec3(P.x.mul(1.6), 5, P.z.mul(1.6))).mul(0.25).add(0.75));
+  m.colorNode = T.rgb.mul(mix(float(1.0), float(0.7), grime)).mul(mix(float(1), float(0.78), trod)).mul(mix(vec3(1), vec3(0.8, 0.78, 0.74), grit));
+  m.roughnessNode = mix(mix(mix(float(0.32), float(0.7), grime), float(0.72), trod.mul(0.6)), float(0.9), grit);  // polished where nobody walks, dull along the paths and at the door
   return m;
 }
 function wallMat() {
@@ -87,7 +90,7 @@ function streetMat() {
   const P = positionWorld;
   // worn: patches of grime and dust; the far road darker where it meets the photograph's dusk
   const grime = mx_fractal_noise_float(vec3(P.x.mul(0.45), 0, P.z.mul(0.45)), 3, 2.0, 0.5).mul(0.5).add(0.5);
-  m.colorNode = texture(tex('pavement'), P.xz.div(1.6)).rgb.mul(0.8).mul(mix(float(0.72), float(1.12), grime)).mul(mix(float(1), float(0.5), smoothstep(5.5, 10.6, P.z)));
+  m.colorNode = texture(tex('pavement'), P.xz.div(1.6)).rgb.mul(0.8).mul(mix(float(0.72), float(1.12), grime)).mul(mix(float(1), float(0.74), smoothstep(5.5, 10.6, P.z))); // (judge r3: darkened to half it drew a black band where it meets the photograph)
   m.roughnessNode = mix(float(0.62), float(0.95), grime);
   return m;
 }
@@ -460,13 +463,21 @@ export default {
       // (bricks and broken concrete across the line where the photograph meets the 3D street, with contact shadows)
       const km = new THREE.MeshStandardNodeMaterial({ color: 0x7c776e, roughness: 0.92 }), bm = new THREE.MeshStandardNodeMaterial({ color: 0x7a4c3a, roughness: 0.95 }), cm = new THREE.MeshStandardNodeMaterial({ color: 0x8d8a83, roughness: 0.97 });
       const zK = d / 2 + 0.25 + 8.3, rnd = (i) => { const x = Math.sin(i * 91.7) * 43758.5453; return x - Math.floor(x); };
-      const kerb = new THREE.Mesh(new THREE.BoxGeometry(16.2, 0.15, 0.32), km); kerb.position.set(0.4, -STEP + 0.075, zK); kerb.castShadow = kerb.receiveShadow = true; root.add(kerb);
-      const gutter = new THREE.Mesh(new THREE.PlaneGeometry(16.2, 0.38).rotateX(-Math.PI / 2), new THREE.MeshStandardNodeMaterial({ color: 0x2c2b29, roughness: 0.6 })); gutter.position.set(0.4, -STEP + 0.003, zK - 0.34); gutter.receiveShadow = true; root.add(gutter);
-      for (let i = 0; i < 90; i++) {
-        const big = rnd(i + 300) > 0.72, w = big ? 0.18 + rnd(i + 7) * 0.22 : 0.2, h = big ? 0.06 + rnd(i + 8) * 0.12 : 0.055, dd = big ? 0.12 + rnd(i + 9) * 0.2 : 0.1;
+      // (judge r3: one straight kerb and a black gutter drew a ruled line under the photograph) -- kerb stones of uneven
+      // length, some sunk or tipped, gaps between; the gutter in pieces, only a little darker than the road
+      const gm = new THREE.MeshStandardNodeMaterial({ color: 0x4a4843, roughness: 0.7 });
+      for (let x = -7.7, i = 0; x < 8.5; i++) {
+        const L = 0.7 + rnd(i + 900) * 0.9, gap = rnd(i + 950) < 0.3 ? 0.08 + rnd(i + 960) * 0.25 : 0.015, sunk = rnd(i + 970) < 0.25 ? 0.04 + rnd(i + 980) * 0.05 : 0;
+        const k = new THREE.Mesh(new THREE.BoxGeometry(L, 0.15, 0.3), km); k.position.set(x + L / 2, -STEP + 0.075 - sunk, zK + (rnd(i + 990) - 0.5) * 0.04);
+        k.rotation.set((rnd(i + 1000) - 0.5) * 0.05, (rnd(i + 1010) - 0.5) * 0.04, (rnd(i + 1020) - 0.5) * (sunk ? 0.12 : 0.03)); k.castShadow = k.receiveShadow = true; root.add(k);
+        if (rnd(i + 1030) < 0.6) { const g = new THREE.Mesh(new THREE.PlaneGeometry(L * (0.5 + rnd(i + 1040) * 0.5), 0.3).rotateX(-Math.PI / 2), gm); g.position.set(x + L / 2, -STEP + 0.003, zK - 0.3); g.receiveShadow = true; root.add(g); }
+        x += L + gap;
+      }
+      for (let i = 0; i < 150; i++) {
+        const big = rnd(i + 300) > 0.66, w = big ? 0.18 + rnd(i + 7) * 0.26 : 0.2, h = big ? 0.06 + rnd(i + 8) * 0.16 : 0.055, dd = big ? 0.12 + rnd(i + 9) * 0.2 : 0.1;
         const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, dd), big ? cm : bm);
-        const pile = rnd(i + 500) < 0.55, x = pile ? 0.45 + (rnd(i + 1) - 0.5) * 3.2 : -7.4 + rnd(i + 1) * 15.6; // most of it in front of the half-demolished house
-        b.position.set(x, -STEP + h / 2 + (rnd(i + 2) < 0.3 ? 0.15 : 0), zK - 0.25 + rnd(i + 40) * (pile ? 1.1 : 0.7));
+        const pile = rnd(i + 500) < 0.45, x = pile ? 0.45 + (rnd(i + 1) - 0.5) * 3.2 : -7.4 + rnd(i + 1) * 15.6; // most of it in front of the half-demolished house; the rest strung along the photograph's foot to break its edge
+        b.position.set(x, -STEP + h / 2 + (rnd(i + 2) < 0.35 ? 0.15 : 0), zK - 0.25 + rnd(i + 40) * (pile ? 1.1 : 0.5));
         b.rotation.set((rnd(i + 60) - 0.5) * 0.5, rnd(i + 80) * 6.3, (rnd(i + 120) - 0.5) * 0.6); b.castShadow = b.receiveShadow = true; root.add(b);
       }
     }

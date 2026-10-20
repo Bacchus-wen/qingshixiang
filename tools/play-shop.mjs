@@ -1,10 +1,11 @@
 // Scripted playthrough of the shop story (v4): drives the real experience (no ?shot) with keyboard and mouse and
 // screenshots the key moments, then tiles them into one sheet.
-//   node tools/play-shop.mjs [--speed 2] [--query "q=low"] [--out renders/play-shop] [--size 1280x720]
+//   node tools/play-shop.mjs [--speed 2] [--query "q=low"] [--out renders/play-shop] [--size 1280x720] [--url http://…/] [--netlog f.json]
+//   --netlog: every request (path, status, bytes) and every failed one, for the web build's file list and its checks
 // Uses Playwright's own Chromium (never the user's Chrome).
 import { createServer } from 'vite';
 import { chromium } from 'playwright';
-import { mkdirSync, readdirSync, unlinkSync } from 'node:fs';
+import { mkdirSync, readdirSync, unlinkSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -26,8 +27,11 @@ const browser = await chromium.launch({ headless: true, channel: 'chromium', arg
 const shots = [];
 try {
   const page = await browser.newPage({ viewport: { width: W, height: H } });
-  const errors = [];
+  page.setDefaultTimeout(120000); // (a loaded machine: the shop's first frames can take a while)
+  const errors = [], net = [], failed = []; globalThis.__net = { net, failed, errors };
   page.on('pageerror', (e) => errors.push(e.message));
+  page.on('response', async (r) => { const u = new URL(r.url()); let n = 0; try { n = +(r.headers()['content-length'] || 0); } catch {} net.push({ path: decodeURIComponent(u.pathname), status: r.status(), bytes: n }); });
+  page.on('requestfailed', (r) => failed.push({ path: r.url(), error: r.failure()?.errorText }));
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') errors.push(`[${m.type()}] ${m.text()}`.slice(0, 300)); });
   await page.goto(`${base || `http://localhost:${server.httpServer.address().port}/`}?speed=${speed}${query ? '&' + query : ''}`);
   await page.waitForFunction(() => document.getElementById('loading')?.classList.contains('done'), null, { timeout: 180000 });
@@ -84,7 +88,10 @@ try {
   const perf = await page.evaluate(() => window.__perf && { frameMs: +window.__perf.frameMs.toFixed(1), calls: window.__perf.calls, tris: window.__perf.triangles });
   console.log('phase now:', await phase(), 'perf', JSON.stringify(perf));
   if (errors.length) console.log('ERRORS:\n' + [...new Set(errors)].slice(0, 12).join('\n'));
+  globalThis.__done = true;
 } finally {
+  const netlog = opt('netlog', null); // (also after a failure: what was loaded up to there)
+  if (netlog && globalThis.__net) { const { net, failed, errors } = globalThis.__net; writeFileSync(netlog, JSON.stringify({ complete: !!globalThis.__done, net, failed, errors: [...new Set(errors)] }, null, 1)); console.log('netlog', netlog, net.length, 'responses,', failed.length, 'failed,', net.filter((x) => x.status >= 400).length, '>= 400'); }
   await browser.close(); await server?.close();
 }
 // contact sheet

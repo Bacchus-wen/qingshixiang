@@ -201,17 +201,8 @@ def turn_group(names, deg):
         it['pos'] = [round(piv[0] + dx * c + dz * s_, 4), it['pos'][1], round(piv[2] - dx * s_ + dz * c, 4)]  # three.js Ry
         it['ry'] = round((it.get('ry') or 0) + deg, 3)
 turn_group({'robot', 'work_carton', 'spare_torso'}, ROBOT_TURN)
-# v5 act two (2026-10-20): appliances put out on the pavement across the road when the street was cleared, in front of
-# the far side's photograph -- 3D Tripo models in the street view (the judges: "the models get no place in act two").
-# Dead and dusty now; in the beam the TV shows its programme and the radio's dial glows (past.js hooks every CRT/radio).
-out += [
- {"name": "street_stool_tv", "glb": "stool.glb", "pos": [-2.4, 0, 6.6], "ry": 18},
- {"name": "street_tv", "glb": "crt_tv.glb", "pos": [-2.4, 0, 6.6], "ry": 196, "scale": 0.9, "on": "street_stool_tv"},
- {"name": "street_radio", "glb": "tube_radio_closed.glb", "pos": [-0.95, 0, 7.4], "ry": 168, "roll": 5, "scale": 0.95},
- {"name": "street_fan", "glb": "desk_fan.glb", "pos": [1.45, 0, 6.3], "ry": 205, "roll": -78, "scale": 1.0},
- {"name": "street_cassette", "glb": "cassette_recorder.glb", "pos": [2.95, 0, 7.1], "ry": 196, "roll": 4},
- {"name": "street_stool", "glb": "stool.glb", "pos": [0.55, 0, 7.7], "ry": -24},
- {"name": "street_carton", "glb": "../v2/cardboard.glb", "pos": [3.95, 0, 6.5], "ry": 12},
-]
+# (judge r3, 2026-10-20: appliances set out on the road in front of the far side's photograph read as a row of
+# exhibits with hard black shadows and cut the view to the shops -- removed; act two shows the Tripo models as the dark
+# shop around the robot, seen from further inside)
 json.dump(out, open('assets/models/shop/layout.json', 'w'), indent=1)
 print(len(out), 'items')
