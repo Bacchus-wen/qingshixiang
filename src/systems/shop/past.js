@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
 import {
   Fn, float, vec2, vec3, vec4, uniform, uv, color, time, hash, floor, fract, sin, cos, mix, smoothstep, step, abs, max, min, length, dot, pow, clamp,
-  positionGeometry, positionWorld, normalView, positionViewDirection, lights, texture, mx_noise_float,
+  positionGeometry, positionWorld, normalView, positionViewDirection, lights, texture, mx_noise_float, atan, normalLocal, positionLocal, normalize,
 } from 'three/tsl';
 import { memoryMask, memoryMaskCPU } from '../../materials/memory.js';
 import { BEAM_COLOR } from './eye.js';
@@ -165,6 +165,55 @@ export function pastHooks(lod) {
   });
 }
 
+// ---- clean knobs over the generated ones (judges r4-r14: "knobs not round, buttons fused -- the generated mesh melts
+// exactly where a close-up looks"): a chrome bezel, a knurled bakelite body, a domed cap with a cream pointer line, in
+// the model's own space (tools/probe.sh), a little larger than the soft originals so they cover them
+const KNOBS = {
+  'tube_radio_closed.glb': { face: 0.1185, front: 0.1405, r: 0.0245, ring: 0.0272, at: [[0.0026, 0.0625, 0.4], [-0.0882, 0.0623, -0.6], [-0.1722, 0.0628, 1.2]] },
+  // the hero set's channel selector (with a ring of channel numbers -- the generated one is garbled) and its second knob
+  // the bench radio (the act-one close-up of its own half-repaired set): brass knobs, the middle one larger
+  'tube_radio_open.glb': { face: 0.121, front: 0.147, r: 0.0145, ring: 0.0165, brass: true, at: [[0.2093, 0.0757, 0.3, 0.0145], [0.1505, 0.0803, -0.5, 0.0188], [0.0919, 0.0808, 0.9, 0.0135]] },
+  'crt_tv_hero.glb': { face: 0.1195, front: 0.1411, r: 0.0185, ring: 0.0205, fin: true, at: [[0.1879, 0.2633, 0.5], [0.1868, 0.2025, -0.4]], dial: [0.1879, 0.2633, 0.0215, 0.0315] },
+};
+let dialTex = null;
+function channelDial(D) { // white channel numbers 2-13 on a black ring, as on the sets of the time
+  dialTex ??= (() => {
+    const c = document.createElement('canvas'); c.width = c.height = 512; const g = c.getContext('2d');
+    g.fillStyle = '#0d0c0b'; g.beginPath(); g.arc(256, 256, 256, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#ece6d6'; g.font = 'bold 50px Helvetica, Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    for (let i = 0; i < 12; i++) { const a = -Math.PI / 2 + (i / 12) * Math.PI * 2; g.fillText(String(i + 2), 256 + Math.cos(a) * 205, 256 + Math.sin(a) * 205); }
+    g.strokeStyle = '#ece6d6'; g.lineWidth = 4; g.beginPath(); g.arc(256, 256, 250, 0, Math.PI * 2); g.stroke();
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t;
+  })();
+  const m = new THREE.Mesh(new THREE.RingGeometry(D[2], D[3], 64), new THREE.MeshStandardNodeMaterial({ map: dialTex, roughness: 0.45 }));
+  m.position.set(D[0], D[1], 0); m.receiveShadow = true; return m;
+}
+let knobMats = null;
+function knob(K0, turn, r) {
+  const K = r ? { ...K0, r, ring: r * 1.12 } : K0;
+  knobMats ??= (() => {
+    const bake = new THREE.MeshStandardNodeMaterial({ roughness: 0.38, metalness: 0 });
+    const a = atan(positionLocal.x, positionLocal.y); // around the axis: knurling on the side, worn brown on the cap
+    bake.colorNode = mix(vec3(0.028, 0.02, 0.016), vec3(0.07, 0.045, 0.03), mx_noise_float(positionLocal.mul(400)).mul(0.5).add(0.5));
+    bake.normalNode = normalize(normalView.add(vec3(sin(a.mul(36)).mul(0.25), 0, 0).mul(smoothstep(0.85, 0.95, abs(normalLocal.z)).oneMinus())));
+    const chrome = new THREE.MeshStandardNodeMaterial({ color: 0xc8c4bb, roughness: 0.22, metalness: 1 });
+    const cream = new THREE.MeshStandardNodeMaterial({ color: 0xe8dcc0, roughness: 0.5 });
+    const brass = new THREE.MeshStandardNodeMaterial({ roughness: 0.42, metalness: 1 });
+    brass.colorNode = mix(vec3(0.5, 0.36, 0.17), vec3(0.3, 0.2, 0.09), mx_noise_float(positionLocal.mul(300)).mul(0.5).add(0.5)); // tarnished
+    brass.normalNode = bake.normalNode;
+    return { bake, chrome, cream, brass };
+  })();
+  const g = new THREE.Group(), d = K.front - K.face;
+  const ring = new THREE.Mesh(new THREE.CylinderGeometry(K.ring, K.ring, 0.004, 48, 1).rotateX(Math.PI / 2), knobMats.chrome); ring.position.z = K.face + 0.002; g.add(ring);
+  const bodyMat = K.brass ? knobMats.brass : knobMats.bake;
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(K.r * 0.92, K.r, d - 0.003, 48, 1).rotateX(Math.PI / 2), bodyMat); body.position.z = K.face + (d - 0.003) / 2 + 0.001; g.add(body);
+  const cap = new THREE.Mesh(new THREE.SphereGeometry(K.r * 0.92, 40, 8, 0, Math.PI * 2, 0, 0.32).rotateX(Math.PI / 2), bodyMat); cap.scale.z = 0.35; cap.position.z = K.front - 0.0045; g.add(cap);
+  const ptr = new THREE.Mesh(new THREE.BoxGeometry(0.0022, K.r * 0.75, 0.0008), knobMats.cream); ptr.position.set(0, K.r * 0.42, K.front - 0.0004); g.add(ptr);
+  if (K.fin) { const fin = new THREE.Mesh(new THREE.BoxGeometry(0.006, K.r * 1.7, 0.009), knobMats.chrome); fin.position.z = K.front - 0.003; g.add(fin); } // the TV's grip bar across the cap
+  g.rotation.z = turn; g.traverse((m) => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
+  return g;
+}
+
 export default {
   name: 'past',
   async init(ctx) {
@@ -188,6 +237,12 @@ export default {
       const c = new THREE.Vector3(T.cx, T.cy, T.apex).applyMatrix4(o.matrixWorld);
       this.tvs.push({ name, o, mesh, on, chan, c, T, presence: 0, phase: k * 1.7, nextZap: 3 + k * 2.3 });
       k++;
+    }
+    // clean knobs on the generated sets that show them in close-ups
+    for (const o of Object.values(placed)) {
+      const K = KNOBS[o.userData.layout?.glb]; if (!K) continue;
+      for (const [x, y, turn, r] of K.at) { const kb = knob(K, turn, r); kb.position.set(x, y, 0); o.add(kb); }
+      if (K.dial) { const dm = channelDial(K.dial); dm.position.z = K.face + 0.0012; o.add(dm); }
     }
     // the glow of the brightest set on the room in front of it (one light, moved to whichever set matters most)
     this.tvLight = new THREE.PointLight(0x9fb8ff, 0, 3.4, 1.4); ctx.scene.add(this.tvLight);

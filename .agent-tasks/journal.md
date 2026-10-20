@@ -370,3 +370,5 @@
 - 2026-10-21 06:03:15 | claude | 派给 codex：评审 key-bench r13（judge-r13-key-bench，只读）
 - 2026-10-21 06:05:39 | codex | 完成：评审 key-shelf r13（judge-r13-key-shelf）
 - 2026-10-21 06:06:34 | codex | 完成：评审 key-bench r13（judge-r13-key-bench）
+- 2026-10-21 06:13:43 | claude | 派给 codex：评审 key-shelf r14（judge-r14-key-shelf，只读）
+- 2026-10-21 06:14:41 | codex | 完成：评审 key-shelf r14（judge-r14-key-shelf）
