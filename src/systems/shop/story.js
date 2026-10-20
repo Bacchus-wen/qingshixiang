@@ -38,8 +38,8 @@ const STREET_C = new THREE.Vector3(0.3, 1.85, 11.0);          // the middle of t
 // act two from further inside, over the dark shop (judges r1-r3: from just behind its head the robot is a rusty box):
 // the robot whole on its stool in the doorway -- head, arms, sprung legs, a robot from behind -- the far side framed
 // by the opening, its beam reaching across the road
-const ACT2_POS = new THREE.Vector3(0.12, 0.95, -1.25), ACT2_LOOK = new THREE.Vector3(-0.45, 1.05, 11.0), ACT2_FOV = 46;
-const ACT2_BEAM = { beamK: 1.0, beamReach: 0.35, spotK: 0.6, duskK: 0.45 }; // a shaft in the dusty air toward the far side; the dusk under the shutter lower (from in here its patch on the floor burns out)
+const ACT2_POS = new THREE.Vector3(-0.05, 1.0, -1.7), ACT2_LOOK = new THREE.Vector3(-0.4, 0.92, 11.0), ACT2_FOV = 48; // (r4: feet and stool in frame, clear of the bench)
+const ACT2_BEAM = { beamK: 1.6, beamReach: 0.25, beamNear: 0.5, spotK: 0.6, duskK: 0.2, shaftW: 0.7, doorK: 1, glowK: 1, robotFillK: 0.25 }; // (dusk 0.2: from in here its hard patch on the floor burnt out) // a shaft in the dusty air toward the far side; the dusk under the shutter lower (from in here its patch on the floor burns out)
 const K = (t, p, l, fov, cut = false) => ({ t, p: new THREE.Vector3(...p), l: new THREE.Vector3(...l), fov, cut });
 const WAIT_POS = new THREE.Vector3(-0.98, 0.88, 0.12), WAIT_LOOK = new THREE.Vector3(-0.6, 0.8, 0.98); // its face, lens side
 const ARRIVE_K = [
@@ -137,7 +137,7 @@ export default {
         this.cam.fov = 50 - 18 * this.zoom;
         if (this.t > 19.6 && this.t < 27.5) { // its own radio: from in front of the open set, the robot's eye turned to it beyond
           this.zoom = 0; this.cam.pos.set(-1.85, 1.15, 1.5); this.cam.look.set(-0.95, 0.88, 0.85); this.cam.fov = 54; m.spotK = 0.3;
-        } else m.spotK = undefined;
+        } else m.spotK = 0.65; // (at 2-3 m on pale plaster the full lamp burnt its circle white)
         // a photographer's lens on the close-ups: the thing in the beam sharp, the shelf behind it soft (as if f/2)
         const P = ctx.postfx.params, bench = this.t > 19.6 && this.t < 27.5 && this.benchPos;
         const fd = bench ? this.curPos.distanceTo(this.benchPos) : this.tvShot ? this.curPos.distanceTo(TV_IN) : this.curPos.distanceTo(this._v.copy(eyePos).addScaledVector(m.dir, 2.4));
@@ -209,7 +209,7 @@ export default {
         if ((this.seen.size >= 3 && this.sinceSeen > 5) || this.power < 0.14 || this.streetTime > 62 || input.wasPressed('KeyD')) { film.hint(''); this.set('last'); }
         this.dip = Math.max(0, (this.dip ?? 0) - dt);
         m.power = this.dip > 0 ? 0.05 : this.power;
-        m.pastK = on ? 0.4 : 0.12; // a shop come back throws its evening light in at the door (atmo.js: x the beam's strength)
+        m.pastK = on ? 0.2 : 0.07; // a shop come back throws its evening light in at the door (atmo.js: x the beam's strength)
         break;
       }
       case 'last': {
@@ -251,7 +251,7 @@ export default {
       case 'end': {
         // from inside, behind it: it still faces the street, dark against it; the lamp across the road comes on over the
         // rubble; a digger somewhere; black; the card
-        m.forceOpen = false; m.holdGaze = true; m.headLift = 1; m.pastK = 0; m.duskK = undefined;
+        m.forceOpen = false; m.holdGaze = true; m.headLift = 1; m.pastK = 0; m.duskK = undefined; m.doorK = 0; m.glowK = 0; m.robotFillK = undefined;
         const u = ease(clamp01(this.t / 12));
         this.cam.pos.set(-0.25 - 0.04 * u, 0.82, -1.05 + 0.2 * u); // its whole seated back on the right, the lamp across the road in frame
         this.cam.look.set(-0.9, 1.7, 11.0); this.cam.fov = 52 - 3 * u;

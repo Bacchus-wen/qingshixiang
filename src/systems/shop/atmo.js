@@ -87,6 +87,10 @@ export default {
       // raw meshes into one more shadow map took a shot from 6 to 30 s and stalled the story when the shop came in
       pl.shadow.camera.layers.set(7);
       ctx.scene.add(pl, pl.target);
+      // and a low, wide spill from the doorway into the dark shop (act two looks over it: the fan, the radios, the sets
+      // only read as silhouettes) -- memory.doorK; no shadows
+      const df = this.doorFill = new THREE.SpotLight(0xd9c7ae, 0, 0, 1.05, 1, 0);
+      df.position.set(0.0, 2.2, 2.6); df.target.position.set(0.0, 1.15, -1.9); ctx.scene.add(df, df.target); // aimed at the shelves, not the floor by the door
     }
     ctx.api.atmo = { levels: LEVELS, set: (s) => { if (LEVELS[s]) this.state = s; }, get state() { return this.state; }, flicker: (k = 1) => { this.burst = Math.max(this.burst, k); } };
   },
@@ -110,7 +114,7 @@ export default {
     if (ctx.isShot && ctx.params.get('tube') !== null) tubeOn = +ctx.params.get('tube');
     L.hemi.intensity = C.hemi; L.dusk.intensity = C.dusk * (ctx.memory.duskK ?? 1); L.lamp.intensity = C.lamp * (ctx.params.get('lampoff') !== null ? 0 : 1) * (ctx.memory.lampK ?? 1); L.fill.intensity = C.fill;
     L.tube.intensity = (this.state === 'review' ? C.tube : 5.5 * tubeOn); L.tubeGlow.value = this.state === 'review' ? C.glow : 0.02 + 2.2 * tubeOn;
-    if (L.robotFill) L.robotFill.intensity = C.robot;
+    if (L.robotFill) L.robotFill.intensity = C.robot * (ctx.memory.robotFillK ?? 1); // (act two looks over its back: this front fill only lit the floor behind it)
     ctx.scene.environmentIntensity = C.env;
     this.streetLamp.intensity = 170 * C.street; this.streakK.value = C.street; // (cold now: brighter so its pool on the empty road shows the robot dark against it)
     if (ctx.api.shop?.farK) ctx.api.shop.farK.value = C.far;
@@ -123,7 +127,9 @@ export default {
       this.pastX = (this.pastX ?? hx) + (hx - (this.pastX ?? hx)) * Math.min(1, dt * (ctx.isShot ? 60 : 3));
       this.pastLight.position.set(this.pastX, 2.25, 10.3);
     }
-    this.pastLight.intensity = 4.5 * this.pastK * Math.min(1, (m.power ?? 1) * 4) * Math.min(1, (m.strength ?? 1) * 1.5) * (+ctx.params.get('pastk') || 1);
+    this.doorK = (this.doorK ?? 0) + ((m.doorK ?? 0) - (this.doorK ?? 0)) * ek; this.doorFill.intensity = 0.6 * this.doorK;
+    this.pastLight.angle = 0.24 + 0.32 * Math.min(1, Math.max(0, ((m.memWide ?? 1) - 1) / 2)); // the whole street: its light comes in across the road, not as a spot on the robot
+    this.pastLight.intensity = 2.6 * this.pastK * Math.min(1, (m.power ?? 1) * 4) * Math.min(1, (m.strength ?? 1) * 1.5) * (+ctx.params.get('pastk') || 1);
     // the dust sees the same lights
     const lp = L.lamp; this.lampPos.value.copy(lp.position); this.lampDir.value.copy(lp.target.position).sub(lp.position).normalize();
     this.lampCos.value = Math.cos(lp.angle); this.lampK.value = lp.intensity / 18; this.duskK.value = C.dusk / 1.4;

@@ -45,8 +45,8 @@ function terrazzo() {
   const trod = smoothstep(0.75, 0.15, dPath).mul(mx_noise_float(vec3(P.x.mul(2.2), 3, P.z.mul(2.2))).mul(0.3).add(0.7));
   // street grit blown in under the shutter: the first metre inside the threshold is dusty and dull, not polished (act
   // two looks out over it: a polished floor there threw the street's light back as a burnt-out sheet)
-  const grit = smoothstep(0.9, 2.1, P.z).mul(mx_noise_float(vec3(P.x.mul(1.6), 5, P.z.mul(1.6))).mul(0.25).add(0.75));
-  m.colorNode = T.rgb.mul(mix(float(1.0), float(0.7), grime)).mul(mix(float(1), float(0.78), trod)).mul(mix(vec3(1), vec3(0.8, 0.78, 0.74), grit));
+  const grit = smoothstep(-0.2, 1.6, P.z).mul(mx_noise_float(vec3(P.x.mul(1.6), 5, P.z.mul(1.6))).mul(0.25).add(0.75));
+  m.colorNode = T.rgb.mul(mix(float(1.0), float(0.7), grime)).mul(mix(float(1), float(0.78), trod)).mul(mix(vec3(1), vec3(0.62, 0.6, 0.57), grit));
   m.roughnessNode = mix(mix(mix(float(0.32), float(0.7), grime), float(0.72), trod.mul(0.6)), float(0.9), grit);  // polished where nobody walks, dull along the paths and at the door
   return m;
 }
@@ -375,10 +375,13 @@ export default {
         if (!m.material.map) return;
         const src = m.material, nm = new THREE.MeshStandardNodeMaterial();
         for (const k of ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap', 'roughness', 'metalness']) if (src[k] !== undefined) nm[k] = src[k];
-        if (src.normalScale) nm.normalScale.copy(src.normalScale).multiplyScalar(0.7); // softer relief: the casing read as stone under raking light
+        if (src.normalScale) nm.normalScale.copy(src.normalScale).multiplyScalar(0.45); // softer relief: the casing read as stone under raking light (judges r4: "mud crust")
         const { position, model } = rig.nodes(m.matrixWorld);
         nm.positionNode = position;
         const c = texture(src.map).rgb;
+        // the generated rust speckle at full contrast reads as gravel / a crust of mud from behind in dim light: part of it
+        // from a blurrier mip, so paint, bare metal and rust read as areas rather than grit
+        nm.colorNode = mix(c, texture(src.map).bias(3.0).rgb, 0.42);
         const core = smoothstep(0.7, 0.9, c.r).mul(smoothstep(0.3, 0.5, c.g)).mul(float(1).sub(smoothstep(0.28, 0.45, c.b)));
         const face = smoothstep(0.76, 0.79, model.y).mul(smoothstep(0.09, 0.13, model.z)); // the lens: y 0.81-0.97, z 0.15-0.21
         nm.emissiveNode = c.mul(core).mul(face).mul(eyeGlow);

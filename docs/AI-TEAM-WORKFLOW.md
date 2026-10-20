@@ -84,7 +84,7 @@
 - Claude 用选择题问:每题 2–4 个选项,推荐项放第一个并说明理由。不问"可以开始吗"这类问题。
 
 ### D. 不用问、但必须一直守的规矩
-- 不推送到 GitHub,只在本地 commit。
+- 平时只在本地 commit;用户明确要求时才推送,只推到私有仓库 `Bacchus-wen/qingshixiang`(2026-10-20 第一次)。不建新仓库、不改可见性。网页版构建见 `docs/DEPLOY.md`。
 - 不读 `~/Downloads/tripo_mv` 里的 `.env`。
 - 不启动用户自己的 Chrome:截图和自动化只用 Playwright 自带的 Chromium。
 - Blender 只用无界面模式(`-b`),脚本末尾 `os._exit(0)`。
