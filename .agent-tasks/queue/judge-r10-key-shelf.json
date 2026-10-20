@@ -1,0 +1,11 @@
+{
+ "id": "judge-r10-key-shelf",
+ "from": "claude",
+ "to": "codex",
+ "title": "评审 key-shelf r10",
+ "write": false,
+ "gen": false,
+ "paths": [],
+ "status": "queued",
+ "posted": "2026-10-20 20:41:17"
+}
