@@ -316,3 +316,17 @@
 - 2026-10-20 20:13:55 | codex | 完成：评审 key-climax r8（judge-r8-key-climax）
 - 2026-10-20 20:15:02 | codex | 完成：评审 key-memory r8（judge-r8-key-memory）
 - 2026-10-20 20:16:12 | codex | 完成：评审 key-end r8（judge-r8-key-end）
+- 2026-10-20 20:24:54 | claude | 派给 codex：评审 key-shelf r9（judge-r9-key-shelf，只读）
+- 2026-10-20 20:24:54 | claude | 派给 codex：评审 key-bench r9（judge-r9-key-bench，只读）
+- 2026-10-20 20:24:54 | claude | 派给 codex：评审 key-turn r9（judge-r9-key-turn，只读）
+- 2026-10-20 20:24:54 | claude | 派给 codex：评审 key-street r9（judge-r9-key-street，只读）
+- 2026-10-20 20:24:54 | claude | 派给 codex：评审 key-climax r9（judge-r9-key-climax，只读）
+- 2026-10-20 20:24:54 | claude | 派给 codex：评审 key-memory r9（judge-r9-key-memory，只读）
+- 2026-10-20 20:24:54 | claude | 派给 codex：评审 key-end r9（judge-r9-key-end，只读）
+- 2026-10-20 20:26:07 | codex | 完成：评审 key-shelf r9（judge-r9-key-shelf）
+- 2026-10-20 20:27:19 | codex | 完成：评审 key-bench r9（judge-r9-key-bench）
+- 2026-10-20 20:28:35 | codex | 完成：评审 key-turn r9（judge-r9-key-turn）
+- 2026-10-20 20:29:46 | codex | 完成：评审 key-street r9（judge-r9-key-street）
+- 2026-10-20 20:30:54 | codex | 完成：评审 key-climax r9（judge-r9-key-climax）
+- 2026-10-20 20:32:03 | codex | 完成：评审 key-memory r9（judge-r9-key-memory）
+- 2026-10-20 20:33:17 | codex | 完成：评审 key-end r9（judge-r9-key-end）

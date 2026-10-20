@@ -10,7 +10,7 @@ import { LodLibrary, SHADOW_LAYER, ROBOT_LAYER, ROBOT_SHADOW_LAYER } from './lod
 import { HeadRig } from './rig.js';
 import { pastHooks } from './past.js';
 import { memoryMask, mem } from '../../materials/memory.js';
-import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorld, positionLocal, smoothstep, vec2, vec3, mx_worley_noise_float, texture, normalWorldGeometry, abs, step, uniform, uv, vec4, cameraPosition } from 'three/tsl';
+import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorld, positionLocal, smoothstep, vec2, vec3, mx_worley_noise_float, texture, normalWorldGeometry, abs, step, uniform, uv, vec4, cameraPosition, fract } from 'three/tsl';
 
 // v4: the closed-down home-appliance repair shop (docs/scene-shop.md). This phase is models + layout only:
 // a simple room shell, the Tripo models placed from /models/shop/layout.json (every item is grounded on its
@@ -471,6 +471,12 @@ export default {
       const BW = 16, BH = BW * 1920 / 3840;
       const plane = new THREE.Mesh(new THREE.PlaneGeometry(BW, BH), bd); plane.rotation.y = Math.PI; // faces the shop (-z)
       plane.position.set(0.4, -STEP + BH / 2 - 0.05, d / 2 + 0.25 + 8.5); root.add(plane); this.backdrop = plane;
+      // the block beyond the photograph's right edge, dark (seen side-on from inside the shop -- the last look and the end
+      // -- the street ran on past the picture into black): the shop's own facade texture, dimmed, a few lightless windows
+      { const bm2 = new THREE.MeshBasicNodeMaterial(); const P = positionWorld; // unlit like the photograph beside it (lit, its face to the shop got no light at all: black)
+        const win = step(0.62, fract(P.x.div(2.7))).mul(step(fract(P.x.div(2.7)), 0.88)).mul(step(0.35, fract(P.y.div(2.9)))).mul(step(fract(P.y.div(2.9)), 0.78)).mul(step(1.2, P.y));
+        bm2.colorNode = mix(texture(tex('facade'), vec2(P.z.add(P.x).div(3.0), P.y.div(3.0))).bias(3.0).rgb.mul(0.15), vec3(0.018, 0.02, 0.024), win.mul(0.6)).mul(far.mul(0.62)); // a mass in shadow, not a second texture beside the photograph
+        const blk = new THREE.Mesh(new THREE.BoxGeometry(5.6, 8.2, 2.0), bm2); blk.position.set(0.4 - BW / 2 - 2.8 + 0.02, -STEP + 4.1 - 0.05, d / 2 + 0.25 + 8.5 + 1.0); blk.receiveShadow = true; root.add(blk); }
       // a low kerb along the far side, where the photograph's pavement begins: a line that ties our road to its ground
       // a continuous worn concrete kerb with a gutter in front, and rubble from the far side spilling over it onto our road
       // (bricks and broken concrete across the line where the photograph meets the 3D street, with contact shadows)
