@@ -144,7 +144,7 @@ export default {
         this.cam.fov = 50 - 18 * this.zoom;
         if (this.t > 19.6 && this.t < 27.5) { // its own radio: from in front of the open set, the robot's eye turned to it beyond
           this.zoom = 0; this.cam.pos.set(-1.85, 1.15, 1.5); this.cam.look.set(-0.95, 0.88, 0.85); this.cam.fov = 54; m.spotK = 0.3;
-        } else m.spotK = 0.65; // (at 2-3 m on pale plaster the full lamp burnt its circle white)
+        } else m.spotK = 0.42; // (at 2-3 m on pale plaster the full lamp burnt its circle white; 0.65 still did)
         m.beamK = 0.55; // act one's shaft: a trace in the air, not a fog over the shelves
         // a photographer's lens on the close-ups: the thing in the beam sharp, the shelf behind it soft (as if f/2)
         const P = ctx.postfx.params, bench = this.t > 19.6 && this.t < 27.5 && this.benchPos;
@@ -178,7 +178,7 @@ export default {
         ctx.api.shop?.robotTurn?.(k);
         if (this.t < 0.05) { this.cut = true; audio?.play('servo'); }
         if (this.t > 1.2 && !this.creak) { this.creak = true; audio?.play('servo'); }
-        this.cam.pos.set(0.95, 0.8, 2.9); this.cam.look.set(-0.5, 0.55, 1.2); this.cam.fov = 40; m.coreK = 0.25; m.spotK = 0.5; m.lampK = 0.45; m.beamK = 0.12; // the whole robot, stool and shadow; the lamp behind it secondary
+        this.cam.pos.set(0.95, 0.8, 2.9); this.cam.look.set(-0.5, 0.55, 1.2); this.cam.fov = 40; m.coreK = 0.25; m.spotK = 0.18; m.lampK = 0.45; m.beamK = 0.12; /* spotK: its circle was a hard white spot on the floor */ // the whole robot, stool and shadow; the lamp behind it secondary
         if (eye && eye.open > 0.2) this.power = Math.max(0, this.power - dt / LOOK_POWER_S);
         if (this.t > 4.2) { m.lookOverride = undefined; m.coreK = undefined; m.lampK = undefined; this.set('street', true); }
         this.tuneCall = 0.55;
