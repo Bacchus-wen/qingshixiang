@@ -40,7 +40,7 @@ const STREET_C = new THREE.Vector3(0.3, 1.85, 11.0);          // the middle of t
 // by the opening, its beam reaching across the road
 // the last look, its fading and the end from inside to its left: its side against the doorway, the shaft crossing the
 // road to the electronics shop seen side-on (judges r4-r9: from behind, act two's climax was "a dark back of a head")
-const SIDE = { pos: new THREE.Vector3(0.92, 0.85, 0.3), look: new THREE.Vector3(-0.95, 0.9, 3.0), fov: 46 }; // (x 0.92: at 1.0 the A-frame sign's black back sat in the corner)
+const SIDE = { pos: new THREE.Vector3(0.85, 0.92, -0.85), look: new THREE.Vector3(-1.0, 0.95, 3.0), fov: 42, beam: { beamNear: 0.05, glowK: 0, beamK: 0.8 } }; // (r10: further in -- the robot whole, the photograph's edge behind the door jamb; the shaft starts at the lens, hidden by the head, not in a glow beside it)
 // the last look's reverse shot: in front of its face, a little to its left, at the door
 // (r6 self-review: from straight in front the warm light lit it flat, as bright as the shelves behind: now from its left,
 // the light from the electronics shop on its far cheek, the room behind it lower, the lens core and glow down)
@@ -231,7 +231,7 @@ export default {
         if (this.t < 0.05) this.cut = true; // (from the exploring view behind it: a cut to its side)
         if (faceT) { this.cam.pos.copy(MEMORY_FACE.pos); this.cam.look.copy(MEMORY_FACE.look); this.cam.fov = MEMORY_FACE.fov; }
         else { this.cam.pos.copy(SIDE.pos); this.cam.look.copy(SIDE.look); this.cam.fov = SIDE.fov - 2 * ease(clamp01((this.t - 3.2) / 2)); }
-        m.forceOpen = true; Object.assign(m, ACT2_BEAM, { coreK: undefined, roomK: undefined, pastX: undefined, pastAngle: undefined }, faceT ? MEMORY_FACE.mem : {});
+        m.forceOpen = true; Object.assign(m, ACT2_BEAM, { coreK: undefined, roomK: undefined, pastX: undefined, pastAngle: undefined }, faceT ? MEMORY_FACE.mem : SIDE.beam);
         eye?.aim(SPOTS.find((x) => x.key === 'tv').pos);
         m.memWide = 1 + 3.2 * ease(clamp01((this.t - 3.2) / 2.2)); // the shop alone a moment (the song), then the whole street
         this.power = Math.max(0.03, this.power - dt * 0.03);
@@ -269,7 +269,7 @@ export default {
         const u = ease(clamp01(this.t / 12));
         // from inside, to its left: its side against the doorway, the night sky's cold edge on its arm and chest, the dark
         // street beyond with the one lamp (r4-r8: from behind, in the dark, it was a black box); pushing in slowly
-        this.cam.pos.copy(SIDE.pos).lerp(this._w.set(0.9, 0.86, 0.45), u); this.cam.look.copy(SIDE.look); this.cam.fov = SIDE.fov - 2 * u;
+        this.cam.pos.copy(SIDE.pos).lerp(this._w.set(0.8, 0.92, -0.6), u); this.cam.look.copy(SIDE.look); this.cam.fov = SIDE.fov - 2 * u;
         if (this.t < 0.05) this.cut = true;
         film.fade(Math.min(1, Math.max(0, (this.t - 7) / 3)));
         if (this.t > 12.5) film.endCard(); // (two seconds of silence first: sound.js)

@@ -6,6 +6,10 @@
  "write": false,
  "gen": false,
  "paths": [],
- "status": "queued",
- "posted": "2026-10-20 20:41:17"
+ "status": "done",
+ "posted": "2026-10-20 20:41:17",
+ "started": "2026-10-20 21:01:46",
+ "seconds": 73.6,
+ "finished": "2026-10-20 21:03:02",
+ "reason": null
 }

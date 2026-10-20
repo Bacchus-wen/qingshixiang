@@ -118,7 +118,7 @@ export default {
     L.tube.intensity = (this.state === 'review' ? C.tube : 5.5 * tubeOn); L.tubeGlow.value = this.state === 'review' ? C.glow : 0.02 + 2.2 * tubeOn;
     if (L.robotFill) L.robotFill.intensity = C.robot * (ctx.memory.robotFillK ?? 1); // (act two looks over its back: this front fill only lit the floor behind it)
     ctx.scene.environmentIntensity = C.env;
-    this.streetLamp.intensity = 120 * C.street; this.streakK.value = C.street; // (cold now: brighter so its pool on the empty road shows the robot dark against it)
+    this.streetLamp.intensity = 85 * C.street; /* (r10: its pool on the road was the brightest thing in the end) */ this.streakK.value = C.street; // (cold now: brighter so its pool on the empty road shows the robot dark against it)
     if (ctx.api.shop?.farK) ctx.api.shop.farK.value = C.far;
     // the past's light comes from where the beam brings the far side back (the whole street: from its middle)
     const m = ctx.memory, pk = m.pastK ?? 0, ek = Math.min(1, dt * (ctx.isShot ? 60 : 2.5));

@@ -29,7 +29,7 @@ fixed = [
  {"name": "enamel_mug", "glb": "enamel_mug.glb", "pos": [-2.22, 0, 0.6], "ry": 30, "on": "workbench"},
  {"name": "robot", "glb": "robot.glb", "pos": [-0.55, 0, 1.16], "ry": -25},
  {"name": "broom", "type": "proc", "kind": "broom", "pos": [-2.8, 0, 0.36], "ry": 90, "roll": -6, "on": "floor"},
- {"name": "aframe", "type": "proc", "kind": "aframe", "pos": [1.12, 0, 2.0], "ry": -28, "scale": 0.7, "on": "floor"},
+ {"name": "aframe", "type": "proc", "kind": "aframe", "pos": [1.78, 0, 2.98], "ry": -20, "scale": 0.7},  # out on the pavement left of the door, where such a sign stands (inside the door its black back sat in the side views)
  {"name": "toolbox", "glb": "toolbox.glb", "pos": [-1.55, 0, 1.7], "ry": 14},
  {"name": "back_door", "glb": "back_door.glb", "pos": [1.75, 0, 0], "wall": "back", "sz": 0.55},
  {"name": "wall_clock", "glb": "wall_clock.glb", "pos": [2.63, 1.78, 0], "wall": "back"},

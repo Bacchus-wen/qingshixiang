@@ -273,13 +273,12 @@
   "type": "proc",
   "kind": "aframe",
   "pos": [
-   1.12,
+   1.78,
    0,
-   2.0
+   2.98
   ],
-  "ry": -28,
-  "scale": 0.7,
-  "on": "floor"
+  "ry": -20,
+  "scale": 0.7
  },
  {
   "name": "toolbox",
