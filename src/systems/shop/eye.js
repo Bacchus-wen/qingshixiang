@@ -266,7 +266,7 @@ export default {
     u.apex.value.copy(origin); u.axis.value.copy(this._d); u.reach.value = +ctx.params.get('beamreach') || (m.beamReach ?? 1); u.near.value = m.beamNear ?? 0.12; u.tanA.value = Math.tan(angle) * (m.shaftW ?? 1); // shaftW: the visible shaft narrower than the circle it brings back (act two looks along it: a full-width cone read as fog) u.k.value = 0.55 * o * o * Math.min(1, pw * 2) * (m.beamK ?? 1) * (+ctx.params.get('beamk') || 1);
     this.cone.position.copy(origin); this.cone.quaternion.setFromUnitVectors(_DOWN, this._d);
     this.halo.position.copy(this._p).addScaledVector(this._d, 0.03);
-    this.haloK.value = 0.6 * o + 0.06;
+    this.haloK.value = (0.6 * o + 0.06) * Math.min(1, m.coreK ?? 1);
     this.glow.position.copy(this._p).addScaledVector(this._d, 0.09); this.glowK.value = 0.5 * o * Math.min(1, pw * 2) * (m.glowK ?? 0);
     const shop = ctx.api.shop; if (shop?.eyeGlow) shop.eyeGlow.value = 0.25 + 0.5 * o; // the texture's own orange spot: an ember under the new core
   },

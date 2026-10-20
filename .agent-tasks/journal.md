@@ -282,3 +282,9 @@
 - 2026-10-20 19:00:15 | claude | 派给 codex：评审 key-climax r5（judge-r5-key-climax，只读）
 - 2026-10-20 19:14:56 | codex | 完成：评审 key-street r5（judge-r5-key-street）
 - 2026-10-20 19:15:59 | codex | 完成：评审 key-climax r5（judge-r5-key-climax）
+- 2026-10-20 19:18:52 | claude | 派给 codex：评审 key-memory r6（judge-r6-key-memory，只读）
+- 2026-10-20 19:18:53 | claude | 派给 codex：评审 key-street r6（judge-r6-key-street，只读）
+- 2026-10-20 19:18:53 | claude | 派给 codex：评审 key-climax r6（judge-r6-key-climax，只读）
+- 2026-10-20 19:41:56 | codex | 完成：评审 key-memory r6（judge-r6-key-memory）
+- 2026-10-20 19:43:27 | codex | 完成：评审 key-street r6（judge-r6-key-street）
+- 2026-10-20 19:44:50 | codex | 完成：评审 key-climax r6（judge-r6-key-climax）

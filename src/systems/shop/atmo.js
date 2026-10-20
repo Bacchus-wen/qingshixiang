@@ -1,6 +1,6 @@
 import * as THREE from 'three/webgpu';
 import {
-  Fn, float, vec3, vec4, uniform, uv, color, instanceIndex, hash, time, positionLocal, sin, mix, smoothstep, dot, normalize, length, max, mx_noise_vec3,
+  Fn, float, vec3, vec4, uniform, uv, color, instanceIndex, hash, time, positionLocal, sin, mix, smoothstep, dot, normalize, length, max, mx_noise_vec3, cameraPosition,
 } from 'three/tsl';
 import { mem } from '../../materials/memory.js';
 
@@ -49,7 +49,9 @@ export default {
     const tw = sin(time.mul(seed.x.mul(3).add(1)).add(seed.z.mul(50))).mul(0.35).add(0.65); // turning motes catch the light
     const r = uv().sub(0.5).length().mul(2);
     const shape = float(1).sub(smoothstep(0.0, 1.0, r)).pow(2);
-    mat.colorNode = vec3(1.0, 0.78, 0.52).mul(inLamp.mul(0.9)).add(vec3(1.0, 0.82, 0.6).mul(inBeam.mul(1.5))).add(vec3(0.42, 0.55, 0.85).mul(inDusk.mul(0.22))).mul(tw).mul(shape).mul(0.55);
+    // (motes within a few tens of cm of the lens were big hard white dots -- dead pixels, snow: they fade out there)
+    const nearCam = smoothstep(0.3, 0.9, length(P.sub(cameraPosition)));
+    mat.colorNode = vec3(1.0, 0.78, 0.52).mul(inLamp.mul(0.9)).add(vec3(1.0, 0.82, 0.6).mul(inBeam.mul(1.5))).add(vec3(0.42, 0.55, 0.85).mul(inDusk.mul(0.22))).mul(tw).mul(shape).mul(nearCam).mul(0.55);
     mat.scaleNode = float(0.0035).add(seed.y.mul(0.003));
     const dust = this.dust = new THREE.Sprite(mat); dust.count = N; dust.frustumCulled = false; dust.renderOrder = 7;
     if (ctx.params.get('nodust') === null) ctx.scene.add(dust);
@@ -57,7 +59,7 @@ export default {
     // between our road and the picture), its head, a soft halo, and the cold pool it throws on the empty road. On only
     // at the end (street = 1 in the 'out' state)
     {
-      const head = new THREE.Vector3(-4.5, 4.6, 10.35); // the post stands at the pillar between the electronics shop and the tailor's (no sign covered)
+      const head = new THREE.Vector3(-4.5, 3.4, 10.35); // (3.4 m, an old street's lamp: from inside the shop at 4.6 its head sat on the shutter's lower edge) // the post stands at the pillar between the electronics shop and the tailor's (no sign covered)
       const hm = new THREE.SpriteNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
       const rr = uv().sub(0.5).length().mul(2);
       this.streakK = uniform(0);
@@ -68,7 +70,7 @@ export default {
       sl.position.copy(head); sl.target.position.set(-3.2, -0.14, 7.4);
       ctx.scene.add(sl, sl.target);
       const pm = new THREE.MeshStandardNodeMaterial({ color: 0x8a877f, roughness: 0.85 });
-      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.1, 4.75, 10), pm); pole.position.set(head.x - 0.72, 4.75 / 2 - 0.14, head.z + 0.04);
+      const PL = head.y + 0.15, pole = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.1, PL, 10), pm); pole.position.set(head.x - 0.72, PL / 2 - 0.14, head.z + 0.04);
       const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.78, 8).rotateZ(Math.PI / 2), pm); arm.position.set(head.x - 0.36, head.y + 0.1, head.z);
       const lampMat = new THREE.MeshStandardNodeMaterial({ color: 0x3a3c40, roughness: 0.6 });
       lampMat.emissiveNode = vec3(0.85, 0.9, 1.0).mul(this.streakK.mul(3.5));
@@ -92,7 +94,7 @@ export default {
       const df = this.doorFill = new THREE.SpotLight(0xd9c7ae, 0, 0, 1.05, 1, 0);
       df.position.set(0.0, 2.2, 2.6); df.target.position.set(0.0, 1.15, -1.9); ctx.scene.add(df, df.target); // aimed at the shelves, not the floor by the door
     }
-    ctx.api.atmo = { levels: LEVELS, set: (s) => { if (LEVELS[s]) this.state = s; }, get state() { return this.state; }, flicker: (k = 1) => { this.burst = Math.max(this.burst, k); } };
+    ctx.api.atmo = { levels: LEVELS, set: (s, snap) => { if (LEVELS[s]) { this.state = s; if (snap) Object.assign(this.cur, LEVELS[s]); } }, get state() { return this.state; }, flicker: (k = 1) => { this.burst = Math.max(this.burst, k); } };
   },
 
   update(dt, t, ctx) {
@@ -112,7 +114,7 @@ export default {
       this.wasOn = on;
     }
     if (ctx.isShot && ctx.params.get('tube') !== null) tubeOn = +ctx.params.get('tube');
-    L.hemi.intensity = C.hemi; L.dusk.intensity = C.dusk * (ctx.memory.duskK ?? 1); L.lamp.intensity = C.lamp * (ctx.params.get('lampoff') !== null ? 0 : 1) * (ctx.memory.lampK ?? 1); L.fill.intensity = C.fill;
+    L.hemi.intensity = C.hemi * (ctx.memory.roomK ?? 1); L.dusk.intensity = C.dusk * (ctx.memory.duskK ?? 1); L.lamp.intensity = C.lamp * (ctx.params.get('lampoff') !== null ? 0 : 1) * (ctx.memory.lampK ?? 1); L.fill.intensity = C.fill * (ctx.memory.roomK ?? 1);
     L.tube.intensity = (this.state === 'review' ? C.tube : 5.5 * tubeOn); L.tubeGlow.value = this.state === 'review' ? C.glow : 0.02 + 2.2 * tubeOn;
     if (L.robotFill) L.robotFill.intensity = C.robot * (ctx.memory.robotFillK ?? 1); // (act two looks over its back: this front fill only lit the floor behind it)
     ctx.scene.environmentIntensity = C.env;
@@ -123,12 +125,12 @@ export default {
     this.pastK = (this.pastK ?? 0) + (pk - (this.pastK ?? 0)) * ek;
     if (m.origin && m.dir && m.dir.z > 0.05) {
       const s = (10.3 - m.origin.z) / m.dir.z, wide = Math.min(1, Math.max(0, ((m.memWide ?? 1) - 1) / 2));
-      const hx = Math.max(-6.5, Math.min(6.5, m.origin.x + m.dir.x * s)) * (1 - wide) + 0.3 * wide;
+      const hx = m.pastX ?? (Math.max(-6.5, Math.min(6.5, m.origin.x + m.dir.x * s)) * (1 - wide) + 0.3 * wide); // (pastX: a shot puts it)
       this.pastX = (this.pastX ?? hx) + (hx - (this.pastX ?? hx)) * Math.min(1, dt * (ctx.isShot ? 60 : 3));
       this.pastLight.position.set(this.pastX, 2.25, 10.3);
     }
     this.doorK = (this.doorK ?? 0) + ((m.doorK ?? 0) - (this.doorK ?? 0)) * ek; this.doorFill.intensity = 0.6 * this.doorK;
-    this.pastLight.angle = 0.24 + 0.32 * Math.min(1, Math.max(0, ((m.memWide ?? 1) - 1) / 2)); // the whole street: its light comes in across the road, not as a spot on the robot
+    this.pastLight.angle = m.pastAngle ?? (0.24 + 0.32 * Math.min(1, Math.max(0, ((m.memWide ?? 1) - 1) / 2))); // the whole street: its light comes in across the road, not as a spot on the robot
     this.pastLight.intensity = 2.6 * this.pastK * Math.min(1, (m.power ?? 1) * 4) * Math.min(1, (m.strength ?? 1) * 1.5) * (+ctx.params.get('pastk') || 1);
     // the dust sees the same lights
     const lp = L.lamp; this.lampPos.value.copy(lp.position); this.lampDir.value.copy(lp.target.position).sub(lp.position).normalize();

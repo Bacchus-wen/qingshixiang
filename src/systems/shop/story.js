@@ -24,7 +24,7 @@ const EYE0 = new THREE.Vector3(-0.493, 0.831, 1.376);
 const FACING = new THREE.Vector3(-0.2588, 0, 0.9659), LEFT = new THREE.Vector3(0.9659, 0, 0.2588);
 const TV_IN = new THREE.Vector3(0.71, 0.86, -1.42);        // the set on the cartons in the middle of the shop (a demo target)
 // its close-up: past the robot's head along the beam, the set and the valve radio above it filling the frame
-const TV_SHOT = { pos: new THREE.Vector3(0.355, 1.095, -0.068), look: new THREE.Vector3(0.42, 1.12, -1.65), fov: 32 };
+const TV_SHOT = { pos: new THREE.Vector3(0.355, 1.095, -0.068), look: new THREE.Vector3(0.47, 1.09, -1.65), fov: 34, aim: new THREE.Vector3(0.4, 1.16, -1.66) }; // aim between the set and the valve radio: both come back (r4: the dial stayed dark)
 // the shops across the road, in the "then" photograph (world points on the backdrop plane, z 11): each has a sound
 // that plays when the beam first rests on it
 export const SPOTS = [
@@ -39,7 +39,9 @@ const STREET_C = new THREE.Vector3(0.3, 1.85, 11.0);          // the middle of t
 // the robot whole on its stool in the doorway -- head, arms, sprung legs, a robot from behind -- the far side framed
 // by the opening, its beam reaching across the road
 // the last look's reverse shot: in front of its face, a little to its left, at the door
-const MEMORY_FACE = { pos: new THREE.Vector3(-0.43, 0.89, 2.38), look: new THREE.Vector3(-0.49, 0.85, 1.38), fov: 32 };
+// (r6 self-review: from straight in front the warm light lit it flat, as bright as the shelves behind: now from its left,
+// the light from the electronics shop on its far cheek, the room behind it lower, the lens core and glow down)
+const MEMORY_FACE = { pos: new THREE.Vector3(-0.32, 0.9, 2.35), look: new THREE.Vector3(-0.47, 0.86, 1.4), fov: 30, mem: { coreK: 0.4, glowK: 0, doorK: 0, roomK: 0.45, lampK: 0.2, pastX: -3.6, pastAngle: 0.12 } };
 const ACT2_POS = new THREE.Vector3(-0.05, 1.0, -1.7), ACT2_LOOK = new THREE.Vector3(-0.4, 0.92, 11.0), ACT2_FOV = 48; // (r4: feet and stool in frame, clear of the bench)
 const ACT2_BEAM = { beamK: 1.6, beamReach: 0.25, beamNear: 0.5, spotK: 0.6, duskK: 0.2, shaftW: 0.7, doorK: 1, glowK: 1, robotFillK: 0.25, lampK: 0.4 }; // (lamp: from in here the bench lamp was the brightest thing in the frame) // (dusk 0.2: from in here its hard patch on the floor burnt out) // a shaft in the dusty air toward the far side; the dusk under the shutter lower (from in here its patch on the floor burns out)
 const K = (t, p, l, fov, cut = false) => ({ t, p: new THREE.Vector3(...p), l: new THREE.Vector3(...l), fov, cut });
@@ -148,7 +150,7 @@ export default {
         if (this.t > 4 && !this.moved) film.hint(TOUCH ? '保持按住，滑动手指' : '保持按住，移动鼠标');
         if (!this.moved && (Math.abs(input.pointer.x) > 0.2 || Math.abs(input.pointer.y) > 0.2)) { this.moved = true; film.hint(''); eye?.aim(null); }
         if (!this.moved && this.t > 9) { // left alone, it looks at the set in the middle of the shop itself: over its head, the set beyond in focus
-          eye?.aim(TV_IN); this.cam.pos.copy(TV_SHOT.pos); this.cam.look.copy(TV_SHOT.look); this.cam.fov = TV_SHOT.fov; this.zoom = 0; this.tvShot = true;
+          eye?.aim(TV_SHOT.aim); this.cam.pos.copy(TV_SHOT.pos); this.cam.look.copy(TV_SHOT.look); this.cam.fov = TV_SHOT.fov; this.zoom = 0; this.tvShot = true;
         } else this.tvShot = false;
         if (eye && eye.open > 0.2) this.power = Math.max(0, this.power - dt / LOOK_POWER_S);
         // its own radio: after a while it looks at the half-repaired set on its bench; a crackle, and a song comes out of it.
@@ -224,7 +226,7 @@ export default {
         if (faceT !== !!this.faceOn) { this.faceOn = faceT; this.cut = true; }
         if (faceT) { this.cam.pos.copy(MEMORY_FACE.pos); this.cam.look.copy(MEMORY_FACE.look); this.cam.fov = MEMORY_FACE.fov; }
         else { this.cam.pos.copy(ACT2_POS); this.cam.look.copy(ACT2_LOOK); this.cam.fov = ACT2_FOV + 2 * ease(clamp01((this.t - 3.2) / 2)); }
-        m.forceOpen = true; Object.assign(m, ACT2_BEAM);
+        m.forceOpen = true; Object.assign(m, ACT2_BEAM, { coreK: undefined, roomK: undefined, pastX: undefined, pastAngle: undefined }, faceT ? MEMORY_FACE.mem : {});
         eye?.aim(SPOTS.find((x) => x.key === 'tv').pos);
         m.memWide = 1 + 3.2 * ease(clamp01((this.t - 3.2) / 2.2)); // the shop alone a moment (the song), then the whole street
         this.power = Math.max(0.03, this.power - dt * 0.03);
@@ -260,8 +262,8 @@ export default {
         // rubble; a digger somewhere; black; the card
         m.forceOpen = false; m.holdGaze = true; m.headLift = 1; m.pastK = 0; m.duskK = undefined; m.doorK = 0; m.glowK = 0; m.robotFillK = undefined; m.lampK = undefined;
         const u = ease(clamp01(this.t / 12));
-        this.cam.pos.set(-0.25 - 0.04 * u, 0.82, -1.05 + 0.2 * u); // its whole seated back on the right, the lamp across the road in frame
-        this.cam.look.set(-0.9, 1.7, 11.0); this.cam.fov = 52 - 3 * u;
+        // act two's view, pushing in slowly: the robot whole on its stool in the doorway, the dark street, the lamp (r4)
+        this.cam.pos.copy(ACT2_POS).lerp(this._w.set(-0.08, 0.98, -1.3), u); this.cam.look.set(-0.45, 1.12, 11.0); this.cam.fov = ACT2_FOV - 2 * u;
         if (this.t < 0.05) this.cut = true;
         film.fade(Math.min(1, Math.max(0, (this.t - 7) / 3)));
         if (this.t > 12.5) film.endCard(); // (two seconds of silence first: sound.js)
@@ -277,6 +279,7 @@ export default {
     const fl = ctx.api.shop?.faceLight; if (fl) {
       const inShop = this.phase === 'arrive' || this.phase === 'wait' || this.phase === 'waking' || this.phase === 'title';
       if (inShop) { fl.position.set(...(this.phase === 'arrive' ? [0.45, 1.25, 0.25] : [-1.35, 1.05, 0.62])); fl.target.position.set(-0.6, this.phase === 'arrive' ? 0.6 : 0.8, 0.98); }
+      else if (this.faceOn && this.phase === 'last') { fl.position.set(-1.35, 1.2, 2.35); fl.target.position.copy(EYE0).add(this._w.set(0, -0.08, 0)); } // the reverse shot: from its right, with the electronics shop's light
       else { fl.position.set(0.35, 1.25, 2.45); fl.target.position.copy(EYE0).add(this._w.set(0, -0.12, 0)); }
       fl.target.updateMatrixWorld(); fl.angle = this.phase === 'arrive' ? 0.7 : this.phase === 'turn' ? 0.9 : this.phase === 'street' || this.phase === 'last' ? 0.28 : 0.6;
       const want = this.phase === 'wait' ? 2.6 : this.phase === 'waking' ? 2.0 : this.phase === 'fade' ? 1.4 : this.phase === 'arrive' ? 3.2 * clamp01((this.t - 11) / 3) : this.phase === 'turn' ? 5.0 : this.phase === 'street' || this.phase === 'last' ? 1.6 : 0;
