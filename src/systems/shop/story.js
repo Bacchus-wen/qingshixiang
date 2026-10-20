@@ -38,8 +38,10 @@ const STREET_C = new THREE.Vector3(0.3, 1.85, 11.0);          // the middle of t
 // act two from further inside, over the dark shop (judges r1-r3: from just behind its head the robot is a rusty box):
 // the robot whole on its stool in the doorway -- head, arms, sprung legs, a robot from behind -- the far side framed
 // by the opening, its beam reaching across the road
+// the last look's reverse shot: in front of its face, a little to its left, at the door
+const MEMORY_FACE = { pos: new THREE.Vector3(-0.43, 0.89, 2.38), look: new THREE.Vector3(-0.49, 0.85, 1.38), fov: 32 };
 const ACT2_POS = new THREE.Vector3(-0.05, 1.0, -1.7), ACT2_LOOK = new THREE.Vector3(-0.4, 0.92, 11.0), ACT2_FOV = 48; // (r4: feet and stool in frame, clear of the bench)
-const ACT2_BEAM = { beamK: 1.6, beamReach: 0.25, beamNear: 0.5, spotK: 0.6, duskK: 0.2, shaftW: 0.7, doorK: 1, glowK: 1, robotFillK: 0.25 }; // (dusk 0.2: from in here its hard patch on the floor burnt out) // a shaft in the dusty air toward the far side; the dusk under the shutter lower (from in here its patch on the floor burns out)
+const ACT2_BEAM = { beamK: 1.6, beamReach: 0.25, beamNear: 0.5, spotK: 0.6, duskK: 0.2, shaftW: 0.7, doorK: 1, glowK: 1, robotFillK: 0.25, lampK: 0.4 }; // (lamp: from in here the bench lamp was the brightest thing in the frame) // (dusk 0.2: from in here its hard patch on the floor burnt out) // a shaft in the dusty air toward the far side; the dusk under the shutter lower (from in here its patch on the floor burns out)
 const K = (t, p, l, fov, cut = false) => ({ t, p: new THREE.Vector3(...p), l: new THREE.Vector3(...l), fov, cut });
 const WAIT_POS = new THREE.Vector3(-0.98, 0.88, 0.12), WAIT_LOOK = new THREE.Vector3(-0.6, 0.8, 0.98); // its face, lens side
 const ARRIVE_K = [
@@ -215,8 +217,13 @@ export default {
       case 'last': {
         // its last look: it turns back to the electronics shop where the song comes from; with what is left, the whole
         // street lights up as it was, for a moment; then it cannot hold it any more
-        this.cam.pos.copy(ACT2_POS);
-        this.cam.look.copy(ACT2_LOOK); this.cam.fov = ACT2_FOV + 2 * ease(clamp01((this.t - 3.2) / 2));
+        // the reverse shot (judges r4-r5: from behind it is a dark back of a head, never "a last look"): when the whole
+        // street has come back, its face for two seconds, the street's evening on the lens and the rusty casing; then
+        // back out to see the street go
+        const faceT = this.t > 5.6 && this.t < 7.8;
+        if (faceT !== !!this.faceOn) { this.faceOn = faceT; this.cut = true; }
+        if (faceT) { this.cam.pos.copy(MEMORY_FACE.pos); this.cam.look.copy(MEMORY_FACE.look); this.cam.fov = MEMORY_FACE.fov; }
+        else { this.cam.pos.copy(ACT2_POS); this.cam.look.copy(ACT2_LOOK); this.cam.fov = ACT2_FOV + 2 * ease(clamp01((this.t - 3.2) / 2)); }
         m.forceOpen = true; Object.assign(m, ACT2_BEAM);
         eye?.aim(SPOTS.find((x) => x.key === 'tv').pos);
         m.memWide = 1 + 3.2 * ease(clamp01((this.t - 3.2) / 2.2)); // the shop alone a moment (the song), then the whole street
@@ -251,7 +258,7 @@ export default {
       case 'end': {
         // from inside, behind it: it still faces the street, dark against it; the lamp across the road comes on over the
         // rubble; a digger somewhere; black; the card
-        m.forceOpen = false; m.holdGaze = true; m.headLift = 1; m.pastK = 0; m.duskK = undefined; m.doorK = 0; m.glowK = 0; m.robotFillK = undefined;
+        m.forceOpen = false; m.holdGaze = true; m.headLift = 1; m.pastK = 0; m.duskK = undefined; m.doorK = 0; m.glowK = 0; m.robotFillK = undefined; m.lampK = undefined;
         const u = ease(clamp01(this.t / 12));
         this.cam.pos.set(-0.25 - 0.04 * u, 0.82, -1.05 + 0.2 * u); // its whole seated back on the right, the lamp across the road in frame
         this.cam.look.set(-0.9, 1.7, 11.0); this.cam.fov = 52 - 3 * u;
