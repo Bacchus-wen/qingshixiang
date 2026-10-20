@@ -1,0 +1,15 @@
+{
+ "id": "judge-r15-key-bench",
+ "from": "claude",
+ "to": "codex",
+ "title": "评审 key-bench r15",
+ "write": false,
+ "gen": false,
+ "paths": [],
+ "status": "done",
+ "posted": "2026-10-21 06:29:09",
+ "started": "2026-10-21 06:30:10",
+ "seconds": 54.6,
+ "finished": "2026-10-21 06:31:06",
+ "reason": null
+}

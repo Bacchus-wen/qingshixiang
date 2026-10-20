@@ -84,7 +84,7 @@ function crtMaterial(chan, on, atlas, prog, TV) {
       const img = texture(prog.tex, rect.xy.add(u.mul(rect.zw))).rgb;
       const lum = dot(img, vec3(0.299, 0.587, 0.114));
       // (r8: soft and dim it read as the shop reflected in the glass, not a set playing) sharp, brighter, more contrast
-      pic = mix(pic, clamp(mix(vec3(lum), img, 0.9).sub(0.06).mul(1.55), 0, 1.2), step(2.5, chan));
+      pic = mix(pic, clamp(mix(vec3(lum), img, 0.72).sub(0.05).mul(1.18), 0, 1.0), step(2.5, chan)); // (r14: "oversaturated, a photo sticker": less colour and light)
     }
     if (atlas) { // programme stills: one row of N images
       const n = float(atlas.n), k = chan.sub(3).clamp(0, atlas.n - 1);
@@ -97,9 +97,10 @@ function crtMaterial(chan, on, atlas, prog, TV) {
     // phosphor: scanlines, a faint shadow mask, soft vignette; warm-up: the picture blooms out from the centre line
     const scan = sin(u.y.mul(Math.PI * 2 * 150)).mul(0.5).add(0.5).mul(0.1).add(0.9); // ~150 soft lines: finer ones alias at room distance
     const maskRGB = vec3(sin(u.x.mul(900)).mul(0.06).add(0.97), sin(u.x.mul(900).add(2.1)).mul(0.06).add(0.97), sin(u.x.mul(900).add(4.2)).mul(0.06).add(0.97));
-    const vig = float(1).sub(smoothstep(0.25, 0.75, length(c.mul(vec2(1.1, 1.3)))).mul(0.45));
+    const vig = float(1).sub(smoothstep(0.2, 0.72, length(c.mul(vec2(1.1, 1.3)))).mul(0.62)); // the tube's darker rim: the picture sits behind curved glass
     const warm = smoothstep(0.0, 0.12, on.mul(0.5).sub(abs(u.y.sub(0.5)).mul(on.lessThan(0.3).select(1, 0))));
-    return pic.mul(scan).mul(maskRGB).mul(vig).mul(1.35).mul(on.clamp(0, 1)).mul(warm.max(on.greaterThan(0.3).select(1, 0)));
+    const sheen = smoothstep(0.1, 0.0, abs(u0.x.add(u0.y.mul(0.6)).sub(0.42))).mul(smoothstep(0.75, 0.35, u0.y)).mul(0.07); // a soft reflection across the glass
+    return pic.mul(scan).mul(maskRGB).mul(vig).mul(1.35).mul(on.clamp(0, 1)).mul(warm.max(on.greaterThan(0.3).select(1, 0))).add(sheen);
   })();
   m.opacityNode = Fn(() => { // glass-edge mask (the picture stops at the rounded corners of the tube)
     const c = uv().sub(0.5), rr = vec2(TV.w, TV.h), q = abs(c.mul(rr)).sub(rr.mul(0.5).sub(TV.corner));
