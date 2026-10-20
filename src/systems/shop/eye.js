@@ -255,7 +255,7 @@ export default {
     const origin = this._v.copy(this._p).addScaledVector(this._d, 0.045); // just in front of the lens barrel
     const angle = 0.07 + 0.15 * o; // v5: a searching beam -- across the road its circle holds a shop and a half, not the street
     m.origin.copy(origin); m.dir.copy(this._d); m.angle = Math.min(1.2, angle * 1.12 * (m.memWide ?? 1)); m.strength = Math.min(1, o * 1.3) * Math.min(1, pw * 3);
-    syncMemory(m); mem.soft.value = (1 - Math.cos(m.angle)) * 0.35; mem.coreCos.value = Math.cos(angle * 1.12); // the soft edge scales with the cone (a fixed width would swallow a narrow one)
+    syncMemory(m); mem.soft.value = (1 - Math.cos(m.angle)) * 0.35 * (m.softK ?? 1); mem.coreCos.value = Math.cos(angle * 1.12); // the soft edge scales with the cone (a fixed width would swallow a narrow one)
     const sp = this.spot;
     sp.position.copy(origin); sp.target.position.copy(origin).addScaledVector(this._d, 4); sp.target.updateMatrixWorld();
     sp.angle = angle; sp.penumbra = 0.7;

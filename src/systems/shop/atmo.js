@@ -66,7 +66,7 @@ export default {
       hm.colorNode = vec3(0.82, 0.88, 1.0).mul(float(1).sub(smoothstep(0, 1, rr)).pow(3).mul(0.6).add(float(1).sub(smoothstep(0, 0.12, rr)).mul(5))).mul(this.streakK);
       const halo = new THREE.Sprite(hm); halo.position.copy(head).add(new THREE.Vector3(0, -0.04, 0)); halo.scale.setScalar(0.8); ctx.scene.add(halo);
       // cold: a mercury lamp over an empty road
-      const sl = this.streetLamp = new THREE.SpotLight(0xcfdcff, 0, 30, 0.75, 0.85, 1.1);
+      const sl = this.streetLamp = new THREE.SpotLight(0xcfdcff, 0, 30, 0.5, 0.9, 1.6); // (r7: a wide cone lit the whole road grey -- the street never went dark; now a pool under the lamp, falling off)
       sl.position.copy(head); sl.target.position.set(-3.2, -0.14, 7.4);
       ctx.scene.add(sl, sl.target);
       const pm = new THREE.MeshStandardNodeMaterial({ color: 0x8a877f, roughness: 0.85 });
@@ -118,7 +118,7 @@ export default {
     L.tube.intensity = (this.state === 'review' ? C.tube : 5.5 * tubeOn); L.tubeGlow.value = this.state === 'review' ? C.glow : 0.02 + 2.2 * tubeOn;
     if (L.robotFill) L.robotFill.intensity = C.robot * (ctx.memory.robotFillK ?? 1); // (act two looks over its back: this front fill only lit the floor behind it)
     ctx.scene.environmentIntensity = C.env;
-    this.streetLamp.intensity = 170 * C.street; this.streakK.value = C.street; // (cold now: brighter so its pool on the empty road shows the robot dark against it)
+    this.streetLamp.intensity = 120 * C.street; this.streakK.value = C.street; // (cold now: brighter so its pool on the empty road shows the robot dark against it)
     if (ctx.api.shop?.farK) ctx.api.shop.farK.value = C.far;
     // the past's light comes from where the beam brings the far side back (the whole street: from its middle)
     const m = ctx.memory, pk = m.pastK ?? 0, ek = Math.min(1, dt * (ctx.isShot ? 60 : 2.5));

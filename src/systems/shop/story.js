@@ -43,7 +43,7 @@ const STREET_C = new THREE.Vector3(0.3, 1.85, 11.0);          // the middle of t
 // the light from the electronics shop on its far cheek, the room behind it lower, the lens core and glow down)
 const MEMORY_FACE = { pos: new THREE.Vector3(-0.32, 0.9, 2.35), look: new THREE.Vector3(-0.47, 0.86, 1.4), fov: 30, mem: { coreK: 0.4, glowK: 0, doorK: 0, roomK: 0.45, lampK: 0.2, pastX: -3.6, pastAngle: 0.12 } };
 const ACT2_POS = new THREE.Vector3(-0.05, 1.0, -1.7), ACT2_LOOK = new THREE.Vector3(-0.4, 0.92, 11.0), ACT2_FOV = 48; // (r4: feet and stool in frame, clear of the bench)
-const ACT2_BEAM = { beamK: 1.6, beamReach: 0.25, beamNear: 0.5, spotK: 0.6, duskK: 0.2, shaftW: 0.7, doorK: 1, glowK: 1, robotFillK: 0.25, lampK: 0.4 }; // (lamp: from in here the bench lamp was the brightest thing in the frame) // (dusk 0.2: from in here its hard patch on the floor burnt out) // a shaft in the dusty air toward the far side; the dusk under the shutter lower (from in here its patch on the floor burns out)
+const ACT2_BEAM = { beamK: 1.6, beamReach: 0.25, beamNear: 0.5, spotK: 0.6, duskK: 0.2, shaftW: 0.7, doorK: 1, glowK: 1, robotFillK: 0.25, lampK: 0.4, softK: 1.8 }; // softK: a wider then/now edge (r7: a hard one read as a burnt stripe) // (lamp: from in here the bench lamp was the brightest thing in the frame) // (dusk 0.2: from in here its hard patch on the floor burnt out) // a shaft in the dusty air toward the far side; the dusk under the shutter lower (from in here its patch on the floor burns out)
 const K = (t, p, l, fov, cut = false) => ({ t, p: new THREE.Vector3(...p), l: new THREE.Vector3(...l), fov, cut });
 const WAIT_POS = new THREE.Vector3(-0.98, 0.88, 0.12), WAIT_LOOK = new THREE.Vector3(-0.6, 0.8, 0.98); // its face, lens side
 const ARRIVE_K = [
@@ -263,7 +263,7 @@ export default {
         m.forceOpen = false; m.holdGaze = true; m.headLift = 1; m.pastK = 0; m.duskK = undefined; m.doorK = 0; m.glowK = 0; m.robotFillK = undefined; m.lampK = undefined;
         const u = ease(clamp01(this.t / 12));
         // act two's view, pushing in slowly: the robot whole on its stool in the doorway, the dark street, the lamp (r4)
-        this.cam.pos.copy(ACT2_POS).lerp(this._w.set(-0.08, 0.98, -1.3), u); this.cam.look.set(-0.45, 1.12, 11.0); this.cam.fov = ACT2_FOV - 2 * u;
+        this.cam.pos.copy(ACT2_POS).lerp(this._w.set(-0.07, 0.99, -1.55), u); this.cam.look.set(-0.43, 1.02, 11.0); this.cam.fov = ACT2_FOV - 1 * u; // (r7: pushed in further, the stool was cut and the robot crowded the bottom edge)
         if (this.t < 0.05) this.cut = true;
         film.fade(Math.min(1, Math.max(0, (this.t - 7) / 3)));
         if (this.t > 12.5) film.endCard(); // (two seconds of silence first: sound.js)
@@ -279,10 +279,12 @@ export default {
     const fl = ctx.api.shop?.faceLight; if (fl) {
       const inShop = this.phase === 'arrive' || this.phase === 'wait' || this.phase === 'waking' || this.phase === 'title';
       if (inShop) { fl.position.set(...(this.phase === 'arrive' ? [0.45, 1.25, 0.25] : [-1.35, 1.05, 0.62])); fl.target.position.set(-0.6, this.phase === 'arrive' ? 0.6 : 0.8, 0.98); }
+      else if (this.phase === 'end') { fl.position.set(1.0, 1.7, 2.5); fl.target.position.set(-0.5, 0.85, 1.15); fl.distance = 6; } // the night sky at the door's left edge: grazing the side of it we see from behind (its range was 3 m: from outside it reached nothing) // the end: the street lamp's cold edge on its head, shoulder and arm, from outside right (r7: a black lump)
       else if (this.faceOn && this.phase === 'last') { fl.position.set(-1.35, 1.2, 2.35); fl.target.position.copy(EYE0).add(this._w.set(0, -0.08, 0)); } // the reverse shot: from its right, with the electronics shop's light
       else { fl.position.set(0.35, 1.25, 2.45); fl.target.position.copy(EYE0).add(this._w.set(0, -0.12, 0)); }
       fl.target.updateMatrixWorld(); fl.angle = this.phase === 'arrive' ? 0.7 : this.phase === 'turn' ? 0.9 : this.phase === 'street' || this.phase === 'last' ? 0.28 : 0.6;
-      const want = this.phase === 'wait' ? 2.6 : this.phase === 'waking' ? 2.0 : this.phase === 'fade' ? 1.4 : this.phase === 'arrive' ? 3.2 * clamp01((this.t - 11) / 3) : this.phase === 'turn' ? 5.0 : this.phase === 'street' || this.phase === 'last' ? 1.6 : 0;
+      fl.color.set(this.phase === 'end' ? 0xc9d6ff : 0xffe2c0); if (this.phase !== 'end') fl.distance = 3;
+      const want = this.phase === 'end' ? 4.5 * clamp01((this.t - 2) / 3) : this.phase === 'wait' ? 2.6 : this.phase === 'waking' ? 2.0 : this.phase === 'fade' ? 1.4 : this.phase === 'arrive' ? 3.2 * clamp01((this.t - 11) / 3) : this.phase === 'turn' ? 5.0 : this.phase === 'street' || this.phase === 'last' ? 1.6 : 0;
       fl.intensity += (want - fl.intensity) * Math.min(1, dt * 1.5);
     }
 
