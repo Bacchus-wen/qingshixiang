@@ -21,7 +21,7 @@ export const CHILD_LAYER = 6; // seen only by the eye's shadow camera (no figure
 const modelPos = (mesh) => uniform(mesh.matrixWorld.clone()).mul(vec4(positionGeometry, 1)).xyz;
 
 // ---- CRT picture. u in [0,1]^2 across the screen; ch = channel; on = 0..1 power (warming up / dying)
-const TV = { w: 0.31, h: 0.236, cx: -0.037, cy: 0.173, apex: 0.1585, bulge: 0.021, corner: 0.035 };
+const TV = { w: 0.345, h: 0.236, cx: -0.0545, cy: 0.173, apex: 0.1585, bulge: 0.021, corner: 0.035 }; // (w, cx: once the picture covered the glass, 1/10 of the glass showed bare on the left)
 function screenGeometry() {
   const g = new THREE.PlaneGeometry(TV.w, TV.h, 24, 18), p = g.attributes.position;
   for (let i = 0; i < p.count; i++) {
@@ -31,7 +31,7 @@ function screenGeometry() {
   g.computeVertexNormals();
   return g;
 }
-function crtMaterial(chan, on, atlas) {
+function crtMaterial(chan, on, atlas, prog) {
   const m = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false });
   m.colorNode = Fn(() => {
     const u0 = uv();
@@ -71,6 +71,14 @@ function crtMaterial(chan, on, atlas) {
     })();
     let pic = mix(card, vec3(snow), step(0.5, chan).mul(step(chan, 1.5)));
     pic = mix(pic, bars, step(1.5, chan).mul(step(chan, 2.5)));
+    if (prog) { // programmes: the 1990s street across the road, as the local station showed it (crops of the "then" photograph)
+      const R = prog.rects, k = chan.sub(3);
+      let rect = vec4(...R[0]);
+      for (let i = 1; i < R.length; i++) rect = mix(rect, vec4(...R[i]), step(i - 0.5, k));
+      const img = texture(prog.tex, rect.xy.add(u.mul(rect.zw))).bias(1.2).rgb; // (a soft broadcast picture)
+      const lum = dot(img, vec3(0.299, 0.587, 0.114));
+      pic = mix(pic, mix(vec3(lum), img, 0.85), step(2.5, chan));
+    }
     if (atlas) { // programme stills: one row of N images
       const n = float(atlas.n), k = chan.sub(3).clamp(0, atlas.n - 1);
       const img = texture(atlas.tex, vec2(u.x.add(k).div(n), u.y)).rgb;
@@ -90,7 +98,8 @@ function crtMaterial(chan, on, atlas) {
     const c = uv().sub(0.5), rr = vec2(TV.w, TV.h), q = abs(c.mul(rr)).sub(rr.mul(0.5).sub(TV.corner));
     return float(1).sub(smoothstep(-0.004, 0.0, length(max(q, vec2(0))).sub(TV.corner))).mul(on.clamp(0, 1).mul(4).clamp(0, 1));
   })();
-  m.blending = THREE.AdditiveBlending; // light from the tube, over the glass the model already has
+  // (normal, not additive: added over the model's pale glass the picture never got darker than the glass -- a milky
+  // veil; the tube's picture covers the glass while it is on, and fades back to it as the set dies)
   return m;
 }
 
@@ -150,12 +159,15 @@ export default {
     this.ctx = ctx;
     // ---- TVs: a picture on every CRT's screen
     this.tvs = [];
+    // (judges r1-r4: test card and colour bars read as a set switched on in a store room, not as the past coming back)
+    // the shop's TVs show the street outside as it was: the electronics shop's window, the barber's, the noodle shop
+    if (shop.streetThen) this.prog = { tex: shop.streetThen, rects: [[0.6525, 0.07, 0.12, 0.18], [0.437, 0.07, 0.12, 0.18], [0.034, 0.07, 0.12, 0.18]] };
     const scr = screenGeometry();
     let k = 0;
     for (const [name, o] of Object.entries(placed)) {
       if (o.userData.layout?.glb !== 'crt_tv.glb') continue;
       const on = uniform(0), chan = uniform(k % 3);
-      const mesh = new THREE.Mesh(scr, crtMaterial(chan, on, this.atlas));
+      const mesh = new THREE.Mesh(scr, crtMaterial(chan, on, this.atlas, this.prog));
       mesh.renderOrder = 3; mesh.frustumCulled = false;
       // the LodObject's frame is the model space (a yaw0 pivot is not used for TVs)
       o.add(mesh);
@@ -182,9 +194,11 @@ export default {
       tv.c.set(TV.cx, TV.cy, TV.apex).applyMatrix4(tv.o.matrixWorld);
       const want = memoryMaskCPU(tv.c, m);
       tv.presence += (want - tv.presence) * Math.min(1, dt * (want > tv.presence ? 1.8 : 3));
+      if (tv.presence > 0.05 && !tv.wasOn && this.prog) tv.chan.value = 3 + (this.tvs.indexOf(tv) % this.prog.rects.length); // switched on by the beam: a programme first
+      tv.wasOn = tv.presence > 0.05;
       tv.on.value = tv.presence > 0.02 ? Math.min(1, tv.presence * 1.15) : 0;
       tv.nextZap -= dt * (tv.presence > 0.5 ? 1 : 0);
-      if (tv.nextZap <= 0) { tv.chan.value = (tv.chan.value + 1 + Math.floor(Math.random() * 2)) % (3 + (this.atlas?.n || 0)); tv.nextZap = 5 + Math.random() * 7; if (tv.presence > 0.6) ctx.api.audio?.play('tvzap', { pos: tv.c }); }
+      if (tv.nextZap <= 0) { const np = this.prog?.rects.length || this.atlas?.n || 0; tv.chan.value = np && Math.random() < 0.8 ? 3 + Math.floor(Math.random() * np) : Math.floor(Math.random() * 3); /* mostly programmes, now and then snow or bars */ tv.nextZap = 5 + Math.random() * 7; if (tv.presence > 0.6) ctx.api.audio?.play('tvzap', { pos: tv.c }); }
       const v = tv.presence; if (v > bestV) { bestV = v; best = tv; }
     }
     if (best && bestV > 0.05) {

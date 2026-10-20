@@ -463,7 +463,7 @@ export default {
     // from "now" as the reference, so the shops line up): lit shops, laundry, neighbours on stools. Where the robot's
     // beam falls, "then" shows through, per pixel, by the same memory mask as everything else
     {
-      const now = tex('street_now'), then = tex('street_then');
+      const now = tex('street_now'), then = this.streetThen = tex('street_then');
       for (const t of [now, then]) { t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; t.anisotropy = 8; }
       const bd = new THREE.MeshBasicNodeMaterial(), k = memoryMask(positionWorld), far = this.farK = uniform(1); // far: dusk 1 -> night (atmo)
       const toP = positionWorld.sub(mem.origin).normalize(), core = smoothstep(mem.coreCos.sub(0.012), mem.coreCos.add(0.02), toP.dot(mem.dir));
@@ -870,7 +870,7 @@ export default {
         for (const o of objs) o.visible = false;
       }
     }
-    ctx.api.shop = { root, placed, ROOM, lod, rig, eyeGlow, lights: { hemi, dusk, lamp: this.lamp, fill, tube: this.tubeLight, tubeGlow, robotFill: this.robotFill }, farK: this.farK, robotTurn: (k) => { const r = placed.robot; if (!r) return; r.userData.ry0 ??= r.rotation.y; r.rotation.y = r.userData.ry0 - Math.PI * k; }, review: !ctx.isShot && ctx.params.get("review") !== null };
+    ctx.api.shop = { streetThen: this.streetThen, root, placed, ROOM, lod, rig, eyeGlow, lights: { hemi, dusk, lamp: this.lamp, fill, tube: this.tubeLight, tubeGlow, robotFill: this.robotFill }, farK: this.farK, robotTurn: (k) => { const r = placed.robot; if (!r) return; r.userData.ry0 ??= r.rotation.y; r.rotation.y = r.userData.ry0 - Math.PI * k; }, review: !ctx.isShot && ctx.params.get("review") !== null };
     ctx.postfx.memoryGrade = true; // the past inside the beam is graded per pixel (src/engine/PostFX.js)
     Object.assign(ctx.postfx.params, { bloomRadius: 0.35, bloomStrength: 0.26, bloomThreshold: 2.2 }); // a tight glow round the hottest cores only (the lamp's shade is lit point-blank: it must not flare)
     // the face light for the robot's close-ups (story: wait / waking), soft and unshadowed, off otherwise (never removed:
