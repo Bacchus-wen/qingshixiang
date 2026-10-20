@@ -1,0 +1,15 @@
+{
+ "id": "blind-tv-1",
+ "from": "claude",
+ "to": "codex",
+ "title": "盲评 三台电视模型",
+ "write": false,
+ "gen": false,
+ "paths": [],
+ "status": "done",
+ "posted": "2026-10-21 05:50:28",
+ "started": "2026-10-21 05:53:24",
+ "seconds": 47.8,
+ "finished": "2026-10-21 05:54:13",
+ "reason": null
+}

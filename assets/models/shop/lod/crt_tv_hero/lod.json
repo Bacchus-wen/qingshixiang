@@ -1,0 +1,51 @@
+{
+ "name": "crt_tv_hero",
+ "source": "assets/generated/tripo4/crt_tv_v2s/single.glb",
+ "size": 0.5,
+ "axis": "long",
+ "rotz": -90,
+ "dims": [
+  0.5,
+  0.4996,
+  0.2823
+ ],
+ "radius": 0.3805,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1912923,
+   "errM": 0,
+   "tex": 4096,
+   "texelsPerM": 3352.130665860625,
+   "minY": 0,
+   "bytes": 37966448
+  },
+  {
+   "file": "L1.glb",
+   "tris": 12586,
+   "errM": 0.0005,
+   "tex": 2048,
+   "texelsPerM": 1676.0653329303125,
+   "minY": 0.00025,
+   "bytes": 8390392
+  },
+  {
+   "file": "L2.glb",
+   "tris": 3952,
+   "errM": 0.00199,
+   "tex": 1024,
+   "texelsPerM": 838.0326664651562,
+   "minY": 0.00071,
+   "bytes": 1268500
+  },
+  {
+   "file": "L3.glb",
+   "tris": 2654,
+   "errM": 0.0058,
+   "tex": 512,
+   "texelsPerM": 419.0163332325781,
+   "minY": 0.00108,
+   "bytes": 414808
+  }
+ ]
+}

@@ -1,0 +1,25 @@
+{
+ "op": "crt_tv_v2s",
+ "steps": {
+  "single": {
+   "state": "submitted",
+   "task_id": "df76fc87-59dd-42ca-8459-94910f10b0f9",
+   "path": "/generation/image-to-model",
+   "payload": {
+    "model": "v3.1-20260211",
+    "geometry_quality": "detailed",
+    "texture": true,
+    "pbr": true,
+    "texture_version": "v3.5-20260815",
+    "texture_quality": "detailed",
+    "delight": true
+   },
+   "status": "success",
+   "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo4/crt_tv_v2s/single.glb",
+   "sha256": "5f055c602c9c81886b179d428135523fdaf3f3136a828aa40662b996f0bc903f"
+  }
+ },
+ "credits": 60,
+ "file_token": "file_39e01d57-f8b8-4a31-8e62-a9bfc1ac8659",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/shop/refs/crt_tv.png"
+}

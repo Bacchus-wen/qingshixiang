@@ -155,6 +155,13 @@
    "axis": "height",
    "levels": "0.3:4096,1:2048,3:1024",
    "rotz": 0
+  },
+  {
+   "name": "crt_tv_hero",
+   "in": "assets/generated/tripo4/crt_tv_v2s/single.glb",
+   "size": 0.5,
+   "axis": "long",
+   "rotz": -90
   }
  ]
 }

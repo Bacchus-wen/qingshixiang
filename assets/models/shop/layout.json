@@ -216,11 +216,11 @@
   "name": "magnifier",
   "glb": "magnifier.glb",
   "pos": [
-   -1.63,
+   -2.12,
    0,
-   0.98
+   0.6
   ],
-  "ry": 25,
+  "ry": 70,
   "on": "workbench"
  },
  {
@@ -1438,7 +1438,7 @@
  },
  {
   "name": "tv_on_cartons",
-  "glb": "crt_tv.glb",
+  "glb": "crt_tv_hero.glb",
   "pos": [
    0.71,
    0,
@@ -1448,9 +1448,9 @@
   "on": "floor_carton_1",
   "scale": 0.78,
   "tint": [
-   0.62,
-   0.64,
-   0.66
+   0.78,
+   0.78,
+   0.8
   ]
  }
 ]

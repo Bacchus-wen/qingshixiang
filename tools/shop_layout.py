@@ -24,7 +24,7 @@ fixed = [
  {"name": "rag", "type": "proc", "kind": "rag", "pos": [-1.81, 0, 1.215], "ry": -6, "on": "workbench", "noDrop": True, "y": 0.0},
  {"name": "desk_lamp", "glb": "desk_lamp.glb", "pos": [-1.78, 0, 0.66], "ry": 32, "on": "workbench"},
  {"name": "tube_radio_open", "glb": "tube_radio_open.glb", "pos": [-1.26, 0, 0.74], "ry": -36, "on": "workbench"},
- {"name": "magnifier", "glb": "magnifier.glb", "pos": [-1.63, 0, 0.98], "ry": 25, "on": "workbench"},
+ {"name": "magnifier", "glb": "magnifier.glb", "pos": [-2.12, 0, 0.6], "ry": 70, "on": "workbench"},  # (back left corner of the bench, reaching in from the side: at the front its arm crossed the open radio in the bench close-up -- judges r4-r8)
  {"name": "soldering_iron", "glb": "soldering_iron.glb", "pos": [-2.06, 0, 1.11], "ry": 12, "on": "workbench"},
  {"name": "enamel_mug", "glb": "enamel_mug.glb", "pos": [-2.22, 0, 0.6], "ry": 30, "on": "workbench"},
  {"name": "robot", "glb": "robot.glb", "pos": [-0.55, 0, 1.16], "ry": -25},
@@ -192,7 +192,7 @@ for i, (key, x, z, ry, lvl) in enumerate([('box_a', 0.7, -1.48, 6, 0), ('box_b',
     if lvl == 0: it["on"] = "floor"
     out.append(it)
 # after the floor cartons (its support must be placed first)
-out.append({"name": "tv_on_cartons", "glb": "crt_tv.glb", "pos": [0.71, 0, -1.48], "ry": 24, "on": "floor_carton_1", "scale": 0.78, "tint": [0.62, 0.64, 0.66]})
+out.append({"name": "tv_on_cartons", "glb": "crt_tv_hero.glb", "pos": [0.71, 0, -1.48], "ry": 24, "on": "floor_carton_1", "scale": 0.78, "tint": [0.78, 0.78, 0.8]})  # the shelf close-up's set: the 2026-10-21 regeneration (past.js TVS)
 # v4 story (2026-10-19): the robot faces into the shop -- the shelves, the back door and the height marks beside it --
 # with its back to the street, so its gaze can reach the door. The robot and the work in front of it (the carton and
 # the spare torso its screwdriver is on) turn together about the robot's own position: the tip stays where it was.

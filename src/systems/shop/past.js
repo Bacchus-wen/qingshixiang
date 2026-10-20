@@ -21,8 +21,14 @@ export const CHILD_LAYER = 6; // seen only by the eye's shadow camera (no figure
 const modelPos = (mesh) => uniform(mesh.matrixWorld.clone()).mul(vec4(positionGeometry, 1)).xyz;
 
 // ---- CRT picture. u in [0,1]^2 across the screen; ch = channel; on = 0..1 power (warming up / dying)
-const TV = { w: 0.345, h: 0.236, cx: -0.0545, cy: 0.173, apex: 0.1585, bulge: 0.021, corner: 0.035 }; // (w, cx: once the picture covered the glass, 1/10 of the glass showed bare on the left)
-function screenGeometry() {
+// per model (tools/probe.sh: the glass measured in model space); the hero set on the cartons is the 2026-10-21 Tripo
+// single-image regeneration (blind review: the best wear on its front; its back, never seen there, is a plain board)
+const TVS = {
+  'crt_tv.glb': { w: 0.345, h: 0.236, cx: -0.0545, cy: 0.173, apex: 0.1585, bulge: 0.021, corner: 0.035 },
+  'crt_tv_hero.glb': { w: 0.336, h: 0.232, cx: -0.052, cy: 0.174, apex: 0.1386, bulge: 0.021, corner: 0.035 },
+};
+const TV = TVS['crt_tv.glb']; // (w, cx: once the picture covered the glass, 1/10 of the glass showed bare on the left)
+function screenGeometry(TV) {
   const g = new THREE.PlaneGeometry(TV.w, TV.h, 24, 18), p = g.attributes.position;
   for (let i = 0; i < p.count; i++) {
     const x = p.getX(i), y = p.getY(i), nx = x / (TV.w / 2), ny = y / (TV.h / 2);
@@ -31,7 +37,7 @@ function screenGeometry() {
   g.computeVertexNormals();
   return g;
 }
-function crtMaterial(chan, on, atlas, prog) {
+function crtMaterial(chan, on, atlas, prog, TV) {
   const m = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false });
   m.colorNode = Fn(() => {
     const u0 = uv();
@@ -163,17 +169,17 @@ export default {
     // (judges r1-r4: test card and colour bars read as a set switched on in a store room, not as the past coming back)
     // the shop's TVs show the street outside as it was: the electronics shop's window, the barber's, the noodle shop
     if (shop.streetThen) this.prog = { tex: shop.streetThen, rects: [[0.6525, 0.07, 0.12, 0.18], [0.437, 0.07, 0.12, 0.18], [0.034, 0.07, 0.12, 0.18]] };
-    const scr = screenGeometry();
+    const scr = {};
     let k = 0;
     for (const [name, o] of Object.entries(placed)) {
-      if (o.userData.layout?.glb !== 'crt_tv.glb') continue;
+      const T = TVS[o.userData.layout?.glb]; if (!T) continue;
       const on = uniform(0), chan = uniform(k % 3);
-      const mesh = new THREE.Mesh(scr, crtMaterial(chan, on, this.atlas, this.prog));
+      const mesh = new THREE.Mesh(scr[o.userData.layout.glb] ??= screenGeometry(T), crtMaterial(chan, on, this.atlas, this.prog, T));
       mesh.renderOrder = 3; mesh.frustumCulled = false;
       // the LodObject's frame is the model space (a yaw0 pivot is not used for TVs)
       o.add(mesh);
-      const c = new THREE.Vector3(TV.cx, TV.cy, TV.apex).applyMatrix4(o.matrixWorld);
-      this.tvs.push({ name, o, mesh, on, chan, c, presence: 0, phase: k * 1.7, nextZap: 3 + k * 2.3 });
+      const c = new THREE.Vector3(T.cx, T.cy, T.apex).applyMatrix4(o.matrixWorld);
+      this.tvs.push({ name, o, mesh, on, chan, c, T, presence: 0, phase: k * 1.7, nextZap: 3 + k * 2.3 });
       k++;
     }
     // the glow of the brightest set on the room in front of it (one light, moved to whichever set matters most)
@@ -192,7 +198,7 @@ export default {
     // TVs: a set inside the beam switches on (a short warm-up), zaps channels now and then; outside it dies away
     let best = null, bestV = 0;
     for (const tv of this.tvs) {
-      tv.c.set(TV.cx, TV.cy, TV.apex).applyMatrix4(tv.o.matrixWorld);
+      tv.c.set(tv.T.cx, tv.T.cy, tv.T.apex).applyMatrix4(tv.o.matrixWorld);
       const want = memoryMaskCPU(tv.c, m);
       tv.presence += (want - tv.presence) * Math.min(1, dt * (want > tv.presence ? 1.8 : 3));
       if (tv.presence > 0.05 && !tv.wasOn && this.prog) tv.chan.value = 3 + (this.tvs.indexOf(tv) % this.prog.rects.length); // switched on by the beam: a programme first
