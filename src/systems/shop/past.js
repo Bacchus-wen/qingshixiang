@@ -176,6 +176,25 @@ const KNOBS = {
   'tube_radio_open.glb': { face: 0.121, front: 0.147, r: 0.0145, ring: 0.0165, brass: true, at: [[0.2093, 0.0757, 0.3, 0.0145], [0.1505, 0.0803, -0.5, 0.0188], [0.0919, 0.0808, 0.9, 0.0135]] },
   'crt_tv_hero.glb': { face: 0.1195, front: 0.1411, r: 0.0185, ring: 0.0205, fin: true, at: [[0.1879, 0.2633, 0.5], [0.1868, 0.2025, -0.4]], dial: [0.1879, 0.2633, 0.0215, 0.0315] },
 };
+// the bench radio's valves (tools/probe.sh slabs: front row at z ~0.065, one behind at z 0.015): a glass shell a
+// little over each generated one -- a rim of reflection when cold; warming orange through the glass, brightest round
+// the plate, when the robot's own radio comes alive (story: memory.benchGlow)
+const VALVES = { 'tube_radio_open.glb': [[-0.028, 0.066, 0.205, 0.272, 0.0135], [-0.057, 0.065, 0.205, 0.25, 0.0125], [-0.087, 0.063, 0.2, 0.255, 0.0145], [-0.087, 0.015, 0.2, 0.255, 0.017]] };
+const valveGlow = uniform(0);
+function valve([x, z, y0, y1, r0]) {
+  const r = r0 * 1.25, h = (y1 - y0) * 0.85, g = new THREE.CylinderGeometry(r, r, h, 32, 1, true).translate(0, h / 2, 0); // (just over the generated glass; no outline, so a shell a few mm off shows no ghost)
+  const m = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide });
+  m.colorNode = Fn(() => {
+    const t = positionLocal.y.div(h); // 0 at the socket, 1 at the top
+    const face = abs(dot(normalize(positionViewDirection), normalView)).pow(1.5); // light inside the glass: strongest straight through, none at the outline
+    const plate = smoothstep(0.08, 0.35, t).mul(smoothstep(0.95, 0.6, t)); // the glowing middle
+    return vec3(1.0, 0.36, 0.07).mul(plate.mul(1.5).add(0.08)).mul(face).mul(valveGlow);
+  })();
+  if (globalThis.location?.search.includes('valvedbg')) m.depthTest = false; // (where are they? drawn over everything)
+  const mesh = new THREE.Mesh(g, m); mesh.position.set(x, y0, z); mesh.renderOrder = 5;
+  // a dome of glass on top
+  return mesh;
+}
 let dialTex = null;
 function channelDial(D) { // white channel numbers 2-13 on a black ring, as on the sets of the time
   dialTex ??= (() => {
@@ -245,6 +264,12 @@ export default {
       for (const [x, y, turn, r] of K.at) { const kb = knob(K, turn, r); kb.position.set(x, y, 0); o.add(kb); }
       if (K.dial) { const dm = channelDial(K.dial); dm.position.z = K.face + 0.0012; o.add(dm); }
     }
+    for (const o of Object.values(placed)) {
+      const V = VALVES[o.userData.layout?.glb]; if (!V) continue;
+      for (const v of V) o.add(valve(v));
+      o.updateMatrixWorld(true);
+      this.valveLight = new THREE.PointLight(0xff8a3a, 0, 0.55, 2); o.localToWorld(this.valveLight.position.set(-0.06, 0.24, 0.05)); ctx.scene.add(this.valveLight); // warm on the chassis inside (made now, at 0: adding a light later recompiles every material)
+    }
     // the glow of the brightest set on the room in front of it (one light, moved to whichever set matters most)
     this.tvLight = new THREE.PointLight(0x9fb8ff, 0, 3.4, 1.4); ctx.scene.add(this.tvLight);
 
@@ -257,6 +282,11 @@ export default {
 
   update(dt, t, ctx) {
     if (!this.tvs) return;
+    { // the bench radio's valves: warming with the song, a slight unsteadiness while they come up
+      const want = (ctx.memory.benchGlow ?? 0) * (0.93 + 0.07 * Math.sin(t * 17) * Math.sin(t * 5.3));
+      valveGlow.value += (want - valveGlow.value) * Math.min(1, dt * (ctx.isShot ? 60 : 1.6));
+      if (this.valveLight) this.valveLight.intensity = 0.35 * valveGlow.value;
+    }
     const m = ctx.memory;
     // TVs: a set inside the beam switches on (a short warm-up), zaps channels now and then; outside it dies away
     let best = null, bestV = 0;

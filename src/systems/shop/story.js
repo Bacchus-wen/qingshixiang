@@ -164,6 +164,7 @@ export default {
         if (this.t > 19 && this.t < 27) eye?.aim(this.benchPos);
         if (this.t > 20.6 && !this.crackled) { this.crackled = true; audio?.play('tvzap', { pos: this.benchPos }); }
         this.benchTune = this.t < 21.2 ? 0 : this.t < 26 ? Math.min(1, (this.t - 21.2) / 1.2) : Math.max(0, 1 - (this.t - 26) / 2.5);
+        m.benchGlow = this.t < 20.6 ? 0 : this.t < 26 ? Math.min(1, (this.t - 20.6) / 2.2) : Math.max(0.35, 1 - (this.t - 26) / 6); // its valves warm up with the crackle and stay warm (past.js)
         if (this.t > 26) this.tuneCall = Math.min(0.55, (this.tuneCall ?? 0) + dt * 0.3);
         if (this.t > 27) eye?.aim(null);
         if ((this.t > 30 && this.zoom < 0.2) || this.t > 34 || input.wasPressed('KeyT')) { film.hint(''); this.benchTune = 0; this.set('turn'); }
