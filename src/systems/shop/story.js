@@ -179,7 +179,7 @@ export default {
         ctx.api.shop?.robotTurn?.(k);
         if (this.t < 0.05) { this.cut = true; audio?.play('servo'); }
         if (this.t > 1.2 && !this.creak) { this.creak = true; audio?.play('servo'); }
-        this.cam.pos.set(0.95, 0.8, 2.9); this.cam.look.set(-0.5, 0.55, 1.2); this.cam.fov = 40; m.coreK = 0.25; m.spotK = 0.18; m.lampK = 0.45; m.beamK = 0.12; /* spotK: its circle was a hard white spot on the floor */ // the whole robot, stool and shadow; the lamp behind it secondary
+        this.cam.pos.set(0.95, 0.8, 2.9); this.cam.look.set(-0.5, 0.55, 1.2); this.cam.fov = 40; m.coreK = 0.25; m.spotK = 0.18; m.lampK = 0.45; m.beamK = 0.12; m.robotFillK = 0.3; /* the cold spot on the floor beside the stool was the robot's front fill (robotFillK), not the eye */ // the whole robot, stool and shadow; the lamp behind it secondary
         if (eye && eye.open > 0.2) this.power = Math.max(0, this.power - dt / LOOK_POWER_S);
         if (this.t > 4.2) { m.lookOverride = undefined; m.coreK = undefined; m.lampK = undefined; this.set('street', true); }
         this.tuneCall = 0.55;
