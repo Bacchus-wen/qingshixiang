@@ -341,7 +341,7 @@ export default {
     // that share geometry, materials and GPU textures.
     // GPU memory for model levels: 600 MB, 320 MB on devices that report 4 GB of memory or less; ?lodmb= overrides
     const lod = this.lod = new LodLibrary(loader, `${import.meta.env.BASE_URL}models/shop/lod/`,
-      { budgetMB: +ctx.params.get('lodmb') || (navigator.deviceMemory && navigator.deviceMemory <= 4 ? 320 : 600) });
+      { budgetMB: +ctx.params.get('lodmb') || (navigator.deviceMemory && navigator.deviceMemory <= 4 ? 320 : 600), fade: !ctx.isShot && ctx.params.get('nolodfade') === null });
     pastHooks(lod); // radio dials, the clock's pendulum: on every level as it loads (./past.js)
     let lodNames = new Set();
     if (ctx.params.get('nolod') === null) {

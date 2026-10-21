@@ -6,6 +6,7 @@
 // loaded up front; finer ones stream in when something comes close. A GPU memory budget is kept: the copies that are
 // biggest on screen get their levels first, the rest wait at a coarser one, and unused levels are released.
 import * as THREE from 'three/webgpu';
+import { Fn, uniform, screenCoordinate, fract, dot, vec2, float } from 'three/tsl';
 
 const _s = new THREE.Sphere(), _frustum = new THREE.Frustum(), _pv = new THREE.Matrix4(), _db = new THREE.Vector2();
 // Shadow proxies: a copy showing the raw mesh (L0) does not cast its own shadow -- every shadow-casting light would
@@ -26,10 +27,28 @@ const FINE = +(new URLSearchParams(globalThis.location?.search ?? '').get('lodfi
 const LODMIN_Q = new URLSearchParams(globalThis.location?.search ?? '').get('lodmin');
 const MIN_LEVEL = Math.max(0, LODMIN_Q != null ? +LODMIN_Q || 0 : +(import.meta.env?.VITE_LOD_MIN ?? (import.meta.env?.PROD ? 1 : 0)) || 0);
 const tintCache = new Map();
+// A change of level is a cross-fade, not a cut. (A viewer saw close-ups "flash": as the camera flew in and out,
+// several copies changed level within a second, each a visible jump in sharpness.) During a change both levels draw,
+// each on its own half of a random set of pixels -- interleaved gradient noise, shifted every frame, which TRAA
+// averages into a smooth blend -- and the incoming level's share grows from 0 to 1 in FADE_S. One mask node, shared
+// by every level's materials (shadow maps included: Renderer applies maskNode there too); each mesh's own value is
+// read per draw from mesh.userData.lodFade: 1 (or none) = whole; f in [0, 1) = incoming at f; 2 + f = outgoing while
+// the incoming is at f.
+const FADE_S = 0.35;
+const lodFrame = uniform(0).onFrameUpdate((frame) => frame.frameId % 64);
+const lodFade = uniform(1).onObjectUpdate(({ object }) => object.userData.lodFade ?? 1);
+const lodMask = Fn(() => {
+  const n = fract(float(52.9829189).mul(fract(dot(screenCoordinate.xy.add(lodFrame.mul(5.588238)), vec2(0.06711056, 0.00583715)))));
+  return lodFade.lessThan(1).and(n.lessThan(lodFade))
+    .or(lodFade.greaterThanEqual(1).and(lodFade.lessThan(2)))
+    .or(lodFade.greaterThanEqual(2).and(n.greaterThanEqual(lodFade.sub(2))));
+})();
+const setFade = (g, v) => g.traverse((m) => { if (m.isMesh) m.userData.lodFade = v; });
 
 export class LodLibrary {
-  constructor(loader, baseUrl, { budgetMB = 600, maxLoads = 2 } = {}) {
+  constructor(loader, baseUrl, { budgetMB = 600, maxLoads = 2, fade = true } = {}) {
     this.loader = loader; this.base = baseUrl; this.budget = budgetMB * 1048576; this.maxLoads = maxLoads;
+    this.fade = fade; this.fading = new Set(); // (fade: off for review shots, which must not catch a level mid-change)
     this.sets = new Map();      // name -> { name, meta, levels: [{ ...meta level, promise, scene, gpu, users: Set, used }] }
     this.instances = [];        // LodObject
     this.hooks = new Map();     // name -> fn(scene, levelIndex), applied once to each level as it loads
@@ -60,6 +79,7 @@ export class LodLibrary {
         // every level stands where L0 stands: a coarse level's lowest point can only be at or above L0's
         g.scene.position.y = -((L.minY ?? 0) - (set.levels[0].minY ?? 0));
         this.hooks.get(set.name)?.(g.scene, i);
+        if (this.fade) g.scene.traverse((m) => { if (m.isMesh) for (const mat of [].concat(m.material)) if (mat.isNodeMaterial && !mat.maskNode) mat.maskNode = lodMask; }); // (after the hooks: their materials too)
         L.scene = g.scene; this.stats.loads++; return g.scene;
       }).catch((e) => { L.promise = null; L.failed = (L.failed || 0) + 1; throw e; }).finally(() => this.loading--);
     }
@@ -72,10 +92,15 @@ export class LodLibrary {
   }
   release(o) { this.instances = this.instances.filter((x) => x !== o); o.dropProxy(); if (o.cur >= 0) o.set.levels[o.cur].users.delete(o); o.removeFromParent(); }
   // true while some copy on screen is not yet showing the level it needs (screenshots wait for this)
-  busy() { return this.loading > 0 || this.instances.some((o) => o.parent && o.target >= 0 && o.cur !== o.target && !o.set.levels[o.target].failed); }
+  busy() { return this.loading > 0 || this.fading.size > 0 || this.instances.some((o) => o.parent && o.target >= 0 && o.cur !== o.target && !o.set.levels[o.target].failed); }
   update(camera, renderer, every = 4) {
+    const now = performance.now();
+    for (const o of this.fading) o.stepFade(now);
     if (++this.frame % every !== 0) return;
-    renderer.getSize(_db); // CSS pixels: a high-density screen renders sharper (pixel ratio), not heavier (finer levels, more memory)
+    // the pixels actually rendered (the internal resolution): a level must hold up against those. (It was the CSS
+    // size, to keep high-density screens from needing finer levels; with the coarse level allowed 1.33x magnification
+    // on top, a close-up showed a blurred texture and then the sharp one cutting in.)
+    renderer.getDrawingBufferSize(_db);
     const k = (_db.y || 1080) / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2));
     _pv.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse); _frustum.setFromProjectionMatrix(_pv);
     // 1. the level each copy needs, and how much it matters (its radius on screen, in pixels; off screen = 0)
@@ -86,11 +111,14 @@ export class LodLibrary {
       // screen pixels per model metre at the copy's nearest point (its own scale included)
       const d = Math.max(0.02, camera.position.distanceTo(_s.center) - _s.radius), pxPerM = (k / d) * o.matrixWorld.getMaxScaleOnAxis() * FINE;
       const lv = o.set.levels, onScreen = o.visibleInTree() && _frustum.intersectsSphere(_s);
-      // coarsest level that passes both tests: geometric error under a pixel, texture at least as sharp as the screen.
-      // Coarsening needs some margin (hysteresis) so a copy at the threshold does not flip every frame.
-      const ok = (L, slack) => L.errM * pxPerM <= slack && L.texelsPerM >= 0.75 * pxPerM / slack; // texture: at most 1.33x magnified
+      // coarsest level that passes both tests: geometric error under a pixel, texture never magnified -- so the finer
+      // level comes in while the two still look the same. Going coarser waits for a 2x margin (the coarser level at
+      // half a pixel of error, its texture minified 2x: again no visible difference), held for 2 s: a camera flying
+      // into a close-up and out again does not make everything around change level twice.
+      const ok = (L, slack) => L.errM * pxPerM <= slack && L.texelsPerM >= pxPerM / slack;
       let t = 0;
-      for (let i = lv.length - 1; i >= 0; i--) if (ok(lv[i], i > o.cur && o.cur >= 0 ? 0.85 : 1.0)) { t = i; break; }
+      for (let i = lv.length - 1; i >= 0; i--) if (ok(lv[i], i > o.cur && o.cur >= 0 ? 0.5 : 1.0)) { t = i; break; }
+      if (o.cur >= 0 && t > o.cur) { o.coarserSince ??= now; if (now - o.coarserSince < 2000) t = o.cur; } else o.coarserSince = null;
       if (!onScreen) t = Math.max(t, o.cur); // off screen: keep what it has, never load finer for it
       t = Math.max(t, Math.min(MIN_LEVEL, lv.length - 1));
       items.push({ o, t, pri: onScreen ? _s.radius * k / d : 0 });
@@ -155,11 +183,24 @@ class LodObject extends THREE.Group {
     const L = this.set.levels[i]; if (!L.scene || i === this.cur) return;
     const prev = this.cur >= 0 ? this.set.levels[this.cur] : null;
     const c = this.tinted(L.scene.clone(true));
-    if (this.view) this.remove(this.view);
+    this.endFade(); // (a change during a change: the older level goes now)
+    if (this.view && this.lib.fade) { // the shown level stays for the cross-fade (and in use: not evicted meanwhile)
+      this.leaving = this.view; this.leavingLevel = prev; this.fadeStart = performance.now();
+      setFade(this.leaving, 2); setFade(c, 0); this.lib.fading.add(this);
+    } else { if (this.view) this.remove(this.view); prev?.users.delete(this); }
     this.dropProxy();
     this.add(c); this.view = c; this.cur = i; c.updateMatrixWorld(true);
-    prev?.users.delete(this); L.users.add(this); L.used = performance.now();
+    L.users.add(this); L.used = performance.now();
     if (i === 0) this.attachProxy();
+  }
+  stepFade(now) {
+    const f = (now - this.fadeStart) / (FADE_S * 1000);
+    if (f >= 1) this.endFade(); else { setFade(this.view, f); setFade(this.leaving, 2 + f); }
+  }
+  endFade() {
+    if (!this.leaving) return;
+    this.remove(this.leaving); if (this.leavingLevel !== this.set.levels[this.cur]) this.leavingLevel?.users.delete(this);
+    this.leaving = this.leavingLevel = null; setFade(this.view, 1); this.lib.fading.delete(this);
   }
   // L0 shown: it stops casting, L1 casts on the shadow layer (if L1 is loaded; until then L0 casts itself)
   attachProxy() {
