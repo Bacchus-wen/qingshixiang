@@ -31,6 +31,7 @@ function box(w, h, d, mat, x, y, z, parent) {
 
 export default {
   name: 'street',
+  clusteredLights: true, // dozens of sign and shop-opening point lights (Engine: Forward+ clustered lighting, the LightPool)
   async init(ctx) {
     const { scene } = ctx;
     const root = this.root = new THREE.Group(); root.name = 'street';

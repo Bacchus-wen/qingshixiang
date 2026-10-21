@@ -20,7 +20,11 @@ export const ROBOT_LAYER = 7, ROBOT_SHADOW_LAYER = 8;
 // model) is not shipped, L1 (0.3-0.5 mm from it) is the finest; it then casts its own shadow (no proxy). ?lodmin=1 tries
 // it locally.
 const FINE = +(new URLSearchParams(globalThis.location?.search ?? '').get('lodfine') ?? 1) || 1; // ?lodfine=8: finer levels sooner (comparisons)
-const MIN_LEVEL = Math.max(0, +(new URLSearchParams(globalThis.location?.search ?? '').get('lodmin') ?? NaN) || +(import.meta.env?.VITE_LOD_MIN ?? 0) || 0);
+// A production build (the frozen preview too) never loads L0 either: the robot's is 79 MB with an 8K texture, more than the
+// GPU budget lets it keep, so it was dropped and loaded again ten times in one viewing, each time a stall. ?lodmin=0
+// brings L0 back.
+const LODMIN_Q = new URLSearchParams(globalThis.location?.search ?? '').get('lodmin');
+const MIN_LEVEL = Math.max(0, LODMIN_Q != null ? +LODMIN_Q || 0 : +(import.meta.env?.VITE_LOD_MIN ?? (import.meta.env?.PROD ? 1 : 0)) || 0);
 const tintCache = new Map();
 
 export class LodLibrary {

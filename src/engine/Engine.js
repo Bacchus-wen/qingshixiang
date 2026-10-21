@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { ClusteredLighting } from 'three/addons/lighting/ClusteredLighting.js';
 import { LightPool } from './LightPool.js';
-import { applyThreeFixes } from './threeFixes.js';
+import { applyThreeFixes, asyncPipelines } from './threeFixes.js';
 import { PostFX } from './PostFX.js';
 import { Input } from './Input.js';
 import { SHOTS } from './shots.js';
@@ -24,21 +24,30 @@ export class Engine {
 
   async init(systems, onProgress = () => {}) {
     const renderer = new THREE.WebGPURenderer({ antialias: false, powerPreference: 'high-performance', forceWebGL: this.params.get('webgl') !== null, trackTimestamp: this.params.get('gputime') !== null });
-    // internal resolution: up to 1.5x on high-density screens (1x there is visibly soft, upscaled 2x by the browser;
-    // TRAA cleans the rest); lowered automatically if frames run long (see adaptResolution). ?dpr=2 for full density
-    this.pixelRatio = this.shot ? 1 : Math.min(devicePixelRatio, parseFloat(this.params.get('dpr') || '1.5'));
+    // internal resolution: at most about 2.1 million pixels (a 1080p frame, the size the review shots are judged at) and
+    // at most 1.5x on high-density screens (1x there is a little soft, upscaled 2x by the browser; TRAA cleans the rest).
+    // The shop is fill-bound (SSR, TRAA, volumetrics, bloom): in a maximised Chrome on a 14" MacBook Pro (M4 Pro),
+    // 1.5x (2268x1335) ran it at 20-28 fps, 1.25x (1890x1112) at 66-74, 1x at 93 (tools/perf-open.mjs --uncap,
+    // 2026-10-21). Lowered further if frames run long (adaptResolution). ?dpr=N fixes it.
+    this.pixelRatio = this.shot ? 1 : this.params.get('dpr') ? Math.min(devicePixelRatio, parseFloat(this.params.get('dpr'))) : this.budgetRatio();
     renderer.setPixelRatio(this.pixelRatio);
     renderer.setSize(innerWidth, innerHeight);
     renderer.shadowMap.enabled = true;
     this.container.appendChild(renderer.domElement);
     await renderer.init();
     if (this.params.get('nofix') === null) applyThreeFixes(renderer); // r186 pipeline-sharing bug, see threeFixes.js (?nofix = off, for A/B)
+    // pipelines compile in parallel, never stalling a frame (threeFixes.js; ?syncpipes = the default way, for A/B)
+    this.pipes = renderer.backend.isWebGPUBackend && this.params.get('syncpipes') === null ? asyncPipelines(renderer) : null;
     const backend = renderer.backend.isWebGPUBackend ? 'webgpu' : 'webgl2';
     if (backend !== 'webgpu') console.warn('[engine] WebGPU unavailable, running on WebGL2 fallback');
     // quality: ?q=low|high; WebGL2 defaults to low (no SSR/DOF, fewer volume steps, smaller shadows)
     const quality = this.params.get('q') || (backend === 'webgpu' ? 'high' : 'low');
-    // v3: Forward+ clustered lighting so dozens of signs and shop openings can really light the street (WebGPU only)
-    const clustered = backend === 'webgpu' && quality !== 'low' && this.params.get('noclustered') === null;
+    // v3: Forward+ clustered lighting so dozens of signs and shop openings can really light the street (WebGPU only), for
+    // the scenes that ask for it (systems with clusteredLights: the v3 street). Not for the shop, which has four point
+    // lights: the cluster code made every material's shader 2-4x bigger, and its grid is sized to the drawing buffer,
+    // so every change of internal resolution (adaptResolution, a window resize) rebuilt and recompiled every material
+    // -- seconds each, which then read as slow frames and stepped the resolution down again.
+    const clustered = backend === 'webgpu' && quality !== 'low' && this.params.get('noclustered') === null && (systems.some((s) => s.clusteredLights) || this.params.get('clustered') !== null); // (?clustered: on anyway, for A/B)
     if (clustered) renderer.lighting = new ClusteredLighting(256, 32, 24, 64);
 
     const scene = new THREE.Scene();
@@ -76,7 +85,7 @@ export class Engine {
       try { await s.init?.(this.ctx); } catch (e) { console.error(`[engine] ${s.name} init failed`, e); s._failed = true; }
       console.log(`[engine] ${s.name} init ${(performance.now() - t0).toFixed(0)}ms`);
       this.systems.push(s);
-      onProgress((i + 1) / active.length, s.name);
+      onProgress(0.75 * (i + 1) / active.length, s.name);
     }
     if (this.params.get('flatmat') !== null) scene.overrideMaterial = new THREE.MeshStandardNodeMaterial({ color: 0x777777, roughness: 0.5 }); // perf test only
     // a story-critical system that failed would leave the experience stuck: stop with a visible error instead
@@ -84,6 +93,7 @@ export class Engine {
     const broken = this.systems.filter((x) => x._failed && core.includes(x.name)).map((x) => x.name);
     if (broken.length) throw new Error(`核心系统初始化失败:${broken.join('、')}`);
     this.postfx.build();
+    if (this.pipes && this.params.get('nowarm') === null) await this.warmUp((k) => onProgress(0.75 + 0.25 * k, 'warm-up'));
     if (this.shot) document.body.classList.add('shot');
     addEventListener('resize', () => this.resize());
     window.__engine = this;
@@ -97,6 +107,31 @@ export class Engine {
     }
   }
 
+  // Compile every pipeline the scene needs before the story starts: each visible object drawn once in every pass it is
+  // drawn in (the depth prepass, the main pass with its extra outputs, every shadow map), whatever the camera sees,
+  // then again until nothing new is asked for. Behind the loading screen; all in parallel (asyncPipelines).
+  async warmUp(onProgress) {
+    const t0 = performance.now(), c0 = this.pipes.created;
+    const culled = [], shadows = [];
+    this.scene.traverseVisible((o) => {
+      if (o.frustumCulled && (o.isMesh || o.isSprite || o.isPoints || o.isLine)) { o.frustumCulled = false; culled.push(o); }
+      if (o.isLight && o.castShadow && o.shadow) shadows.push(o.shadow);
+    });
+    let asked = 0; const log = [];
+    for (let round = 0; round < 8; round++) {
+      for (const sh of shadows) sh.needsUpdate = true; // (a shadow that does not update every frame still gets compiled)
+      const tr = performance.now(); this.postfx.render(); const build = performance.now() - tr; // (building the shaders: here, on this thread)
+      const n = this.pipes.pending; if (!n && round > 0) break;
+      asked += n; let done = 0; const all = this.pipes.settled();
+      const tick = setInterval(() => { done = asked - this.pipes.pending; onProgress(Math.min(0.98, done / Math.max(1, asked))); }, 100);
+      const tw = performance.now(); await all; clearInterval(tick);
+      log.push(`${n} in ${build.toFixed(0)}+${(performance.now() - tw).toFixed(0)}ms`); // (compiling them: the GPU process)
+    }
+    for (const o of culled) o.frustumCulled = true;
+    onProgress(1);
+    console.log(`[engine] warm-up ${(performance.now() - t0).toFixed(0)}ms, ${this.pipes.created - c0} pipelines (per round, built + compiled: ${log.join(', ')})`);
+  }
+
   applyShot() {
     const v = SHOTS[this.shot];
     if (!v) return;
@@ -106,6 +141,8 @@ export class Engine {
     this.camera.lookAt(...v.look);
     v.setup?.(this.ctx, this.time);
   }
+
+  budgetRatio() { return +Math.min(devicePixelRatio, 1.5, Math.sqrt(2.1e6 / Math.max(1, innerWidth * innerHeight))).toFixed(2); }
 
   // dynamic resolution: if the average frame stays over ~20 ms for 2 s, render at a smaller internal size.
   // Steps down only (no oscillation); each step is a one-off render-target reallocation.
@@ -118,7 +155,7 @@ export class Engine {
     if (p.frameMs > 20.5 && p.submitMs > 9) {
       this._slowSince ??= now;
       if (now - this._slowSince > 2000 && this.pixelRatio > 0.6) {
-        this.pixelRatio = Math.max(0.6, +(this.pixelRatio - 0.15).toFixed(2));
+        this.pixelRatio = this.adaptCap = Math.max(0.6, +(this.pixelRatio - 0.15).toFixed(2));
         this.renderer.setPixelRatio(this.pixelRatio);
         console.log(`[engine] slow frames (${p.frameMs.toFixed(1)} ms): internal resolution -> ${this.pixelRatio}x`);
         this._slowSince = null; p.n = 0;
@@ -127,6 +164,10 @@ export class Engine {
   }
 
   resize() {
+    if (!this.shot && !this.params.get('dpr')) { // (a bigger window: fewer pixels per CSS pixel, same budget)
+      const r = Math.min(this.budgetRatio(), this.adaptCap ?? Infinity);
+      if (r !== this.pixelRatio) { this.pixelRatio = r; this.renderer.setPixelRatio(r); }
+    }
     this.camera.aspect = innerWidth / innerHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(innerWidth, innerHeight);
@@ -160,7 +201,7 @@ export class Engine {
       }
       // freeze: the capture is exactly this frame. A system can hold the shot while it still streams data the frame
       // needs (ctx.busy(): e.g. finer model levels for this camera), up to 30 s
-      if (this.shot && this.frame >= this.shotFrames && !(this.ctx.busy?.() && this.frame < this.shotFrames + 1800)) { window.__shotReady = true; this.renderer.setAnimationLoop(null); }
+      if (this.shot && this.frame >= this.shotFrames && !((this.pipes?.pending || this.ctx.busy?.()) && this.frame < this.shotFrames + 1800)) { window.__shotReady = true; this.renderer.setAnimationLoop(null); }
     });
   }
 }

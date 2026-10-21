@@ -32,3 +32,21 @@ export function applyThreeFixes(renderer) {
     return ro;
   };
 }
+
+// 2. Render pipelines compile in the GPU process. Created the default way (createRenderPipeline), the first frame that
+//    draws a new material waits until its pipeline is compiled: on the opening of the shop story -- a few hundred
+//    materials of 60-80 KB of WGSL each, every one coming into view for the first time -- frames of 2-16 s, and 40 s
+//    of a 45 s opening frozen (tools/perf-open.mjs, 2026-10-21). Created with createRenderPipelineAsync instead, they
+//    compile in parallel and the frame goes on without that object until its pipeline is ready (r186 skips a draw
+//    whose pipeline is not ready: Pipelines.isReady). Engine.warmUp compiles everything in the scene that way behind
+//    the loading screen, so in the story itself nothing waits and nothing is missing.
+//    Returns { pending: pipelines still compiling, created, settled(): a promise for the ones in flight }.
+export function asyncPipelines(renderer) {
+  const P = renderer._pipelines;
+  const pending = new Set();
+  const state = { created: 0, get pending() { return pending.size; }, settled: () => Promise.all([...pending]) };
+  const sink = { push(p) { state.created++; pending.add(p); p.finally(() => pending.delete(p)); } };
+  const get = P.getForRender;
+  P.getForRender = function (renderObject, promises = null) { return get.call(this, renderObject, promises ?? sink); };
+  return state;
+}
