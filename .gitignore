@@ -26,5 +26,7 @@ assets/generated/vmc/**/*.png
 assets/generated/hero2/**/*.png
 assets/generated/child/**/*.png
 assets/generated/compare/**/*.out
+# derived sources (Blender edits of raw generations): the GLB stays local, its README and the script are committed
+assets/generated/derived/**/*.glb
 # throwaway debug probes
 tools/_*.mjs

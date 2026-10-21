@@ -248,10 +248,11 @@ export default {
     if (this.aimAt) { // yaw/pitch that put the eye's axis on the point
       this.rig.eye(this.robot, this._p, this._d); // current
       const want = this._v.copy(this.aimAt).sub(this._p).normalize();
-      // error in the robot's frame -> look offsets
+      // error in the robot's frame -> look offsets (the yaw error wrapped to +-180: turned on its stool the robot faces the
+      // frame's -z, where atan2 jumps from +pi to -pi)
       const inv = this._q.copy(this.robot.getWorldQuaternion(this._q)).invert();
       const w = want.clone().applyQuaternion(inv), c = this._d.clone().applyQuaternion(inv);
-      const dyaw = Math.atan2(w.x, w.z) - Math.atan2(c.x, c.z), dpit = Math.asin(THREE.MathUtils.clamp(w.y, -1, 1)) - Math.asin(THREE.MathUtils.clamp(c.y, -1, 1));
+      const dyaw = THREE.MathUtils.euclideanModulo(Math.atan2(w.x, w.z) - Math.atan2(c.x, c.z) + Math.PI, 2 * Math.PI) - Math.PI, dpit = Math.asin(THREE.MathUtils.clamp(w.y, -1, 1)) - Math.asin(THREE.MathUtils.clamp(c.y, -1, 1));
       // (directed looks may turn further than the pointer can: up to ~66 deg, e.g. to the radio on its bench)
       this.look.x = THREE.MathUtils.clamp(this.lookCur.x + dyaw / 0.85, -1.35, 1.35); this.look.y = THREE.MathUtils.clamp(this.lookCur.y + dpit / 0.32, -1, 1);
     } else if (m.lookOverride) this.look.set(m.lookOverride.x, m.lookOverride.y);

@@ -7,7 +7,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { SHOTS } from '../../engine/shots.js';
 import { LodLibrary, SHADOW_LAYER, ROBOT_LAYER, ROBOT_SHADOW_LAYER } from './lod.js';
-import { HeadRig } from './rig.js';
+import { HeadRig, turnPose } from './rig.js';
 import { pastHooks } from './past.js';
 import { memoryMask, mem } from '../../materials/memory.js';
 import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorld, positionLocal, smoothstep, vec2, vec3, mx_worley_noise_float, texture, normalWorldGeometry, abs, step, uniform, uv, vec4, cameraPosition, fract } from 'three/tsl';
@@ -371,10 +371,13 @@ export default {
     { const hp = (ctx.params.get('head') || '').split(',').map(Number); if (hp.length >= 2) { rig.yaw = THREE.MathUtils.degToRad(hp[0]); rig.pitch = THREE.MathUtils.degToRad(hp[1]); rig.update(); } }
     lod.proxyLayers.set('robot', ROBOT_SHADOW_LAYER);
     ctx.camera.layers.enable(ROBOT_LAYER);
+    // (the stool it sits on is its own mesh since tools/blender/robot_split.py: it keeps its plain material, no rig, the
+    // ordinary layer -- it stays put while the robot turns on it)
+    const inStool = (o) => { for (; o; o = o.parent) if (/^stool/i.test(o.name)) return true; return false; };
     lod.hook('robot', (scene) => {
       scene.updateMatrixWorld(true); // mesh -> model space (the level's own minY offset included)
       scene.traverse((m) => {
-        if (!m.isMesh) return;
+        if (!m.isMesh || inStool(m)) return;
         m.layers.set(ROBOT_LAYER); // (copies made from this level keep it)
         if (!m.material.map) return;
         const src = m.material, nm = new THREE.MeshStandardNodeMaterial();
@@ -876,7 +879,7 @@ export default {
         for (const o of objs) o.visible = false;
       }
     }
-    ctx.api.shop = { streetNow: this.streetNow, streetThen: this.streetThen, root, placed, ROOM, lod, rig, eyeGlow, lights: { hemi, dusk, lamp: this.lamp, fill, tube: this.tubeLight, tubeGlow, robotFill: this.robotFill }, farK: this.farK, robotTurn: (k) => { const r = placed.robot; if (!r) return; r.userData.ry0 ??= r.rotation.y; r.rotation.y = r.userData.ry0 - Math.PI * k; }, review: !ctx.isShot && ctx.params.get("review") !== null };
+    ctx.api.shop = { streetNow: this.streetNow, streetThen: this.streetThen, root, placed, ROOM, lod, rig, eyeGlow, lights: { hemi, dusk, lamp: this.lamp, fill, tube: this.tubeLight, tubeGlow, robotFill: this.robotFill }, farK: this.farK, robotTurn: (k) => { turnPose(rig, k); rig.update(); }, review: !ctx.isShot && ctx.params.get("review") !== null };
     ctx.postfx.memoryGrade = true; // the past inside the beam is graded per pixel (src/engine/PostFX.js)
     Object.assign(ctx.postfx.params, { bloomRadius: 0.35, bloomStrength: 0.26, bloomThreshold: 2.2 }); // a tight glow round the hottest cores only (the lamp's shade is lit point-blank: it must not flare)
     // the face light for the robot's close-ups (story: wait / waking), soft and unshadowed, off otherwise (never removed:

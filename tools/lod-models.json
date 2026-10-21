@@ -150,7 +150,7 @@
   },
   {
    "name": "robot",
-   "in": "assets/generated/compare/studio/robot-h3.1-8k.glb",
+   "in": "assets/generated/derived/robot-split/robot_split.glb",
    "size": 1.05,
    "axis": "height",
    "levels": "0.3:4096,1:2048,3:1024",

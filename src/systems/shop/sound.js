@@ -197,7 +197,7 @@ export default {
     set(this.staticIn.gain, 0.22 * tvp * (snow ? 1 : 0.25)); set(this.toneG.gain, tv && !snow && Math.round(tv.chan.value) === 0 ? 0.012 * tvp : 0, 0.08);
     if (tv) { const pn = this.pan(tv.c)[0]; set(this.staticPan.pan, pn); set(this.tonePan.pan, pn); }
     // the robot's head: servo noise with its angular speed
-    const rig = shop?.rig; if (rig) { const w = Math.abs(rig.yaw - (this.yaw0 ?? rig.yaw)) / Math.max(dt, 1e-3) + Math.abs(rig.pitch - (this.pitch0 ?? rig.pitch)) / Math.max(dt, 1e-3); this.yaw0 = rig.yaw; this.pitch0 = rig.pitch;
+    const rig = shop?.rig; if (rig) { const w = (Math.abs(rig.yaw - (this.yaw0 ?? rig.yaw)) + Math.abs(rig.pitch - (this.pitch0 ?? rig.pitch)) + 0.6 * Math.abs(rig.body - (this.body0 ?? rig.body))) / Math.max(dt, 1e-3); this.yaw0 = rig.yaw; this.pitch0 = rig.pitch; this.body0 = rig.body; // (the body's turn on the stool too)
       set(this.servoG.gain, Math.min(0.05, w * 0.03) * quiet, 0.05); set(this.servoO.frequency, 160 + Math.min(260, w * 220), 0.05); }
     // now and then: a machine on the demolition site (present), a bicycle bell going past (past)
     this.nextDemo = (this.nextDemo ?? 25) - dt; if (this.nextDemo < 0 && phase !== 'title') { this.nextDemo = 40 + Math.random() * 40; this.shot('demolition_far', 0, 13.9, { gain: 0.16 * quiet * (1 - 0.4 * inside), wet: 0 }); }

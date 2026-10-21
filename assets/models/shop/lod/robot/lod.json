@@ -1,51 +1,51 @@
 {
  "name": "robot",
- "source": "assets/generated/compare/studio/robot-h3.1-8k.glb",
+ "source": "assets/generated/derived/robot-split/robot_split.glb",
  "size": 1.05,
  "axis": "height",
  "rotz": 0,
  "dims": [
-  0.6097,
+  0.6139,
   1.05,
   0.6938
  ],
- "radius": 0.6992,
+ "radius": 0.7001,
  "levels": [
   {
    "file": "L0.glb",
-   "tris": 1872330,
+   "tris": 1831304,
    "errM": 0,
    "tex": 8192,
-   "texelsPerM": 3393.840375901675,
+   "texelsPerM": 3381.6452867183243,
    "minY": 0,
-   "bytes": 82433008
+   "bytes": 83048608
   },
   {
    "file": "L1.glb",
-   "tris": 190633,
+   "tris": 205157,
    "errM": 0.0003,
    "tex": 4096,
-   "texelsPerM": 1696.9201879508375,
-   "minY": 0,
-   "bytes": 33338464
+   "texelsPerM": 1690.8226433591622,
+   "minY": 0.00013,
+   "bytes": 34156152
   },
   {
    "file": "L2.glb",
-   "tris": 51768,
-   "errM": 0.00099,
+   "tris": 56739,
+   "errM": 0.001,
    "tex": 2048,
-   "texelsPerM": 848.4600939754188,
-   "minY": 0.00085,
-   "bytes": 9305544
+   "texelsPerM": 845.4113216795811,
+   "minY": 0.00062,
+   "bytes": 10027528
   },
   {
    "file": "L3.glb",
-   "tris": 18158,
+   "tris": 19627,
    "errM": 0.00299,
    "tex": 1024,
-   "texelsPerM": 424.2300469877094,
-   "minY": 0.00085,
-   "bytes": 1612704
+   "texelsPerM": 422.70566083979054,
+   "minY": 0.00137,
+   "bytes": 1850168
   }
  ]
 }

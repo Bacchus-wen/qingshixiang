@@ -20,7 +20,7 @@ import { Film } from '../../ui/film.js';
 const EYE_IN = new THREE.Vector3(-0.61, 0.83, 0.94);
 const FACING_IN = new THREE.Vector3(0.2588, 0, -0.9659), LEFT_IN = new THREE.Vector3(-0.9659, 0, -0.2588);
 // act two (swivelled half a turn: ry -15, facing the street)
-const EYE0 = new THREE.Vector3(-0.493, 0.831, 1.376);
+const EYE0 = new THREE.Vector3(-0.371, 0.831, 1.676); // (+0.12, 0, +0.30 since 2026-10-21: it turns round the stool's axis now, not its own middle)
 const FACING = new THREE.Vector3(-0.2588, 0, 0.9659), LEFT = new THREE.Vector3(0.9659, 0, 0.2588);
 const TV_IN = new THREE.Vector3(0.71, 0.86, -1.42);        // the set on the cartons in the middle of the shop (a demo target)
 // its close-up: past the robot's head along the beam, the set and the valve radio above it filling the frame
@@ -40,12 +40,12 @@ const STREET_C = new THREE.Vector3(0.3, 1.85, 11.0);          // the middle of t
 // by the opening, its beam reaching across the road
 // the last look, its fading and the end from inside to its left: its side against the doorway, the shaft crossing the
 // road to the electronics shop seen side-on (judges r4-r9: from behind, act two's climax was "a dark back of a head")
-const SIDE = { pos: new THREE.Vector3(0.85, 0.92, -0.85), look: new THREE.Vector3(-1.0, 0.95, 3.0), fov: 42, beam: { beamNear: 0.05, glowK: 0, beamK: 0.8 } }; // (r10: further in -- the robot whole, the photograph's edge behind the door jamb; the shaft starts at the lens, hidden by the head, not in a glow beside it)
+const SIDE = { pos: new THREE.Vector3(0.972, 0.92, -0.55), look: new THREE.Vector3(-0.878, 0.95, 3.3), fov: 42, beam: { beamNear: 0.05, glowK: 0, beamK: 0.8 } }; // (r10: further in -- the robot whole, the photograph's edge behind the door jamb; the shaft starts at the lens, hidden by the head, not in a glow beside it)
 // the last look's reverse shot: in front of its face, a little to its left, at the door
 // (r6 self-review: from straight in front the warm light lit it flat, as bright as the shelves behind: now from its left,
 // the light from the electronics shop on its far cheek, the room behind it lower, the lens core and glow down)
-const MEMORY_FACE = { pos: new THREE.Vector3(-0.32, 0.9, 2.35), look: new THREE.Vector3(-0.47, 0.86, 1.4), fov: 30, mem: { coreK: 0.28, glowK: 0, doorK: 0, roomK: 0.45, lampK: 0.2, pastX: -3.6, pastAngle: 0.12 } };
-const ACT2_POS = new THREE.Vector3(-0.05, 1.0, -1.7), ACT2_LOOK = new THREE.Vector3(-0.4, 0.92, 11.0), ACT2_FOV = 48; // (r4: feet and stool in frame, clear of the bench)
+const MEMORY_FACE = { pos: new THREE.Vector3(-0.198, 0.9, 2.65), look: new THREE.Vector3(-0.348, 0.86, 1.7), fov: 30, mem: { coreK: 0.28, glowK: 0, doorK: 0, roomK: 0.45, lampK: 0.2, pastX: -3.6, pastAngle: 0.12 } };
+const ACT2_POS = new THREE.Vector3(0.072, 1, -1.4), ACT2_LOOK = new THREE.Vector3(-0.278, 0.92, 11.3), ACT2_FOV = 48; // (r4: feet and stool in frame, clear of the bench)
 const ACT2_BEAM = { beamK: 0.65, beamReach: 0.25, beamNear: 0.5, beamFar: 9, spotK: 0.6, duskK: 0.2, shaftW: 0.7, doorK: 1, glowK: 1, robotFillK: 0.25, lampK: 0.4, softK: 1.8 }; // softK: a wider then/now edge (r7: a hard one read as a burnt stripe) // (lamp: from in here the bench lamp was the brightest thing in the frame) // (dusk 0.2: from in here its hard patch on the floor burnt out) // a shaft in the dusty air toward the far side; the dusk under the shutter lower (from in here its patch on the floor burns out)
 const K = (t, p, l, fov, cut = false) => ({ t, p: new THREE.Vector3(...p), l: new THREE.Vector3(...l), fov, cut });
 const WAIT_POS = new THREE.Vector3(-0.98, 0.88, 0.12), WAIT_LOOK = new THREE.Vector3(-0.6, 0.8, 0.98); // its face, lens side
@@ -174,11 +174,15 @@ export default {
       case 'turn': {
         // it swivels round on its stool, half a turn, to face the street; the head comes back to straight ahead.
         // Seen from the doorway: its back first, then it comes round to us, the street's dusk on its face
-        m.forceOpen = true; eye?.aim(null); m.lookOverride = { x: 0, y: 0.15 };
-        const k = ease(clamp01((this.t - 0.4) / 3.0));
+        // (2026-10-21: it shuffles round on the seat in three goes -- rig.js turnPose -- the stool staying put; the gaze
+        // goes first, toward the song, and comes back to straight ahead as the body arrives)
+        m.forceOpen = true; eye?.aim(null);
+        const lead = this.t < 2.3 ? -1.15 * Math.min(1, this.t / 0.5) : -1.15 * (1 - ease(clamp01((this.t - 2.3) / 1.3)));
+        m.lookOverride = { x: lead, y: 0.15 };
+        const k = clamp01((this.t - 0.35) / 3.4);
         ctx.api.shop?.robotTurn?.(k);
-        if (this.t < 0.05) { this.cut = true; audio?.play('servo'); }
-        if (this.t > 1.2 && !this.creak) { this.creak = true; audio?.play('servo'); }
+        if (this.t < 0.05 || this.shuffles === undefined) { this.cut = true; this.shuffles = 0; audio?.play('servo'); }
+        if (this.shuffles < 3 && k >= [0.0001, 0.33, 0.67][this.shuffles]) { this.shuffles++; audio?.play('servo'); } // (a servo at each shuffle)
         this.cam.pos.set(0.95, 0.8, 2.9); this.cam.look.set(-0.5, 0.55, 1.2); this.cam.fov = 40; m.coreK = 0.25; m.spotK = 0.18; m.lampK = 0.45; m.beamK = 0.12; m.robotFillK = 0.3; /* the cold spot on the floor beside the stool was the robot's front fill (robotFillK), not the eye */ // the whole robot, stool and shadow; the lamp behind it secondary
         if (eye && eye.open > 0.2) this.power = Math.max(0, this.power - dt / LOOK_POWER_S);
         if (this.t > 4.2) { m.lookOverride = undefined; m.coreK = undefined; m.lampK = undefined; this.set('street', true); }
@@ -270,7 +274,7 @@ export default {
         const u = ease(clamp01(this.t / 12));
         // from inside, to its left: its side against the doorway, the night sky's cold edge on its arm and chest, the dark
         // street beyond with the one lamp (r4-r8: from behind, in the dark, it was a black box); pushing in slowly
-        this.cam.pos.copy(SIDE.pos).lerp(this._w.set(0.8, 0.92, -0.6), u); this.cam.look.copy(SIDE.look); this.cam.fov = SIDE.fov - 2 * u;
+        this.cam.pos.copy(SIDE.pos).lerp(this._w.set(0.922, 0.92, -0.3), u); this.cam.look.copy(SIDE.look); this.cam.fov = SIDE.fov - 2 * u;
         if (this.t < 0.05) this.cut = true;
         film.fade(Math.min(1, Math.max(0, (this.t - 7) / 3)));
         if (this.t > 12.5) film.endCard(); // (two seconds of silence first: sound.js)
@@ -286,9 +290,9 @@ export default {
     const fl = ctx.api.shop?.faceLight; if (fl) {
       const inShop = this.phase === 'arrive' || this.phase === 'wait' || this.phase === 'waking' || this.phase === 'title';
       if (inShop) { fl.position.set(...(this.phase === 'arrive' ? [0.45, 1.25, 0.25] : [-1.35, 1.05, 0.62])); fl.target.position.set(-0.6, this.phase === 'arrive' ? 0.6 : 0.8, 0.98); }
-      else if (this.phase === 'end') { fl.position.set(1.0, 1.7, 2.5); fl.target.position.set(-0.5, 0.85, 1.15); fl.distance = 6; } // the night sky at the door's left edge: grazing the side of it we see from behind (its range was 3 m: from outside it reached nothing) // the end: the street lamp's cold edge on its head, shoulder and arm, from outside right (r7: a black lump)
-      else if (this.faceOn && this.phase === 'last') { fl.position.set(-1.35, 1.2, 2.35); fl.target.position.copy(EYE0).add(this._w.set(0, -0.08, 0)); } // the reverse shot: from its right, with the electronics shop's light
-      else { fl.position.set(0.35, 1.25, 2.45); fl.target.position.copy(EYE0).add(this._w.set(0, -0.12, 0)); }
+      else if (this.phase === 'end') { fl.position.set(1.122, 1.7, 2.8); fl.target.position.set(-0.378, 0.85, 1.45); fl.distance = 6; } // the night sky at the door's left edge: grazing the side of it we see from behind (its range was 3 m: from outside it reached nothing) // the end: the street lamp's cold edge on its head, shoulder and arm, from outside right (r7: a black lump)
+      else if (this.faceOn && this.phase === 'last') { fl.position.set(-1.228, 1.2, 2.65); fl.target.position.copy(EYE0).add(this._w.set(0, -0.08, 0)); } // the reverse shot: from its right, with the electronics shop's light
+      else { fl.position.set(0.472, 1.25, 2.75); fl.target.position.copy(EYE0).add(this._w.set(0, -0.12, 0)); }
       fl.target.updateMatrixWorld(); fl.angle = this.phase === 'arrive' ? 0.7 : this.phase === 'turn' ? 0.9 : this.phase === 'street' || this.phase === 'last' ? 0.28 : 0.6;
       fl.color.set(this.phase === 'end' ? 0xc9d6ff : 0xffe2c0); if (this.phase !== 'end') fl.distance = 3;
       const want = this.phase === 'end' ? 4.5 * clamp01((this.t - 2) / 3) : this.phase === 'wait' ? 2.6 : this.phase === 'waking' ? 2.0 : this.phase === 'fade' ? 1.4 : this.phase === 'arrive' ? 3.2 * clamp01((this.t - 11) / 3) : this.phase === 'turn' ? 5.0 : this.phase === 'street' || this.phase === 'last' ? 1.6 : 0;
