@@ -216,6 +216,8 @@ export default {
       spot, rig, robot,
       // the story aims the gaze at a world point (null = back to the pointer)
       aim(p) { sys.aimAt = p ? (sys.aimAt ?? new THREE.Vector3()).copy(p) : null; },
+      // put the gaze straight there (at a cut: the head must not swing round to catch up with the new shot)
+      snapLook(x, y) { sys.look.set(x, y); sys.lookCur.set(x, y); },
     };
     ctx.memory.range = 22; // v5: the far side of the street is ~10 m away (memoryMask is full to 0.55 x range)
     mem.soft.value = 0.09; // the past fades in at the beam's edge (the street version keeps a sharper edge)

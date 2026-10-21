@@ -137,6 +137,20 @@ export default {
       case 'rattle': // a door shaken in its frame by the wind: four soft wooden knocks
         [0, 0.09, 0.16, 0.29].forEach((d, i) => setTimeout(() => this.synthClick(190 + 60 * (i % 2), { pos: opts.pos, gain: 0.5 - 0.08 * i, decay: 0.11 }), d * 1000)); break;
       case 'whine': this.tone(900, 2600, 2.4, { gain: 0.035 }); break;
+      case 'scrape': { // a wooden stool dragged a little on the terrazzo as it turns on it: stick-slip noise in a low band, then it
+        // settles (a knock). Starts just before the cut and carries over it (story.js turn)
+        const ac = this.ac, src = ac.createBufferSource(); src.buffer = this.clickBuf ??= this.noise(0.1); src.loop = true;
+        const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 2.4;
+        const am = ac.createGain(); am.gain.value = 0.55; const lfo = ac.createOscillator(); lfo.type = 'square'; const lg = ac.createGain(); lg.gain.value = 0.45; lfo.connect(lg).connect(am.gain);
+        const gg = ac.createGain(), p = ac.createStereoPanner(), [pn, dg] = this.pan(opts.pos ?? new THREE.Vector3(-0.6, 0.3, 1.0)); p.pan.value = pn;
+        const t = ac.currentTime, dur = 0.62, g = 0.55 * dg * (opts.gain ?? 1);
+        bp.frequency.setValueAtTime(380, t); bp.frequency.linearRampToValueAtTime(610, t + dur);
+        lfo.frequency.setValueAtTime(17, t); lfo.frequency.linearRampToValueAtTime(29, t + dur);
+        gg.gain.setValueAtTime(0, t); gg.gain.linearRampToValueAtTime(g, t + 0.05); gg.gain.setValueAtTime(g, t + dur * 0.7); gg.gain.linearRampToValueAtTime(0, t + dur);
+        src.connect(bp).connect(am).connect(gg).connect(p).connect(this.master); const w = ac.createGain(); w.gain.value = 0.6; p.connect(w).connect(this.roomSend);
+        src.start(t); src.stop(t + dur + 0.05); lfo.start(t); lfo.stop(t + dur + 0.05);
+        setTimeout(() => this.synthClick(150, { pos: opts.pos, gain: 0.45, decay: 0.14 }), (dur + 0.08) * 1000);
+        break; }
       case 'powerdown': this.tone(1800, 120, 3.2, { gain: 0.05 }); this.shot('relay_b', 0, undefined, { gain: 0.4 }); break;
       case 'streetlamp': this.shot('relay_b', 0, undefined, { gain: 0.25, rate: 0.8, wet: 0.1 }); break;
       case 'dog': this.shot('dog_far_a', 0, undefined, { gain: 0.2, wet: 0 }); break;

@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { Film } from '../../ui/film.js';
+import { turnBefore, turnAfter } from './rig.js';
 
 // The shop story (v5: two acts), start to end. Owns the camera (except ?shot= and ?review) and the pacing.
 //   title   : black, the title card; a click starts the sound and the arrival
@@ -45,6 +46,7 @@ const SIDE = { pos: new THREE.Vector3(0.972, 0.92, -0.55), look: new THREE.Vecto
 // (r6 self-review: from straight in front the warm light lit it flat, as bright as the shelves behind: now from its left,
 // the light from the electronics shop on its far cheek, the room behind it lower, the lens core and glow down)
 const MEMORY_FACE = { pos: new THREE.Vector3(-0.198, 0.9, 2.65), look: new THREE.Vector3(-0.348, 0.86, 1.7), fov: 30, mem: { coreK: 0.28, glowK: 0, doorK: 0, roomK: 0.45, lampK: 0.2, pastX: -3.6, pastAngle: 0.12 } };
+const TURN_CUT_S = 2.6, TURN_SETTLE_S = 0.7; // the turn: listening, gaze, shoulders, the lean -- cut -- the last of it and the settle
 const ACT2_POS = new THREE.Vector3(0.072, 1, -1.4), ACT2_LOOK = new THREE.Vector3(-0.278, 0.92, 11.3), ACT2_FOV = 48; // (r4: feet and stool in frame, clear of the bench)
 const ACT2_BEAM = { beamK: 0.65, beamReach: 0.25, beamNear: 0.5, beamFar: 9, spotK: 0.6, duskK: 0.2, shaftW: 0.7, doorK: 1, glowK: 1, robotFillK: 0.25, lampK: 0.4, softK: 1.8 }; // softK: a wider then/now edge (r7: a hard one read as a burnt stripe) // (lamp: from in here the bench lamp was the brightest thing in the frame) // (dusk 0.2: from in here its hard patch on the floor burnt out) // a shaft in the dusty air toward the far side; the dusk under the shutter lower (from in here its patch on the floor burns out)
 const K = (t, p, l, fov, cut = false) => ({ t, p: new THREE.Vector3(...p), l: new THREE.Vector3(...l), fov, cut });
@@ -172,20 +174,25 @@ export default {
         break;
       }
       case 'turn': {
-        // it swivels round on its stool, half a turn, to face the street; the head comes back to straight ahead.
-        // Seen from the doorway: its back first, then it comes round to us, the street's dusk on its face
-        // (2026-10-21: it shuffles round on the seat in three goes -- rig.js turnPose -- the stool staying put; the gaze
-        // goes first, toward the song, and comes back to straight ahead as the body arrives)
+        // the song from across the road. Seen from the doorway, its back to us: it stops and listens, its gaze goes round
+        // toward the song over its right shoulder, the shoulders follow, it leans forward to get up -- and on that, the
+        // cut: act two opens on the end of the turn (2026-10-21, the film's way: the whole manoeuvre round the stool read
+        // as a statue on a turntable; rig.js turnBefore / turnAfter)
         m.forceOpen = true; eye?.aim(null);
-        const lead = this.t < 2.3 ? -1.15 * Math.min(1, this.t / 0.5) : -1.15 * (1 - ease(clamp01((this.t - 2.3) / 1.3)));
-        m.lookOverride = { x: lead, y: 0.15 };
-        const k = clamp01((this.t - 0.35) / 3.4);
-        ctx.api.shop?.robotTurn?.(k);
-        if (this.t < 0.05 || this.shuffles === undefined) { this.cut = true; this.shuffles = 0; audio?.play('servo'); }
-        if (this.shuffles < 3 && k >= [0.0001, 0.33, 0.67][this.shuffles]) { this.shuffles++; audio?.play('servo'); } // (a servo at each shuffle)
-        this.cam.pos.set(0.95, 0.8, 2.9); this.cam.look.set(-0.5, 0.55, 1.2); this.cam.fov = 40; m.coreK = 0.25; m.spotK = 0.18; m.lampK = 0.45; m.beamK = 0.12; m.robotFillK = 0.3; /* the cold spot on the floor beside the stool was the robot's front fill (robotFillK), not the eye */ // the whole robot, stool and shadow; the lamp behind it secondary
+        if (this.t >= TURN_CUT_S) { // the cut: the robot is most of the way round; act two shows the rest (street, below).
+          // This frame is already the new shot (pose and camera switch together: no frame of the turned robot from the door)
+          m.coreK = undefined; m.lampK = undefined; m.tilt = undefined; m.headK = undefined; this.settle = 0;
+          const after = turnAfter(0); ctx.api.shop?.robotPose?.(after); eye?.snapLook(after.look, 0.15); m.lookOverride = { x: after.look, y: 0.15 };
+          this.set('street', true); this.cam.pos.copy(ACT2_POS); this.cam.look.copy(ACT2_LOOK); this.cam.fov = ACT2_FOV;
+          break;
+        }
+        const u = this.t / TURN_CUT_S, pose = turnBefore(u);
+        m.lookOverride = { x: pose.look, y: pose.up }; m.tilt = pose.tilt; m.headK = 2.8;
+        ctx.api.shop?.robotPose?.({ body: 0, waist: pose.waist, lean: pose.lean });
+        if (this.t < 0.05 || this.sounds === undefined) { this.cut = true; this.sounds = 0; }
+        if (this.sounds < 3 && u >= [0.3, 0.44, 1 - 0.12 / TURN_CUT_S][this.sounds]) { audio?.play(['servo', 'servo', 'scrape'][this.sounds], { short: this.sounds === 1 }); this.sounds++; } // the neck, the waist, the stool across the cut
+        this.cam.pos.set(0.95, 0.8, 2.9).lerp(this._w.set(0.82, 0.82, 2.62), ease(clamp01(this.t / TURN_CUT_S))); this.cam.look.set(-0.5, 0.55, 1.2); this.cam.fov = 40; m.coreK = 0.25; m.spotK = 0.18; m.lampK = 0.45; m.beamK = 0.12; m.robotFillK = 0.3; /* the cold spot on the floor beside the stool was the robot's front fill (robot 0.7 -> 0.3) */
         if (eye && eye.open > 0.2) this.power = Math.max(0, this.power - dt / LOOK_POWER_S);
-        if (this.t > 4.2) { m.lookOverride = undefined; m.coreK = undefined; m.lampK = undefined; this.set('street', true); }
         this.tuneCall = 0.55;
         m.power = this.power;
         break;
@@ -194,6 +201,11 @@ export default {
         // act two: behind its head on the lens side, held still: the whole far side fills the opening (the photographs'
         // edges just outside the frame), the head in the near corner, and the beam moves across the street -- the view
         // only leans a little after it
+        if (this.settle !== undefined) { // the end of the turn, from the cut: the last of it round the stool, and it settles
+          this.settle += dt; const sp = turnAfter(this.settle / TURN_SETTLE_S);
+          ctx.api.shop?.robotPose?.(sp); m.lookOverride = { x: sp.look, y: 0.15 };
+          if (this.settle >= TURN_SETTLE_S) { this.settle = undefined; m.lookOverride = undefined; ctx.api.shop?.robotTurn?.(1); }
+        }
         this.cam.pos.copy(ACT2_POS);
         this.cam.look.copy(ACT2_LOOK).lerp(this._v.copy(eyePos).addScaledVector(m.dir, 10), 0.05);
         this.cam.fov = ACT2_FOV;
@@ -301,6 +313,7 @@ export default {
 
     // the camera eases toward its target, a little handheld drift on top
     const k = this.phase === 'waking' ? 3 : this.phase === 'look' ? 2.2 : 1.4;
+    const snap = this.cut; // (a cut is a cut for the lens too: no zoom easing across it)
     if (this.cut) { this.curPos.copy(this.cam.pos); this.curLook.copy(this.cam.look); this.cut = false; }
     this.curPos.lerp(this.cam.pos, Math.min(1, dt * k));
     this.curLook.lerp(this.cam.look, Math.min(1, dt * k * 1.2));
@@ -311,6 +324,6 @@ export default {
     cam.lookAt(this.curLook);
     // portrait screens (phones held upright) see a narrow slice: widen the vertical angle so the same things stay in frame
     const want = Math.min(78, this.cam.fov * (cam.aspect < 1 ? Math.min(1.6, 1 / Math.sqrt(cam.aspect)) : 1));
-    if (Math.abs(cam.fov - want) > 0.01) { cam.fov += (want - cam.fov) * Math.min(1, dt * 2); cam.updateProjectionMatrix(); }
+    if (Math.abs(cam.fov - want) > 0.01) { cam.fov += snap ? want - cam.fov : (want - cam.fov) * Math.min(1, dt * 2); cam.updateProjectionMatrix(); }
   },
 };
