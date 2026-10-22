@@ -1,0 +1,15 @@
+{
+ "id": "judge-english-2",
+ "from": "claude",
+ "to": "codex",
+ "title": "评审 英文版 2",
+ "write": false,
+ "gen": false,
+ "paths": [],
+ "status": "done",
+ "posted": "2026-10-22 19:36:06",
+ "started": "2026-10-22 19:36:08",
+ "seconds": 131.0,
+ "finished": "2026-10-22 19:38:20",
+ "reason": null
+}
