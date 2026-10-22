@@ -1,0 +1,15 @@
+{
+ "id": "judge-transition-3",
+ "from": "claude",
+ "to": "codex",
+ "title": "评审 故障转场 3",
+ "write": false,
+ "gen": false,
+ "paths": [],
+ "status": "done",
+ "posted": "2026-10-22 14:15:08",
+ "started": "2026-10-22 14:15:10",
+ "seconds": 97.0,
+ "finished": "2026-10-22 14:16:47",
+ "reason": null
+}

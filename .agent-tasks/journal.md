@@ -390,3 +390,15 @@
 - 2026-10-21 13:26:06 | codex | 完成：评审 key-climax r16（judge-r16-key-climax）
 - 2026-10-21 13:27:10 | codex | 完成：评审 key-memory r16（judge-r16-key-memory）
 - 2026-10-21 13:28:10 | codex | 完成：评审 key-end r16（judge-r16-key-end）
+- 2026-10-22 13:53:32 | claude | 派给 codex：评审 故障转场 1（judge-transition-1，只读）
+- 2026-10-22 13:54:44 | codex | 完成：评审 故障转场 1（judge-transition-1）
+- 2026-10-22 14:06:32 | claude | 派给 codex：评审 故障转场 2（judge-transition-2，只读）
+- 2026-10-22 14:07:53 | codex | 完成：评审 故障转场 2（judge-transition-2）
+- 2026-10-22 14:15:08 | claude | 派给 codex：评审 故障转场 3（judge-transition-3，只读）
+- 2026-10-22 14:16:47 | codex | 完成：评审 故障转场 3（judge-transition-3）
+- 2026-10-22 14:23:08 | claude | 派给 codex：评审 故障转场 4（judge-transition-4，只读）
+- 2026-10-22 14:24:32 | codex | 完成：评审 故障转场 4（judge-transition-4）
+- 2026-10-22 14:26:20 | claude | 派给 codex：评审 故障转场 5（judge-transition-5，只读）
+- 2026-10-22 14:27:39 | codex | 完成：评审 故障转场 5（judge-transition-5）
+- 2026-10-22 15:14:06 | claude | 派给 codex：评审 故障转场 6（judge-transition-6，只读）
+- 2026-10-22 15:20:35 | codex | 完成：评审 故障转场 6（judge-transition-6）

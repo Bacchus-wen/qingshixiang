@@ -296,14 +296,14 @@ export default {
       tv.presence += (want - tv.presence) * Math.min(1, dt * (want > tv.presence ? 1.8 : 3));
       if (tv.presence > 0.05 && !tv.wasOn && this.prog) tv.chan.value = 3 + (this.tvs.indexOf(tv) % this.prog.rects.length); // switched on by the beam: a programme first
       tv.wasOn = tv.presence > 0.05;
-      tv.on.value = tv.presence > 0.02 ? Math.min(1, tv.presence * 1.15) : 0;
+      tv.on.value = tv.presence > 0.02 ? Math.min(1, tv.presence * 1.15) * (m.tvK ?? 1) : 0; // (tvK: the eye's power sagging -- the picture collapses toward its centre line and snows)
       tv.nextZap -= dt * (tv.presence > 0.5 ? 1 : 0);
       if (tv.nextZap <= 0) { const np = this.prog?.rects.length || this.atlas?.n || 0; tv.chan.value = np && Math.random() < 0.8 ? 3 + Math.floor(Math.random() * np) : Math.floor(Math.random() * 3); /* mostly programmes, now and then snow or bars */ tv.nextZap = 5 + Math.random() * 7; if (tv.presence > 0.6) ctx.api.audio?.play('tvzap', { pos: tv.c }); }
       const v = tv.presence; if (v > bestV) { bestV = v; best = tv; }
     }
     if (best && bestV > 0.05) {
       this.tvLight.position.copy(best.c).add(new THREE.Vector3(0, 0, 0.3).applyQuaternion(best.o.getWorldQuaternion(new THREE.Quaternion())));
-      this.tvLight.intensity = 3.2 * bestV * (0.85 + 0.15 * Math.sin(t * 13 + best.phase) * Math.sin(t * 5.1));
+      this.tvLight.intensity = 3.2 * bestV * (0.85 + 0.15 * Math.sin(t * 13 + best.phase) * Math.sin(t * 5.1)) * (m.tvK ?? 1);
     } else this.tvLight.intensity = 0;
     // pendulum: swings while the beam is on the clock (and for a while after); ~1 s period, 4 degrees
     const clock = ctx.api.shop.placed.wall_clock;

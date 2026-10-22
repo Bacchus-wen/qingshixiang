@@ -2,7 +2,7 @@ import * as THREE from 'three/webgpu';
 import {
   pass, depthPass, mrt, output, velocity, normalView, metalness, roughness, packNormalToRGB, unpackRGBToNormal, sample,
   normalWorld, materialReference, uniform, vec2, vec3, vec4, float, screenUV, time, hash, floor, fract, mix,
-  smoothstep, length, luminance, clamp, max, min, renderOutput, Fn, agxToneMapping, exp, step, sin,
+  smoothstep, length, luminance, clamp, max, min, renderOutput, Fn, agxToneMapping, exp, step, sin, abs,
 } from 'three/tsl';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 import { traa } from 'three/addons/tsl/display/TRAANode.js';
@@ -41,7 +41,7 @@ export class PostFX {
       halation: uniform(0.35), aoStrength: uniform(0.85), scatter: uniform(0.16), streak: uniform(0.08), weave: uniform(new THREE.Vector2()), flicker: uniform(0),
       // a signal glitch over the whole picture, 0..1 (story.js: the cut from act one to act two); its pattern re-rolls with
       // glitchSeed (render(): every other frame while it shows)
-      glitch: uniform(0), glitchSeed: uniform(0),
+      glitch: uniform(0), glitchSeed: uniform(0), glitchBlock: uniform(0), glitchDark: uniform(0), // (the digital part and a darkening: only at the peak)
       ssrIntensity: uniform(1.0),
       presentK: uniform(0), pastK: uniform(1), // v4 shop memory grade (see build)
       // depth of field, driven by the director (bokeh 0 = off)
@@ -134,20 +134,29 @@ export class PostFX {
     this.bloomPass = bloomPass;
     // gate weave: the whole developed frame drifts a fraction of a pixel, like film in a projector gate
     const aaTex = aa.getTextureNode?.();
-    // the glitch (2026-10-22, the cut from act one to act two): the frame tears into horizontal bands shoved sideways, a
-    // few blocks show another piece of the picture, and the channels slip apart; static and scanlines in grade below
-    const G = params.glitch, GS = params.glitchSeed;
+    // the glitch (2026-10-22, the cut from act one to act two; reworked after Codex's review: mostly analogue -- lines
+    // losing sync, bright parts trailing -- and the digital part, a sliver or two of the wrong picture and a few pixels of
+    // channel slip, only at the peak (glitchBlock)); static, scanlines and the darkening in grade below
+    const G = params.glitch, GB = params.glitchBlock, GS = params.glitchSeed;
     const guv = Fn(([uv]) => {
-      const band = floor(uv.y.mul(mix(float(16), float(44), hash(GS.add(0.37)))));
-      const torn = step(float(1).sub(G.mul(0.55)), hash(band.mul(1.71).add(GS.mul(3.3))));
-      const shove = hash(band.add(GS.mul(13.1))).sub(0.5).mul(0.16).mul(G).mul(torn);
-      const blk = floor(uv.mul(vec2(24, 14)));
-      const bad = step(float(1).sub(G.mul(0.12)), hash(blk.x.add(blk.y.mul(57)).add(GS.mul(91.7))));
-      const elsewhere = vec2(hash(blk.x.add(GS)).sub(0.5), hash(blk.y.add(GS.mul(2.1))).sub(0.5)).mul(0.25).mul(bad).mul(G);
-      return uv.add(vec2(shove, 0)).add(elsewhere);
+      // every ~4 px row shoved sideways: a slow roll plus jitter, under 0.4% of the width; at the peak a band or two to 3%
+      const row = floor(uv.y.mul(270));
+      const roll = sin(uv.y.mul(37).add(GS.mul(2.3))).mul(0.6).add(hash(row.add(GS.mul(17.3))).sub(0.5).mul(0.8));
+      const sb = floor(uv.y.mul(40)), far = step(0.96, hash(sb.add(GS.mul(7.7)))).mul(GB); // (round 2: under 0.4%; the strong tear in a narrow band or two)
+      const dx = roll.mul(0.004).mul(G).add(hash(sb.add(GS.mul(5.3))).sub(0.5).mul(0.06).mul(far));
+      // thin slivers (2.5% x 0.7% of the frame) showing another piece of the picture, about two of them, peak only
+      const blk = floor(uv.mul(vec2(40, 150)));
+      const bad = step(float(1).sub(GB.mul(0.0004)), hash(blk.x.add(blk.y.mul(41)).add(GS.mul(91.7))));
+      const elsewhere = vec2(hash(blk.x.add(GS)).sub(0.5).mul(0.1), hash(blk.y.add(GS.mul(2.1))).sub(0.5).mul(0.03)).mul(bad);
+      return uv.add(vec2(dx, 0)).add(elsewhere);
     });
-    const gp = guv(screenUV.add(params.weave)), slip = vec2(G.mul(0.0075), 0);
-    const frameCol = aaTex ? vec3(aaTex.sample(gp.add(slip)).r, aaTex.sample(gp).g, aaTex.sample(gp.sub(slip)).b) : aa;
+    const gp = guv(screenUV.add(params.weave));
+    const slip = vec2(G.mul(0.0005).add(GB.mul(0.0011)), 0); // ~1 px of channel slip, ~3 px at the peak (1080p)
+    const tr = vec2(G.mul(0.002), 0); // (round 3: half the trail, its second step faint -- the peak was ghosting everything)
+    const frameCol = aaTex
+      ? max(vec3(aaTex.sample(gp.add(slip)).r, aaTex.sample(gp).g, aaTex.sample(gp.sub(slip)).b), // bright parts trail rightwards
+        max(aaTex.sample(gp.sub(tr)).rgb.mul(0.7), aaTex.sample(gp.sub(tr.mul(2))).rgb.mul(0.2)).mul(G))
+      : aa;
     // halation: light scattered back through the film base. Only chromatic (memory-amber) glow gets the warm
     // fringe, so the silver present stays neutral and the past bleeds a little more than it should.
     const bl = bloomPass.rgb;
@@ -205,12 +214,19 @@ export class PostFX {
       const px = floor(screenUV.mul(vec2(1920, 1080)));
       const g = hash(px.x.add(px.y.mul(1931)).add(floor(fract(time.mul(0.41)).mul(7919)).mul(2099))).sub(0.5);
       c.addAssign(g.mul(params.grain));
-      // the glitch: scanlines, bands of static, the whole frame's level jumping
-      c.mulAssign(float(1).sub(G.mul(0.28).mul(sin(screenUV.y.mul(1080 * Math.PI)).mul(0.5).add(0.5))));
-      const snow = hash(px.x.add(px.y.mul(1931)).add(GS.mul(7919)));
-      const sband = step(float(1).sub(G.mul(0.3)), hash(floor(screenUV.y.mul(30)).add(GS.mul(5.7))));
-      c.assign(mix(c, vec3(snow), sband.mul(0.6).mul(G)));
-      c.mulAssign(float(1).add(hash(GS.add(0.71)).sub(0.5).mul(0.5).mul(G)));
+      // the glitch: faint scanlines; one to three thin bands of static, broken along their length, grain in clusters; the
+      // level wavering (+-8%); and the darkening that hides the cut (glitchDark)
+      c.mulAssign(float(1).sub(G.mul(0.08).mul(sin(screenUV.y.mul(1080 * Math.PI)).mul(0.5).add(0.5))));
+      const nb = floor(hash(GS.add(2.2)).mul(2.99)).add(1), cl = floor(px.div(3));
+      const grit = hash(cl.x.add(cl.y.mul(613)).add(GS.mul(41))).mul(0.6).add(hash(px.x.add(px.y.mul(1931)).add(GS.mul(7919))).mul(0.4));
+      for (let k = 0; k < 3; k++) {
+        const inBand = step(abs(screenUV.y.sub(hash(GS.add(k * 11.1)))), mix(float(0.0015), float(0.01), hash(GS.add(k * 5.9)))).mul(step(float(k + 0.5), nb));
+        const piece = step(0.5, hash(floor(screenUV.x.mul(50)).add(k * 31).add(GS.mul(3)))); // (round 2: 50 pieces, half of them gone)
+        const op = mix(float(0.12), float(0.22), hash(GS.add(k * 3.7))).mul(G).add(GB.mul(0.03));   // (never over 0.25)
+        c.assign(mix(c, vec3(grit), inBand.mul(piece).mul(op)));
+      }
+      c.mulAssign(float(1).add(hash(GS.add(0.71)).sub(0.5).mul(0.16).mul(G)));
+      c.mulAssign(float(1).sub(params.glitchDark.mul(0.7)));
       return vec4(max(c, vec3(0)), 1);
     })();
 

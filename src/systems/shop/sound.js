@@ -137,17 +137,18 @@ export default {
       case 'rattle': // a door shaken in its frame by the wind: four soft wooden knocks
         [0, 0.09, 0.16, 0.29].forEach((d, i) => setTimeout(() => this.synthClick(190 + 60 * (i % 2), { pos: opts.pos, gain: 0.5 - 0.08 * i, decay: 0.11 }), d * 1000)); break;
       case 'whine': this.tone(900, 2600, 2.4, { gain: 0.035 }); break;
-      case 'glitch': { // its picture breaking up: stepped square chirps and bursts of hiss (synthesised, story.js turn)
-        const ac = this.ac, t0 = ac.currentTime, dur = opts.short ? 0.11 : 0.95, g = (opts.short ? 0.045 : 0.08) * (opts.gain ?? 1);
-        const o = ac.createOscillator(); o.type = 'square'; const og = ac.createGain(); og.gain.value = 0;
-        for (let t = t0; t < t0 + dur; t += 0.022 + r() * 0.03) { o.frequency.setValueAtTime(160 + r() * 2400, t); og.gain.setValueAtTime(r() < 0.7 ? g : 0, t); }
-        og.gain.setValueAtTime(0, t0 + dur);
-        const src = ac.createBufferSource(); src.buffer = this.clickBuf ??= this.noise(0.1); src.loop = true;
-        const hp = ac.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1400; const ng = ac.createGain(); ng.gain.value = 0;
-        for (let t = t0; t < t0 + dur; t += 0.03) ng.gain.setValueAtTime(r() < 0.5 ? g * 1.7 : 0, t);
-        ng.gain.setValueAtTime(0, t0 + dur);
-        o.connect(og).connect(this.master); src.connect(hp).connect(ng).connect(this.master);
-        o.start(t0); o.stop(t0 + dur + 0.02); src.start(t0); src.stop(t0 + dur + 0.02);
+      case 'glitch': { // its picture losing lock (story.js turn): a contact's pop -- 40 ms of hiss through a band -- and, on the
+        // tear, a low detuned hum dying away (Codex's review: the stepped square chirps read as an electronic alarm)
+        const ac = this.ac, t0 = ac.currentTime, g = (opts.short ? 0.12 : 0.22) * (opts.gain ?? 1);
+        const src = ac.createBufferSource(); src.buffer = this.clickBuf ??= this.noise(0.1);
+        const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2600; bp.Q.value = 0.9; const ng = ac.createGain();
+        ng.gain.setValueAtTime(g, t0); ng.gain.exponentialRampToValueAtTime(0.001, t0 + 0.045);
+        src.connect(bp).connect(ng).connect(this.master); src.start(t0); src.stop(t0 + 0.06);
+        if (!opts.short) {
+          const hg = ac.createGain(); hg.gain.setValueAtTime(0.0001, t0); hg.gain.exponentialRampToValueAtTime(0.05, t0 + 0.02); hg.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.6);
+          const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 420; lp.connect(hg).connect(this.master);
+          for (const f of [55, 57.6, 110.9]) { const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.connect(lp); o.start(t0); o.stop(t0 + 0.65); }
+        }
         break; }
       case 'powerdown': this.tone(1800, 120, 3.2, { gain: 0.05 }); this.shot('relay_b', 0, undefined, { gain: 0.4 }); break;
       case 'streetlamp': this.shot('relay_b', 0, undefined, { gain: 0.25, rate: 0.8, wet: 0.1 }); break;
