@@ -5,6 +5,7 @@ import { applyThreeFixes, asyncPipelines } from './threeFixes.js';
 import { PostFX } from './PostFX.js';
 import { Input } from './Input.js';
 import { SHOTS } from './shots.js';
+import { tr } from '../ui/i18n.js';
 
 // Engine: owns renderer, scene, camera, main loop and the shared ctx every system receives.
 // System contract: { name, async init(ctx), update(dt, t, ctx), dispose?() }.
@@ -91,7 +92,7 @@ export class Engine {
     // a story-critical system that failed would leave the experience stuck: stop with a visible error instead
     const core = ['street', 'robot', 'director', 'shop', 'eye', 'story'];
     const broken = this.systems.filter((x) => x._failed && core.includes(x.name)).map((x) => x.name);
-    if (broken.length) throw new Error(`核心系统初始化失败:${broken.join('、')}`);
+    if (broken.length) throw Object.assign(new Error(tr(`核心系统初始化失败:${broken.join('、')}`, `Core systems failed to start: ${broken.join(', ')}`)), { core: true });
     this.postfx.build();
     if (this.pipes && this.params.get('nowarm') === null) await this.warmUp((k) => onProgress(0.75 + 0.25 * k, 'warm-up'));
     if (this.shot) document.body.classList.add('shot');

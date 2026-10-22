@@ -10,6 +10,7 @@ import { LodLibrary, SHADOW_LAYER, ROBOT_LAYER, ROBOT_SHADOW_LAYER, ditherNoise 
 import { HeadRig } from './rig.js';
 import { pastHooks } from './past.js';
 import { memoryMask, mem } from '../../materials/memory.js';
+import { tr, zh } from '../../ui/i18n.js';
 import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorld, positionLocal, smoothstep, vec2, vec3, mx_worley_noise_float, texture, normalWorldGeometry, abs, step, uniform, uv, vec4, cameraPosition, fract } from 'three/tsl';
 
 // v4: the closed-down home-appliance repair shop (docs/scene-shop.md). This phase is models + layout only:
@@ -898,10 +899,14 @@ export default {
       addEventListener('keydown', (e) => { const k = Number(e.key); if (k >= 1 && k <= KEYS.length) go(KEYS[k - 1]); });
       // double-click a model: the camera glides to a 3/4 view of it and orbits around it; its name and triangle
       // count show bottom-left (every placed model here was generated with Tripo)
-      const NAMES = { 'robot.glb': '机器人', 'workbench.glb': '工作台', 'desk_lamp.glb': '台灯', 'tube_radio_open.glb': '拆开的电子管收音机', 'tube_radio_closed.glb': '电子管收音机',
-        'crt_tv.glb': '显像管电视', 'desk_fan.glb': '台式电风扇', 'cassette_recorder.glb': '收录机', 'alarm_clock.glb': '闹钟', 'thermos.glb': '暖水瓶', 'enamel_mug.glb': '搪瓷杯',
+      const NAMES = zh ? { 'robot.glb': '机器人', 'workbench.glb': '工作台', 'desk_lamp.glb': '台灯', 'tube_radio_open.glb': '拆开的电子管收音机', 'tube_radio_closed.glb': '电子管收音机',
+        'crt_tv.glb': '显像管电视', 'crt_tv_hero.glb': '显像管电视', 'desk_fan.glb': '台式电风扇', 'cassette_recorder.glb': '收录机', 'alarm_clock.glb': '闹钟', 'thermos.glb': '暖水瓶', 'enamel_mug.glb': '搪瓷杯',
         'magnifier.glb': '放大镜', 'soldering_iron.glb': '电烙铁', 'toolbox.glb': '铁皮工具箱', 'stool.glb': '木凳', 'parts_cabinet.glb': '零件抽屉柜', 'wall_clock.glb': '摆钟',
-        'back_door.glb': '后屋门', 'bicycle.glb': '二八自行车', 'spare_arm.glb': '备用手臂', 'spare_leg.glb': '备用腿', 'spare_torso.glb': '备用躯干', '../v2/meterbox.glb': '电表箱', '../v2/cardboard.glb': '压扁的纸箱' };
+        'back_door.glb': '后屋门', 'bicycle.glb': '二八自行车', 'spare_arm.glb': '备用手臂', 'spare_leg.glb': '备用腿', 'spare_torso.glb': '备用躯干', '../v2/meterbox.glb': '电表箱', '../v2/cardboard.glb': '压扁的纸箱' }
+        : { 'robot.glb': 'Robot', 'workbench.glb': 'Workbench', 'desk_lamp.glb': 'Desk lamp', 'tube_radio_open.glb': 'Valve radio, opened up', 'tube_radio_closed.glb': 'Valve radio',
+          'crt_tv.glb': 'CRT television', 'crt_tv_hero.glb': 'CRT television', 'desk_fan.glb': 'Desk fan', 'cassette_recorder.glb': 'Cassette recorder', 'alarm_clock.glb': 'Alarm clock', 'thermos.glb': 'Thermos flask', 'enamel_mug.glb': 'Enamel mug',
+          'magnifier.glb': 'Magnifier', 'soldering_iron.glb': 'Soldering iron', 'toolbox.glb': 'Tin toolbox', 'stool.glb': 'Wooden stool', 'parts_cabinet.glb': 'Parts cabinet', 'wall_clock.glb': 'Pendulum clock',
+          'back_door.glb': 'Back door', 'bicycle.glb': '28-inch bicycle', 'spare_arm.glb': 'Spare arm', 'spare_leg.glb': 'Spare leg', 'spare_torso.glb': 'Spare torso', '../v2/meterbox.glb': 'Electricity meter box', '../v2/cardboard.glb': 'Flattened carton' };
       const pick = new THREE.Raycaster(), ndc = new THREE.Vector2(), fly = this.fly = { t: 1 }; pick.layers.enableAll(); // (the robot draws on its own layer)
       const info = document.createElement('div');
       Object.assign(info.style, { position: 'fixed', left: '16px', bottom: '36px', font: '15px/1.4 -apple-system, "PingFang SC", sans-serif', color: 'rgba(245,238,224,0.92)', textShadow: '0 1px 3px rgba(0,0,0,0.85)', pointerEvents: 'none', transition: 'opacity 0.6s', opacity: '0' });
@@ -930,14 +935,14 @@ export default {
         let tris = 0; o.traverse((m) => { if (m.isMesh) tris += (m.geometry.index ? m.geometry.index.count : m.geometry.attributes.position.count) / 3; });
         let lo = o; while (lo && !lo.isLodObject) lo = lo.children?.[0];
         const raw = lo?.set.levels[0].tris;
-        info.textContent = `${NAMES[o.userData.layout.glb] || o.userData.layout.glb} · Tripo 生成 · ${raw ? `原始 ${(raw / 1e4).toFixed(0)} 万三角面,靠近时显示原始模型` : `${(tris / 1000).toFixed(1)} 千三角面`}`;
+        info.textContent = `${NAMES[o.userData.layout.glb] || o.userData.layout.glb} · ${tr('Tripo 生成', 'generated with Tripo')} · ${raw ? tr(`原始 ${(raw / 1e4).toFixed(0)} 万三角面,靠近时显示原始模型`, `${(raw / 1e6).toFixed(2)} M triangles raw; up close the raw mesh shows`) : tr(`${(tris / 1000).toFixed(1)} 千三角面`, `${(tris / 1000).toFixed(1)}k triangles`)}`;
         info.style.opacity = '1'; clearTimeout(this._infoT); this._infoT = setTimeout(() => (info.style.opacity = '0'), 7000);
       });
       // a small, quiet hint for reviewers (bottom-left); fades after a while, any key brings it back
       const ui = document.getElementById('ui');
       if (ui) {
         const hint = document.createElement('div');
-        hint.textContent = '拖动旋转 · 右键平移 · 滚轮缩放 · 双击模型看近景 · 数字键 1–8 切换机位';
+        hint.textContent = tr('拖动旋转 · 右键平移 · 滚轮缩放 · 双击模型看近景 · 数字键 1–8 切换机位', 'Drag to orbit · right-drag to pan · scroll to zoom · double-click a model for a close look · keys 1–8 for views');
         Object.assign(hint.style, { position: 'fixed', left: '16px', bottom: '14px', font: '13px/1.4 -apple-system, "PingFang SC", sans-serif', color: 'rgba(235,228,214,0.78)', letterSpacing: '0.04em', textShadow: '0 1px 3px rgba(0,0,0,0.8)', pointerEvents: 'none', transition: 'opacity 1.2s', opacity: '1' });
         ui.appendChild(hint);
         let t = setTimeout(() => (hint.style.opacity = '0'), 9000);

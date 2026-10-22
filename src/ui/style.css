@@ -33,3 +33,19 @@ body.playing, body.playing * { cursor: none !important; }
 .film-title.on { opacity: 0.7; }
 .film-title h1 { font-weight: 400; font-size: 26px; letter-spacing: 0.9em; margin: 0 0 3.2em 0.9em; opacity: 0.9; }
 .film-title small { margin-top: 2.4em; font-family: "SF Mono", Menlo, monospace; font-size: 9px; letter-spacing: 0.5em; opacity: 0.55; }
+
+/* the other language, on the title only (src/ui/i18n.js): top left, where the film edge has nothing */
+.film-lang { position: absolute; top: 16px; left: 28px; font-family: "SF Mono", Menlo, monospace; font-size: 10px; letter-spacing: 0.25em;
+  color: inherit; text-decoration: none; opacity: 0.45; pointer-events: none; transition: opacity 0.4s; }
+.film-title.on .film-lang { pointer-events: auto; }
+.film-title.on .film-lang:hover { opacity: 0.95; }
+/* English (2026-10-22): a Latin serif, and the spacing of words, not of single characters (0.6-0.9em pulled words apart) */
+html[lang=en] .film-hint, html[lang=en] .film-card, html[lang=en] .film-title { font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif; }
+html[lang=en] .film-hint { letter-spacing: 0.06em; padding: 0.55em 1.1em; }
+html[lang=en] .film-card { letter-spacing: 0.03em; }
+html[lang=en] .film-title { letter-spacing: 0.16em; }
+html[lang=en] .film-title h1 { text-transform: uppercase; font-size: 24px; letter-spacing: 0.42em; margin: 0 0 3.2em 0.42em; }
+html[lang=en] .film-title small:not(.film-credit), html[lang=en] .film-card small { text-transform: uppercase; letter-spacing: 0.32em; }
+html[lang=en] .film-hint { white-space: normal; width: max-content; max-width: 86vw; text-align: center; line-height: 1.45; } /* (a phone: the longest English hint is wider than the screen) */
+.film-title .film-credit { left: 50%; transform: translateX(-50%); width: max-content; max-width: 90vw; text-align: center; } /* (a phone: the credit wider than the screen ran off its left edge) */
+@media (max-width: 480px) { html[lang^=zh] .film-hint { letter-spacing: 0.45em; font-size: 15px; padding-left: 1em; } } /* (a phone: the Chinese hint's wide spacing reached both edges) */

@@ -1,3 +1,4 @@
+import { tr } from './ui/i18n.js'; // (first: the page's language and title)
 import { DefaultLoadingManager } from 'three/webgpu';
 import { Engine } from './engine/Engine.js';
 
@@ -35,7 +36,7 @@ try {
   if (engine.ctx.params.get('studio') !== null) import('./ui/studio.js').then((m) => m.studio(engine.ctx)); // live tuning panel
 } catch (e) {
   console.error(e);
-  const msg = /核心系统/.test(e.message) ? `${e.message}` : '这个浏览器无法运行 WebGPU 或 WebGL2';
-  const hint = /核心系统/.test(e.message) ? '请刷新页面重试(详细信息见浏览器控制台)' : '请用最新的 Chrome、Edge 或 Safari 打开';
+  const msg = e.core ? `${e.message}` : tr('这个浏览器无法运行 WebGPU 或 WebGL2', 'This browser cannot run WebGPU or WebGL2');
+  const hint = e.core ? tr('请刷新页面重试(详细信息见浏览器控制台)', 'Please reload the page (details in the browser console)') : tr('请用最新的 Chrome、Edge 或 Safari 打开', 'Please open it in the latest Chrome, Edge or Safari');
   document.getElementById('ui').innerHTML = `<div class="film-title on"><p>${msg}</p><small>${hint}</small></div>`;
 }
