@@ -37,8 +37,10 @@ const tintCache = new Map();
 const FADE_S = 0.35;
 const lodFrame = uniform(0).onFrameUpdate((frame) => frame.frameId % 64);
 const lodFade = uniform(1).onObjectUpdate(({ object }) => object.userData.lodFade ?? 1);
+// the noise itself, 0..1 per pixel, a new pattern each frame (also the far shop's now/then switch: ./farshop.js)
+export const ditherNoise = fract(float(52.9829189).mul(fract(dot(screenCoordinate.xy.add(lodFrame.mul(5.588238)), vec2(0.06711056, 0.00583715)))));
 const lodMask = Fn(() => {
-  const n = fract(float(52.9829189).mul(fract(dot(screenCoordinate.xy.add(lodFrame.mul(5.588238)), vec2(0.06711056, 0.00583715)))));
+  const n = ditherNoise;
   return lodFade.lessThan(1).and(n.lessThan(lodFade))
     .or(lodFade.greaterThanEqual(1).and(lodFade.lessThan(2)))
     .or(lodFade.greaterThanEqual(2).and(n.greaterThanEqual(lodFade.sub(2))));
@@ -175,8 +177,10 @@ export class LodLibrary {
 }
 
 class LodObject extends THREE.Group {
-  constructor(lib, set, { tint } = {}) {
-    super(); this.lib = lib; this.set = set; this.tint = tint; this.cur = -1; this.target = -1; this.isLodObject = true;
+  // tint: a colour for this copy's materials; look: { key, fn(clone, source) -> material } -- this copy's own version of
+  // every material (the far shop's sets carry their own light: ./farshop.js), one per source material and key
+  constructor(lib, set, { tint, look } = {}) {
+    super(); this.lib = lib; this.set = set; this.tint = tint; this.look = look; this.cur = -1; this.target = -1; this.isLodObject = true;
     this.show(set.levels.length - 1);
   }
   show(i) {
@@ -217,9 +221,10 @@ class LodObject extends THREE.Group {
     this.remove(this.proxy); this.proxy = null; this.set.levels[1].users.delete(this);
   }
   tinted(c) {
-    if (this.tint) c.traverse((m) => { // one tinted material per source material and tint
-      if (!m.isMesh) return; const key = m.material.uuid + this.tint.join();
-      let t = tintCache.get(key); if (!t) { t = m.material.clone(); t.color.setRGB(...this.tint); tintCache.set(key, t); }
+    if (this.tint || this.look) c.traverse((m) => { // one tinted / looked material per source material and tint / look
+      if (!m.isMesh) return; const src = m.material, key = src.uuid + (this.tint ? this.tint.join() : '') + (this.look ? '|' + this.look.key : '');
+      let t = tintCache.get(key);
+      if (!t) { t = src.clone(); if (this.tint) t.color.setRGB(...this.tint); if (this.look) t = this.look.fn(t, src) ?? t; tintCache.set(key, t); }
       m.material = t;
     });
     return c;

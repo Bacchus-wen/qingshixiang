@@ -15,6 +15,7 @@ import shop from './systems/shop/index.js';
 import eye from './systems/shop/eye.js';
 import past from './systems/shop/past.js';
 import atmoShop from './systems/shop/atmo.js';
+import farshop from './systems/shop/farshop.js';
 import story from './systems/shop/story.js';
 import shopsound from './systems/shop/sound.js';
 
@@ -22,7 +23,7 @@ import shopsound from './systems/shop/sound.js';
 const q = new URLSearchParams(location.search);
 // v4: the repair shop is the experience; ?scene=street is the v3 rainy street (its shots carry no scene: street)
 const scene = q.get('scene') || (SHOTS[q.get('shot')] ? SHOTS[q.get('shot')].scene || 'street' : 'shop');
-const list = scene === 'lookdev' ? SYSTEMS : scene === 'shop' ? [shop, eye, past, atmoShop, story, shopsound] // v4: the repair shop
+const list = scene === 'lookdev' ? SYSTEMS : scene === 'shop' ? [shop, eye, past, farshop, atmoShop, story, shopsound] // v4: the repair shop
   : [street, atmo, robot, cat, ghosts, ...SYSTEMS.filter((s) => s.name !== 'lookdev')];
 
 const loading = document.getElementById('loading');

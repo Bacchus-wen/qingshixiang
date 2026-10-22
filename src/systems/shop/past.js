@@ -247,17 +247,19 @@ export default {
     if (shop.streetThen) this.prog = { tex: shop.streetThen, rects: [[0.6525, 0.07, 0.12, 0.18], [0.437, 0.07, 0.12, 0.18], [0.034, 0.07, 0.12, 0.18]] };
     const scr = {};
     let k = 0;
-    for (const [name, o] of Object.entries(placed)) {
-      const T = TVS[o.userData.layout?.glb]; if (!T) continue;
-      const on = uniform(0), chan = uniform(k % 3);
-      const mesh = new THREE.Mesh(scr[o.userData.layout.glb] ??= screenGeometry(T), crtMaterial(chan, on, this.atlas, this.prog, T));
+    // opts.prog: its own programmes ({ tex, rects }); opts.pin: the channel it stays on (no zapping)
+    const addTV = (name, o, glb, opts = {}) => {
+      const T = TVS[glb]; if (!T) return null;
+      const on = uniform(0), chan = uniform(opts.pin ?? k % 3);
+      const mesh = new THREE.Mesh(scr[glb] ??= screenGeometry(T), crtMaterial(chan, on, this.atlas, opts.prog ?? this.prog, T));
       mesh.renderOrder = 3; mesh.frustumCulled = false;
       // the LodObject's frame is the model space (a yaw0 pivot is not used for TVs)
-      o.add(mesh);
+      o.add(mesh); o.updateMatrixWorld(true);
       const c = new THREE.Vector3(T.cx, T.cy, T.apex).applyMatrix4(o.matrixWorld);
-      this.tvs.push({ name, o, mesh, on, chan, c, T, presence: 0, phase: k * 1.7, nextZap: 3 + k * 2.3 });
-      k++;
-    }
+      const tv = { name, o, mesh, on, chan, c, T, presence: 0, phase: k * 1.7, nextZap: 3 + k * 2.3, pin: opts.pin, far: !!opts.far };
+      this.tvs.push(tv); k++; return tv;
+    };
+    for (const [name, o] of Object.entries(placed)) addTV(name, o, o.userData.layout?.glb);
     // clean knobs on the generated sets that show them in close-ups
     for (const o of Object.values(placed)) {
       const K = KNOBS[o.userData.layout?.glb]; if (!K) continue;
@@ -276,6 +278,9 @@ export default {
     const sys = this;
     ctx.api.past = {
       get tvs() { return sys.tvs; },
+      // a set placed by another system (the electronics shop across the road, ./farshop.js): a screen on it that comes on
+      // in the beam like these. glb: its model file name ('crt_tv.glb', 'crt_tv_hero.glb')
+      addTV: (name, o, glb, opts) => addTV(name, o, glb, opts),
     };
     // (story v5 looks out at the street: the customer, the child at the door and her height marks are gone; past.js v4 has them)
   },
@@ -298,8 +303,9 @@ export default {
       tv.wasOn = tv.presence > 0.05;
       tv.on.value = tv.presence > 0.02 ? Math.min(1, tv.presence * 1.15) * (m.tvK ?? 1) : 0; // (tvK: the eye's power sagging -- the picture collapses toward its centre line and snows)
       tv.nextZap -= dt * (tv.presence > 0.5 ? 1 : 0);
-      if (tv.nextZap <= 0) { const np = this.prog?.rects.length || this.atlas?.n || 0; tv.chan.value = np && Math.random() < 0.8 ? 3 + Math.floor(Math.random() * np) : Math.floor(Math.random() * 3); /* mostly programmes, now and then snow or bars */ tv.nextZap = 5 + Math.random() * 7; if (tv.presence > 0.6) ctx.api.audio?.play('tvzap', { pos: tv.c }); }
-      const v = tv.presence; if (v > bestV) { bestV = v; best = tv; }
+      if (tv.pin != null) { tv.chan.value = tv.pin; tv.nextZap = 1e9; }
+      if (tv.nextZap <= 0) { const np = this.prog?.rects.length || this.atlas?.n || 0; tv.chan.value = np && Math.random() < 0.8 ? 3 + Math.floor(Math.random() * np) : Math.floor(Math.random() * 3); /* mostly programmes, now and then snow or bars */ tv.nextZap = 5 + Math.random() * 7; if (tv.presence > 0.6 && !tv.quiet) ctx.api.audio?.play('tvzap', { pos: tv.c }); }
+      const v = tv.presence; if (v > bestV && !tv.far) { bestV = v; best = tv; } // (a set across the road lights nothing in here: Codex farshop-1)
     }
     if (best && bestV > 0.05) {
       this.tvLight.position.copy(best.c).add(new THREE.Vector3(0, 0, 0.3).applyQuaternion(best.o.getWorldQuaternion(new THREE.Quaternion())));

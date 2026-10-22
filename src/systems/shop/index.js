@@ -6,7 +6,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { SHOTS } from '../../engine/shots.js';
-import { LodLibrary, SHADOW_LAYER, ROBOT_LAYER, ROBOT_SHADOW_LAYER } from './lod.js';
+import { LodLibrary, SHADOW_LAYER, ROBOT_LAYER, ROBOT_SHADOW_LAYER, ditherNoise } from './lod.js';
 import { HeadRig } from './rig.js';
 import { pastHooks } from './past.js';
 import { memoryMask, mem } from '../../materials/memory.js';
@@ -484,6 +484,7 @@ export default {
       // a continuous worn concrete kerb with a gutter in front, and rubble from the far side spilling over it onto our road
       // (bricks and broken concrete across the line where the photograph meets the 3D street, with contact shadows)
       const km = new THREE.MeshStandardNodeMaterial({ color: 0x7c776e, roughness: 0.92 }), bm = new THREE.MeshStandardNodeMaterial({ color: 0x7a4c3a, roughness: 0.95 }), cm = new THREE.MeshStandardNodeMaterial({ color: 0x8d8a83, roughness: 0.97 });
+      bm.maskNode = cm.maskNode = memoryMask(positionWorld).lessThan(ditherNoise); // the rubble is the present's: in the beam the pavement is as the then-photograph has it (2026-10-22: a brick stood at the feet of the family at the electronics shop's window)
       const zK = d / 2 + 0.25 + 8.3, rnd = (i) => { const x = Math.sin(i * 91.7) * 43758.5453; return x - Math.floor(x); };
       // (judge r3: one straight kerb and a black gutter drew a ruled line under the photograph) -- kerb stones of uneven
       // length, some sunk or tipped, gaps between; the gutter in pieces, only a little darker than the road
@@ -879,7 +880,7 @@ export default {
         for (const o of objs) o.visible = false;
       }
     }
-    ctx.api.shop = { streetNow: this.streetNow, streetThen: this.streetThen, root, placed, ROOM, lod, rig, eyeGlow, lights: { hemi, dusk, lamp: this.lamp, fill, tube: this.tubeLight, tubeGlow, robotFill: this.robotFill }, farK: this.farK, robotTurn: (k) => { rig.body = -Math.PI * Math.min(1, Math.max(0, k)); rig.update(); }, review: !ctx.isShot && ctx.params.get("review") !== null };
+    ctx.api.shop = { streetNow: this.streetNow, streetThen: this.streetThen, backdrop: this.backdrop, root, placed, ROOM, lod, rig, eyeGlow, lights: { hemi, dusk, lamp: this.lamp, fill, tube: this.tubeLight, tubeGlow, robotFill: this.robotFill }, farK: this.farK, robotTurn: (k) => { rig.body = -Math.PI * Math.min(1, Math.max(0, k)); rig.update(); }, review: !ctx.isShot && ctx.params.get("review") !== null };
     ctx.postfx.memoryGrade = true; // the past inside the beam is graded per pixel (src/engine/PostFX.js)
     Object.assign(ctx.postfx.params, { bloomRadius: 0.35, bloomStrength: 0.26, bloomThreshold: 2.2 }); // a tight glow round the hottest cores only (the lamp's shade is lit point-blank: it must not flare)
     // the face light for the robot's close-ups (story: wait / waking), soft and unshadowed, off otherwise (never removed:

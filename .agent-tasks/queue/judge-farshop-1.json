@@ -1,0 +1,15 @@
+{
+ "id": "judge-farshop-1",
+ "from": "claude",
+ "to": "codex",
+ "title": "评审 对街电器行三维 1",
+ "write": false,
+ "gen": false,
+ "paths": [],
+ "status": "done",
+ "posted": "2026-10-22 17:20:28",
+ "started": "2026-10-22 17:20:28",
+ "seconds": 194.3,
+ "finished": "2026-10-22 17:23:43",
+ "reason": null
+}
