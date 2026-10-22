@@ -2,7 +2,7 @@ import * as THREE from 'three/webgpu';
 import {
   pass, depthPass, mrt, output, velocity, normalView, metalness, roughness, packNormalToRGB, unpackRGBToNormal, sample,
   normalWorld, materialReference, uniform, vec2, vec3, vec4, float, screenUV, time, hash, floor, fract, mix,
-  smoothstep, length, luminance, clamp, max, min, renderOutput, Fn, agxToneMapping, exp,
+  smoothstep, length, luminance, clamp, max, min, renderOutput, Fn, agxToneMapping, exp, step, sin,
 } from 'three/tsl';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
 import { traa } from 'three/addons/tsl/display/TRAANode.js';
@@ -39,6 +39,9 @@ export class PostFX {
       lift: uniform(new THREE.Vector3(0.004, 0.006, 0.009)),
       // film: amber halation hugging warm highlights, gate weave (sub-pixel frame drift), density flicker
       halation: uniform(0.35), aoStrength: uniform(0.85), scatter: uniform(0.16), streak: uniform(0.08), weave: uniform(new THREE.Vector2()), flicker: uniform(0),
+      // a signal glitch over the whole picture, 0..1 (story.js: the cut from act one to act two); its pattern re-rolls with
+      // glitchSeed (render(): every other frame while it shows)
+      glitch: uniform(0), glitchSeed: uniform(0),
       ssrIntensity: uniform(1.0),
       presentK: uniform(0), pastK: uniform(1), // v4 shop memory grade (see build)
       // depth of field, driven by the director (bokeh 0 = off)
@@ -131,7 +134,20 @@ export class PostFX {
     this.bloomPass = bloomPass;
     // gate weave: the whole developed frame drifts a fraction of a pixel, like film in a projector gate
     const aaTex = aa.getTextureNode?.();
-    const frameCol = aaTex ? aaTex.sample(screenUV.add(params.weave)) : aa;
+    // the glitch (2026-10-22, the cut from act one to act two): the frame tears into horizontal bands shoved sideways, a
+    // few blocks show another piece of the picture, and the channels slip apart; static and scanlines in grade below
+    const G = params.glitch, GS = params.glitchSeed;
+    const guv = Fn(([uv]) => {
+      const band = floor(uv.y.mul(mix(float(16), float(44), hash(GS.add(0.37)))));
+      const torn = step(float(1).sub(G.mul(0.55)), hash(band.mul(1.71).add(GS.mul(3.3))));
+      const shove = hash(band.add(GS.mul(13.1))).sub(0.5).mul(0.16).mul(G).mul(torn);
+      const blk = floor(uv.mul(vec2(24, 14)));
+      const bad = step(float(1).sub(G.mul(0.12)), hash(blk.x.add(blk.y.mul(57)).add(GS.mul(91.7))));
+      const elsewhere = vec2(hash(blk.x.add(GS)).sub(0.5), hash(blk.y.add(GS.mul(2.1))).sub(0.5)).mul(0.25).mul(bad).mul(G);
+      return uv.add(vec2(shove, 0)).add(elsewhere);
+    });
+    const gp = guv(screenUV.add(params.weave)), slip = vec2(G.mul(0.0075), 0);
+    const frameCol = aaTex ? vec3(aaTex.sample(gp.add(slip)).r, aaTex.sample(gp).g, aaTex.sample(gp.sub(slip)).b) : aa;
     // halation: light scattered back through the film base. Only chromatic (memory-amber) glow gets the warm
     // fringe, so the silver present stays neutral and the past bleeds a little more than it should.
     const bl = bloomPass.rgb;
@@ -189,6 +205,12 @@ export class PostFX {
       const px = floor(screenUV.mul(vec2(1920, 1080)));
       const g = hash(px.x.add(px.y.mul(1931)).add(floor(fract(time.mul(0.41)).mul(7919)).mul(2099))).sub(0.5);
       c.addAssign(g.mul(params.grain));
+      // the glitch: scanlines, bands of static, the whole frame's level jumping
+      c.mulAssign(float(1).sub(G.mul(0.28).mul(sin(screenUV.y.mul(1080 * Math.PI)).mul(0.5).add(0.5))));
+      const snow = hash(px.x.add(px.y.mul(1931)).add(GS.mul(7919)));
+      const sband = step(float(1).sub(G.mul(0.3)), hash(floor(screenUV.y.mul(30)).add(GS.mul(5.7))));
+      c.assign(mix(c, vec3(snow), sband.mul(0.6).mul(G)));
+      c.mulAssign(float(1).add(hash(GS.add(0.71)).sub(0.5).mul(0.5).mul(G)));
       return vec4(max(c, vec3(0)), 1);
     })();
 
@@ -211,6 +233,7 @@ export class PostFX {
     P.weave.value.x += (n(1) * a * 0.6 - P.weave.value.x) * 0.35;
     P.weave.value.y += (n(2) * a - P.weave.value.y) * 0.35;
     P.flicker.value += (n(3) * 0.012 - P.flicker.value) * 0.3;
+    if (P.glitch.value > 0 && this.frame % 2 === 0) P.glitchSeed.value = (Math.floor(this.frame / 2) * 7.31) % 97; // (deterministic: shots repeat)
     this.pipeline.render();
   }
 }

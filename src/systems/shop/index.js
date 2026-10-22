@@ -879,7 +879,7 @@ export default {
         for (const o of objs) o.visible = false;
       }
     }
-    ctx.api.shop = { streetNow: this.streetNow, streetThen: this.streetThen, root, placed, ROOM, lod, rig, eyeGlow, lights: { hemi, dusk, lamp: this.lamp, fill, tube: this.tubeLight, tubeGlow, robotFill: this.robotFill }, farK: this.farK, robotTurn: (k) => { rig.body = -Math.PI * Math.min(1, Math.max(0, k)); rig.waist = rig.lean = rig.liftL = rig.liftR = 0; rig.update(); }, robotPose: (p) => { rig.body = p.body ?? rig.body; rig.waist = p.waist ?? 0; rig.lean = p.lean ?? 0; rig.update(); }, review: !ctx.isShot && ctx.params.get("review") !== null };
+    ctx.api.shop = { streetNow: this.streetNow, streetThen: this.streetThen, root, placed, ROOM, lod, rig, eyeGlow, lights: { hemi, dusk, lamp: this.lamp, fill, tube: this.tubeLight, tubeGlow, robotFill: this.robotFill }, farK: this.farK, robotTurn: (k) => { rig.body = -Math.PI * Math.min(1, Math.max(0, k)); rig.update(); }, review: !ctx.isShot && ctx.params.get("review") !== null };
     ctx.postfx.memoryGrade = true; // the past inside the beam is graded per pixel (src/engine/PostFX.js)
     Object.assign(ctx.postfx.params, { bloomRadius: 0.35, bloomStrength: 0.26, bloomThreshold: 2.2 }); // a tight glow round the hottest cores only (the lamp's shade is lit point-blank: it must not flare)
     // the face light for the robot's close-ups (story: wait / waking), soft and unshadowed, off otherwise (never removed:

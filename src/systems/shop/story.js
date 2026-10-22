@@ -1,6 +1,5 @@
 import * as THREE from 'three/webgpu';
 import { Film } from '../../ui/film.js';
-import { turnBefore, turnAfter } from './rig.js';
 
 // The shop story (v5: two acts), start to end. Owns the camera (except ?shot= and ?review) and the pacing.
 //   title   : black, the title card; a click starts the sound and the arrival
@@ -46,7 +45,7 @@ const SIDE = { pos: new THREE.Vector3(0.972, 0.92, -0.55), look: new THREE.Vecto
 // (r6 self-review: from straight in front the warm light lit it flat, as bright as the shelves behind: now from its left,
 // the light from the electronics shop on its far cheek, the room behind it lower, the lens core and glow down)
 const MEMORY_FACE = { pos: new THREE.Vector3(-0.198, 0.9, 2.65), look: new THREE.Vector3(-0.348, 0.86, 1.7), fov: 30, mem: { coreK: 0.28, glowK: 0, doorK: 0, roomK: 0.45, lampK: 0.2, pastX: -3.6, pastAngle: 0.12 } };
-const TURN_CUT_S = 2.6, TURN_SETTLE_S = 0.7; // the turn: listening, gaze, shoulders, the lean -- cut -- the last of it and the settle
+const GLITCH_AT_S = 1.65, GLITCH_OUT_S = 0.6; // act one to act two: it listens, two warnings, the tear -- cut on its peak -- it clears
 const ACT2_POS = new THREE.Vector3(0.072, 1, -1.4), ACT2_LOOK = new THREE.Vector3(-0.278, 0.92, 11.3), ACT2_FOV = 48; // (r4: feet and stool in frame, clear of the bench)
 const ACT2_BEAM = { beamK: 0.65, beamReach: 0.25, beamNear: 0.5, beamFar: 9, spotK: 0.6, duskK: 0.2, shaftW: 0.7, doorK: 1, glowK: 1, robotFillK: 0.25, lampK: 0.4, softK: 1.8 }; // softK: a wider then/now edge (r7: a hard one read as a burnt stripe) // (lamp: from in here the bench lamp was the brightest thing in the frame) // (dusk 0.2: from in here its hard patch on the floor burnt out) // a shaft in the dusty air toward the far side; the dusk under the shutter lower (from in here its patch on the floor burns out)
 const K = (t, p, l, fov, cut = false) => ({ t, p: new THREE.Vector3(...p), l: new THREE.Vector3(...l), fov, cut });
@@ -174,24 +173,24 @@ export default {
         break;
       }
       case 'turn': {
-        // the song from across the road. Seen from the doorway, its back to us: it stops and listens, its gaze goes round
-        // toward the song over its right shoulder, the shoulders follow, it leans forward to get up -- and on that, the
-        // cut: act two opens on the end of the turn (2026-10-21, the film's way: the whole manoeuvre round the stool read
-        // as a statue on a turntable; rig.js turnBefore / turnAfter)
-        m.forceOpen = true; eye?.aim(null);
-        if (this.t >= TURN_CUT_S) { // the cut: the robot is most of the way round; act two shows the rest (street, below).
-          // This frame is already the new shot (pose and camera switch together: no frame of the turned robot from the door)
-          m.coreK = undefined; m.lampK = undefined; m.tilt = undefined; m.headK = undefined; this.settle = 0;
-          const after = turnAfter(0); ctx.api.shop?.robotPose?.(after); eye?.snapLook(after.look, 0.15); m.lookOverride = { x: after.look, y: 0.15 };
+        // the song from across the road. Seen from the doorway, its back to us, it is still -- listening -- and its picture
+        // of the shop breaks up: two small glitches, then the whole frame tears, and on its peak act two cuts in, the
+        // robot already facing the street; the glitch clears over that (street, below). (2026-10-22, the user: "直接故障
+        // 特效转场" -- animated, the turn on the stool stretched the steel body; it is not shown.)
+        m.forceOpen = true; eye?.aim(null); m.lookOverride = { x: 0, y: 0.15 };
+        if (this.t < 0.05) this.cut = true;
+        if (this.t >= GLITCH_AT_S) { // the cut, on the glitch's peak: pose, gaze and camera together, this frame
+          m.coreK = undefined; m.lampK = undefined; this.glitchOut = 0; this.glitch = 1;
+          ctx.api.shop?.robotTurn?.(1); eye?.snapLook(0, 0.15); m.lookOverride = undefined;
           this.set('street', true); this.cam.pos.copy(ACT2_POS); this.cam.look.copy(ACT2_LOOK); this.cam.fov = ACT2_FOV;
           break;
         }
-        const u = this.t / TURN_CUT_S, pose = turnBefore(u);
-        m.lookOverride = { x: pose.look, y: pose.up }; m.tilt = pose.tilt; m.headK = 2.8;
-        ctx.api.shop?.robotPose?.({ body: 0, waist: pose.waist, lean: pose.lean });
-        if (this.t < 0.05 || this.sounds === undefined) { this.cut = true; this.sounds = 0; }
-        if (this.sounds < 3 && u >= [0.3, 0.44, 1 - 0.12 / TURN_CUT_S][this.sounds]) { audio?.play(['servo', 'servo', 'scrape'][this.sounds], { short: this.sounds === 1 }); this.sounds++; } // the neck, the waist, the stool across the cut
-        this.cam.pos.set(0.95, 0.8, 2.9).lerp(this._w.set(0.82, 0.82, 2.62), ease(clamp01(this.t / TURN_CUT_S))); this.cam.look.set(-0.5, 0.55, 1.2); this.cam.fov = 40; m.coreK = 0.25; m.spotK = 0.18; m.lampK = 0.45; m.beamK = 0.12; m.robotFillK = 0.3; /* the cold spot on the floor beside the stool was the robot's front fill (robot 0.7 -> 0.3) */
+        // two warnings, then the tear (an envelope in seconds; the static's pattern jumps every other frame, PostFX)
+        const blip = (t0, d, k) => (this.t > t0 && this.t < t0 + d ? k : 0);
+        this.glitch = Math.max(blip(0.62, 0.07, 0.35), blip(1.02, 0.1, 0.5), clamp01((this.t - (GLITCH_AT_S - 0.28)) / 0.28) ** 1.6);
+        if (this.glitchSounds === undefined || this.t < 0.05) this.glitchSounds = 0;
+        if (this.glitchSounds < 3 && this.t >= [0.62, 1.02, GLITCH_AT_S - 0.28][this.glitchSounds]) { audio?.play('glitch', { short: this.glitchSounds < 2 }); this.glitchSounds++; }
+        this.cam.pos.set(0.95, 0.8, 2.9).lerp(this._w.set(0.82, 0.82, 2.62), ease(clamp01(this.t / GLITCH_AT_S))); this.cam.look.set(-0.5, 0.55, 1.2); this.cam.fov = 40; m.coreK = 0.25; m.spotK = 0.18; m.lampK = 0.45; m.beamK = 0.12; m.robotFillK = 0.3; /* the cold spot on the floor beside the stool was the robot's front fill (robot 0.7 -> 0.3) */
         if (eye && eye.open > 0.2) this.power = Math.max(0, this.power - dt / LOOK_POWER_S);
         this.tuneCall = 0.55;
         m.power = this.power;
@@ -201,10 +200,10 @@ export default {
         // act two: behind its head on the lens side, held still: the whole far side fills the opening (the photographs'
         // edges just outside the frame), the head in the near corner, and the beam moves across the street -- the view
         // only leans a little after it
-        if (this.settle !== undefined) { // the end of the turn, from the cut: the last of it round the stool, and it settles
-          this.settle += dt; const sp = turnAfter(this.settle / TURN_SETTLE_S);
-          ctx.api.shop?.robotPose?.(sp); m.lookOverride = { x: sp.look, y: 0.15 };
-          if (this.settle >= TURN_SETTLE_S) { this.settle = undefined; m.lookOverride = undefined; ctx.api.shop?.robotTurn?.(1); }
+        if (this.glitchOut !== undefined) { // the glitch clears over the first of act two, a twitch or two on the way
+          this.glitchOut += dt; const g = this.glitchOut;
+          this.glitch = Math.max(0, 1 - g / GLITCH_OUT_S) ** 1.3 + (g > 0.32 && g < 0.38 ? 0.4 : 0);
+          if (g > GLITCH_OUT_S + 0.1) { this.glitchOut = undefined; this.glitch = 0; }
         }
         this.cam.pos.copy(ACT2_POS);
         this.cam.look.copy(ACT2_LOOK).lerp(this._v.copy(eyePos).addScaledVector(m.dir, 10), 0.05);
@@ -295,6 +294,8 @@ export default {
         break;
       }
     }
+    if (this.phase !== 'turn' && this.glitchOut === undefined) this.glitch = 0;
+    if (ctx.postfx?.params.glitch) ctx.postfx.params.glitch.value = this.glitch ?? 0;
     film.power(this.power, this.phase === 'look' || this.phase === 'turn' || this.phase === 'street' || this.phase === 'last');
     if (this.phase !== 'look' && ctx.postfx.params.bokeh.value > 0) ctx.postfx.params.bokeh.value = Math.max(0, ctx.postfx.params.bokeh.value - dt * 3); // depth of field only on act one's close-ups
     // a soft key on its face while we are in front of it: in the shop from the bench side (from the camera's side while
