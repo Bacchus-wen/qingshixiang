@@ -49,3 +49,8 @@ html[lang=en] .film-title small:not(.film-credit), html[lang=en] .film-card smal
 html[lang=en] .film-hint { white-space: normal; width: max-content; max-width: 86vw; text-align: center; line-height: 1.45; } /* (a phone: the longest English hint is wider than the screen) */
 .film-title .film-credit { left: 50%; transform: translateX(-50%); width: max-content; max-width: 90vw; text-align: center; } /* (a phone: the credit wider than the screen ran off its left edge) */
 @media (max-width: 480px) { html[lang^=zh] .film-hint { letter-spacing: 0.45em; font-size: 15px; padding-left: 1em; } } /* (a phone: the Chinese hint's wide spacing reached both edges) */
+/* (Codex english-1) the small English lines at least 12 px and brighter; the end card's line centred with room at the sides */
+html[lang=en] .film-title small:not(.film-credit) { font-size: 12px; opacity: 0.75; }
+html[lang=en] .film-title .film-credit { font-size: 12px; opacity: 0.55; letter-spacing: 0.04em; }
+html[lang=en] .film-card small { font-size: 12px; }
+.film-card p { text-align: center; padding: 0 8vw; }

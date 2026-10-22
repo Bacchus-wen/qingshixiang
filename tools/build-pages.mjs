@@ -71,7 +71,7 @@ writeFileSync(path.join(out, 'credits-en.html'), `<!doctype html><meta charset="
 <style>body{font:15px/1.7 -apple-system,"Helvetica Neue",sans-serif;max-width:760px;margin:40px auto;padding:0 20px;color:#ddd;background:#111}a{color:#e9b46a}h1{font-weight:400}li{margin:.3em 0}</style>
 <h1>Bluestone Lane · Sources and licences</h1>
 <p><a href="./?lang=en">← Back to the piece</a> · <a href="credits.html">中文</a></p>
-<h2>3D models</h2><ul><li>The old things in the repair shop, the workbench and the robot, and the sets in the electronics shop across the road: raw meshes generated with Tripo (from reference images made with an image model); the web version uses reduced levels.</li></ul>
+<h2>3D models</h2><ul><li>The old things in the repair shop, the workbench and the robot, and the sets in the electronics shop across the road: raw meshes generated with Tripo (from reference images made with an image model); the web version uses lower-detail meshes made from them.</li></ul>
 <h2>Images</h2><ul><li>The street across the road, "now" and "then": generated with an image model (gpt-image-2.5); the shop names and the people in them are generated and do not stand for real shops or people.</li><li>The wall and floor textures inside the shop: generated with an image model or painted procedurally.</li></ul>
 <h2>Sound</h2><ul>${soundLines.map((l) => `<li>${esc(noZh(l.replace(/^\s*-\s*/, '')))}</li>`).join('')}<li>The pendulum, the song on the radio (written for this piece), the TV test tones, the robot's servos and its eye opening, the hum of the tube and the mains: synthesised with Web Audio.</li></ul>
 <h2>Code and libraries</h2><ul><li>three.js (MIT), GSAP (standard licence).</li></ul>

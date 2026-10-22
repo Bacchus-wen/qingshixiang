@@ -82,7 +82,7 @@ export default {
     if (ctx.isShot || ctx.api.shop?.review) { this.off = true; return; }
     this.film = new Film(document.getElementById('ui'), {
       title: tr('青 石 巷', 'Bluestone Lane'), sub: tr('请戴上耳机', 'Best with headphones'), start: tr('点击画面开始', TOUCH ? 'Tap to begin' : 'Click to begin'),
-      credit: tr('店里的每一件旧物都由 Tripo 生成 · 素材出处与许可见 credits.html', 'Every old thing in the shop was generated with Tripo · sources and licences: credits-en.html'),
+      credit: tr('店里的每一件旧物都由 Tripo 生成 · 素材出处与许可见 credits.html', 'Every old object in the shop was generated with Tripo · sources and licences: credits\u2011en.html'),
       card: [tr('它记得这条街亮着灯的样子。', 'It remembers the street with its lights on.')],
       replay: tr('点击画面重看', TOUCH ? 'Tap to watch again' : 'Click to watch again'),
     });
@@ -127,7 +127,7 @@ export default {
         m.forceOpen = undefined; film.fade(0); ctx.api.shop?.robotTurn?.(0);
         this.cam.pos.copy(WAIT_POS).addScaledVector(LEFT_IN, Math.sin(this.t * 0.15) * 0.06).addScaledVector(FACING_IN, -(1 - Math.cos(this.t * 0.15)) * 0.05);
         this.cam.look.copy(WAIT_LOOK); this.cam.fov = 40 - Math.min(3, this.t * 0.15);
-        if (this.t > 3) film.hint(eye?.failed ? (input.hold ? tr('松开，再按住', 'Let go, then hold again') : tr('再按住一次', 'Hold it again')) : TOUCH ? tr('按住屏幕', 'Press and hold the screen') : tr('按住鼠标左键', 'Hold the left mouse button'));
+        if (this.t > 3) film.hint(eye?.failed ? (input.hold ? tr('松开，再按住', 'Let go, then hold again') : tr('再按住一次', 'Press and hold again')) : TOUCH ? tr('按住屏幕', 'Press and hold the screen') : tr('按住鼠标左键', 'Hold the left mouse button'));
         if (eye?.failed && !this.shook) { this.shook = true; this.shake = 0.45; } // the first try: a clunk, the head jolts
         if (eye && eye.open > 0.08 && eye.attempts > 1) { film.hint(''); this.set('waking', true); }
         break;
@@ -164,7 +164,7 @@ export default {
         const fd = bench ? this.curPos.distanceTo(this.benchPos) : this.tvShot ? this.curPos.distanceTo(TV_IN) : this.curPos.distanceTo(this._v.copy(eyePos).addScaledVector(m.dir, 2.4));
         P.focus.value += (fd - P.focus.value) * Math.min(1, dt * 3); P.focalRange.value = this.tvShot ? 1.2 : 0.9; P.bokeh.value += ((bench ? 1.4 : this.tvShot ? 2.0 : 2.4 * this.zoom) - P.bokeh.value) * Math.min(1, dt * 2);
         this.lookTime += dt;
-        if (this.t > 4 && !this.moved) film.hint(TOUCH ? tr('保持按住，滑动手指', 'Keep holding, slide your finger') : tr('保持按住，移动鼠标', 'Keep holding, move the mouse'));
+        if (this.t > 4 && !this.moved) film.hint(TOUCH ? tr('保持按住，滑动手指', 'Keep holding and slide your finger') : tr('保持按住，移动鼠标', 'Keep holding and move the mouse'));
         if (!this.moved && (Math.abs(input.pointer.x) > 0.2 || Math.abs(input.pointer.y) > 0.2)) { this.moved = true; film.hint(''); eye?.aim(null); }
         if (!this.moved && this.t > 9) { // left alone, it looks at the set in the middle of the shop itself: over its head, the set beyond in focus
           eye?.aim(TV_SHOT.aim); this.cam.pos.copy(TV_SHOT.pos); this.cam.look.copy(TV_SHOT.look); this.cam.fov = TV_SHOT.fov; this.zoom = 0; this.tvShot = true;

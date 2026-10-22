@@ -935,7 +935,7 @@ export default {
         let tris = 0; o.traverse((m) => { if (m.isMesh) tris += (m.geometry.index ? m.geometry.index.count : m.geometry.attributes.position.count) / 3; });
         let lo = o; while (lo && !lo.isLodObject) lo = lo.children?.[0];
         const raw = lo?.set.levels[0].tris;
-        info.textContent = `${NAMES[o.userData.layout.glb] || o.userData.layout.glb} · ${tr('Tripo 生成', 'generated with Tripo')} · ${raw ? tr(`原始 ${(raw / 1e4).toFixed(0)} 万三角面,靠近时显示原始模型`, `${(raw / 1e6).toFixed(2)} M triangles raw; up close the raw mesh shows`) : tr(`${(tris / 1000).toFixed(1)} 千三角面`, `${(tris / 1000).toFixed(1)}k triangles`)}`;
+        info.textContent = `${NAMES[o.userData.layout.glb] || o.userData.layout.glb} · ${tr('Tripo 生成', 'generated with Tripo')} · ${raw ? tr(`原始 ${(raw / 1e4).toFixed(0)} 万三角面,靠近时显示原始模型`, `${(raw / 1e6).toFixed(2)}M triangles · original mesh shown up close`) : tr(`${(tris / 1000).toFixed(1)} 千三角面`, `${(tris / 1000).toFixed(1)}k triangles`)}`;
         info.style.opacity = '1'; clearTimeout(this._infoT); this._infoT = setTimeout(() => (info.style.opacity = '0'), 7000);
       });
       // a small, quiet hint for reviewers (bottom-left); fades after a while, any key brings it back

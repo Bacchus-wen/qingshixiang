@@ -1,0 +1,9 @@
+总评 8/10
+
+1. 英文整体克制统一。建议：Hold it again → Press and hold again；Keep holding, move the mouse → Keep holding and move the mouse；Every old thing → Every old object。检视说明改为：1.83M triangles · original mesh shown up close。片尾原句可保留。
+
+2. Bluestone Lane 合适，自然且保留石巷的质感。
+
+3. 衬线、标题大写和手机提示换行良好；开始提示、署名仅9–10px且偏暗，建议至少12px并提亮。手机片尾缺内边距和文字居中；总览未展示手机标题、署名、片尾，尚不能确认这些状态。
+
+4. 主流程未见漏翻；“中文”切换、场景招牌应保留。但 `?scene=street&lang=en` 仍调用 film.js、director.js 的中文文案。出处页 reduced levels 建议改为 lower-detail meshes。

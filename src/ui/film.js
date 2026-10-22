@@ -4,7 +4,9 @@ import { tr, otherLangHref } from './i18n.js';
 export class Film {
   // text: optional { title, sub, start, credit, card: [lines], replay } (v4 shop); defaults are the v3 street's
   constructor(root, text = {}) {
-    const T = { title: '青 石 巷', sub: '请戴上耳机', start: '点击画面开始', credit: '现场录音来自 Freesound 与 Wikimedia Commons(CC0);远处的狗叫:YleArkisto,CC BY 4.0。出处见 CREDITS.md', card: ['刻度停在十一岁。', '灯灭了，门还是那么高。'], replay: '点击画面重看', ...text };
+    const T = { title: tr('青 石 巷', 'Bluestone Lane'), sub: tr('请戴上耳机', 'Best with headphones'), start: tr('点击画面开始', 'Click to begin'),
+      credit: tr('现场录音来自 Freesound 与 Wikimedia Commons(CC0);远处的狗叫:YleArkisto,CC BY 4.0。出处见 CREDITS.md', 'Field recordings from Freesound and Wikimedia Commons (CC0); the distant dog: YleArkisto, CC BY 4.0. Sources in CREDITS.md'),
+      card: [tr('刻度停在十一岁。', 'The marks stop at eleven.'), tr('灯灭了，门还是那么高。', 'The light is out; the door is as tall as ever.')], replay: tr('点击画面重看', 'Click to watch again'), ...text };
     root.innerHTML = `
       <div class="film-edge top"><span class="fe-l"></span><span class="fe-r">ISO 400 · <b class="fe-frame">0000</b></span></div>
       <div class="film-edge bottom"><span class="fe-l fe-phase">—</span><span class="fe-power"><i></i></span></div>

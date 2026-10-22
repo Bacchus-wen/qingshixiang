@@ -1,5 +1,6 @@
 import * as THREE from 'three/webgpu';
 import { Film } from '../ui/film.js';
+import { tr } from '../ui/i18n.js';
 
 // The experience, start to end. Owns the camera (except in ?shot= mode) and the pacing.
 //   arrive  : slow dolly down the lane, eye forced shut, ends in the dark in front of the robot
@@ -83,7 +84,7 @@ export default {
         ARRIVE.getPoint(1, this.cam.pos);
         this.cam.look.copy(WAIT_LOOK);
         this.cam.fov = 40 - Math.min(4, this.t * 0.15);
-        if (this.t > 4) this.film.hint(robot?.failed && !input.hold ? '再按住' : robot?.failed ? '' : '按住');
+        if (this.t > 4) this.film.hint(robot?.failed && !input.hold ? tr('再按住', 'Press and hold again') : robot?.failed ? '' : tr('按住', 'Press and hold'));
         if (robot && robot.open > 0.08 && robot.attempts > 1) { this.film.hint(''); this.set('waking', true); }
         break;
       }
@@ -124,7 +125,7 @@ export default {
         const frag = ctx.api.fragment;
         this.lookTime = (this.lookTime ?? 0) + dt; // gates the door memory (fragment.js) so it is not the first thing seen
         // nudge: one faint line until the pointer moves
-        if (this.t > 4 && !this.moved) this.film.hint('移动鼠标 · 慢慢看');
+        if (this.t > 4 && !this.moved) this.film.hint(tr('移动鼠标 · 慢慢看', 'Move the mouse · look slowly'));
         if (!this.moved && (Math.abs(input.pointer.x) > 0.15 || Math.abs(input.pointer.y) > 0.15)) { this.moved = true; this.film.hint(''); }
         // however it was used, the eye goes back to the door before it runs out (its resting gaze is the door)
         if (frag?.state === 'idle' && this.power < 0.35) { this.returning = Math.min(1, (this.returning ?? 0) + dt * 0.25); m.lookOverride = { x: 0, y: 0 }; }
