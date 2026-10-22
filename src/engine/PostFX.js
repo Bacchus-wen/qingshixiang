@@ -153,7 +153,8 @@ export class PostFX {
     const gp = guv(screenUV.add(params.weave));
     const slip = vec2(G.mul(0.0005).add(GB.mul(0.0011)), 0); // ~1 px of channel slip, ~3 px at the peak (1080p)
     const tr = vec2(G.mul(0.002), 0); // (round 3: half the trail, its second step faint -- the peak was ghosting everything)
-    const frameCol = aaTex
+    const noGlitch = dbg.includes('noglitch'); // (?pfx=noglitch: the graph without it, for measuring what it costs when off)
+    const frameCol = aaTex && noGlitch ? aaTex.sample(screenUV.add(params.weave)) : aaTex
       ? max(vec3(aaTex.sample(gp.add(slip)).r, aaTex.sample(gp).g, aaTex.sample(gp.sub(slip)).b), // bright parts trail rightwards
         max(aaTex.sample(gp.sub(tr)).rgb.mul(0.7), aaTex.sample(gp.sub(tr.mul(2))).rgb.mul(0.2)).mul(G))
       : aa;
@@ -216,6 +217,7 @@ export class PostFX {
       c.addAssign(g.mul(params.grain));
       // the glitch: faint scanlines; one to three thin bands of static, broken along their length, grain in clusters; the
       // level wavering (+-8%); and the darkening that hides the cut (glitchDark)
+      if (noGlitch) return vec4(max(c, vec3(0)), 1);
       c.mulAssign(float(1).sub(G.mul(0.08).mul(sin(screenUV.y.mul(1080 * Math.PI)).mul(0.5).add(0.5))));
       const nb = floor(hash(GS.add(2.2)).mul(2.99)).add(1), cl = floor(px.div(3));
       const grit = hash(cl.x.add(cl.y.mul(613)).add(GS.mul(41))).mul(0.6).add(hash(px.x.add(px.y.mul(1931)).add(GS.mul(7919))).mul(0.4));
