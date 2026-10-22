@@ -271,7 +271,7 @@ export default {
     // it lifts ~13 deg and can look up/down another ~18 deg
     rig.yaw = this.lookCur.x * 0.85 + jitter;
     rig.pitch = this.lift * 0.23 + this.lookCur.y * 0.32 - (1 - this.lift) * 0.04 * (0.5 + 0.5 * Math.sin(t * 0.7)) - 0.14 * Math.sin(Math.PI * Math.min(1, Math.max(0, m.nod ?? 0))); // nod: 0 -> 1 = one small nod
-    this.tilt = (this.tilt ?? 0) + ((m.tilt ?? 0) - (this.tilt ?? 0)) * Math.min(1, dt * 1.6); // a listening tilt
+    this.tilt = (this.tilt ?? 0) + ((m.tilt ?? 0) - (this.tilt ?? 0)) * Math.min(1, dt * (m.tiltK ?? 1.6)); // a listening tilt (tiltK: how quickly; the story's listening beat sets its own)
     rig.roll = this.lift * 0.05 + this.tilt;
     if (!(ctx.isShot && ctx.params.get('head'))) rig.update();
 

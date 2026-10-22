@@ -46,9 +46,6 @@ const SIDE = { pos: new THREE.Vector3(0.972, 0.92, -0.55), look: new THREE.Vecto
 // (r6 self-review: from straight in front the warm light lit it flat, as bright as the shelves behind: now from its left,
 // the light from the electronics shop on its far cheek, the room behind it lower, the lens core and glow down)
 const MEMORY_FACE = { pos: new THREE.Vector3(-0.198, 0.9, 2.65), look: new THREE.Vector3(-0.348, 0.86, 1.7), fov: 30, mem: { coreK: 0.28, glowK: 0, doorK: 0, roomK: 0.45, lampK: 0.2, pastX: -3.6, pastAngle: 0.12 } };
-// act one to act two (timings from Codex's review of the first version): it listens; its eye's light sags and the picture
-// loses lock for a moment, twice; the tear, short, and the cut on its peak, darkened across it; clear within 0.24 s
-const GLITCH_AT_S = 1.28, GLITCH_OUT_S = 0.24;
 // the shot after the cut matches the one before it: the robot's head on the same spot of the frame (within 1% of its
 // width), the same size, but now it faces the street -- from 35 degrees behind its left, the lens's side edge in view;
 // its gaze a little to the left (look -0.5, ~24 degrees), on the electronics shop the song comes from, which lands in
@@ -56,7 +53,15 @@ const GLITCH_AT_S = 1.28, GLITCH_OUT_S = 0.24;
 // /tmp/rigwork/matchcut.mjs, 2026-10-22). Held while you find your bearings, then on to ACT2 (the gaze is yours again).
 // (round 3: 43 degrees of lens, panned 0.75 degrees left -- the shop whole with 3.6% to spare at the left edge; the head
 // within 1% of its place and 8% smaller)
-const MATCH = { pos: new THREE.Vector3(1.101, 0.82, 0.153), look: new THREE.Vector3(-6.642, -0.731, 6.573), fov: 43, hold: 1.04, move: 1.6, gaze: -0.5 };
+const MATCH = { pos: new THREE.Vector3(1.101, 0.82, 0.153), look: new THREE.Vector3(-6.642, -0.731, 6.573), fov: 43, hold: 1.3, move: 2.0, gaze: -0.5 }; // (hold 1.04 -> 1.3, move 1.6 -> 2.0: the user, "转场太突兀了")
+// the pacing (2026-10-22 evening, the user: "转场太突兀了" -- act one cut straight to the doorway 4 s after the song began,
+// 1.3 s there, the tear: nothing on screen said why). Now no cut out of act one: it hears the song and turns its head to
+// it while the view draws back out to the doorway (PULL_S); it listens; from LISTEN_S its light falters, the song fills
+// with static, the picture loses lock more and more often; the tear builds for TEAR_S and the cut falls on its peak,
+// the picture dipping instead of flashing dark; after it the picture settles over GLITCH_OUT2_S
+const PULL_S = 2.6, LISTEN_S = 3.3, TEAR_S = 0.45, CUT_S = 4.9, GLITCH_OUT2_S = 0.5;
+const DOOR_A = new THREE.Vector3(0.95, 0.8, 2.9), DOOR_B = new THREE.Vector3(0.82, 0.82, 2.62), DOOR_LOOK = new THREE.Vector3(-0.5, 0.55, 1.2);
+const LISTEN = { x: -0.55, y: 0.15, tilt: 0.09 }; // its head turned to the song (to its right, toward the door: within the pointer's own range), a little tilted
 const ACT2_POS = new THREE.Vector3(0.072, 1, -1.4), ACT2_LOOK = new THREE.Vector3(-0.278, 0.92, 11.3), ACT2_FOV = 48; // (r4: feet and stool in frame, clear of the bench)
 const ACT2_BEAM = { beamK: 0.65, beamReach: 0.25, beamNear: 0.5, beamFar: 9, spotK: 0.6, duskK: 0.2, shaftW: 0.7, doorK: 1, glowK: 1, robotFillK: 0.25, lampK: 0.4, softK: 1.8 }; // softK: a wider then/now edge (r7: a hard one read as a burnt stripe) // (lamp: from in here the bench lamp was the brightest thing in the frame) // (dusk 0.2: from in here its hard patch on the floor burnt out) // a shaft in the dusty air toward the far side; the dusk under the shutter lower (from in here its patch on the floor burns out)
 const K = (t, p, l, fov, cut = false) => ({ t, p: new THREE.Vector3(...p), l: new THREE.Vector3(...l), fov, cut });
@@ -150,6 +155,8 @@ export default {
         // when the beam rests on something, the view leans in to it: a slow, oblique close-up of the thing coming back
         const px = input.pointer.x, py = input.pointer.y, mv = Math.abs(px - (this.px ?? px)) + Math.abs(py - (this.py ?? py)); this.px = px; this.py = py;
         this.still = mv > 0.004 ? 0 : (this.still ?? 0) + dt;
+        if (this.t > 30 || input.wasPressed('KeyT')) this.ending = true; // (act one is over: no close-up any more, the view comes back over its shoulder before it draws back to the doorway)
+        if (this.ending) this.still = 0;
         const zk = ease(clamp01((this.still - 1.0) / 1.6)); this.zoom = (this.zoom ?? 0) + (zk - (this.zoom ?? 0)) * Math.min(1, dt * (zk > (this.zoom ?? 0) ? 1.2 : 3));
         // (judge r3: from behind its head the rusty box filled the lower third -- the close-up goes on past it, along the
         // beam to a metre or so from the thing, a little right of and above the shaft: a product shot in its light)
@@ -180,19 +187,28 @@ export default {
         m.benchGlow = this.t < 20.6 ? 0 : this.t < 26 ? Math.min(1, (this.t - 20.6) / 2.2) : Math.max(0.35, 1 - (this.t - 26) / 6); // its valves warm up with the crackle and stay warm (past.js)
         if (this.t > 26) this.tuneCall = Math.min(0.55, (this.tuneCall ?? 0) + dt * 0.3);
         if (this.t > 27) eye?.aim(null);
-        if ((this.t > 30 && this.zoom < 0.2) || this.t > 34 || input.wasPressed('KeyT')) { film.hint(''); this.benchTune = 0; this.set('turn'); }
+        if (this.ending && this.zoom < 0.12) {
+          film.hint(''); this.benchTune = 0; this.ending = false;
+          // the view it draws back from, and a bend in the path round the robot's right if the view was in front of it
+          const S = this.curPos.clone(), ahead = this._v.copy(S).sub(eyePos).dot(m.dir) > -0.2;
+          const right = this._d.copy(m.dir).setY(0).normalize().cross(this._w.set(0, 1, 0));
+          const ctl = ahead ? eyePos.clone().addScaledVector(right, 1.0).add(this._w.set(0, 0.45, 0)) : S.clone().lerp(DOOR_A, 0.5);
+          this.pull0 = { pos: S, ctl, look: this.curLook.clone(), fov: this.cam.fov, spotK: m.spotK ?? 1, beamK: m.beamK ?? 1, lampK: m.lampK ?? 1 };
+          this.set('turn');
+        }
         m.power = this.power;
         break;
       }
       case 'turn': {
-        // the song from across the road. Seen from the doorway, its back to us, it is still -- listening -- and its picture
-        // of the shop breaks up: two small glitches, then the whole frame tears, and on its peak act two cuts in, the
-        // robot already facing the street; the glitch clears over that (street, below). (2026-10-22, the user: "直接故障
-        // 特效转场" -- animated, the turn on the stool stretched the steel body; it is not shown.)
-        m.forceOpen = true; eye?.aim(null); m.lookOverride = { x: 0, y: 0.15 };
-        if (this.t < 0.05) this.cut = true;
-        if (this.t >= GLITCH_AT_S) { // the cut, on the glitch's peak: pose, gaze and camera together, this frame
-          m.coreK = undefined; m.lampK = undefined; m.tvK = undefined; this.glitchOut = 0; this.glitch = 1;
+        // the song from across the road (see PULL_S above): it hears it and turns its head to it while the view draws back
+        // out of the shop to the doorway; it listens; its light falters, the picture loses lock more and more often and
+        // tears; on the tear's peak act two cuts in, the robot already facing the street (the turn itself is not shown:
+        // a steel body does not bend -- the user, 2026-10-22: "直接故障特效转场"); the picture settles (street, below)
+        m.forceOpen = true; eye?.aim(null);
+        m.lookOverride = { x: LISTEN.x, y: LISTEN.y }; m.headK = 1.2; m.tilt = LISTEN.tilt * ease(clamp01((this.t - 2.2) / 0.5)); m.tiltK = 6; // (the head turns during the draw-back; the tilt once the view has settled, done by 2.9 s, then 0.4 s of stillness before its light falters -- Codex transition-7)
+        if (!this.pull0 && this.t < 0.05) this.cut = true; // (?phase=turn: straight into the doorway)
+        if (this.t >= CUT_S) { // the cut, on the tear's peak: pose, gaze and camera together, this frame
+          m.coreK = undefined; m.lampK = undefined; m.tvK = undefined; m.headK = undefined; m.tilt = undefined; m.tiltK = undefined; this.glitchOut = 0; this.glitch = 1; this.pull0 = null;
           ctx.api.shop?.robotTurn?.(1); eye?.snapLook(MATCH.gaze, 0.15); m.lookOverride = { x: MATCH.gaze, y: 0.15 }; Object.assign(m, ACT2_BEAM); eye?.sync?.(time);
           this.gazeHeld = { x: input.pointer.x, y: input.pointer.y }; // (kept on the electronics shop until you move: no swing away from the song)
           this.ptr0 = { ...this.gazeHeld };
@@ -200,18 +216,30 @@ export default {
           this.set('street', true); this.cam.pos.copy(MATCH.pos); this.cam.look.copy(MATCH.look); this.cam.fov = MATCH.fov;
           break;
         }
-        // the eye's light sags just before each loss of lock (the glitch is its own: the device in its head faltering);
-        // two short losses, then the tear (seconds; the static's pattern jumps every other frame, PostFX)
-        const win = (t0, d) => this.t > t0 && this.t < t0 + d;
-        const sag = win(0.5, 0.22) ? 0.1 : win(0.86, 0.06) || win(1.12, 0.06) ? 0.25 : 1; // (round 5: the first one deep and long enough to read -- to a tenth, 0.50-0.72 s)
-        const tear = clamp01((this.t - 1.18) / (GLITCH_AT_S - 1.18)) ** 1.5;
-        this.glitch = Math.max(win(0.62, 0.04) ? 0.18 : 0, win(0.92, 0.06) ? 0.3 : 0, tear);
-        this.glitchBlock = clamp01((this.t - 1.25) / 0.03); this.glitchDark = this.t > 1.26 ? 1 : 0;
+        // the view: drawn back along a curve to the doorway, then a slow creep in while it listens
+        const u = this.pull0 ? ease(clamp01(this.t / PULL_S)) : 1, P0 = this.pull0;
+        if (P0 && u < 1) {
+          const k1 = 1 - u;
+          this.cam.pos.copy(P0.pos).multiplyScalar(k1 * k1).addScaledVector(P0.ctl, 2 * u * k1).addScaledVector(DOOR_A, u * u);
+          this.cam.look.copy(P0.look).lerp(DOOR_LOOK, u); this.cam.fov = P0.fov + (40 - P0.fov) * u;
+        } else {
+          this.cam.pos.copy(DOOR_A).lerp(DOOR_B, ease(clamp01((this.t - PULL_S) / (CUT_S - PULL_S)))); this.cam.look.copy(DOOR_LOOK); this.cam.fov = 40;
+        }
+        // its light: act one's levels eased to the doorway's while the view draws back; from LISTEN_S it sags before each
+        // loss of lock -- the first to a tenth for 0.24 s, two short ones -- and dims with the tear
+        const L = LISTEN_S, win = (t0, d) => this.t > L + t0 && this.t < L + t0 + d, T0 = CUT_S - TEAR_S;
+        const tear = clamp01((this.t - T0) / TEAR_S) ** 1.6;
+        const sag = (win(0, 0.24) ? 0.1 : win(0.5, 0.06) || win(0.8, 0.06) ? 0.25 : 1) * (1 - 0.6 * tear);
+        const mixK = (a, b) => a + (b - a) * u;
+        m.coreK = mixK(1, 0.25) * sag; m.spotK = mixK(P0?.spotK ?? 0.18, 0.18) * sag; m.lampK = mixK(P0?.lampK ?? 0.45, 0.45); m.beamK = mixK(P0?.beamK ?? 0.3, 0.3) * sag; m.tvK = sag; m.robotFillK = mixK(1, 0.15);
+        this.glitch = Math.max(win(0.12, 0.04) ? 0.18 : 0, win(0.52, 0.05) ? 0.25 : 0, win(0.82, 0.06) ? 0.3 : 0, tear);
+        this.glitchBlock = clamp01((this.t - (CUT_S - 0.06)) / 0.05);
+        this.glitchDark = ease(clamp01((this.t - (CUT_S - 0.18)) / 0.18)); // (a dip into the cut, not a flash of black)
+        this.interference = clamp01((this.t - L) / (CUT_S - L)) ** 1.5; // the song across the road fills with static (sound.js)
         if (this.t < 0.05) this.glitchSounded = false;
-        if (!this.glitchSounded && this.t >= 1.18) { this.glitchSounded = true; audio?.play('glitch'); } // one sound, on the tear (the two warnings are silent)
-        this.cam.pos.set(0.95, 0.8, 2.9).lerp(this._w.set(0.82, 0.82, 2.62), ease(clamp01(this.t / GLITCH_AT_S))); this.cam.look.set(-0.5, 0.55, 1.2); this.cam.fov = 40; m.coreK = 0.25 * sag; m.spotK = 0.18 * sag; m.lampK = 0.45; m.beamK = 0.3 * sag; m.tvK = sag; m.robotFillK = 0.15; /* (the eye's light sags, and the set it switched on with it: the cold patch on the floor in rounds 4-5 was that set's glow, not the fill -- the fill is the street's dusk and stays) */
+        if (!this.glitchSounded && this.t >= T0) { this.glitchSounded = true; audio?.play('glitch'); } // one sound, as the tear begins (the warnings are silent)
         if (eye && eye.open > 0.2) this.power = Math.max(0, this.power - dt / LOOK_POWER_S);
-        this.tuneCall = 0.55;
+        this.tuneCall = 0.55 + 0.12 * ease(clamp01(this.t / 1.6)); // (the song swells a little as it turns to it)
         m.power = this.power;
         break;
       }
@@ -219,10 +247,10 @@ export default {
         // act two: behind its head on the lens side, held still: the whole far side fills the opening (the photographs'
         // edges just outside the frame), the head in the near corner, and the beam moves across the street -- the view
         // only leans a little after it
-        if (this.glitchOut !== undefined) { // after the cut: clear within GLITCH_OUT_S (the digital part within 0.08 s, the
-          // darkening 0.02 s past the cut); the matching shot held, then the move to act two's view
+        if (this.glitchOut !== undefined) { // after the cut: the picture settles within GLITCH_OUT2_S (the digital part
+          // within 0.08 s, the dip back up in 0.28 s); the matching shot held, then the move to act two's view
           this.glitchOut += dt; const g = this.glitchOut;
-          this.glitch = Math.max(0, 1 - g / GLITCH_OUT_S) ** 1.4; this.glitchBlock = clamp01(1 - g / 0.06); this.glitchDark = g < 0.02 ? 1 : 0;
+          this.glitch = Math.max(0, 1 - g / GLITCH_OUT2_S) ** 1.6; this.glitchBlock = clamp01(1 - g / 0.08); this.glitchDark = clamp01(1 - g / 0.28) ** 1.4; this.interference = Math.max(0, 1 - g / 0.6);
           if (g > MATCH.hold + MATCH.move) this.glitchOut = undefined;
         }
         if (this.gazeHeld && Math.hypot(input.pointer.x - this.gazeHeld.x, input.pointer.y - this.gazeHeld.y) > 0.06) { this.gazeHeld = null; m.lookOverride = undefined; } // you move: the gaze is yours
@@ -232,7 +260,7 @@ export default {
         this.cam.fov = MATCH.fov + (ACT2_FOV - MATCH.fov) * mv;
         this.streetTime += dt; this.tuneCall = Math.max(0, (this.tuneCall ?? 0) - dt * 0.25);
         Object.assign(m, ACT2_BEAM);
-        if (this.t > 2.9 && !this.moved2) film.hint(TOUCH ? tr('滑动手指，让它看看街对面', 'Slide your finger to let it look across the street') : tr('移动鼠标，让它看看街对面', 'Move the mouse to let it look across the street'));
+        if (this.t > MATCH.hold + MATCH.move + 0.4 && !this.moved2) film.hint(TOUCH ? tr('滑动手指，让它看看街对面', 'Slide your finger to let it look across the street') : tr('移动鼠标，让它看看街对面', 'Move the mouse to let it look across the street'));
         const movedFrom = this.ptr0 ? Math.hypot(input.pointer.x - this.ptr0.x, input.pointer.y - this.ptr0.y) > 0.06 : Math.abs(input.pointer.x) > 0.25 || Math.abs(input.pointer.y) > 0.25; // (a move since the cut, wherever the pointer was)
         if (!this.moved2 && movedFrom) { this.moved2 = true; film.hint(''); } // (latched the first time: a move and back again does not bring the hint)
         // the power failing: now and then the past drops out for a moment
@@ -317,7 +345,7 @@ export default {
         break;
       }
     }
-    if (this.phase !== 'turn' && this.glitchOut === undefined) this.glitch = this.glitchBlock = this.glitchDark = 0;
+    if (this.phase !== 'turn' && this.glitchOut === undefined) this.glitch = this.glitchBlock = this.glitchDark = this.interference = 0;
     const PP = ctx.postfx?.params; if (PP?.glitch) { PP.glitch.value = this.glitch ?? 0; PP.glitchBlock.value = this.glitchBlock ?? 0; PP.glitchDark.value = this.glitchDark ?? 0; }
     film.power(this.power, this.phase === 'look' || this.phase === 'turn' || this.phase === 'street' || this.phase === 'last');
     if (this.phase !== 'look' && ctx.postfx.params.bokeh.value > 0) ctx.postfx.params.bokeh.value = Math.max(0, ctx.postfx.params.bokeh.value - dt * 3); // depth of field only on act one's close-ups
@@ -343,7 +371,7 @@ export default {
     }
 
     // the camera eases toward its target, a little handheld drift on top
-    const k = this.phase === 'waking' ? 3 : this.phase === 'look' ? 2.2 : 1.4;
+    const k = this.phase === 'waking' ? 3 : this.phase === 'look' ? 2.2 : this.phase === 'turn' ? 6 : 1.4; // (the turn's path is eased itself: follow it closely)
     const snap = this.cut; // (a cut is a cut for the lens too: no zoom easing across it)
     if (this.cut) { this.curPos.copy(this.cam.pos); this.curLook.copy(this.cam.look); this.cut = false; }
     this.curPos.lerp(this.cam.pos, Math.min(1, dt * k));

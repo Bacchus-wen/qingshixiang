@@ -142,12 +142,12 @@ export default {
         const ac = this.ac, t0 = ac.currentTime, g = (opts.short ? 0.12 : 0.22) * (opts.gain ?? 1);
         const src = ac.createBufferSource(); src.buffer = this.clickBuf ??= this.noise(0.1);
         const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2600; bp.Q.value = 0.9; const ng = ac.createGain();
-        ng.gain.setValueAtTime(g, t0); ng.gain.exponentialRampToValueAtTime(0.001, t0 + 0.045);
+        ng.gain.setValueAtTime(0.0001, t0); ng.gain.exponentialRampToValueAtTime(g, t0 + 0.012); ng.gain.exponentialRampToValueAtTime(0.001, t0 + 0.06); // (12 ms attack: no click)
         src.connect(bp).connect(ng).connect(this.master); src.start(t0); src.stop(t0 + 0.06);
         if (!opts.short) {
-          const hg = ac.createGain(); hg.gain.setValueAtTime(0.0001, t0); hg.gain.exponentialRampToValueAtTime(0.05, t0 + 0.02); hg.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.6);
+          const hg = ac.createGain(); hg.gain.setValueAtTime(0.0001, t0); hg.gain.exponentialRampToValueAtTime(0.05, t0 + 0.12); hg.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.1); // (swelling with the tear, dying as the picture settles)
           const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 420; lp.connect(hg).connect(this.master);
-          for (const f of [55, 57.6, 110.9]) { const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.connect(lp); o.start(t0); o.stop(t0 + 0.65); }
+          for (const f of [55, 57.6, 110.9]) { const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.connect(lp); o.start(t0); o.stop(t0 + 1.15); }
         }
         break; }
       case 'powerdown': this.tone(1800, 120, 3.2, { gain: 0.05 }); this.shot('relay_b', 0, undefined, { gain: 0.4 }); break;
@@ -189,9 +189,9 @@ export default {
     if (story?.radioPos && past > 0.05) { const k = memoryMaskCPU(story.radioPos, m); if (k > radio) { radio = k; rpos = story.radioPos; } }
     if (story?.benchTune > 0 && story.benchPos && story.benchTune > radio) { radio = story.benchTune; rpos = story.benchPos; } // its own radio, on the bench
     this.radioLevel = (this.radioLevel ?? 0) + (radio - (this.radioLevel ?? 0)) * Math.min(1, dt * 1.5);
-    const call = story?.tuneCall ?? 0; if (call > this.radioLevel && story?.radioPos) rpos = story.radioPos; // the song calling from across the road
+    const call = story?.tuneCall ?? 0; if ((call > this.radioLevel || phase === 'turn') && story?.radioPos) rpos = story.radioPos; // the song calling from across the road (while it listens, only from there: a radio in the beam had taken the song over)
     const cut = (phase === 'fade' && story.t > 2.3) || phase === 'end'; // the light dies: the song stops mid-phrase
-    set(this.radioG.gain, cut ? 0 : 0.32 * Math.max(this.radioLevel, call) * quiet * intimate, cut ? 0.012 : 0.2); if (rpos) set(this.radioPan.pan, this.pan(rpos)[0]);
+    set(this.radioG.gain, cut ? 0 : 0.32 * Math.max(this.radioLevel, call) * quiet * intimate * (1 - 0.45 * (story?.interference ?? 0)), cut ? 0.012 : 0.2); if (rpos) set(this.radioPan.pan, this.pan(rpos)[0], 0.25); // (the static takes over as its picture tears; the song keeps its place across the road -- Codex transition-7: a comment had swallowed this pan)
     // the tune keeps playing (silently when nobody looks), so the radio comes back mid-phrase like a real one
     while (this.tuneT < now + 0.25) {
       const [st, beats] = TUNE[this.tuneI % TUNE.length], dur = beats * 0.42;
@@ -207,8 +207,9 @@ export default {
     // TVs: static and the test tone from the most present set
     let tv = null; for (const s of ctx.api.past?.tvs || []) if (!tv || s.presence > tv.presence) tv = s;
     const tvp = tv ? tv.presence * quiet : 0, snow = tv && Math.round(tv.chan.value) === 1;
-    set(this.staticIn.gain, 0.22 * tvp * (snow ? 1 : 0.25)); set(this.toneG.gain, tv && !snow && Math.round(tv.chan.value) === 0 ? 0.012 * tvp : 0, 0.08);
-    if (tv) { const pn = this.pan(tv.c)[0]; set(this.staticPan.pan, pn); set(this.tonePan.pan, pn); }
+    const itf = story?.interference ?? 0; // (act one to act two: the song across the road losing its signal)
+    set(this.staticIn.gain, Math.max(0.22 * tvp * (snow ? 1 : 0.25), 0.09 * itf)); set(this.toneG.gain, tv && !snow && Math.round(tv.chan.value) === 0 ? 0.012 * tvp : 0, 0.08);
+    if (tv && !(itf > 0.05)) { const pn = this.pan(tv.c)[0]; set(this.staticPan.pan, pn); set(this.tonePan.pan, pn); } else if (itf > 0.05) set(this.staticPan.pan, 0);
     // the robot's head: servo noise with its angular speed
     const rig = shop?.rig; if (rig) { const w = (Math.abs(rig.yaw - (this.yaw0 ?? rig.yaw)) + Math.abs(rig.pitch - (this.pitch0 ?? rig.pitch)) + 0.6 * Math.abs(rig.body - (this.body0 ?? rig.body))) / Math.max(dt, 1e-3); this.yaw0 = rig.yaw; this.pitch0 = rig.pitch; this.body0 = rig.body; // (the body's turn on the stool too)
       set(this.servoG.gain, Math.min(0.05, w * 0.03) * quiet, 0.05); set(this.servoO.frequency, 160 + Math.min(260, w * 220), 0.05); }

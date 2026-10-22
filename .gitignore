@@ -30,3 +30,6 @@ assets/generated/compare/**/*.out
 assets/generated/derived/**/*.glb
 # throwaway debug probes
 tools/_*.mjs
+
+# screen recordings for review (docs/judge/*/before.mp4, after.mp4): local only, too heavy for the repo
+docs/judge/**/*.mp4
