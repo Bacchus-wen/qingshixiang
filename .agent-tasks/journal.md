@@ -418,3 +418,11 @@
 - 2026-10-22 20:47:28 | codex | 完成：评审 故障转场 8（judge-transition-8）
 - 2026-10-23 18:21:24 | claude | 派给 codex：评审 机器人换级闪变（judge-robot-lod-1，只读）
 - 2026-10-23 18:24:50 | codex | 完成：评审 机器人换级闪变（judge-robot-lod-1）
+- 2026-10-23 18:55:11 | claude | 派给 codex：生图 残破版参考图 16 张（gen-broken-props，可写 assets/generated/codex/broken）
+- 2026-10-23 19:10:14 | claude | 派给 codex：评审 落败材质层 1（judge-decay-1，只读）
+- 2026-10-23 19:10:20 | codex | 未完成（timeout）：生图 残破版参考图 16 张（gen-broken-props）｜任务没完成，它的半成品改动没有带回项目，副本保留在 /Users/wenbin/.local/share/agent-team/work/新游戏--53fa3746--gen-broken-props
+- 2026-10-23 19:11:52 | claude | 派给 codex：生图 收音机残破版 4 张（续）（gen-broken-props-2，可写 assets/generated/codex/broken/tube_radio_closed）
+- 2026-10-23 19:15:53 | codex | 完成：评审 落败材质层 1（judge-decay-1）
+- 2026-10-23 19:41:58 | codex | 完成：生图 收音机残破版 4 张（续）（gen-broken-props-2）
+- 2026-10-23 20:09:25 | claude | 派给 codex：评审 落败材质层+残破模型 2（judge-decay-2，只读）
+- 2026-10-23 20:11:55 | codex | 完成：评审 落败材质层+残破模型 2（judge-decay-2）

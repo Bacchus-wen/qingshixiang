@@ -1,0 +1,25 @@
+{
+ "op": "tube_radio_closed_broken_s",
+ "steps": {
+  "single": {
+   "state": "submitted",
+   "task_id": "fa895de0-1bd7-4072-934a-44a6c8d4d10e",
+   "path": "/generation/image-to-model",
+   "payload": {
+    "model": "v3.1-20260211",
+    "geometry_quality": "detailed",
+    "texture": true,
+    "pbr": true,
+    "texture_version": "v3.5-20260815",
+    "texture_quality": "detailed",
+    "delight": true
+   },
+   "status": "success",
+   "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo4/tube_radio_closed_broken_s/single.glb",
+   "sha256": "7af3231af2cb5191c0cdf3139098eed9ee694025077f749ea8b6bd504785652d"
+  }
+ },
+ "credits": 60,
+ "file_token": "file_39847eef-166f-4fc2-af7b-33e1ac2cf69a",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/codex/broken/tube_radio_closed/2.png"
+}

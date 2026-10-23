@@ -1,0 +1,31 @@
+{
+ "id": "gen-broken-props",
+ "from": "claude",
+ "to": "codex",
+ "title": "生图 残破版参考图 16 张",
+ "write": true,
+ "gen": true,
+ "paths": [
+  "assets/generated/codex/broken"
+ ],
+ "status": "timeout",
+ "posted": "2026-10-23 18:55:11",
+ "started": "2026-10-23 18:55:17",
+ "seconds": 901.2,
+ "touched": [
+  "assets/generated/codex/broken/crt_tv/1.png",
+  "assets/generated/codex/broken/crt_tv/2.png",
+  "assets/generated/codex/broken/crt_tv/3.png",
+  "assets/generated/codex/broken/crt_tv/4.png",
+  "assets/generated/codex/broken/desk_fan/1.png",
+  "assets/generated/codex/broken/desk_fan/2.png",
+  "assets/generated/codex/broken/desk_fan/3.png",
+  "assets/generated/codex/broken/desk_fan/4.png",
+  "assets/generated/codex/broken/wall_clock/1.png",
+  "assets/generated/codex/broken/wall_clock/2.png",
+  "assets/generated/codex/broken/wall_clock/3.png",
+  "assets/generated/codex/broken/wall_clock/4.png"
+ ],
+ "finished": "2026-10-23 19:10:20",
+ "reason": "任务没完成，它的半成品改动没有带回项目，副本保留在 /Users/wenbin/.local/share/agent-team/work/新游戏--53fa3746--gen-broken-props"
+}

@@ -1,0 +1,24 @@
+{
+ "id": "gen-broken-props-2",
+ "from": "claude",
+ "to": "codex",
+ "title": "生图 收音机残破版 4 张（续）",
+ "write": true,
+ "gen": true,
+ "paths": [
+  "assets/generated/codex/broken/tube_radio_closed"
+ ],
+ "status": "done",
+ "posted": "2026-10-23 19:11:52",
+ "started": "2026-10-23 19:15:58",
+ "seconds": 1558.4,
+ "touched": [
+  "assets/generated/codex/broken/tube_radio_closed/1.png",
+  "assets/generated/codex/broken/tube_radio_closed/2.png",
+  "assets/generated/codex/broken/tube_radio_closed/3.png",
+  "assets/generated/codex/broken/tube_radio_closed/4.png"
+ ],
+ "applied": 4,
+ "finished": "2026-10-23 19:41:58",
+ "reason": null
+}

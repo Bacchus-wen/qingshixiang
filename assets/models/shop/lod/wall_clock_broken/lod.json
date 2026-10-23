@@ -1,0 +1,51 @@
+{
+ "name": "wall_clock_broken",
+ "source": "assets/generated/tripo4/wall_clock_broken/model.glb",
+ "size": 0.72,
+ "axis": "height",
+ "rotz": -90,
+ "dims": [
+  0.3312,
+  0.72,
+  0.1522
+ ],
+ "radius": 0.4035,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1895467,
+   "errM": 0,
+   "tex": 4096,
+   "texelsPerM": 3663.189014485509,
+   "minY": 0,
+   "bytes": 36319988
+  },
+  {
+   "file": "L1.glb",
+   "tris": 18215,
+   "errM": 0.0005,
+   "tex": 2048,
+   "texelsPerM": 1831.5945072427544,
+   "minY": 0.00009,
+   "bytes": 8018052
+  },
+  {
+   "file": "L2.glb",
+   "tris": 5079,
+   "errM": 0.00199,
+   "tex": 1024,
+   "texelsPerM": 915.7972536213772,
+   "minY": 0.00009,
+   "bytes": 1248484
+  },
+  {
+   "file": "L3.glb",
+   "tris": 2749,
+   "errM": 0.00596,
+   "tex": 512,
+   "texelsPerM": 457.8986268106886,
+   "minY": 0.00269,
+   "bytes": 418744
+  }
+ ]
+}

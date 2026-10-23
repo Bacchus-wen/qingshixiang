@@ -11,6 +11,7 @@ import { HeadRig } from './rig.js';
 import { pastHooks } from './past.js';
 import { memoryMask, mem } from '../../materials/memory.js';
 import { tr, zh } from '../../ui/i18n.js';
+import { decayScene, decayK, DECAY_SKIP, addCobwebs, TWINS, twinMask } from './decay.js';
 import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorld, positionLocal, smoothstep, vec2, vec3, mx_worley_noise_float, texture, normalWorldGeometry, abs, step, uniform, uv, vec4, cameraPosition, fract } from 'three/tsl';
 
 // v4: the closed-down home-appliance repair shop (docs/scene-shop.md). This phase is models + layout only:
@@ -344,12 +345,21 @@ export default {
     const lod = this.lod = new LodLibrary(loader, `${import.meta.env.BASE_URL}models/shop/lod/`,
       { budgetMB: +ctx.params.get('lodmb') || (navigator.deviceMemory && navigator.deviceMemory <= 4 ? 320 : 600), fade: !ctx.isShot && ctx.params.get('nolodfade') === null });
     pastHooks(lod); // radio dials, the clock's pendulum: on every level as it loads (./past.js)
+    // the present: dust, grime and faded colour on everything outside the beam, but the robot's corner (./decay.js)
+    if (ctx.params.get('nodecay') !== null) decayK.value = 0;
+    lod.decorate((scene, name) => { if (!DECAY_SKIP.has(name)) decayScene(scene, /_broken$/.test(name) ? { dust: 0.4 } : undefined); });
+    // four of the sets have a broken twin standing in the same place: the broken one in the present, the whole one where
+    // the beam falls, swapped per pixel (./decay.js; the twins: Tripo models of Codex's "decades later" edits of the
+    // same reference images, docs/gen-log.md)
+    const twinNames = new Set();
+    lod.decorate((scene, name) => { if (twinNames.has(name)) twinMask(scene, /_broken$/.test(name)); });
     let lodNames = new Set();
     if (ctx.params.get('nolod') === null) {
       try { const r = await fetch(`${import.meta.env.BASE_URL}models/shop/lod/index.json`, { cache: 'no-store' }); if (r.ok) lodNames = new Set(await r.json()); } catch { /* no LOD set: old models */ }
       for (const n of (ctx.params.get('lodskip') || '').split(',').filter(Boolean)) lodNames.delete(n); // A/B one model: ?lodskip=tube_radio_open
       const only = (ctx.params.get('lodonly') || '').split(',').filter(Boolean); if (only.length) lodNames = new Set([...lodNames].filter((n) => only.includes(n)));
     }
+    if (ctx.params.get('notwins') === null) for (const [glb, b] of Object.entries(TWINS)) if (lodNames.has(b) && lodNames.has(glb.replace(/\.glb$/, ''))) { twinNames.add(glb.replace(/\.glb$/, '')); twinNames.add(b); } // (?notwins: the whole sets only)
     // CRT screens are glass: the generated texture paints them a flat grey, so the bright, unsaturated parts of the
     // TV's colour map (screen, chrome trim) get glass-like roughness and pick up the room in reflection
     const glassify = (scene) => scene.traverse((m) => {
@@ -408,7 +418,8 @@ export default {
         ? lod.prepare(name, { coarsest: COARSEST[name] }).then(() => ({ lod: name })).catch((e) => { console.warn('[shop] lod failed', name, e.message); return null; })
         : loader.loadAsync(`${import.meta.env.BASE_URL}models/shop/${glb}`).catch((e) => { console.warn('[shop] model failed', glb, e.message); return null; }));
     }
-    await Promise.all([loadTextures(ktx2), ...templates.values()]);
+    const twinSets = Object.values(TWINS).filter((b) => twinNames.has(b)).map((b) => lod.prepare(b).then(() => b).catch((e) => { console.warn('[shop] twin failed', b, e.message); return null; }));
+    await Promise.all([loadTextures(ktx2), ...templates.values(), ...twinSets]);
     const tvT = await templates.get('crt_tv.glb');
     if (tvT && !tvT.lod) glassify(tvT.scene);
     ctx.busy = () => lod.busy();
@@ -617,6 +628,8 @@ export default {
           if (it.yaw0) { const piv = new THREE.Group(); o.rotation.y = it.yaw0 * Math.PI / 180; piv.add(o); o = piv; }
         }
         o.traverse((m) => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
+        if (it.type === 'shelf' || it.type === 'plank' || it.type === 'proc') decayScene(o); // (the shop's own furniture: dust too)
+        if (it.type === 'carton') decayScene(o, { fade: 0.25, film: 0.02 }); // (boxes keep their paper colour and print on the sides; the dust on top -- Codex decay-1)
         // per-instance tint so repeated models read as different units (black vs silver boombox, grey vs wood TV)
         if (it.tint && !(await templates.get(it.glb))?.lod) o.traverse((m) => { if (m.isMesh) { m.material = m.material.clone(); m.material.color.setRGB(...it.tint); } });
         if (it.scale) o.scale.setScalar(it.scale);
@@ -651,6 +664,23 @@ export default {
         o.name = it.name; o.userData.layout = it; placed[it.name] = o;
       } catch (e) { console.warn('[shop] model failed', it.glb || it.name, e.message); }
     }
+    // the broken twins, each where its whole set stands (same place, turn, scale and tint)
+    for (const o of Object.values(placed)) {
+      const it = o.userData.layout, b = it?.glb && TWINS[it.glb];
+      if (!b || !twinNames.has(b) || !o.isLodObject) continue;
+      const tw = lod.instance(b, { tint: it.tint });
+      tw.position.copy(o.position); tw.quaternion.copy(o.quaternion); tw.scale.copy(o.scale); tw.name = `${it.name}_broken`;
+      tw.traverse((m) => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
+      o.parent.add(tw); tw.updateMatrixWorld(true); o.userData.twin = tw;
+      if (it.wall) { // (a different depth: its back flush with the wall too, like the whole one's)
+        const a = new THREE.Box3().setFromObject(o, true), b = new THREE.Box3().setFromObject(tw, true);
+        if (it.wall === 'back') tw.position.z += a.min.z - b.min.z;
+        if (it.wall === 'left') tw.position.x += a.min.x - b.min.x;
+        if (it.wall === 'right') tw.position.x += a.max.x - b.max.x;
+        tw.updateMatrixWorld(true);
+      }
+    }
+    if (ctx.params.get('nodecay') === null) addCobwebs(root, layout, ROOM); // (the present only: ./decay.js)
     // wiring and small dressing that makes the place look used (procedural: too thin for image-to-3D):
     // the tube's conduit to a switch, the robot's own power cable to a wall socket, cords hanging off shelf
     // appliances, screwdrivers hanging on the pegboard. One merged mesh per material.

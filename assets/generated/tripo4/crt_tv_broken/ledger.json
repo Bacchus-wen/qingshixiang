@@ -1,0 +1,25 @@
+{
+ "op": "crt_tv_broken",
+ "steps": {
+  "single": {
+   "state": "submitted",
+   "task_id": "9fbbbcf1-ca59-40f1-8274-ed55baa9a1b9",
+   "path": "/generation/image-to-model",
+   "payload": {
+    "model": "v3.1-20260211",
+    "geometry_quality": "detailed",
+    "texture": true,
+    "pbr": true,
+    "texture_version": "v3.5-20260815",
+    "texture_quality": "detailed",
+    "delight": true
+   },
+   "status": "success",
+   "glb": "/Users/wenbin/Games/新游戏/assets/generated/tripo4/crt_tv_broken/single.glb",
+   "sha256": "969d5ae89b6eaa0f7f31003c9b620fda4c627d0cc2522f0a641611c1cfd70e0b"
+  }
+ },
+ "credits": 60,
+ "file_token": "file_bc95fcf5-5809-4595-b330-112d93c0866c",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/codex/broken/crt_tv/1.png"
+}

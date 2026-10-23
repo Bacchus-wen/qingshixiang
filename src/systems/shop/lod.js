@@ -58,6 +58,8 @@ export class LodLibrary {
     this.loading = 0; this.frame = 0; this.gpuBytes = 0; this.stats = { loads: 0, evictions: 0 };
   }
   hook(name, fn) { this.hooks.set(name, fn); }
+  // fn(scene, name, levelIndex) for every model's every level, after its own hook (the shop's decay: ./decay.js)
+  decorate(fn) { (this.decorators ??= []).push(fn); }
   // the model's metadata and its coarsest level (what the scene starts with). coarsest: the coarsest level this model may
   // ever show (default: its last). The robot starts at L2: its L3 -- ETC1S colour, a PNG normal map -- looked visibly
   // different, and the change to L2 when the camera first came close read as its material flashing (the user, 10-23)
@@ -84,7 +86,8 @@ export class LodLibrary {
         // every level stands where L0 stands: a coarse level's lowest point can only be at or above L0's
         g.scene.position.y = -((L.minY ?? 0) - (set.levels[0].minY ?? 0));
         this.hooks.get(set.name)?.(g.scene, i);
-        if (this.fade) g.scene.traverse((m) => { if (m.isMesh) for (const mat of [].concat(m.material)) if (mat.isNodeMaterial && !mat.maskNode) mat.maskNode = lodMask; }); // (after the hooks: their materials too)
+        for (const d of this.decorators ?? []) d(g.scene, set.name, i);
+        if (this.fade) g.scene.traverse((m) => { if (m.isMesh) for (const mat of [].concat(m.material)) if (mat.isNodeMaterial && !mat.userData.lodMasked) { mat.userData.lodMasked = true; mat.maskNode = mat.maskNode ? mat.maskNode.and(lodMask) : lodMask; } }); // (after the hooks: their materials too; a mask of their own -- the broken/intact swap, ./decay.js -- kept, and the cross-fade's added)
         L.scene = g.scene; this.stats.loads++; return g.scene;
       }).catch((e) => { L.promise = null; L.failed = (L.failed || 0) + 1; throw e; }).finally(() => this.loading--);
     }

@@ -1,0 +1,10 @@
+{
+ "task_id": "gen-broken-props",
+ "agent": "codex",
+ "cwd": "/Users/wenbin/.local/share/agent-team/work/新游戏--53fa3746--gen-broken-props",
+ "write": true,
+ "task_sha256": "39da96a3397c4277d162c8cefaf67f89ac1f4b47a158947688607673c0f8cfbe",
+ "started": "2026-10-23T18:55:17+0800",
+ "status": "timeout",
+ "seconds": 901.2
+}

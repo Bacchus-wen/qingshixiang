@@ -1,0 +1,15 @@
+{
+ "id": "judge-decay-1",
+ "from": "claude",
+ "to": "codex",
+ "title": "评审 落败材质层 1",
+ "write": false,
+ "gen": false,
+ "paths": [],
+ "status": "done",
+ "posted": "2026-10-23 19:10:14",
+ "started": "2026-10-23 19:14:27",
+ "seconds": 84.8,
+ "finished": "2026-10-23 19:15:53",
+ "reason": null
+}

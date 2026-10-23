@@ -1,0 +1,15 @@
+{
+ "id": "judge-decay-2",
+ "from": "claude",
+ "to": "codex",
+ "title": "评审 落败材质层+残破模型 2",
+ "write": false,
+ "gen": false,
+ "paths": [],
+ "status": "done",
+ "posted": "2026-10-23 20:09:25",
+ "started": "2026-10-23 20:09:26",
+ "seconds": 146.7,
+ "finished": "2026-10-23 20:11:55",
+ "reason": null
+}

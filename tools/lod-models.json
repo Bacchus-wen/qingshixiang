@@ -162,6 +162,34 @@
    "size": 0.5,
    "axis": "long",
    "rotz": -90
+  },
+  {
+   "name": "crt_tv_hero_broken",
+   "in": "assets/generated/tripo4/crt_tv_broken/single.glb",
+   "size": 0.5,
+   "axis": "long",
+   "rotz": -90
+  },
+  {
+   "name": "wall_clock_broken",
+   "in": "assets/generated/tripo4/wall_clock_broken/model.glb",
+   "size": 0.72,
+   "axis": "height",
+   "rotz": -90
+  },
+  {
+   "name": "desk_fan_broken",
+   "in": "assets/generated/tripo4/desk_fan_broken/model.glb",
+   "size": 0.46,
+   "axis": "height",
+   "rotz": -90
+  },
+  {
+   "name": "tube_radio_closed_broken",
+   "in": "assets/generated/tripo4/tube_radio_closed_broken_s/single.glb",
+   "size": 0.5,
+   "axis": "long",
+   "rotz": -90
   }
  ]
 }

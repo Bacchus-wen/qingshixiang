@@ -1,0 +1,17 @@
+{
+ "op": "tube_radio_closed_broken",
+ "steps": {
+  "views": {
+   "state": "submitted",
+   "task_id": "ed03ee05-41d0-46c4-a30a-4e00a1d59e1e",
+   "path": "/generation/image-to-multiview",
+   "payload": {
+    "model": "v3.1-20260211"
+   },
+   "status": "success"
+  }
+ },
+ "credits": 10,
+ "file_token": "file_15da342b-4195-4bea-a219-40e936a7ad3b",
+ "image": "/Users/wenbin/Games/新游戏/assets/generated/codex/broken/tube_radio_closed/2.png"
+}

@@ -1,0 +1,51 @@
+{
+ "name": "desk_fan_broken",
+ "source": "assets/generated/tripo4/desk_fan_broken/model.glb",
+ "size": 0.46,
+ "axis": "height",
+ "rotz": -90,
+ "dims": [
+  0.3917,
+  0.46,
+  0.3066
+ ],
+ "radius": 0.3387,
+ "levels": [
+  {
+   "file": "L0.glb",
+   "tris": 1933716,
+   "errM": 0,
+   "tex": 4096,
+   "texelsPerM": 3791.948848982177,
+   "minY": 0,
+   "bytes": 38292728
+  },
+  {
+   "file": "L1.glb",
+   "tris": 33982,
+   "errM": 0.0005,
+   "tex": 2048,
+   "texelsPerM": 1895.9744244910885,
+   "minY": 0.00008,
+   "bytes": 8285388
+  },
+  {
+   "file": "L2.glb",
+   "tris": 9790,
+   "errM": 0.00199,
+   "tex": 1024,
+   "texelsPerM": 947.9872122455442,
+   "minY": 0.0001,
+   "bytes": 1068424
+  },
+  {
+   "file": "L3.glb",
+   "tris": 6096,
+   "errM": 0.00596,
+   "tex": 512,
+   "texelsPerM": 473.9936061227721,
+   "minY": 0.00014,
+   "bytes": 408132
+  }
+ ]
+}

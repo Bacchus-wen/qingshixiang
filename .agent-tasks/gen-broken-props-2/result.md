@@ -1,0 +1,10 @@
+已用内置工具按确认的提示词生成并保存 4 张，均为不透明 PNG，已从 1254×1254 等比缩至 **1024×1024**。
+
+| 文件路径 | 尺寸 | 与原图相比 |
+|---|---|---|
+| `assets/generated/codex/broken/tube_radio_closed/1.png` | 1024×1024 | 机箱形状、比例和角度基本不变；琴键缺了 3 枚，比要求多缺 1 枚。 |
+| `assets/generated/codex/broken/tube_radio_closed/2.png` | 1024×1024 | 主体形状基本不变，缺中间旋钮和 2 枚琴键，未见明显额外形变。 |
+| `assets/generated/codex/broken/tube_radio_closed/3.png` | 1024×1024 | 主体形状基本不变，缺中间旋钮和 2 枚琴键，未见明显额外形变。 |
+| `assets/generated/codex/broken/tube_radio_closed/4.png` | 1024×1024 | 主体形状基本不变；琴键缺了 3 枚，中央旋钮轴杆也消失成为空洞。 |
+
+本次只新增上述 4 个项目文件。
