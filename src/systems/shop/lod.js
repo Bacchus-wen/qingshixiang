@@ -58,16 +58,19 @@ export class LodLibrary {
     this.loading = 0; this.frame = 0; this.gpuBytes = 0; this.stats = { loads: 0, evictions: 0 };
   }
   hook(name, fn) { this.hooks.set(name, fn); }
-  // the model's metadata and its coarsest level (what the scene starts with)
-  async prepare(name) {
+  // the model's metadata and its coarsest level (what the scene starts with). coarsest: the coarsest level this model may
+  // ever show (default: its last). The robot starts at L2: its L3 -- ETC1S colour, a PNG normal map -- looked visibly
+  // different, and the change to L2 when the camera first came close read as its material flashing (the user, 10-23)
+  async prepare(name, { coarsest } = {}) {
     let set = this.sets.get(name);
     if (!set) {
-      set = { name, meta: null, levels: [] }; this.sets.set(name, set);
+      set = { name, meta: null, levels: [], coarsest: 0 }; this.sets.set(name, set);
       set.ready = (async () => {
         const r = await fetch(`${this.base}${name}/lod.json`); if (!r.ok) throw new Error(`lod.json ${r.status}`);
         set.meta = await r.json();
         set.levels = set.meta.levels.map((L) => ({ ...L, promise: null, scene: null, gpu: estimateGPU(L), users: new Set(), used: 0 }));
-        await this.load(set, set.levels.length - 1);
+        set.coarsest = Math.max(0, Math.min(set.levels.length - 1, coarsest ?? set.levels.length - 1));
+        await this.load(set, set.coarsest);
       })();
     }
     await set.ready; return set;
@@ -119,21 +122,21 @@ export class LodLibrary {
       // into a close-up and out again does not make everything around change level twice.
       const ok = (L, slack) => L.errM * pxPerM <= slack && L.texelsPerM >= pxPerM / slack;
       let t = 0;
-      for (let i = lv.length - 1; i >= 0; i--) if (ok(lv[i], i > o.cur && o.cur >= 0 ? 0.5 : 1.0)) { t = i; break; }
+      for (let i = o.set.coarsest; i >= 0; i--) if (ok(lv[i], i > o.cur && o.cur >= 0 ? 0.5 : 1.0)) { t = i; break; }
       if (o.cur >= 0 && t > o.cur) { o.coarserSince ??= now; if (now - o.coarserSince < 2000) t = o.cur; } else o.coarserSince = null;
       if (!onScreen) t = Math.max(t, o.cur); // off screen: keep what it has, never load finer for it
-      t = Math.max(t, Math.min(MIN_LEVEL, lv.length - 1));
+      t = Math.min(Math.max(t, Math.min(MIN_LEVEL, lv.length - 1)), o.set.coarsest); // (?lodmin= never below a model's own coarsest: Codex robot-lod-1)
       items.push({ o, t, pri: onScreen ? _s.radius * k / d : 0 });
     }
     // 2. GPU budget: biggest on screen first; each level costs once however many copies show it. A copy whose level
     //    would not fit waits at the finest coarser level that does (the coarsest levels are always resident).
     items.sort((a, b) => b.pri - a.pri);
     const counted = new Set(); let total = 0;
-    for (const set of this.sets.values()) { const L = set.levels[set.levels.length - 1]; if (L) { counted.add(L); total += L.gpu; } }
+    for (const set of this.sets.values()) { const L = set.levels[set.coarsest]; if (L) { counted.add(L); total += L.gpu; } }
     for (const it of items) {
       const lv = it.o.set.levels; let t = it.t;
       const cost = (i) => (counted.has(lv[i]) ? 0 : lv[i].gpu) + (i === 0 && lv[1] && !counted.has(lv[1]) ? lv[1].gpu : 0); // L0 brings its shadow proxy L1
-      while (t < lv.length - 1 && total + cost(t) > this.budget) t++;
+      while (t < it.o.set.coarsest && total + cost(t) > this.budget) t++;
       total += cost(t); counted.add(lv[t]); if (t === 0 && lv[1]) counted.add(lv[1]);
       it.o.target = t;
     }
@@ -165,7 +168,7 @@ export class LodLibrary {
     let total = 0; const spare = [];
     for (const set of this.sets.values()) set.levels.forEach((L, i) => {
       if (!L.scene) return; total += L.gpu;
-      if (i < set.levels.length - 1 && L.users.size === 0 && !needed.has(L)) spare.push(L);
+      if (i < set.coarsest && L.users.size === 0 && !needed.has(L)) spare.push(L);
     });
     spare.sort((a, b) => a.used - b.used);
     for (const L of spare) {
@@ -181,7 +184,7 @@ class LodObject extends THREE.Group {
   // every material (the far shop's sets carry their own light: ./farshop.js), one per source material and key
   constructor(lib, set, { tint, look } = {}) {
     super(); this.lib = lib; this.set = set; this.tint = tint; this.look = look; this.cur = -1; this.target = -1; this.isLodObject = true;
-    this.show(set.levels.length - 1);
+    this.show(set.coarsest);
   }
   show(i) {
     const L = this.set.levels[i]; if (!L.scene || i === this.cur) return;

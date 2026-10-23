@@ -397,11 +397,15 @@ export default {
         m.material = nm;
       });
     });
+    // the robot (and the stool under it) never show their coarsest level: it is encoded differently (ETC1S colour, a
+    // PNG normal map) and the change from it, as the camera first came close, read as the robot's material flashing
+    // (the user, 2026-10-23). L2 is loaded behind the loading screen instead (+9 MB)
+    const COARSEST = { robot: 2, stool: 2 };
     const templates = new Map();
     for (const glb of new Set(layout.filter((i) => i.glb).map((i) => i.glb))) {
       const name = glb.replace(/\.glb$/, '');
       templates.set(glb, lodNames.has(name)
-        ? lod.prepare(name).then(() => ({ lod: name })).catch((e) => { console.warn('[shop] lod failed', name, e.message); return null; })
+        ? lod.prepare(name, { coarsest: COARSEST[name] }).then(() => ({ lod: name })).catch((e) => { console.warn('[shop] lod failed', name, e.message); return null; })
         : loader.loadAsync(`${import.meta.env.BASE_URL}models/shop/${glb}`).catch((e) => { console.warn('[shop] model failed', glb, e.message); return null; }));
     }
     await Promise.all([loadTextures(ktx2), ...templates.values()]);
