@@ -207,10 +207,19 @@ export default {
     while (this.tuneT < now + 0.25) {
       const [st, beats] = TUNE[this.tuneI % TUNE.length], dur = beats * 0.42;
       if (st !== null) {
-        const o = ac.createOscillator(), gg = ac.createGain(), vib = ac.createOscillator(), vg = ac.createGain();
-        o.type = 'sawtooth'; o.frequency.value = 392 * Math.pow(2, st / 12); vib.frequency.value = 5.6; vg.gain.value = o.frequency.value * 0.012; vib.connect(vg).connect(o.frequency);
-        gg.gain.setValueAtTime(0, this.tuneT); gg.gain.linearRampToValueAtTime(0.16, this.tuneT + 0.06); gg.gain.setTargetAtTime(0.09, this.tuneT + 0.1, 0.2); gg.gain.linearRampToValueAtTime(0, this.tuneT + dur);
-        o.connect(gg).connect(this.radioBus); o.start(this.tuneT); o.stop(this.tuneT + dur + 0.02); vib.start(this.tuneT); vib.stop(this.tuneT + dur + 0.02);
+        // played like a bowed line on an old record (2026-10-26: a bare sawtooth with its vibrato from the first instant read
+        // as a machine): each note slides in from the last when the step is small, its vibrato comes in after the attack and
+        // deepens (rate a little different each note), a second voice a few cents sharp under it
+        const T = this.tuneT, f = 392 * Math.pow(2, st / 12), from = this.lastF && Math.abs(st - this.lastSt) <= 5 ? this.lastF : f;
+        const o = ac.createOscillator(), o2 = ac.createOscillator(), g2 = ac.createGain(), gg = ac.createGain(), vib = ac.createOscillator(), vg = ac.createGain();
+        o.type = o2.type = 'sawtooth'; o2.detune.value = 7; g2.gain.value = 0.5;
+        for (const x of [o, o2]) { x.frequency.setValueAtTime(from, T); x.frequency.exponentialRampToValueAtTime(f, T + 0.07); }
+        vib.frequency.value = 5.2 + Math.random() * 0.6; vg.gain.setValueAtTime(0, T); vg.gain.setValueAtTime(0, T + 0.12); vg.gain.linearRampToValueAtTime(f * 0.013, T + Math.max(0.2, Math.min(dur, 0.5)));
+        vib.connect(vg); vg.connect(o.frequency); vg.connect(o2.frequency);
+        gg.gain.setValueAtTime(0, T); gg.gain.linearRampToValueAtTime(0.13, T + 0.06); gg.gain.setTargetAtTime(0.075, T + 0.1, 0.2); gg.gain.linearRampToValueAtTime(0, T + dur);
+        o.connect(gg); o2.connect(g2).connect(gg); gg.connect(this.radioBus);
+        for (const x of [o, o2, vib]) { x.start(T); x.stop(T + dur + 0.02); }
+        this.lastF = f; this.lastSt = st;
         if (this.tuneI % 2 === 0) { const b = ac.createOscillator(), bg = ac.createGain(); b.type = 'triangle'; b.frequency.value = 98 * Math.pow(2, (st % 12) / 12); bg.gain.setValueAtTime(0.18, this.tuneT); bg.gain.exponentialRampToValueAtTime(0.001, this.tuneT + 0.5); b.connect(bg).connect(this.radioBus); b.start(this.tuneT); b.stop(this.tuneT + 0.55); }
       }
       this.tuneT += dur; this.tuneI++;
