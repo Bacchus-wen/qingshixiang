@@ -133,11 +133,11 @@ export default {
       // v5: the shops across the road, each once when the beam first rests on it (synthesised: they follow the picture)
       // (their level across the road has a floor: 12 m away they were at 0.08 of it, under the street's murmur -- the calls
       // of the shops not yet found must carry, and from their side: 2026-10-26, Codex player-1)
-      case 'bowls': [0, 0.17, 0.26, 0.55].forEach((d, i) => setTimeout(() => this.synthClick(2700 + 500 * (i % 3), { pos: opts.pos, gain: 0.32, decay: 0.16, floor: 0.3 }), d * 1000)); break; // china knocking on china
-      case 'tinks': [0, 0.22, 0.5].forEach((d, i) => setTimeout(() => this.synthClick(4300 + 700 * i, { pos: opts.pos, gain: 0.26, decay: 0.22, floor: 0.3 }), d * 1000)); break; // a spanner set down on a tray
-      case 'snips': for (let i = 0; i < 6; i++) setTimeout(() => this.synthClick(5200, { pos: opts.pos, gain: 0.22, decay: 0.025, floor: 0.3 }), (Math.floor(i / 2) * 0.42 + (i % 2) * 0.07) * 1000); break; // scissors
-      case 'sewing': for (let i = 0; i < 26; i++) setTimeout(() => this.synthClick(1700 + (i % 2) * 300, { pos: opts.pos, gain: 0.18, decay: 0.03, floor: 0.3 }), i * 70); break; // a treadle machine
-      case 'tvshow': this.shot('tv_on', 0.25, 1.4, { pos: opts.pos, gain: 0.35, floor: 0.3 }); break; // the set's click and hum; the show's tune follows the beam (radio)
+      case 'bowls': [0, 0.17, 0.26, 0.55].forEach((d, i) => setTimeout(() => this.synthClick(2700 + 500 * (i % 3), { pos: opts.pos, gain: 0.32 * (opts.gain ?? 1), decay: 0.16, floor: 0.3 }), d * 1000)); break; // china knocking on china
+      case 'tinks': [0, 0.22, 0.5].forEach((d, i) => setTimeout(() => this.synthClick(4300 + 700 * i, { pos: opts.pos, gain: 0.26 * (opts.gain ?? 1), decay: 0.22, floor: 0.3 }), d * 1000)); break; // a spanner set down on a tray
+      case 'snips': for (let i = 0; i < 6; i++) setTimeout(() => this.synthClick(5200, { pos: opts.pos, gain: 0.22 * (opts.gain ?? 1), decay: 0.025, floor: 0.3 }), (Math.floor(i / 2) * 0.42 + (i % 2) * 0.07) * 1000); break; // scissors
+      case 'sewing': for (let i = 0; i < 26; i++) setTimeout(() => this.synthClick(1700 + (i % 2) * 300, { pos: opts.pos, gain: 0.18 * (opts.gain ?? 1), decay: 0.03, floor: 0.3 }), i * 70); break; // a treadle machine
+      case 'tvshow': this.shot('tv_on', 0.25, 1.4, { pos: opts.pos, gain: 0.35 * (opts.gain ?? 1), floor: 0.3 }); break; // the set's click and hum; the show's tune follows the beam (radio)
       case 'bell': this.shot('bike_bell', 0, 3.4, { pos: opts.pos, gain: 0.22, wet: 0.15 }); break;
       case 'servo': opts.short ? this.tone(300, 380, 0.3, { gain: 0.035, type: 'sawtooth' }) : this.tone(240, 420, 0.7, { gain: 0.05, type: 'sawtooth' }); break;
       case 'rattle': // a door shaken in its frame by the wind: four soft wooden knocks
