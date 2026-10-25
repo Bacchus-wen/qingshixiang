@@ -489,7 +489,10 @@ export default {
     if (this.shake > 0) { this.shake -= dt; const a = Math.max(0, this.shake) * 0.012; cam.position.x += (Math.random() - 0.5) * a; cam.position.y += (Math.random() - 0.5) * a; }
     cam.lookAt(this.curLook);
     // portrait screens (phones held upright) see a narrow slice: widen the vertical angle so the same things stay in frame
-    const want = Math.min(78, this.cam.fov * (cam.aspect < 1 ? Math.min(1.6, 1 / Math.sqrt(cam.aspect)) : 1));
+    // (the street, the last look and its fading: less -- held upright the opening's shutter and the floor took half the
+    // frame and the street a strip, Codex player-6; the view already turns after the gaze there)
+    const streetSide = this.phase === 'street' || this.phase === 'last' || (this.phase === 'fade' && this.t < 5.5);
+    const want = Math.min(78, this.cam.fov * (cam.aspect < 1 ? Math.min(streetSide ? 1.25 : 1.6, 1 / Math.sqrt(cam.aspect)) : 1));
     if (Math.abs(cam.fov - want) > 0.01) { cam.fov += snap ? want - cam.fov : (want - cam.fov) * Math.min(1, dt * 2); cam.updateProjectionMatrix(); }
   },
 };
