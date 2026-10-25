@@ -155,7 +155,9 @@ export default {
         this.cam.pos.copy(WAIT_POS).addScaledVector(LEFT_IN, Math.sin(this.t * 0.15) * 0.06).addScaledVector(FACING_IN, -(1 - Math.cos(this.t * 0.15)) * 0.05);
         this.cam.look.copy(WAIT_LOOK); this.cam.fov = 40 - Math.min(3, this.t * 0.15);
         // ("let go" only while the hold that failed is still held: a new press read it for a quarter second before it counted)
-        if (eye?.failed && this.failHold === undefined) this.failHold = !!input.hold;
+        // (set on the failure itself: a release before it had latched it false, and a player still holding the failed try
+        // was told "hold again" -- holding on, it would never open. Codex session review)
+        if (eye?.failed && !this.failSeen) { this.failSeen = true; this.failHold = !!input.hold; }
         if (!input.hold) this.failHold = false;
         if (this.t > 2.2) film.hint(eye?.failed ? (this.failHold ? tr('松开，再按住', 'Let go, then hold again') : tr('再按住一次', 'Press and hold again')) : TOUCH ? tr('按住屏幕', 'Press and hold the screen') : tr('按住鼠标左键', 'Hold the left mouse button'));
         if (eye?.failed && !this.shook) { this.shook = true; this.shake = 0.45; } // the first try: a clunk, the head jolts
@@ -474,6 +476,11 @@ export default {
       const H = this.headKeep, dx = this.curPos.x - H.x, dz = this.curPos.z - H.z, dh = Math.hypot(dx, dz);
       if (dh < 0.55) { const s = 0.55 / Math.max(dh, 1e-3); this.curPos.x = H.x + dx * s; this.curPos.z = H.z + dz * s; }
       this.curPos.y = Math.max(this.curPos.y, H.y + 0.45 * THREE.MathUtils.smoothstep(0.8 - dh, 0, 0.3));
+      // and, looking left, out of the space over the bench and its lamp -- the eased view, not only its target, which
+      // jumped as the close-up's stop moved and the easing then cut across the bench (Codex session review). Eased out,
+      // not snapped: a view swinging from the right passes over it on its way
+      const C = this.curPos;
+      if (m.dir.x < -0.3 && C.x > -2.5 && C.x < -0.62 && C.z > 0.3 && C.z < 1.5 && C.y < 1.7) C.x += (-0.62 - C.x) * Math.min(1, dt * 6);
     }
     this.curLook.lerp(this.cam.look, Math.min(1, dt * k * 1.2));
     const cam = ctx.camera;
