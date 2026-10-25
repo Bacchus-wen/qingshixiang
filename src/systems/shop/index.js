@@ -528,7 +528,9 @@ export default {
       let rem = float(0);
       REM_SHOPS.forEach(([x, hw], i) => { rem = max(rem, smoothstep(hw + 0.18, hw - 0.12, abs(P.x.sub(x))).mul(smoothstep(3.2, 2.95, P.y)).mul(remK[i])); });
       const thenC = texture(then, uv()).rgb, nowC = texture(now, uv()).rgb.mul(far.mul(0.62));
-      bd.colorNode = mix(mix(nowC, thenC.mul(0.5), rem.mul(0.62)), thenC.mul(mix(float(0.36), float(0.98), core)), k); // what the beam itself touches stays brightest
+      // (past 1 for a moment when a shop is found: a flash that settles. Codex player-1: kept shops told apart from the
+      // rest too weakly -- 0.62 of a half-bright "then" -> 0.72 of 0.55)
+      bd.colorNode = mix(mix(nowC, thenC.mul(rem.mul(0.3).add(0.25)), rem.min(1).mul(0.72)), thenC.mul(mix(float(0.36), float(0.98), core)), k); // what the beam itself touches stays brightest
       const BW = 16, BH = BW * 1920 / 3840;
       const plane = new THREE.Mesh(new THREE.PlaneGeometry(BW, BH), bd); plane.rotation.y = Math.PI; // faces the shop (-z)
       plane.position.set(0.4, -STEP + BH / 2 - 0.05, d / 2 + 0.25 + 8.5); root.add(plane); this.backdrop = plane;

@@ -92,26 +92,26 @@ export default {
       this.tuneT = ac.currentTime + 0.5; this.tuneI = 0; }
   },
   noise(sec) { const ac = this.ac, b = ac.createBuffer(1, ac.sampleRate * sec, ac.sampleRate), d = b.getChannelData(0); let last = 0; for (let i = 0; i < d.length; i++) { last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02; d[i] = last * 3.5; } return b; },
-  pan(pos) { // stereo position and distance gain of a world point for the current camera
+  pan(pos, floor = 0) { // stereo position and distance gain of a world point for the current camera (floor: the least gain)
     if (!pos) return [0, 1];
     const cam = this.ctx.camera; this._v.copy(pos).sub(cam.position); const d = this._v.length();
     this._r.set(1, 0, 0).applyQuaternion(cam.quaternion);
-    return [THREE.MathUtils.clamp(this._v.dot(this._r) / Math.max(d, 0.3), -0.9, 0.9), 1 / (1 + d * d * 0.08)];
+    return [THREE.MathUtils.clamp(this._v.dot(this._r) / Math.max(d, 0.3), -0.9, 0.9), Math.max(floor, 1 / (1 + d * d * 0.08))];
   },
   // one-shot from a buffer slice, positioned
-  shot(name, at, dur, { pos, gain = 1, rate = 1, wet = 0.35 } = {}) {
+  shot(name, at, dur, { pos, gain = 1, rate = 1, wet = 0.35, floor = 0 } = {}) {
     const b = this.buffers.get(name); if (!b) return;
     const ac = this.ac, s = ac.createBufferSource(), gg = ac.createGain(), p = ac.createStereoPanner();
-    const [pn, dg] = this.pan(pos); p.pan.value = pn; s.buffer = b; s.playbackRate.value = rate;
+    const [pn, dg] = this.pan(pos, floor); p.pan.value = pn; s.buffer = b; s.playbackRate.value = rate;
     const t = ac.currentTime, d = Math.min(dur ?? b.duration, b.duration - (at || 0));
     gg.gain.setValueAtTime(0, t); gg.gain.linearRampToValueAtTime(gain * dg, t + 0.02); gg.gain.setValueAtTime(gain * dg, t + Math.max(0.03, d - 0.12)); gg.gain.linearRampToValueAtTime(0, t + d);
     s.connect(gg).connect(p).connect(this.master); if (wet) { const w = ac.createGain(); w.gain.value = wet; p.connect(w).connect(this.roomSend); }
     s.start(t, at || 0, d + 0.05);
   },
-  synthClick(freq, { pos, gain = 1, decay = 0.05 } = {}) { // a wooden tick: a noise burst through a resonance
+  synthClick(freq, { pos, gain = 1, decay = 0.05, floor = 0 } = {}) { // a wooden tick: a noise burst through a resonance
     const ac = this.ac, s = ac.createBufferSource(); s.buffer = this.clickBuf ??= this.noise(0.1);
     const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = 9;
-    const gg = ac.createGain(), p = ac.createStereoPanner(), [pn, dg] = this.pan(pos); p.pan.value = pn;
+    const gg = ac.createGain(), p = ac.createStereoPanner(), [pn, dg] = this.pan(pos, floor); p.pan.value = pn;
     const t = ac.currentTime; gg.gain.setValueAtTime(gain * dg * 2.5, t); gg.gain.exponentialRampToValueAtTime(0.001, t + decay);
     s.connect(bp).connect(gg).connect(p).connect(this.master); const w = ac.createGain(); w.gain.value = 0.6; p.connect(w).connect(this.roomSend);
     s.start(t); s.stop(t + decay + 0.05);
@@ -131,11 +131,13 @@ export default {
       case 'pencil': { const a = r() * 8.2; this.shot('pencil', a, 1.2 + r() * 0.4, { pos: opts.pos, gain: 0.9 }); break; }
       case 'click': this.shot('relay_a', 0, undefined, { gain: 0.5 }); break;
       // v5: the shops across the road, each once when the beam first rests on it (synthesised: they follow the picture)
-      case 'bowls': [0, 0.17, 0.26, 0.55].forEach((d, i) => setTimeout(() => this.synthClick(2700 + 500 * (i % 3), { pos: opts.pos, gain: 0.32, decay: 0.16 }), d * 1000)); break; // china knocking on china
-      case 'tinks': [0, 0.22, 0.5].forEach((d, i) => setTimeout(() => this.synthClick(4300 + 700 * i, { pos: opts.pos, gain: 0.26, decay: 0.22 }), d * 1000)); break; // a spanner set down on a tray
-      case 'snips': for (let i = 0; i < 6; i++) setTimeout(() => this.synthClick(5200, { pos: opts.pos, gain: 0.22, decay: 0.025 }), (Math.floor(i / 2) * 0.42 + (i % 2) * 0.07) * 1000); break; // scissors
-      case 'sewing': for (let i = 0; i < 26; i++) setTimeout(() => this.synthClick(1700 + (i % 2) * 300, { pos: opts.pos, gain: 0.18, decay: 0.03 }), i * 70); break; // a treadle machine
-      case 'tvshow': this.shot('tv_on', 0.25, 1.4, { pos: opts.pos, gain: 0.35 }); break; // the set's click and hum; the show's tune follows the beam (radio)
+      // (their level across the road has a floor: 12 m away they were at 0.08 of it, under the street's murmur -- the calls
+      // of the shops not yet found must carry, and from their side: 2026-10-26, Codex player-1)
+      case 'bowls': [0, 0.17, 0.26, 0.55].forEach((d, i) => setTimeout(() => this.synthClick(2700 + 500 * (i % 3), { pos: opts.pos, gain: 0.32, decay: 0.16, floor: 0.3 }), d * 1000)); break; // china knocking on china
+      case 'tinks': [0, 0.22, 0.5].forEach((d, i) => setTimeout(() => this.synthClick(4300 + 700 * i, { pos: opts.pos, gain: 0.26, decay: 0.22, floor: 0.3 }), d * 1000)); break; // a spanner set down on a tray
+      case 'snips': for (let i = 0; i < 6; i++) setTimeout(() => this.synthClick(5200, { pos: opts.pos, gain: 0.22, decay: 0.025, floor: 0.3 }), (Math.floor(i / 2) * 0.42 + (i % 2) * 0.07) * 1000); break; // scissors
+      case 'sewing': for (let i = 0; i < 26; i++) setTimeout(() => this.synthClick(1700 + (i % 2) * 300, { pos: opts.pos, gain: 0.18, decay: 0.03, floor: 0.3 }), i * 70); break; // a treadle machine
+      case 'tvshow': this.shot('tv_on', 0.25, 1.4, { pos: opts.pos, gain: 0.35, floor: 0.3 }); break; // the set's click and hum; the show's tune follows the beam (radio)
       case 'bell': this.shot('bike_bell', 0, 3.4, { pos: opts.pos, gain: 0.22, wet: 0.15 }); break;
       case 'servo': opts.short ? this.tone(300, 380, 0.3, { gain: 0.035, type: 'sawtooth' }) : this.tone(240, 420, 0.7, { gain: 0.05, type: 'sawtooth' }); break;
       case 'rattle': // a door shaken in its frame by the wind: four soft wooden knocks
@@ -156,7 +158,7 @@ export default {
         break; }
       case 'powerdown': this.tone(1800, 120, 3.2, { gain: 0.05 }); this.shot('relay_b', 0, undefined, { gain: 0.4 }); break;
       case 'streetlamp': this.shot('relay_b', 0, undefined, { gain: 0.25, rate: 0.8, wet: 0.1 }); break;
-      case 'lampoff': this.synthClick(780, { pos: opts.pos, gain: 0.14, decay: 0.07 }); break; // a shop it remembered going out (story.js fade): a switch across the road
+      case 'lampoff': this.synthClick(780, { pos: opts.pos, gain: 0.14, decay: 0.07, floor: 0.3 }); break; // a shop it remembered going out (story.js fade): a switch across the road
       case 'dog': this.shot('dog_far_a', 0, undefined, { gain: 0.2, wet: 0 }); break;
       case 'page': { // a page turned: a soft paper swish (noise swept through a band, quick)
         const ac = this.ac, src = ac.createBufferSource(); src.buffer = this.clickBuf ??= this.noise(0.1); src.loop = true;
@@ -174,7 +176,7 @@ export default {
     const ac = this.ac, now = ac.currentTime, m = ctx.memory, set = (p, v, tau = 0.3) => p.setTargetAtTime(v, now, tau);
     const cam = ctx.camera.position, inside = THREE.MathUtils.smoothstep(2.6 - cam.z, -0.2, 0.6); // 0 outside .. 1 inside
     const story = ctx.api.story, phase = story?.phase, atmo = ctx.api.atmo;
-    const quiet = phase === 'title' ? 0 : phase === 'end' ? Math.max(0, 1 - Math.max(0, story.t - 6.5) / 4) : 1; // the street a while into the black, then silence before the card
+    const quiet = phase === 'title' ? 0 : phase === 'end' ? Math.max(0, 1 - Math.max(0, story.t - 4.5) / 3) : 1; // the street a while into the black, then silence before the card (story.js: black 5-7.5 s, the card at 9.5)
     // present
     set(this.duskIn.gain, 0.5 * quiet * (1 - 0.45 * inside)); set(this.duskLP.frequency, 2400 - 1600 * inside, 0.5);
     set(this.humG.gain, 0.006 * inside * quiet);
@@ -184,7 +186,7 @@ export default {
     const intimate = 1;
     // the last look: when the whole street comes back the song swells -- the set across the road louder, the street's
     // murmur fuller, the drone under it -- and all of it stops with the song (2026-10-26: the mix stayed level through it)
-    const swell = phase === 'last' ? THREE.MathUtils.smoothstep(story.t, 3.0, 5.6) : phase === 'fade' && story.t < 2.3 ? 1 : 0;
+    const swell = phase === 'last' ? THREE.MathUtils.smoothstep(story.t, 2.4, 4.8) : phase === 'fade' && story.t < 2.3 ? 1 : 0;
     set(this.pastIn.gain, 0.55 * (1 + 0.35 * swell) * Math.max(past * past, 0.3 * (story?.remembered ?? 0)) * quiet * intimate, 0.6); // (the shops it remembered keep a little of the street's murmur)
     set(this.droneG.gain, 0.05 * swell * quiet, swell > 0 ? 0.8 : 0.015);
     let radio = 0, rpos = null;
@@ -231,7 +233,7 @@ export default {
       if (phase === 'end') { this.endT = 0; }
       this.lastPhase = phase;
     }
-    if (phase === 'end') { this.endT += dt; if (this.endT > 3.5 && !this.lamped) { this.lamped = true; this.play('streetlamp'); } if (this.endT > 4.5 && !this.dug) { this.dug = true; this.shot('demolition_far', 0, 6, { gain: 0.3, wet: 0 }); } } // a digger somewhere down the street // a digger somewhere down the street
+    if (phase === 'end') { this.endT += dt; if (this.endT > 3.5 && !this.lamped) { this.lamped = true; this.play('streetlamp'); } if (this.endT > 3.9 && !this.dug) { this.dug = true; this.shot('demolition_far', 0, 3.4, { gain: 0.3, wet: 0 }); } } // a digger somewhere down the street // a digger somewhere down the street
     void atmo;
   },
 };

@@ -64,18 +64,19 @@ const PULL_S = 2.6, LISTEN_S = 3.3, TEAR_S = 0.45, CUT_S = 4.9, GLITCH_OUT2_S = 
 const DOOR_A = new THREE.Vector3(0.95, 0.8, 2.9), DOOR_B = new THREE.Vector3(0.82, 0.82, 2.62), DOOR_LOOK = new THREE.Vector3(-0.5, 0.55, 1.2);
 const LISTEN = { x: -0.55, y: 0.15, tilt: 0.09 }; // its head turned to the song (to its right, toward the door: within the pointer's own range), a little tilted
 const ACT2_POS = new THREE.Vector3(0.072, 1, -1.4), ACT2_LOOK = new THREE.Vector3(-0.278, 0.92, 11.3), ACT2_FOV = 48; // (r4: feet and stool in frame, clear of the bench)
-const ACT2_BEAM = { beamK: 0.65, beamReach: 0.25, beamNear: 0.5, beamFar: 9, spotK: 0.6, duskK: 0.2, shaftW: 0.7, doorK: 1, glowK: 1, robotFillK: 0.25, lampK: 0.4, softK: 1.8 }; // softK: a wider then/now edge (r7: a hard one read as a burnt stripe) // (lamp: from in here the bench lamp was the brightest thing in the frame) // (dusk 0.2: from in here its hard patch on the floor burnt out) // a shaft in the dusty air toward the far side; the dusk under the shutter lower (from in here its patch on the floor burns out)
+const ACT2_BEAM = { beamK: 0.65, beamReach: 0.25, beamNear: 0.5, beamFar: 9, spotK: 0.6, duskK: 0.2, shaftW: 0.7, doorK: 1, glowK: 1, robotFillK: 0.25, lampK: 0.25, softK: 1.8 }; // (lamp 0.4 -> 0.25: the dolly brings its white shade toward the middle of the frame, Codex player-1) // softK: a wider then/now edge (r7: a hard one read as a burnt stripe) // (lamp: from in here the bench lamp was the brightest thing in the frame) // (dusk 0.2: from in here its hard patch on the floor burnt out) // a shaft in the dusty air toward the far side; the dusk under the shutter lower (from in here its patch on the floor burns out)
 const K = (t, p, l, fov, cut = false) => ({ t, p: new THREE.Vector3(...p), l: new THREE.Vector3(...l), fov, cut });
 const WAIT_POS = new THREE.Vector3(-0.98, 0.88, 0.12), WAIT_LOOK = new THREE.Vector3(-0.6, 0.8, 0.98); // its face, lens side
 const ARRIVE_K = [
+  // (2026-10-26, Codex player-1: half a minute before you can do anything -- 18.8 s -> 16 s here, the prompt sooner)
   K(0, [0.9, 1.55, 5.6], [1.6, 2.6, 11.0], 50),           // the far side: what is left of the street (a slow drift)
-  K(5.2, [0.2, 1.55, 6.0], [0.3, 2.4, 11.0], 48),
-  K(5.25, [0.6, 1.55, 6.6], [-0.4, 1.1, 0.8], 46, true),   // (cut) behind us, the one shop still half open, a light inside
-  K(8.5, [0.25, 1.28, 3.1], [-0.4, 1.05, 0.6], 46),        // at the shutter: someone sits inside at a bench
-  K(11.0, [-0.55, 1.5, 2.2], [-1.55, 0.9, 0.7], 44),       // in: the bench in the lamp's light
-  K(13.8, [0.99, 0.9, -0.38], [-0.55, 0.52, 1.16], 40),    // the robot whole, three-quarter (the model shown whole)
-  K(16.0, [0.84, 0.88, -0.5], [-0.55, 0.52, 1.16], 40),
-  K(18.8, WAIT_POS.toArray(), WAIT_LOOK.toArray(), 38),    // its face
+  K(4.4, [0.2, 1.55, 6.0], [0.3, 2.4, 11.0], 48),
+  K(4.45, [0.6, 1.55, 6.6], [-0.4, 1.1, 0.8], 46, true),   // (cut) behind us, the one shop still half open, a light inside
+  K(7.2, [0.25, 1.28, 3.1], [-0.4, 1.05, 0.6], 46),        // at the shutter: someone sits inside at a bench
+  K(9.4, [-0.55, 1.5, 2.2], [-1.55, 0.9, 0.7], 44),        // in: the bench in the lamp's light
+  K(11.8, [0.99, 0.9, -0.38], [-0.55, 0.52, 1.16], 40),    // the robot whole, three-quarter (the model shown whole)
+  K(13.6, [0.84, 0.88, -0.5], [-0.55, 0.52, 1.16], 40),
+  K(16.0, WAIT_POS.toArray(), WAIT_LOOK.toArray(), 38),    // its face
 ];
 const TOUCH = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches; // a phone or tablet: hints speak of fingers
 const ease = (x) => x * x * (3 - 2 * x);
@@ -87,7 +88,7 @@ const ACT1_FLOOR = 0.68, STREET_POWER_S = 85;
 // what comes back to life in the beam in act one (the twins, the sets with pictures, the radios with their dials, the
 // clock): five of them seen and its own radio on the bench calls it (the beat below), or at 34 s at the latest
 const ALIVE = new Set(['tube_radio_closed.glb', 'desk_fan.glb', 'crt_tv.glb', 'crt_tv_hero.glb', 'wall_clock.glb', 'cassette_recorder.glb', 'alarm_clock.glb']);
-const BENCH = { cue: 0, aim: 0.5, cut: 1.3, tune: 1.8, fade: 7, release: 8, back: 8.5, end: 11 }; // the bench beat, s after it starts
+const BENCH = { cue: 0, aim: 0.5, cut: 1.3, tune: 1.8, fade: 6.0, release: 6.8, back: 7.2, end: 9.6 }; // the bench beat, s after it starts (Codex player-1: the close-up held still too long -- 5.9 s now, pushing in)
 // the order the shops it remembered go out in when the light dies: from the far ends in, the electronics shop last
 const OUT_ORDER = { noodles: 0, tailor: 1, hardware: 2, barber: 3, tv: 4 };
 
@@ -156,7 +157,7 @@ export default {
         // ("let go" only while the hold that failed is still held: a new press read it for a quarter second before it counted)
         if (eye?.failed && this.failHold === undefined) this.failHold = !!input.hold;
         if (!input.hold) this.failHold = false;
-        if (this.t > 3) film.hint(eye?.failed ? (this.failHold ? tr('松开，再按住', 'Let go, then hold again') : tr('再按住一次', 'Press and hold again')) : TOUCH ? tr('按住屏幕', 'Press and hold the screen') : tr('按住鼠标左键', 'Hold the left mouse button'));
+        if (this.t > 2.2) film.hint(eye?.failed ? (this.failHold ? tr('松开，再按住', 'Let go, then hold again') : tr('再按住一次', 'Press and hold again')) : TOUCH ? tr('按住屏幕', 'Press and hold the screen') : tr('按住鼠标左键', 'Hold the left mouse button'));
         if (eye?.failed && !this.shook) { this.shook = true; this.shake = 0.45; } // the first try: a clunk, the head jolts
         if (eye && eye.open > 0.08 && eye.attempts > 1) { film.hint(''); this.set('waking', true); }
         break;
@@ -194,7 +195,7 @@ export default {
         this.cam.pos.lerp(this._v.copy(eyePos).addScaledVector(m.dir, 1.35).addScaledVector(this._w, -0.33).setY(eyePos.y + 0.27), 0.85 * this.zoom);
         this.cam.fov = 50 - 18 * this.zoom;
         if (benchShot) { // its own radio: from in front of the open set, the robot's eye turned to it beyond
-          this.zoom = 0; this.cam.pos.set(-1.95, 1.0, 1.4); this.cam.look.set(-1.0, 0.93, 0.78); this.cam.fov = 46; m.spotK = 0.3; m.lampK = 0.5; // (r16: lower and tighter -- the lens and the set, the sign whole, less empty bench; the desk lamp's haze halved)
+          this.zoom = 0; this.cam.pos.set(-1.95, 1.0, 1.4).lerp(this._v.set(-1.62, 0.98, 1.14), ease(clamp01((bt - BENCH.cut) / (BENCH.back - BENCH.cut)))); this.cam.look.set(-1.0, 0.93, 0.78); this.cam.fov = 46; m.spotK = 0.3; m.lampK = 0.5; // (r16: lower and tighter -- the lens and the set, the sign whole, less empty bench; the desk lamp's haze halved) (a slow push in on the set as its song starts)
         } else m.spotK = 0.42; // (at 2-3 m on pale plaster the full lamp burnt its circle white; 0.65 still did)
         m.beamK = 0.55; // act one's shaft: a trace in the air, not a fog over the shelves
         // a photographer's lens on the close-ups: the thing in the beam sharp, the shelf behind it soft (as if f/2)
@@ -291,11 +292,14 @@ export default {
         this.cam.pos.copy(MATCH.pos).lerp(ACT2_POS, mv);
         this.cam.look.copy(MATCH.look).lerp(this._w.copy(ACT2_LOOK).lerp(this._v.copy(eyePos).addScaledVector(m.dir, 10), 0.05), mv);
         this.cam.fov = MATCH.fov + (ACT2_FOV - MATCH.fov) * mv;
-        // the view moves over a little after the gaze (a dolly, not a pan): looking to the ends of the street it sees past
-        // the door jambs, which hid most of the noodle shop and half the tailor's from the middle (2026-10-26)
-        const side = -0.8 * THREE.MathUtils.clamp(Math.atan2(m.dir.x, m.dir.z) / 0.6, -1, 1) * mv;
-        this.side = (this.side ?? 0) + (side - (this.side ?? 0)) * Math.min(1, dt * 0.8);
-        this.cam.pos.x += this.side; this.cam.look.x += this.side;
+        // the view steps after the gaze (a dolly, not a pan): looking to the ends of the street it moves toward the door
+        // and a little across, to see past the jambs that hid most of the noodle shop and half the tailor's from here
+        // (2026-10-26). Across, only so far: to the left the set on its cartons stands 0.4 m away (x 0.49 on, z < -1.26
+        // -- a ±0.8 m slide put the lens inside it), to the right the bench (x < -0.88)
+        const b = THREE.MathUtils.clamp(Math.atan2(m.dir.x, m.dir.z) / 0.6, -1, 1) * mv; // + toward the noodle shop (the screen's left)
+        this.side = (this.side ?? 0) + ((b > 0 ? -0.45 : -0.25) * b - (this.side ?? 0)) * Math.min(1, dt * 0.8);
+        this.fwd = (this.fwd ?? 0) + (0.8 * Math.abs(b) - (this.fwd ?? 0)) * Math.min(1, dt * 0.8);
+        this.cam.pos.x += this.side; this.cam.look.x += this.side; this.cam.pos.z += this.fwd; this.cam.look.z += this.fwd;
         this.streetTime += dt; this.tuneCall = Math.max(0, (this.tuneCall ?? 0) - dt * 0.25);
         Object.assign(m, ACT2_BEAM);
         if (this.t > MATCH.hold + MATCH.move + 0.4 && !this.moved2) film.hint(TOUCH ? tr('滑动手指，让它看看街对面', 'Slide your finger to let it look across the street') : tr('移动鼠标，让它看看街对面', 'Move the mouse to let it look across the street'));
@@ -310,13 +314,13 @@ export default {
           const c = this._v.copy(s.pos).sub(m.origin).normalize().dot(m.dir), hit = m.strength > 0.5 && c > Math.cos(0.17);
           this.dwell[s.key] = hit ? (this.dwell[s.key] ?? 0) + dt : 0;
           if (hit) on = s;
-          if (this.dwell[s.key] > 0.5 && !this.seen.has(s.key)) { this.seen.add(s.key); this.sinceSeen = 0; audio?.play(s.sound, { pos: s.pos }); }
+          if (this.dwell[s.key] > 0.5 && !this.seen.has(s.key)) { this.seen.add(s.key); this.sinceSeen = 0; (this.foundAt ??= {})[s.key] = this.t; audio?.play(s.sound, { pos: s.pos }); }
         }
         this.sinceSeen += dt;
         // nothing found for a while: one of the shops not yet seen calls from its side of the street (a bell)
         if (!on && this.sinceSeen > 6 && (this.callT = (this.callT ?? 5) - dt) < 0) {
-          const s = SPOTS.find((x) => !this.seen.has(x.key)); this.callT = 7;
-          if (s) audio?.play(s.sound, { pos: s.pos }); // the shop itself calls, from its side of the street
+          const unseen = SPOTS.filter((x) => !this.seen.has(x.key)), s = unseen[(this.calls = (this.calls ?? -1) + 1) % Math.max(1, unseen.length)]; this.callT = 7; // (in turn: the first unseen one called every time)
+          if (s) { audio?.play(s.sound, { pos: s.pos }); this.callFlash = { key: s.key, t0: this.t }; } // the shop itself calls, from its side of the street, its front flickering like a tube that will not quite start
         }
         // enough: all five shops (and a moment with the last); or three, half a minute on the street and nothing new for a
         // while; or the power nearly gone -- then one last look (2026-10-26: three shops and 5 s ended it after 11 s)
@@ -333,18 +337,19 @@ export default {
         // the reverse shot (judges r4-r5: from behind it is a dark back of a head, never "a last look"): when the whole
         // street has come back, its face for two seconds, the street's evening on the lens and the rusty casing; then
         // back out to see the street go
-        const faceT = this.t > 5.6 && this.t < 7.8;
+        // (Codex player-1: the people came back and it cut to its face at once -- the whole street now holds 5 s first)
+        const faceT = this.t > 9.6 && this.t < 11.6;
         if (faceT !== !!this.faceOn) { this.faceOn = faceT; this.cut = true; }
         if (this.t < 0.05) this.cut = true; // (from the exploring view behind it: a cut to its side)
         if (faceT) { this.cam.pos.copy(MEMORY_FACE.pos); this.cam.look.copy(MEMORY_FACE.look); this.cam.fov = MEMORY_FACE.fov; }
-        else { this.cam.pos.copy(SIDE.pos); this.cam.look.copy(SIDE.look); this.cam.fov = SIDE.fov - 2 * ease(clamp01((this.t - 3.2) / 2)); }
+        else { this.cam.pos.copy(SIDE.pos); this.cam.look.copy(SIDE.look); this.cam.fov = SIDE.fov - 2 * ease(clamp01((this.t - 2.6) / 2)) - 1.5 * ease(clamp01((this.t - 4.6) / 5)); } // (and a slow push while it holds)
         m.forceOpen = true; Object.assign(m, ACT2_BEAM, { coreK: undefined, roomK: undefined, pastX: undefined, pastAngle: undefined }, faceT ? MEMORY_FACE.mem : SIDE.beam);
         eye?.aim(SPOTS.find((x) => x.key === 'tv').pos);
-        m.memWide = 1 + 3.2 * ease(clamp01((this.t - 3.2) / 2.2)); // the shop alone a moment (the song), then the whole street
+        m.memWide = 1 + 3.2 * ease(clamp01((this.t - 2.6) / 2.0)); // the shop alone a moment (the song), then the whole street
         this.power = Math.max(0.03, this.power - dt * 0.03);
-        m.power = this.t > 7.4 && Math.random() < 0.25 ? 0.04 : Math.max(0.34, this.power); // (the whole street at full strength, whatever act two left: from 0.2 it lit at 0.6)
-        m.pastK = 0.4 + 0.6 * ease(clamp01((this.t - 3.2) / 2.2)); // the whole street's evening floods in over it
-        if (this.t > 8.4) this.set('fade');
+        m.power = this.t > 11.2 && Math.random() < 0.25 ? 0.04 : Math.max(0.34, this.power); // (the whole street at full strength, whatever act two left: from 0.2 it lit at 0.6)
+        m.pastK = 0.4 + 0.6 * ease(clamp01((this.t - 2.6) / 2.0)); // the whole street's evening floods in over it
+        if (this.t > 12.2) this.set('fade');
         break;
       }
       case 'fade': {
@@ -355,18 +360,18 @@ export default {
         m.holdGaze = true;
         this.power = Math.max(0, this.power - dt / 3);
         m.power = this.t < 2.8 ? 0.34 * (1 - 0.7 * this.t / 2.8) : 0.02;
-        m.forceOpen = this.t < 2.2 ? true : this.t < 5.4 ? Math.random() > Math.min(0.92, (this.t - 2.2) * 0.3) : false;
-        if (this.t > 4.6) atmo?.set('out');
+        m.forceOpen = this.t < 2.2 ? true : this.t < 6.2 ? Math.random() > Math.min(0.92, (this.t - 2.2) * 0.25) : false;
+        if (this.t > 5.3) atmo?.set('out');
         m.memWide = this.t < 2.8 ? 4.2 : 1;
         m.pastK = this.t < 2.8 ? 1 : 0; // (with the power: atmo.js)
-        if (this.t < 4.7) { // (to 4.7: the shops it remembered stay a moment and go out one by one -- below -- then its face)
+        if (this.t < 5.5) { // (to 5.5: the shops it remembered stay a moment and go out one by one -- below -- then its face)
           this.cam.pos.copy(SIDE.pos); this.cam.look.copy(SIDE.look); this.cam.fov = SIDE.fov - 2;
         } else {
           if (!this.faced) { this.faced = true; this.cut = true; }
           this.cam.pos.copy(EYE0).addScaledVector(FACING, 0.78).addScaledVector(LEFT, 0.18).add(this._w.set(0, 0.03, 0));
           this.cam.look.copy(EYE0).add(this._w.set(0, 0.02, 0)); this.cam.fov = 34;
         }
-        if (this.t > 9.2) this.set('end');
+        if (this.t > 10) this.set('end');
         break;
       }
       case 'end': {
@@ -378,10 +383,10 @@ export default {
         // street beyond with the one lamp (r4-r8: from behind, in the dark, it was a black box); pushing in slowly
         this.cam.pos.copy(SIDE.pos).lerp(this._w.set(0.922, 0.92, -0.3), u); this.cam.look.copy(SIDE.look); this.cam.fov = SIDE.fov - 2 * u;
         if (this.t < 0.05) this.cut = true;
-        film.fade(Math.min(1, Math.max(0, (this.t - 7) / 3)));
-        if (this.t > 12.5) film.endCard(); // (two seconds of silence first: sound.js)
-        if (this.t > 30) film.replayHint();
-        if (this.t > 14 && (input.wasPressed('Pointer') || input.wasPressed('Space'))) location.reload();
+        film.fade(Math.min(1, Math.max(0, (this.t - 5) / 2.5))); // (Codex player-1: the dark street held long after the farewell -- 7 + 3 s -> 5 + 2.5 s)
+        if (this.t > 9.5) film.endCard(); // (two seconds of silence first: sound.js)
+        if (this.t > 19) film.replayHint(); // (ten seconds after the card: at thirty the screen sat dark and still for long enough to wonder)
+        if (this.t > 11 && (input.wasPressed('Pointer') || input.wasPressed('Space'))) location.reload();
         break;
       }
     }
@@ -396,11 +401,14 @@ export default {
         const lit = this.seen.has(s.key) && (this.phase === 'street' || this.phase === 'last' || this.phase === 'fade');
         let want = lit ? 1 : 0, flick = 1;
         if (this.phase === 'fade' && lit) {
-          const out = 3.0 + OUT_ORDER[s.key] * 0.3;
+          const out = 3.0 + OUT_ORDER[s.key] * 0.45; // (Codex player-1: the farewell was quicker than the empty end after it)
           if (this.t > out) { want = 0; if (!this.outDone.has(s.key)) { this.outDone.add(s.key); audio?.play('lampoff', { pos: s.pos }); } } else if (this.t > out - 0.28) flick = Math.random() < 0.5 ? 1 : 0.15;
         }
-        this.rem[i] += (want - this.rem[i]) * Math.min(1, dt * (want > this.rem[i] ? 0.8 : 14));
-        rk[i].value = this.rem[i] * (0.9 + 0.1 * Math.sin(time * 1.1 + i * 1.7)) * (this.phase === 'street' && this.dip > 0 ? 0.25 : 1) * flick;
+        this.rem[i] += (want - this.rem[i]) * Math.min(1, dt * (want > this.rem[i] ? 2.5 : 14));
+        const pk = this.phase === 'street' && this.foundAt?.[s.key] !== undefined ? Math.max(0, 1 - (this.t - this.foundAt[s.key]) / 1.4) : 0; // (found: a flash that settles into its kept light)
+        const ft = this.phase === 'street' && this.callFlash?.key === s.key ? this.t - this.callFlash.t0 : -1; // (a shop calling: three flickers)
+        const flash = ft < 0 || ft > 1 ? 0 : ft < 0.08 || (ft > 0.2 && ft < 0.32) ? 0.4 : ft > 0.5 ? 0.4 * (1 - (ft - 0.5) / 0.5) : 0;
+        rk[i].value = Math.max(flash, this.rem[i] * (0.9 + 0.1 * Math.sin(time * 1.1 + i * 1.7)) * (this.phase === 'street' && this.dip > 0 ? 0.25 : 1) * flick + 0.45 * pk * pk);
         sum += this.rem[i];
       });
       this.remembered = sum / SPOTS.length; // (sound.js: the past street's murmur stays with them)
@@ -424,7 +432,7 @@ export default {
       else { fl.position.set(0.472, 1.25, 2.75); fl.target.position.copy(EYE0).add(this._w.set(0, -0.12, 0)); }
       fl.target.updateMatrixWorld(); fl.angle = this.phase === 'arrive' ? 0.7 : this.phase === 'turn' ? 0.9 : this.phase === 'street' && this.glitchOut !== undefined ? 0.5 + (0.28 - 0.5) * ease(clamp01((this.glitchOut - MATCH.hold) / MATCH.move)) : this.phase === 'street' || this.phase === 'last' ? 0.28 : 0.6;
       fl.color.set(this.phase === 'end' ? 0xc9d6ff : 0xffe2c0); if (this.phase !== 'end') fl.distance = 3;
-      const want = this.phase === 'end' ? 4.5 * clamp01((this.t - 2) / 3) : this.phase === 'wait' ? 2.6 : this.phase === 'waking' ? 2.0 : this.phase === 'fade' ? 1.4 : this.phase === 'arrive' ? 3.2 * clamp01((this.t - 11) / 3) : this.phase === 'turn' ? 0 : this.phase === 'street' && this.glitchOut !== undefined ? 3.95 + (1.6 - 3.95) * ease(clamp01((this.glitchOut - MATCH.hold) / MATCH.move)) : this.phase === 'street' || this.phase === 'last' ? 1.6 : 0;
+      const want = this.phase === 'end' ? 4.5 * clamp01((this.t - 2) / 3) : this.phase === 'wait' ? 2.6 : this.phase === 'waking' ? 2.0 : this.phase === 'fade' ? 1.4 : this.phase === 'arrive' ? 3.2 * clamp01((this.t - 9.4) / 2.6) : this.phase === 'turn' ? 0 : this.phase === 'street' && this.glitchOut !== undefined ? 3.95 + (1.6 - 3.95) * ease(clamp01((this.glitchOut - MATCH.hold) / MATCH.move)) : this.phase === 'street' || this.phase === 'last' ? 1.6 : 0;
       // (the doorway shot: off -- it is aimed where the head will be after the cut, and before the cut nothing is there;
       // it comes on with the cut)
       fl.intensity = this.cut && this.phase === 'street' ? want : fl.intensity + (want - fl.intensity) * Math.min(1, dt * 1.5);
