@@ -391,7 +391,9 @@ export default {
         m.memWide = this.t < 2.8 ? 4.2 : 1;
         m.pastK = this.t < 2.8 ? 1 : 0; // (with the power: atmo.js)
         if (this.t < 5.5) { // (to 5.5: the shops it remembered stay a moment and go out one by one -- below -- then its face)
-          this.cam.pos.copy(SIDE.pos); this.cam.look.copy(SIDE.look); this.cam.fov = SIDE.fov - 2;
+          // (held where the last look's push ended: from SIDE again the view drew back from the people just as the light
+          // began to go -- Codex player-5)
+          this.cam.pos.copy(SIDE.pos); this.cam.look.copy(SIDE.look).lerp(SPOTS.find((x) => x.key === 'tv').pos, 0.15); this.cam.fov = SIDE.fov - 5.5;
         } else {
           if (!this.faced) { this.faced = true; this.cut = true; }
           this.cam.pos.copy(EYE0).addScaledVector(FACING, 0.78).addScaledVector(LEFT, 0.18).add(this._w.set(0, 0.03, 0));
