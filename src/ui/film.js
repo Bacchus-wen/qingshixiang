@@ -26,6 +26,11 @@ export class Film {
     this.n = 0;
     setInterval(() => { this.n = (this.n + 1) % 10000; this.frameEl.textContent = String(this.n).padStart(4, '0'); }, 1000 / 24);
   }
+  // one film for the page: main.js makes it as the page starts loading (the title at once, not seconds of black), the
+  // story takes it over
+  static shared(root, text) { return (Film._shared ??= new Film(root, text)); }
+  // the line under the title: "loading" until the piece can start, then "click to begin"
+  start(text) { const el = this.titleEl.querySelector('small:not(.film-credit)'); if (el) el.textContent = text; }
   hint(text) { this.hintEl.textContent = text; this.hintEl.classList.toggle('on', !!text); }
   power(v, visible) { this.powerBar.style.width = `${(v * 100).toFixed(1)}%`; this.powerEl.classList.toggle('on', visible); }
   phase(name) {

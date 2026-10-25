@@ -524,13 +524,18 @@ export default {
       const toP = positionWorld.sub(mem.origin).normalize(), core = smoothstep(mem.coreCos.sub(0.012), mem.coreCos.add(0.02), toP.dot(mem.dir));
       // the shops it has found keep their evening, dimmer (story.js: remembered, 0..1 each) -- the shopfront only, so the
       // street fills up shop by shop and the last look still brings the rest back: the windows above, the people
-      const remK = this.remK = REM_SHOPS.map(() => uniform(0)), P = positionWorld;
-      let rem = float(0);
-      REM_SHOPS.forEach(([x, hw], i) => { rem = max(rem, smoothstep(hw + 0.18, hw - 0.12, abs(P.x.sub(x))).mul(smoothstep(3.2, 2.95, P.y)).mul(remK[i])); });
+      const remK = this.remK = REM_SHOPS.map(() => uniform(0)), callK = this.callK = REM_SHOPS.map(() => uniform(0)), P = positionWorld;
+      let rem = float(0), sign = float(0);
+      REM_SHOPS.forEach(([x, hw], i) => {
+        const across = smoothstep(hw + 0.18, hw - 0.12, abs(P.x.sub(x)));
+        rem = max(rem, across.mul(smoothstep(3.2, 2.95, P.y)).mul(remK[i]));
+        sign = max(sign, across.mul(smoothstep(2.2, 2.3, P.y)).mul(smoothstep(3.02, 2.94, P.y)).mul(callK[i])); // its board only (y 2.3-2.95)
+      });
       const thenC = texture(then, uv()).rgb, nowC = texture(now, uv()).rgb.mul(far.mul(0.62));
       // (past 1 for a moment when a shop is found: a flash that settles. Codex player-1: kept shops told apart from the
-      // rest too weakly -- 0.62 of a half-bright "then" -> 0.72 of 0.55)
-      bd.colorNode = mix(mix(nowC, thenC.mul(rem.mul(0.3).add(0.25)), rem.min(1).mul(0.72)), thenC.mul(mix(float(0.36), float(0.98), core)), k); // what the beam itself touches stays brightest
+      // rest too weakly -- 0.62 of a half-bright "then" -> 0.72 of 0.55.) A shop not yet found calls with its sign alone
+      // lit, flickering (story.js) -- Codex player-2: calling and found both lit the whole front, "look here" read as "found"
+      bd.colorNode = mix(mix(mix(nowC, thenC.mul(rem.mul(0.3).add(0.25)), rem.min(1).mul(0.72)), thenC.mul(0.85), sign), thenC.mul(mix(float(0.36), float(0.98), core)), k); // what the beam itself touches stays brightest
       const BW = 16, BH = BW * 1920 / 3840;
       const plane = new THREE.Mesh(new THREE.PlaneGeometry(BW, BH), bd); plane.rotation.y = Math.PI; // faces the shop (-z)
       plane.position.set(0.4, -STEP + BH / 2 - 0.05, d / 2 + 0.25 + 8.5); root.add(plane); this.backdrop = plane;
@@ -985,7 +990,7 @@ export default {
         for (const o of objs) o.visible = false;
       }
     }
-    ctx.api.shop = { streetNow: this.streetNow, streetThen: this.streetThen, backdrop: this.backdrop, remK: this.remK, root, placed, ROOM, lod, rig, eyeGlow, lights: { hemi, dusk, lamp: this.lamp, fill, tube: this.tubeLight, tubeGlow, robotFill: this.robotFill }, farK: this.farK, robotTurn: (k) => { rig.body = -Math.PI * Math.min(1, Math.max(0, k)); rig.update(); }, review: !ctx.isShot && ctx.params.get("review") !== null };
+    ctx.api.shop = { streetNow: this.streetNow, streetThen: this.streetThen, backdrop: this.backdrop, remK: this.remK, callK: this.callK, root, placed, ROOM, lod, rig, eyeGlow, lights: { hemi, dusk, lamp: this.lamp, fill, tube: this.tubeLight, tubeGlow, robotFill: this.robotFill }, farK: this.farK, robotTurn: (k) => { rig.body = -Math.PI * Math.min(1, Math.max(0, k)); rig.update(); }, review: !ctx.isShot && ctx.params.get("review") !== null };
     ctx.postfx.memoryGrade = true; // the past inside the beam is graded per pixel (src/engine/PostFX.js)
     Object.assign(ctx.postfx.params, { bloomRadius: 0.35, bloomStrength: 0.26, bloomThreshold: 2.2 }); // a tight glow round the hottest cores only (the lamp's shade is lit point-blank: it must not flare)
     // the face light for the robot's close-ups (story: wait / waking), soft and unshadowed, off otherwise (never removed:

@@ -79,6 +79,13 @@ const ARRIVE_K = [
   K(16.0, WAIT_POS.toArray(), WAIT_LOOK.toArray(), 38),    // its face
 ];
 const TOUCH = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches; // a phone or tablet: hints speak of fingers
+// the film's words (main.js puts the title up while the page loads, with "loading" where "click to begin" will be)
+export const TITLE_TEXT = () => ({
+  title: tr('青 石 巷', 'Bluestone Lane'), sub: tr('请戴上耳机', 'Best with headphones'), start: tr('点击画面开始', TOUCH ? 'Tap to begin' : 'Click to begin'),
+  credit: tr('店里的每一件旧物都由 Tripo 生成 · 素材出处与许可见 credits.html', 'Every old object in the shop was generated with Tripo · sources and licences: credits\u2011en.html'),
+  card: [tr('它记得这条街亮着灯的样子。', 'It remembers the street with its lights on.')],
+  replay: tr('点击画面重看', TOUCH ? 'Tap to watch again' : 'Click to watch again'),
+});
 const ease = (x) => x * x * (3 - 2 * x);
 const clamp01 = (x) => Math.min(1, Math.max(0, x));
 const LOOK_POWER_S = 105; // seconds of open eye before the power is gone (both acts)
@@ -96,12 +103,7 @@ export default {
   name: 'story',
   async init(ctx) {
     if (ctx.isShot || ctx.api.shop?.review) { this.off = true; return; }
-    this.film = new Film(document.getElementById('ui'), {
-      title: tr('青 石 巷', 'Bluestone Lane'), sub: tr('请戴上耳机', 'Best with headphones'), start: tr('点击画面开始', TOUCH ? 'Tap to begin' : 'Click to begin'),
-      credit: tr('店里的每一件旧物都由 Tripo 生成 · 素材出处与许可见 credits.html', 'Every old object in the shop was generated with Tripo · sources and licences: credits\u2011en.html'),
-      card: [tr('它记得这条街亮着灯的样子。', 'It remembers the street with its lights on.')],
-      replay: tr('点击画面重看', TOUCH ? 'Tap to watch again' : 'Click to watch again'),
-    });
+    this.film = Film.shared(document.getElementById('ui'), TITLE_TEXT()); // (main.js shows it while the page loads)
     this.phase = ctx.params.get('phase') || 'title';
     this.t = 0; this.power = 1; this.lookTime = 0; this.streetTime = 0; this.seen = new Set(); this.dwell = {}; this.sinceSeen = 0;
     this.cam = { pos: ARRIVE_K[0].p.clone(), look: ARRIVE_K[0].l.clone(), fov: ARRIVE_K[0].fov };
@@ -204,6 +206,10 @@ export default {
         P.focus.value += (fd - P.focus.value) * Math.min(1, dt * 3); P.focalRange.value = this.tvShot ? 1.2 : 0.9; P.bokeh.value += ((bench ? 1.4 : this.tvShot ? 2.0 : 2.4 * this.zoom) - P.bokeh.value) * Math.min(1, dt * 2);
         this.lookTime += dt;
         if (this.t > 4 && !this.moved) film.hint(TOUCH ? tr('保持按住，滑动手指', 'Keep holding and slide your finger') : tr('保持按住，移动鼠标', 'Keep holding and move the mouse'));
+        // let go in act one and its eye shuts, the shop goes back to now -- with nothing to say why (2026-10-26)
+        this.letGo = !input.hold && !(bt > 0 && bt < BENCH.release) ? (this.letGo ?? 0) + dt : 0;
+        if (this.moved && this.letGo > 1.5) { film.hint(TOUCH ? tr('按住屏幕，让它睁着眼', 'Hold the screen to keep its eye open') : tr('按住，让它睁着眼', 'Hold to keep its eye open')); this.letGoHint = true; }
+        else if (this.letGoHint && input.hold) { film.hint(''); this.letGoHint = false; }
         if (!this.moved && (Math.abs(input.pointer.x) > 0.2 || Math.abs(input.pointer.y) > 0.2)) { this.moved = true; film.hint(''); eye?.aim(null); }
         if (!this.moved && this.t > 9 && bt < 0) { // left alone, it looks at the set in the middle of the shop itself: over its head, the set beyond in focus
           eye?.aim(TV_SHOT.aim); this.cam.pos.copy(TV_SHOT.pos); this.cam.look.copy(TV_SHOT.look); this.cam.fov = TV_SHOT.fov; this.zoom = 0; this.tvShot = true;
@@ -320,7 +326,7 @@ export default {
         // nothing found for a while: one of the shops not yet seen calls from its side of the street (a bell)
         if (!on && this.sinceSeen > 6 && (this.callT = (this.callT ?? 5) - dt) < 0) {
           const unseen = SPOTS.filter((x) => !this.seen.has(x.key)), s = unseen[(this.calls = (this.calls ?? -1) + 1) % Math.max(1, unseen.length)]; this.callT = 7; // (in turn: the first unseen one called every time)
-          if (s) { audio?.play(s.sound, { pos: s.pos }); this.callFlash = { key: s.key, t0: this.t }; } // the shop itself calls, from its side of the street, its front flickering like a tube that will not quite start
+          if (s) { audio?.play(s.sound, { pos: s.pos }); this.callFlash = { key: s.key, t0: this.t }; } // the shop itself calls, from its side of the street, its sign flickering like a tube that will not quite start
         }
         // enough: all five shops (and a moment with the last); or three, half a minute on the street and nothing new for a
         // while; or the power nearly gone -- then one last look (2026-10-26: three shops and 5 s ended it after 11 s)
@@ -347,7 +353,7 @@ export default {
         eye?.aim(SPOTS.find((x) => x.key === 'tv').pos);
         m.memWide = 1 + 3.2 * ease(clamp01((this.t - 2.6) / 2.0)); // the shop alone a moment (the song), then the whole street
         this.power = Math.max(0.03, this.power - dt * 0.03);
-        m.power = this.t > 11.2 && Math.random() < 0.25 ? 0.04 : Math.max(0.34, this.power); // (the whole street at full strength, whatever act two left: from 0.2 it lit at 0.6)
+        m.power = Math.max(0.34, this.power); // (the whole street at full strength, whatever act two left: from 0.2 it lit at 0.6. No stutter at its end any more: dark there, it lit again as the fade began -- "the power came back", Codex player-2)
         m.pastK = 0.4 + 0.6 * ease(clamp01((this.t - 2.6) / 2.0)); // the whole street's evening floods in over it
         if (this.t > 12.2) this.set('fade');
         break;
@@ -359,8 +365,12 @@ export default {
         // (2026-10-26: from what act two had left, 0.06, the whole street went at once)
         m.holdGaze = true;
         this.power = Math.max(0, this.power - dt / 3);
-        m.power = this.t < 2.8 ? 0.34 * (1 - 0.7 * this.t / 2.8) : 0.02;
-        m.forceOpen = this.t < 2.2 ? true : this.t < 6.2 ? Math.random() > Math.min(0.92, (this.t - 2.2) * 0.25) : false;
+        // (its face from 5.5 s: the light flickers once more and the iris closes there -- 6.2 to ~7 s -- not before the cut:
+        // the shot opened on a lens already dark, Codex player-2)
+        // (the stutter is in its light, not its iris: the iris stays open till the face shot and closes there)
+        const flick = Math.random() < 0.3 ? 0.15 : 1;
+        m.power = this.t < 2.8 ? 0.34 * (1 - 0.7 * this.t / 2.8) * (this.t > 2.2 ? flick : 1) : this.t < 5.5 ? 0.02 : 0.22 * (1 - clamp01((this.t - 5.5) / 1.4)) * flick;
+        m.forceOpen = this.t < 6.2;
         if (this.t > 5.3) atmo?.set('out');
         m.memWide = this.t < 2.8 ? 4.2 : 1;
         m.pastK = this.t < 2.8 ? 1 : 0; // (with the power: atmo.js)
@@ -371,7 +381,7 @@ export default {
           this.cam.pos.copy(EYE0).addScaledVector(FACING, 0.78).addScaledVector(LEFT, 0.18).add(this._w.set(0, 0.03, 0));
           this.cam.look.copy(EYE0).add(this._w.set(0, 0.02, 0)); this.cam.fov = 34;
         }
-        if (this.t > 10) this.set('end');
+        if (this.t > 9.2) this.set('end');
         break;
       }
       case 'end': {
@@ -385,7 +395,7 @@ export default {
         if (this.t < 0.05) this.cut = true;
         film.fade(Math.min(1, Math.max(0, (this.t - 5) / 2.5))); // (Codex player-1: the dark street held long after the farewell -- 7 + 3 s -> 5 + 2.5 s)
         if (this.t > 9.5) film.endCard(); // (two seconds of silence first: sound.js)
-        if (this.t > 19) film.replayHint(); // (ten seconds after the card: at thirty the screen sat dark and still for long enough to wonder)
+        if (this.t > 13.5) film.replayHint(); // (4 s after the card: 9.5 s later was long enough to leave -- Codex player-2) // (ten seconds after the card: at thirty the screen sat dark and still for long enough to wonder)
         if (this.t > 11 && (input.wasPressed('Pointer') || input.wasPressed('Space'))) location.reload();
         break;
       }
@@ -406,9 +416,9 @@ export default {
         }
         this.rem[i] += (want - this.rem[i]) * Math.min(1, dt * (want > this.rem[i] ? 2.5 : 14));
         const pk = this.phase === 'street' && this.foundAt?.[s.key] !== undefined ? Math.max(0, 1 - (this.t - this.foundAt[s.key]) / 1.4) : 0; // (found: a flash that settles into its kept light)
-        const ft = this.phase === 'street' && this.callFlash?.key === s.key ? this.t - this.callFlash.t0 : -1; // (a shop calling: three flickers)
-        const flash = ft < 0 || ft > 1 ? 0 : ft < 0.08 || (ft > 0.2 && ft < 0.32) ? 0.4 : ft > 0.5 ? 0.4 * (1 - (ft - 0.5) / 0.5) : 0;
-        rk[i].value = Math.max(flash, this.rem[i] * (0.9 + 0.1 * Math.sin(time * 1.1 + i * 1.7)) * (this.phase === 'street' && this.dip > 0 ? 0.25 : 1) * flick + 0.45 * pk * pk);
+        const ft = this.phase === 'street' && this.callFlash?.key === s.key && !this.seen.has(s.key) ? this.t - this.callFlash.t0 : -1; // (a shop calling: its sign flickers three times, then glows and fades)
+        const ck = ctx.api.shop?.callK; if (ck) ck[i].value = ft < 0 || ft > 1.6 ? 0 : ft < 0.08 || (ft > 0.2 && ft < 0.32) ? 0.9 : ft > 0.5 ? 0.9 * (1 - (ft - 0.5) / 1.1) : 0;
+        rk[i].value = this.rem[i] * (0.9 + 0.1 * Math.sin(time * 1.1 + i * 1.7)) * (this.phase === 'street' && this.dip > 0 ? 0.25 : 1) * flick + 0.45 * pk * pk;
         sum += this.rem[i];
       });
       this.remembered = sum / SPOTS.length; // (sound.js: the past street's murmur stays with them)
