@@ -240,7 +240,7 @@ class LodObject extends THREE.Group {
     s.center.set(0, m.dims[1] / 2, 0).applyMatrix4(this.matrixWorld);
     s.radius = m.radius * this.matrixWorld.getMaxScaleOnAxis(); return s;
   }
-  visibleInTree() { let o = this; while (o) { if (!o.visible) return false; o = o.parent; } return true; }
+  visibleInTree() { let o = this; while (o) { if (!o.visible && !(o === this && o.userData.offBeam)) return false; o = o.parent; } return true; } // (offBeam: hidden only while the beam is off it -- index.js -- its level kept ready for when the beam comes)
 }
 
 // glTF MeshStandardMaterial -> MeshStandardNodeMaterial with the same maps and factors, so every level is a node

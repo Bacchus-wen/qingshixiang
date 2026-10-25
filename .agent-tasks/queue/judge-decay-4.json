@@ -1,0 +1,15 @@
+{
+ "id": "judge-decay-4",
+ "from": "claude",
+ "to": "codex",
+ "title": "复核 落败第3轮后:纸片、预热漏编、动态检查",
+ "write": false,
+ "gen": false,
+ "paths": [],
+ "status": "done",
+ "posted": "2026-10-26 00:37:59",
+ "started": "2026-10-26 00:38:01",
+ "seconds": 149.7,
+ "finished": "2026-10-26 00:40:32",
+ "reason": null
+}

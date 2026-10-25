@@ -1,6 +1,6 @@
 import * as THREE from 'three/webgpu';
 import {
-  uniform, positionWorld, dot, length, smoothstep, float, vec3, mx_noise_float, time, color, hash, floor, step,
+  uniform, positionWorld, dot, length, smoothstep, float, vec3, mx_noise_float, time, color, hash, floor, step, Fn, If,
 } from 'three/tsl';
 
 // The memory cone as TSL: where the robot's eye looks, the past shows through.
@@ -31,15 +31,23 @@ export function syncMemory(m) {
 
 // 0..1: how much "past" shows at world position P. The edge is ragged world-space grain ("failed development"),
 // fixed in world space so TRAA does not smear it.
+// (The grain moves the edge by at most |grain| x span, |grain| <= 0.75: only pixels within that of the edge need its two
+// noises -- elsewhere the mask is 0 or 1 whatever the grain. Same result, the noise skipped on almost every pixel.)
 export function memoryMask(P = positionWorld) {
-  const v = P.sub(mem.origin);
-  const d = length(v);
-  const c = dot(v.div(d.max(1e-3)), mem.dir);
-  const grain = mx_noise_float(P.mul(3.1)).mul(0.5).add(mx_noise_float(P.mul(17.0)).mul(0.25));
-  const edge = mem.cosAngle.add(grain.mul(0.035).mul(float(1).sub(mem.strength).add(0.4)));
-  const inCone = smoothstep(edge, edge.add(mem.soft), c); // v4 shop: softer (soft = 0.06): the past fades in, it is not a torch circle
-  const reach = float(1).sub(smoothstep(mem.range.mul(0.55), mem.range, d));
-  return inCone.mul(reach).mul(mem.strength);
+  return Fn(() => {
+    const v = P.sub(mem.origin);
+    const d = length(v);
+    const c = dot(v.div(d.max(1e-3)), mem.dir);
+    const span = float(0.035).mul(float(1).sub(mem.strength).add(0.4));
+    const grain = float(0).toVar();
+    If(c.greaterThan(mem.cosAngle.sub(span)).and(c.lessThan(mem.cosAngle.add(span).add(mem.soft))), () => {
+      grain.assign(mx_noise_float(P.mul(3.1)).mul(0.5).add(mx_noise_float(P.mul(17.0)).mul(0.25)));
+    });
+    const edge = mem.cosAngle.add(grain.mul(span));
+    const inCone = smoothstep(edge, edge.add(mem.soft), c); // v4 shop: softer (soft = 0.06): the past fades in, it is not a torch circle
+    const reach = float(1).sub(smoothstep(mem.range.mul(0.55), mem.range, d));
+    return inCone.mul(reach).mul(mem.strength);
+  })();
 }
 
 // CPU twin for per-object decisions (shutters rising, figures spawning). Same maths, no grain.

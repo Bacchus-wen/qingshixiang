@@ -1,0 +1,15 @@
+{
+ "id": "judge-decay-3",
+ "from": "claude",
+ "to": "codex",
+ "title": "评审 落败第3轮:房间、碎片、倒下的台扇、摆钟、性能",
+ "write": false,
+ "gen": false,
+ "paths": [],
+ "status": "done",
+ "posted": "2026-10-26 00:13:13",
+ "started": "2026-10-26 00:13:14",
+ "seconds": 205.1,
+ "finished": "2026-10-26 00:16:40",
+ "reason": null
+}

@@ -113,22 +113,24 @@ export class Engine {
   // then again until nothing new is asked for. Behind the loading screen; all in parallel (asyncPipelines).
   async warmUp(onProgress) {
     const t0 = performance.now(), c0 = this.pipes.created;
+    this.ctx.warming = true; // (systems that hide things by state show them all now: the shop's whole sets kept off the beam)
     const culled = [], shadows = [];
     this.scene.traverseVisible((o) => {
       if (o.frustumCulled && (o.isMesh || o.isSprite || o.isPoints || o.isLine)) { o.frustumCulled = false; culled.push(o); }
       if (o.isLight && o.castShadow && o.shadow) shadows.push(o.shadow);
     });
-    let asked = 0; const log = [];
-    for (let round = 0; round < 8; round++) {
-      for (const sh of shadows) sh.needsUpdate = true; // (a shadow that does not update every frame still gets compiled)
-      const tr = performance.now(); this.postfx.render(); const build = performance.now() - tr; // (building the shaders: here, on this thread)
-      const n = this.pipes.pending; if (!n && round > 0) break;
-      asked += n; let done = 0; const all = this.pipes.settled();
-      const tick = setInterval(() => { done = asked - this.pipes.pending; onProgress(Math.min(0.98, done / Math.max(1, asked))); }, 100);
-      const tw = performance.now(); await all; clearInterval(tick);
-      log.push(`${n} in ${build.toFixed(0)}+${(performance.now() - tw).toFixed(0)}ms`); // (compiling them: the GPU process)
-    }
-    for (const o of culled) o.frustumCulled = true;
+    let asked = 0, tick = null; const log = [];
+    try {
+      for (let round = 0; round < 8; round++) {
+        for (const sh of shadows) sh.needsUpdate = true; // (a shadow that does not update every frame still gets compiled)
+        const tr = performance.now(); this.postfx.render(); const build = performance.now() - tr; // (building the shaders: here, on this thread)
+        const n = this.pipes.pending; if (!n && round > 0) break;
+        asked += n; let done = 0; const all = this.pipes.settled();
+        tick = setInterval(() => { done = asked - this.pipes.pending; onProgress(Math.min(0.98, done / Math.max(1, asked))); }, 100);
+        const tw = performance.now(); await all; clearInterval(tick); tick = null;
+        log.push(`${n} in ${build.toFixed(0)}+${(performance.now() - tw).toFixed(0)}ms`); // (compiling them: the GPU process)
+      }
+    } finally { clearInterval(tick); for (const o of culled) o.frustumCulled = true; this.ctx.warming = false; } // (a failed compile too: no stray timer, culling back)
     onProgress(1);
     console.log(`[engine] warm-up ${(performance.now() - t0).toFixed(0)}ms, ${this.pipes.created - c0} pipelines (per round, built + compiled: ${log.join(', ')})`);
   }

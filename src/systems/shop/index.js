@@ -11,8 +11,8 @@ import { HeadRig } from './rig.js';
 import { pastHooks } from './past.js';
 import { memoryMask, mem } from '../../materials/memory.js';
 import { tr, zh } from '../../ui/i18n.js';
-import { decayScene, decayK, DECAY_SKIP, addCobwebs, TWINS, twinMask } from './decay.js';
-import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorld, positionLocal, smoothstep, vec2, vec3, mx_worley_noise_float, texture, normalWorldGeometry, abs, step, uniform, uv, vec4, cameraPosition, fract } from 'three/tsl';
+import { decayScene, decayMaterial, decayK, DECAY_SKIP, addCobwebs, addDebris, TWINS, twinMask } from './decay.js';
+import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorld, positionLocal, smoothstep, vec2, vec3, mx_worley_noise_float, texture, normalWorldGeometry, abs, step, uniform, uv, vec4, cameraPosition, fract, materialColor, materialNormal, transformNormalToView, sign } from 'three/tsl';
 
 // v4: the closed-down home-appliance repair shop (docs/scene-shop.md). This phase is models + layout only:
 // a simple room shell, the Tripo models placed from /models/shop/layout.json (every item is grounded on its
@@ -113,6 +113,7 @@ function shutterMat() {
 const _box = new THREE.Box3();
 
 // flat printed things on the walls (pegboard, calendar, price list, poster, signs): a textured plane a few mm off the wall
+let NO_DECAY = false; // (?nodecay: set in init before the room is built)
 function decal(name, W, H, opts = {}) {
   const m = new THREE.MeshStandardNodeMaterial({ map: tex(name), roughness: opts.rough ?? 0.85 });
   m.map.wrapS = m.map.wrapT = THREE.ClampToEdgeWrapping;
@@ -128,6 +129,7 @@ function decal(name, W, H, opts = {}) {
 // coordinate (x for back/front, z for the side walls) and centre height
 function onWall(o, wall, a, y, off = 0.004) {
   const { w, d } = ROOM;
+  if (wall !== 'front-out' && !NO_DECAY) o.traverse((m) => { if (m.isMesh && m.material.map) decayMaterial(m.material, { yellow: 0.5, fade: 0.35, film: 0.02 }); }); // (the posters inside: faded and yellow in the present)
   if (wall === 'back') { o.position.set(a, y, -d / 2 + off); }
   if (wall === 'left') { o.position.set(-w / 2 + off, y, a); o.rotation.y = Math.PI / 2; }
   if (wall === 'right') { o.position.set(w / 2 - off, y, a); o.rotation.y = -Math.PI / 2; }
@@ -347,6 +349,34 @@ export default {
     pastHooks(lod); // radio dials, the clock's pendulum: on every level as it loads (./past.js)
     // the present: dust, grime and faded colour on everything outside the beam, but the robot's corner (./decay.js)
     if (ctx.params.get('nodecay') !== null) decayK.value = 0;
+    NO_DECAY = ctx.params.get('nodecay') !== null;
+    // the wall clock as generated has a second dial on the side of its case (the broken one has not): on the side faces,
+    // in the dial's height band, what is not the case's red-brown wood -- the cream face, its black numerals, the brass
+    // ring -- becomes dark wood with a vertical grain (before the decay wraps its colour). By hue, not brightness:
+    // darkening only the bright texels left the numerals and the ring drawing the dial
+    lod.decorate((scene, name) => {
+      if (name !== 'wall_clock') return;
+      scene.traverse((m) => {
+        if (!m.isMesh || !m.material.map || !m.material.isNodeMaterial) return;
+        m.geometry.computeBoundingBox();
+        // (the level's own bounds as uniforms, not constants: every level then compiles to the same pipeline -- with them
+        // written into the shader each finer level needed its own, compiled when first drawn, and drawn first when the
+        // beam reaches the clock: hidden till then (the twins' cull below), a hole for those frames)
+        const mat = m.material, c = texture(mat.map).rgb, bb = m.geometry.boundingBox;
+        const y = positionLocal.y.sub(uniform(bb.min.y)).div(uniform(bb.max.y - bb.min.y)); // (0 bottom, 1 top: the dial is at 0.49..0.83)
+        const band = smoothstep(0.47, 0.5, y).mul(smoothstep(0.86, 0.83, y));
+        // the side panels and all that stands on them (the dial's rim and hands too, which face every way), by position:
+        // the panels are at |x| 0.36..0.40 of the case's 0.44 half width, the front's frame further in
+        const side = smoothstep(0.74, 0.8, abs(positionLocal.x).div(uniform(bb.max.x)));
+        const wood = smoothstep(0.62, 0.45, c.g.div(c.r.max(0.004))); // (linear: the case's wood g/r ~0.2-0.4, brass ~0.6, cream and black ~0.8)
+        const grain = mx_noise_float(vec3(positionLocal.z.mul(25), positionLocal.y.mul(1.8), 1.3)).mul(0.5).add(0.5);
+        const plank = mix(vec3(0.05, 0.014, 0.007), vec3(0.1, 0.03, 0.013), grain);
+        const k = side.mul(band).mul(float(1).sub(wood));
+        mat.colorNode = vec4(mix(materialColor.rgb, plank, k), materialColor.a);
+        // and its relief lit flat: the panel's own normal there
+        mat.normalNode = mix(materialNormal, transformNormalToView(vec3(sign(positionLocal.x), 0, 0)), smoothstep(0, 0.35, k)).normalize();
+      });
+    });
     lod.decorate((scene, name) => { if (!DECAY_SKIP.has(name)) decayScene(scene, /_broken$/.test(name) ? { dust: 0.4 } : undefined); });
     // four of the sets have a broken twin standing in the same place: the broken one in the present, the whole one where
     // the beam falls, swapped per pixel (./decay.js; the twins: Tripo models of Codex's "decades later" edits of the
@@ -449,6 +479,9 @@ export default {
     const ceil = new THREE.Mesh(new THREE.PlaneGeometry(w, d).rotateX(Math.PI / 2), ceilingMat());
     ceil.material.shadowSide = THREE.DoubleSide; ceil.castShadow = true;
     ceil.position.y = h; root.add(ceil);
+    // the room itself in the present too: dust over the floor, tide marks and mould on the walls and ceiling; where the
+    // beam falls, the floor as it was kept, polished (./decay.js)
+    if (ctx.params.get('nodecay') === null) { decayMaterial(floor.material, { dust: 0.55, film: 0.2 }); decayMaterial(wm, { stains: 1, film: 0.03 }); decayMaterial(ceil.material, { stains: 0.8, film: 0 }); }
     // front wall with the shutter opening, seen from inside as dark masonry
     // front wall: pillars either side of the 3.6 m opening and the facade above it (up to 4.2 m: the sign board)
     const front = facadeMat(), FH = 4.2;
@@ -664,12 +697,19 @@ export default {
         o.name = it.name; o.userData.layout = it; placed[it.name] = o;
       } catch (e) { console.warn('[shop] model failed', it.glb || it.name, e.message); }
     }
-    // the broken twins, each where its whole set stands (same place, turn, scale and tint)
+    // the broken twins, each where its whole set stands (same place, turn, scale and tint) -- but the fan on the box by
+    // the door, which has fallen off it
+    const FALLEN = { drop_fan: { x: 2.3, z: 0.78, ry: 62, roll: 88 } }; // (clear floor beside its box: drop_carton_b covers x 1.57..2.03, z 1.16..1.60; queue_carton from x 2.49, z < 0.66)
     for (const o of Object.values(placed)) {
       const it = o.userData.layout, b = it?.glb && TWINS[it.glb];
       if (!b || !twinNames.has(b) || !o.isLodObject) continue;
       const tw = lod.instance(b, { tint: it.tint });
       tw.position.copy(o.position); tw.quaternion.copy(o.quaternion); tw.scale.copy(o.scale); tw.name = `${it.name}_broken`;
+      const F = FALLEN[it.name];
+      if (F) { // knocked over since: on its side on the floor beside where it stood
+        tw.rotation.set(0, F.ry * Math.PI / 180, 0); tw.rotateZ(F.roll * Math.PI / 180); tw.position.set(F.x, 0, F.z); tw.updateMatrixWorld(true);
+        tw.position.y -= new THREE.Box3().setFromObject(tw, true).min.y - 0.002;
+      }
       tw.traverse((m) => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
       o.parent.add(tw); tw.updateMatrixWorld(true); o.userData.twin = tw;
       if (it.wall) { // (a different depth: its back flush with the wall too, like the whole one's)
@@ -680,7 +720,26 @@ export default {
         tw.updateMatrixWorld(true);
       }
     }
+    // a whole set with a broken twin draws only when the beam can reach it: anywhere else its every pixel would be masked
+    // out (its bounding sphere against the memory cone widened by the edge's grain and a margin; checked just before
+    // each render, after the eye has moved and a cut has synced it). Its level is chosen as if it showed (lod.js), and
+    // the warm-up draws them all: the eye is shut then, and a set first drawn when the beam reached it would have had no
+    // compiled pipeline yet -- skipped for those frames (asyncPipelines), a hole where the beam falls
+    const pairs = Object.values(placed).filter((o) => o.userData.twin).map((o) => ({ o, s: new THREE.Box3().setFromObject(o, true).getBoundingSphere(new THREE.Sphere()) }));
+    if (pairs.length && ctx.params.get('nobeamcull') === null) {
+      const v = new THREE.Vector3(), prev = scene.onBeforeRender, clamp = THREE.MathUtils.clamp;
+      scene.onBeforeRender = function (...a) {
+        prev.apply(this, a);
+        const k = mem.strength.value, O = mem.origin.value, D = mem.dir.value, cone = Math.acos(clamp(mem.cosAngle.value - 0.06, -1, 1)) + 0.04;
+        for (const { o, s } of pairs) {
+          v.copy(s.center).sub(O);
+          const d = v.length(), on = ctx.warming || (k > 0 && d - s.radius < mem.range.value && (d <= s.radius || Math.acos(clamp(v.dot(D) / d, -1, 1)) - Math.asin(s.radius / d) < cone));
+          o.visible = on; o.userData.offBeam = !on;
+        }
+      };
+    }
     if (ctx.params.get('nodecay') === null) addCobwebs(root, layout, ROOM); // (the present only: ./decay.js)
+    if (ctx.params.get('nodecay') === null) addDebris(root, { tvAt: placed.tv_on_cartons?.position });
     // wiring and small dressing that makes the place look used (procedural: too thin for image-to-3D):
     // the tube's conduit to a switch, the robot's own power cable to a wall socket, cords hanging off shelf
     // appliances, screwdrivers hanging on the pegboard. One merged mesh per material.
