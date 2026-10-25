@@ -196,11 +196,19 @@ export default {
         const zk = ease(clamp01((this.still - 1.0) / 1.6)); this.zoom = (this.zoom ?? 0) + (zk - (this.zoom ?? 0)) * Math.min(1, dt * (zk > (this.zoom ?? 0) ? 1.2 : 3));
         // (judge r3: from behind its head the rusty box filled the lower third -- the close-up goes on past it, along the
         // beam to a metre or so from the thing, a little right of and above the shaft: a product shot in its light)
-        this.cam.pos.lerp(this._v.copy(eyePos).addScaledVector(m.dir, 1.35).addScaledVector(this._w, -0.33).setY(eyePos.y + 0.27), 0.85 * this.zoom);
+        // (2026-10-26: a close-up to the left, toward the shelves past the bench, went 20 cm over the bench top -- its lamp's
+        // pool filled the frame, burnt white. It stops short of the bench, its lamp and what stands on them)
+        { const zt = this._v.copy(eyePos).addScaledVector(m.dir, 1.35).addScaledVector(this._w, -0.33).setY(eyePos.y + 0.27), base = (this._b ??= new THREE.Vector3()).copy(this.cam.pos), p = this._p2 ??= new THREE.Vector3();
+          let f = 0.85 * this.zoom;
+          while (f > 0 && (p.copy(base).lerp(zt, f), p.x > -2.5 && p.x < -0.62 && p.z > 0.3 && p.z < 1.5 && p.y < 1.7)) f -= 0.05;
+          this.cam.pos.lerp(zt, Math.max(0, f));
+          // and on its way in it keeps 55 cm from its head, a little above it (a close-up to the left passed 20 cm over the
+          // box of its head, the lamp-lit top filling the lower frame)
+          (this.headKeep ??= new THREE.Vector3()).set(eyePos.x - m.dir.x * 0.15, eyePos.y, eyePos.z - m.dir.z * 0.15); } // (applied to the eased view itself, below: the target went round, the easing cut the corner)
         this.cam.fov = 50 - 18 * this.zoom;
         if (benchShot) { // its own radio: from in front of the open set, the robot's eye turned to it beyond
           this.zoom = 0; this.cam.pos.set(-1.95, 1.0, 1.4).lerp(this._v.set(-1.62, 0.98, 1.14), ease(clamp01((bt - BENCH.cut) / (BENCH.back - BENCH.cut)))); this.cam.look.set(-1.0, 0.93, 0.78); this.cam.fov = 46; m.spotK = 0.3; m.lampK = 0.5; // (r16: lower and tighter -- the lens and the set, the sign whole, less empty bench; the desk lamp's haze halved) (a slow push in on the set as its song starts)
-        } else m.spotK = 0.42; // (at 2-3 m on pale plaster the full lamp burnt its circle white; 0.65 still did)
+        } else { m.spotK = 0.42; m.lampK = 0.65 - 0.4 * THREE.MathUtils.smoothstep(-m.dir.x, 0.3, 0.75); } // (at 2-3 m on pale plaster the full lamp burnt its circle white; 0.65 still did) (and the bench lamp, half a metre over the opened radio, burnt its top white whenever the view looked left past it: 0.65, down to 0.25 looking that way, as a camera's exposure would -- 2026-10-26)
         m.beamK = 0.55; // act one's shaft: a trace in the air, not a fog over the shelves
         // a photographer's lens on the close-ups: the thing in the beam sharp, the shelf behind it soft (as if f/2)
         const P = ctx.postfx.params, bench = benchShot && this.benchPos;
@@ -455,6 +463,11 @@ export default {
     const snap = this.cut; // (a cut is a cut for the lens too: no zoom easing across it)
     if (this.cut) { this.curPos.copy(this.cam.pos); this.curLook.copy(this.cam.look); this.cut = false; }
     this.curPos.lerp(this.cam.pos, Math.min(1, dt * k));
+    if (this.phase === 'look' && this.headKeep && !this.benchShotOn) { // act one: never within 55 cm of its head, a little above it when near
+      const H = this.headKeep, dx = this.curPos.x - H.x, dz = this.curPos.z - H.z, dh = Math.hypot(dx, dz);
+      if (dh < 0.55) { const s = 0.55 / Math.max(dh, 1e-3); this.curPos.x = H.x + dx * s; this.curPos.z = H.z + dz * s; }
+      this.curPos.y = Math.max(this.curPos.y, H.y + 0.45 * THREE.MathUtils.smoothstep(0.8 - dh, 0, 0.3));
+    }
     this.curLook.lerp(this.cam.look, Math.min(1, dt * k * 1.2));
     const cam = ctx.camera;
     cam.position.copy(this.curPos);
