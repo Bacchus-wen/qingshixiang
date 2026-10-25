@@ -277,7 +277,8 @@ export default {
 
     // ---- the lens parts follow the head; the iris opens with the eye (a little ahead of the light: it lets it out)
     this.lens.matrix.multiplyMatrices(this.robot.matrixWorld, this._lm.multiplyMatrices(rig.mat.value, LENS_FRAME)); this.lens.matrixWorldNeedsUpdate = true;
-    const lu = this.lensU; lu.thenK.value = Math.min(1, m.pastK ?? 0); lu.aperture.value = 0.06 + 0.4 * Math.min(1, o * 1.15); lu.twist.value = o * 0.18; lu.coreK.value = ((m.eyeRest ?? 0.35) * (1 - o) + 3.2 * o * Math.min(1, pw * 2)) * (m.coreK ?? 1);
+    const mech = Math.min(m.openCap ?? 1, this.open * flick); // the iris's own opening: the power dims its light, not the iris (Codex player-3: at the end its iris pumped with the flicker)
+    const lu = this.lensU; lu.thenK.value = Math.min(1, m.pastK ?? 0); lu.aperture.value = 0.06 + 0.4 * Math.min(1, mech * 1.15); lu.twist.value = mech * 0.18; lu.coreK.value = ((m.eyeRest ?? 0.35) * (1 - o) + 3.2 * o * Math.min(1, pw * 2)) * (m.coreK ?? 1);
     // ---- the light and the shaft follow the lens
     rig.eye(this.robot, this._p, this._d);
     const origin = this._v.copy(this._p).addScaledVector(this._d, 0.045); // just in front of the lens barrel

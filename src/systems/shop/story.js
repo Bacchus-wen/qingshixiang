@@ -113,6 +113,8 @@ export default {
     ctx.api.story = this;
     if (this.phase === 'title') this.film.title(true); else { this.film.title(false); this.set(this.phase, true); }
     if (['turn', 'street', 'last', 'fade', 'end'].includes(this.phase)) ctx.api.shop?.robotTurn?.(1); // (?phase= straight into act two)
+    if (['street', 'last', 'fade'].includes(this.phase)) ctx.memory.forceOpen = true; // (as after the turn: its eye open without holding)
+    if (this.phase === 'end') ctx.api.atmo?.set('out');
     ctx.postfx.params.presentK.value = 1; // the dusty present outside the beam
   },
   set(phase, cut = false) { this.phase = phase; this.t = 0; this.cut = cut; },
@@ -137,7 +139,7 @@ export default {
       case 'title': {
         m.forceOpen = false; film.fade(1);
         this.cam.pos.copy(ARRIVE_K[0].p); this.cam.look.copy(ARRIVE_K[0].l); this.cam.fov = ARRIVE_K[0].fov; this.cut = true;
-        if (input.pointer.held || input.wasPressed('Pointer') || input.wasPressed('Space') || input.wasPressed('Enter')) { film.title(false); this.set('arrive'); }
+        if (input.wasPressed('Pointer') || input.wasPressed('Space') || input.wasPressed('Enter')) { film.title(false); this.set('arrive'); } // (a press, not a button still held from the loading screen: the sound unlocks on the press)
         break;
       }
       case 'arrive': {
@@ -296,7 +298,7 @@ export default {
         if (this.gazeHeld && Math.hypot(input.pointer.x - this.gazeHeld.x, input.pointer.y - this.gazeHeld.y) > 0.06) { this.gazeHeld = null; m.lookOverride = undefined; } // you move: the gaze is yours
         const mv = this.glitchOut === undefined ? 1 : ease(clamp01((this.glitchOut - MATCH.hold) / MATCH.move));
         this.cam.pos.copy(MATCH.pos).lerp(ACT2_POS, mv);
-        this.cam.look.copy(MATCH.look).lerp(this._w.copy(ACT2_LOOK).lerp(this._v.copy(eyePos).addScaledVector(m.dir, 10), 0.05), mv);
+        this.cam.look.copy(MATCH.look).lerp(this._w.copy(ACT2_LOOK).lerp(this._v.copy(eyePos).addScaledVector(m.dir, 10), ctx.camera.aspect < 1 ? 0.5 : 0.05), mv); // (a phone held upright sees a narrow slice: the view turns half way after the gaze, or the shops at the ends stay out of frame -- Codex player-3)
         this.cam.fov = MATCH.fov + (ACT2_FOV - MATCH.fov) * mv;
         // the view steps after the gaze (a dolly, not a pan): looking to the ends of the street it moves toward the door
         // and a little across, to see past the jambs that hid most of the noodle shop and half the tailor's from here
@@ -324,7 +326,7 @@ export default {
         }
         this.sinceSeen += dt;
         // nothing found for a while: one of the shops not yet seen calls from its side of the street (a bell)
-        if (!on && this.sinceSeen > 6 && (this.callT = (this.callT ?? 5) - dt) < 0) {
+        if (!(on && !this.seen.has(on.key)) && this.sinceSeen > 6 && (this.callT = (this.callT ?? 5) - dt) < 0) { // (resting on a shop already found does not silence the others -- Codex player-3)
           const unseen = SPOTS.filter((x) => !this.seen.has(x.key)), s = unseen[(this.calls = (this.calls ?? -1) + 1) % Math.max(1, unseen.length)]; this.callT = 7; // (in turn: the first unseen one called every time)
           if (s) { audio?.play(s.sound, { pos: s.pos }); this.callFlash = { key: s.key, t0: this.t }; } // the shop itself calls, from its side of the street, its sign flickering like a tube that will not quite start
         }

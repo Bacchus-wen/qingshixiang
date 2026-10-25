@@ -38,6 +38,7 @@ try {
   await engine.init(list, (p) => { loading.style.setProperty('--p', p); });
   loading.classList.add('done');
   early?.start(TITLE_TEXT().start);
+  engine.ctx.input?.endFrame(); // (a click while it loaded must not start it: the sound unlocks on a press after this -- Codex player-3)
   engine.start();
   if (engine.ctx.params.get('studio') !== null) import('./ui/studio.js').then((m) => m.studio(engine.ctx)); // live tuning panel
 } catch (e) {
