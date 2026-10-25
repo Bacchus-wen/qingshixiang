@@ -79,6 +79,10 @@ export default {
     // head servo: a filtered sawtooth whose level follows how fast the head turns
     { const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = 180; const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1400; bp.Q.value = 4;
       this.servoG = g(0); this.servoO = o; o.connect(bp).connect(this.servoG).connect(master); this.servoG.connect(room); o.start(); }
+    // under the last look's song (story.js last): a low drone in the tune's own notes, G and D -- soft triangles, a
+    // little detuned, low-passed -- so the whole street coming back swells instead of only getting brighter
+    { this.droneG = g(0); const dl = lp(650); this.droneG.connect(dl).connect(master); dl.connect(g(0.5)).connect(room);
+      for (const [f, a] of [[98, 0.5], [98.4, 0.3], [146.8, 0.35], [196.3, 0.22]]) { const o = ac.createOscillator(); o.type = 'triangle'; o.frequency.value = f; const og = g(a); o.connect(og).connect(this.droneG); o.start(); } }
     // the radio's tune (synthesised in a tinny box: band-limited, a little distortion and hiss), level = beam on a radio
     { this.radioG = g(0); this.radioPan = ac.createStereoPanner();
       const shaper = ac.createWaveShaper(); const curve = new Float32Array(1024); for (let i = 0; i < 1024; i++) { const x = i / 511.5 - 1; curve[i] = Math.tanh(2.2 * x) / Math.tanh(2.2); } shaper.curve = curve;
@@ -152,6 +156,7 @@ export default {
         break; }
       case 'powerdown': this.tone(1800, 120, 3.2, { gain: 0.05 }); this.shot('relay_b', 0, undefined, { gain: 0.4 }); break;
       case 'streetlamp': this.shot('relay_b', 0, undefined, { gain: 0.25, rate: 0.8, wet: 0.1 }); break;
+      case 'lampoff': this.synthClick(780, { pos: opts.pos, gain: 0.14, decay: 0.07 }); break; // a shop it remembered going out (story.js fade): a switch across the road
       case 'dog': this.shot('dog_far_a', 0, undefined, { gain: 0.2, wet: 0 }); break;
       case 'page': { // a page turned: a soft paper swish (noise swept through a band, quick)
         const ac = this.ac, src = ac.createBufferSource(); src.buffer = this.clickBuf ??= this.noise(0.1); src.loop = true;
@@ -177,7 +182,11 @@ export default {
     // past: the street, louder where the beam falls (its strength), the radio by the radios in the beam
     const past = Math.min(1, m.strength ?? 0);
     const intimate = 1;
-    set(this.pastIn.gain, 0.55 * past * past * quiet * intimate, 0.6);
+    // the last look: when the whole street comes back the song swells -- the set across the road louder, the street's
+    // murmur fuller, the drone under it -- and all of it stops with the song (2026-10-26: the mix stayed level through it)
+    const swell = phase === 'last' ? THREE.MathUtils.smoothstep(story.t, 3.0, 5.6) : phase === 'fade' && story.t < 2.3 ? 1 : 0;
+    set(this.pastIn.gain, 0.55 * (1 + 0.35 * swell) * Math.max(past * past, 0.3 * (story?.remembered ?? 0)) * quiet * intimate, 0.6); // (the shops it remembered keep a little of the street's murmur)
+    set(this.droneG.gain, 0.05 * swell * quiet, swell > 0 ? 0.8 : 0.015);
     let radio = 0, rpos = null;
     const shop = ctx.api.shop;
     // the music: in the shop, the closed tube radios in the beam play it (act one); across the road, the TV show in the
@@ -191,7 +200,7 @@ export default {
     this.radioLevel = (this.radioLevel ?? 0) + (radio - (this.radioLevel ?? 0)) * Math.min(1, dt * 1.5);
     const call = story?.tuneCall ?? 0; if ((call > this.radioLevel || phase === 'turn') && story?.radioPos) rpos = story.radioPos; // the song calling from across the road (while it listens, only from there: a radio in the beam had taken the song over)
     const cut = (phase === 'fade' && story.t > 2.3) || phase === 'end'; // the light dies: the song stops mid-phrase
-    set(this.radioG.gain, cut ? 0 : 0.32 * Math.max(this.radioLevel, call) * quiet * intimate * (1 - 0.45 * (story?.interference ?? 0)), cut ? 0.012 : 0.2); if (rpos) set(this.radioPan.pan, this.pan(rpos)[0], 0.25); // (the static takes over as its picture tears; the song keeps its place across the road -- Codex transition-7: a comment had swallowed this pan)
+    set(this.radioG.gain, cut ? 0 : 0.32 * (1 + 0.45 * swell) * Math.max(this.radioLevel, call) * quiet * intimate * (1 - 0.45 * (story?.interference ?? 0)), cut ? 0.012 : 0.2); if (rpos) set(this.radioPan.pan, this.pan(rpos)[0], 0.25); // (the static takes over as its picture tears; the song keeps its place across the road -- Codex transition-7: a comment had swallowed this pan)
     // the tune keeps playing (silently when nobody looks), so the radio comes back mid-phrase like a real one
     while (this.tuneT < now + 0.25) {
       const [st, beats] = TUNE[this.tuneI % TUNE.length], dur = beats * 0.42;

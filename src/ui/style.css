@@ -19,7 +19,7 @@ body.shot #ui { display: none; }
 .film-hint.on { opacity: 0.9; }
 .film-black { position: absolute; inset: 0; background: #000; opacity: 0; }
 .film-card { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;
-  font-family: "Songti SC", "Noto Serif SC", serif; font-size: 22px; letter-spacing: 0.18em; line-height: 1.7;
+  font-family: "Songti SC", "Noto Serif SC", serif; font-size: 26px; letter-spacing: 0.18em; line-height: 1.7;
   opacity: 0; transition: opacity 4s; }
 .film-card p { margin: 0.35em 0; }
 .film-card.on { opacity: 0.92; }
@@ -54,3 +54,8 @@ html[lang=en] .film-title small:not(.film-credit) { font-size: 12px; opacity: 0.
 html[lang=en] .film-title .film-credit { font-size: 12px; opacity: 0.55; letter-spacing: 0.04em; }
 html[lang=en] .film-card small { font-size: 12px; }
 .film-card p { text-align: center; padding: 0 8vw; }
+/* (2026-10-26, played as a newcomer) the title's "click to begin" and the end's "click to watch again" were 9 px at a third
+   of full brightness -- the first thing to read and hardly there; the end card's line is the piece's last word: larger */
+html[lang^=zh] .film-title small:not(.film-credit) { font-size: 12px; opacity: 0.75; }
+html[lang^=zh] .film-card small { font-size: 12px; }
+@media (max-width: 480px) { .film-card { font-size: 19px; } }

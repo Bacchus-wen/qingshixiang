@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu';
 import { Film } from '../../ui/film.js';
 import { tr } from '../../ui/i18n.js';
+import { memoryMaskCPU } from '../../materials/memory.js';
 
 // The shop story (v5: two acts), start to end. Owns the camera (except ?shot= and ?review) and the pacing.
 //   title   : black, the title card; a click starts the sound and the arrival
@@ -80,6 +81,15 @@ const TOUCH = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)'
 const ease = (x) => x * x * (3 - 2 * x);
 const clamp01 = (x) => Math.min(1, Math.max(0, x));
 const LOOK_POWER_S = 105; // seconds of open eye before the power is gone (both acts)
+// (2026-10-26, played through as a newcomer: act two lasted 11 s -- three shops found in a sweep and it was over. The
+// shop takes act one down to 0.68 at most; the street then has ~46 s of light, the last of it failing)
+const ACT1_FLOOR = 0.68, STREET_POWER_S = 85;
+// what comes back to life in the beam in act one (the twins, the sets with pictures, the radios with their dials, the
+// clock): five of them seen and its own radio on the bench calls it (the beat below), or at 34 s at the latest
+const ALIVE = new Set(['tube_radio_closed.glb', 'desk_fan.glb', 'crt_tv.glb', 'crt_tv_hero.glb', 'wall_clock.glb', 'cassette_recorder.glb', 'alarm_clock.glb']);
+const BENCH = { cue: 0, aim: 0.5, cut: 1.3, tune: 1.8, fade: 7, release: 8, back: 8.5, end: 11 }; // the bench beat, s after it starts
+// the order the shops it remembered go out in when the light dies: from the far ends in, the electronics shop last
+const OUT_ORDER = { noodles: 0, tailor: 1, hardware: 2, barber: 3, tv: 4 };
 
 export default {
   name: 'story',
@@ -103,6 +113,17 @@ export default {
     ctx.postfx.params.presentK.value = 1; // the dusty present outside the beam
   },
   set(phase, cut = false) { this.phase = phase; this.t = 0; this.cut = cut; },
+  // the things in the shop that have come back in its light (act one): each counted once, after a third of a second in
+  // the beam's full light
+  countRevived(ctx, m, dt) {
+    if (!this.alive) {
+      const box = new THREE.Box3();
+      this.alive = Object.values(ctx.api.shop?.placed ?? {}).filter((o) => ALIVE.has(o.userData.layout?.glb)).map((o) => ({ o, c: box.setFromObject(o).getCenter(new THREE.Vector3()), d: 0 }));
+      this.revived = new Set();
+    }
+    if (!(m.strength > 0.3)) return;
+    for (const a of this.alive) { if (this.revived.has(a.o)) continue; a.d = memoryMaskCPU(a.c, m) > 0.5 ? a.d + dt : 0; if (a.d > 0.35) this.revived.add(a.o); }
+  },
 
   update(dt, time, ctx) {
     if (this.off) return;
@@ -132,7 +153,10 @@ export default {
         m.forceOpen = undefined; film.fade(0); ctx.api.shop?.robotTurn?.(0);
         this.cam.pos.copy(WAIT_POS).addScaledVector(LEFT_IN, Math.sin(this.t * 0.15) * 0.06).addScaledVector(FACING_IN, -(1 - Math.cos(this.t * 0.15)) * 0.05);
         this.cam.look.copy(WAIT_LOOK); this.cam.fov = 40 - Math.min(3, this.t * 0.15);
-        if (this.t > 3) film.hint(eye?.failed ? (input.hold ? tr('松开，再按住', 'Let go, then hold again') : tr('再按住一次', 'Press and hold again')) : TOUCH ? tr('按住屏幕', 'Press and hold the screen') : tr('按住鼠标左键', 'Hold the left mouse button'));
+        // ("let go" only while the hold that failed is still held: a new press read it for a quarter second before it counted)
+        if (eye?.failed && this.failHold === undefined) this.failHold = !!input.hold;
+        if (!input.hold) this.failHold = false;
+        if (this.t > 3) film.hint(eye?.failed ? (this.failHold ? tr('松开，再按住', 'Let go, then hold again') : tr('再按住一次', 'Press and hold again')) : TOUCH ? tr('按住屏幕', 'Press and hold the screen') : tr('按住鼠标左键', 'Hold the left mouse button'));
         if (eye?.failed && !this.shook) { this.shook = true; this.shake = 0.45; } // the first try: a clunk, the head jolts
         if (eye && eye.open > 0.08 && eye.attempts > 1) { film.hint(''); this.set('waking', true); }
         break;
@@ -155,38 +179,47 @@ export default {
         // when the beam rests on something, the view leans in to it: a slow, oblique close-up of the thing coming back
         const px = input.pointer.x, py = input.pointer.y, mv = Math.abs(px - (this.px ?? px)) + Math.abs(py - (this.py ?? py)); this.px = px; this.py = py;
         this.still = mv > 0.004 ? 0 : (this.still ?? 0) + dt;
-        if (this.t > 30 || input.wasPressed('KeyT')) this.ending = true; // (act one is over: no close-up any more, the view comes back over its shoulder before it draws back to the doorway)
+        // its own radio on the bench (the beat below): when five things have come back in its light and it has looked
+        // round for 22 s, or at 34 s; bt is the beat's own clock. Act one is over a few seconds after it (a newcomer's
+        // sweep brought four back in 16 s: too soon to have looked at any of them)
+        this.countRevived(ctx, m, dt);
+        if (this.benchAt === undefined && ((this.revived.size >= 5 && this.t > 22) || this.t > 34)) this.benchAt = this.t;
+        const bt = this.benchAt === undefined ? -1 : this.t - this.benchAt, benchShot = bt > BENCH.cut && bt < BENCH.back;
+        if (benchShot !== !!this.benchShotOn) { this.benchShotOn = benchShot; this.cut = true; } // (cuts, in and out: the view swept through the bench and its lamp to get there)
+        if (bt > BENCH.end || input.wasPressed('KeyT')) this.ending = true; // (act one is over: no close-up any more, the view comes back over its shoulder before it draws back to the doorway)
         if (this.ending) this.still = 0;
         const zk = ease(clamp01((this.still - 1.0) / 1.6)); this.zoom = (this.zoom ?? 0) + (zk - (this.zoom ?? 0)) * Math.min(1, dt * (zk > (this.zoom ?? 0) ? 1.2 : 3));
         // (judge r3: from behind its head the rusty box filled the lower third -- the close-up goes on past it, along the
         // beam to a metre or so from the thing, a little right of and above the shaft: a product shot in its light)
         this.cam.pos.lerp(this._v.copy(eyePos).addScaledVector(m.dir, 1.35).addScaledVector(this._w, -0.33).setY(eyePos.y + 0.27), 0.85 * this.zoom);
         this.cam.fov = 50 - 18 * this.zoom;
-        if (this.t > 19.6 && this.t < 27.5) { // its own radio: from in front of the open set, the robot's eye turned to it beyond
+        if (benchShot) { // its own radio: from in front of the open set, the robot's eye turned to it beyond
           this.zoom = 0; this.cam.pos.set(-1.95, 1.0, 1.4); this.cam.look.set(-1.0, 0.93, 0.78); this.cam.fov = 46; m.spotK = 0.3; m.lampK = 0.5; // (r16: lower and tighter -- the lens and the set, the sign whole, less empty bench; the desk lamp's haze halved)
         } else m.spotK = 0.42; // (at 2-3 m on pale plaster the full lamp burnt its circle white; 0.65 still did)
         m.beamK = 0.55; // act one's shaft: a trace in the air, not a fog over the shelves
         // a photographer's lens on the close-ups: the thing in the beam sharp, the shelf behind it soft (as if f/2)
-        const P = ctx.postfx.params, bench = this.t > 19.6 && this.t < 27.5 && this.benchPos;
+        const P = ctx.postfx.params, bench = benchShot && this.benchPos;
         const fd = bench ? this.curPos.distanceTo(this.benchPos) : this.tvShot ? this.curPos.distanceTo(TV_IN) : this.curPos.distanceTo(this._v.copy(eyePos).addScaledVector(m.dir, 2.4));
         P.focus.value += (fd - P.focus.value) * Math.min(1, dt * 3); P.focalRange.value = this.tvShot ? 1.2 : 0.9; P.bokeh.value += ((bench ? 1.4 : this.tvShot ? 2.0 : 2.4 * this.zoom) - P.bokeh.value) * Math.min(1, dt * 2);
         this.lookTime += dt;
         if (this.t > 4 && !this.moved) film.hint(TOUCH ? tr('保持按住，滑动手指', 'Keep holding and slide your finger') : tr('保持按住，移动鼠标', 'Keep holding and move the mouse'));
         if (!this.moved && (Math.abs(input.pointer.x) > 0.2 || Math.abs(input.pointer.y) > 0.2)) { this.moved = true; film.hint(''); eye?.aim(null); }
-        if (!this.moved && this.t > 9) { // left alone, it looks at the set in the middle of the shop itself: over its head, the set beyond in focus
+        if (!this.moved && this.t > 9 && bt < 0) { // left alone, it looks at the set in the middle of the shop itself: over its head, the set beyond in focus
           eye?.aim(TV_SHOT.aim); this.cam.pos.copy(TV_SHOT.pos); this.cam.look.copy(TV_SHOT.look); this.cam.fov = TV_SHOT.fov; this.zoom = 0; this.tvShot = true;
         } else this.tvShot = false;
-        if (eye && eye.open > 0.2) this.power = Math.max(0, this.power - dt / LOOK_POWER_S);
+        if (eye && eye.open > 0.2) this.power = Math.max(ACT1_FLOOR, this.power - dt / LOOK_POWER_S);
         // its own radio: after a while it looks at the half-repaired set on its bench; a crackle, and a song comes out of it.
         // Then the song leaves the radio and answers, faint, from across the road behind it (the TV in the electronics
         // shop window); it turns round to it
         if (!this.benchPos) { const r = ctx.api.shop?.placed?.tube_radio_open; this.benchPos = r ? r.getWorldPosition(new THREE.Vector3()).add(this._w.set(0, 0.16, 0)) : new THREE.Vector3(-1.26, 1.0, 0.74); }
-        if (this.t > 19 && this.t < 27) eye?.aim(this.benchPos);
-        if (this.t > 20.6 && !this.crackled) { this.crackled = true; audio?.play('tvzap', { pos: this.benchPos }); }
-        this.benchTune = this.t < 21.2 ? 0 : this.t < 26 ? Math.min(1, (this.t - 21.2) / 1.2) : Math.max(0, 1 - (this.t - 26) / 2.5);
-        m.benchGlow = this.t < 20.6 ? 0 : this.t < 26 ? Math.min(1, (this.t - 20.6) / 2.2) : Math.max(0.35, 1 - (this.t - 26) / 6); // its valves warm up with the crackle and stay warm (past.js)
-        if (this.t > 26) this.tuneCall = Math.min(0.55, (this.tuneCall ?? 0) + dt * 0.3);
-        if (this.t > 27) eye?.aim(null);
+        // (2026-10-26, played as a newcomer: its head turned by itself and the view swept away mid-look, and only then
+        // the crackle -- now the set crackles first, behind it on the bench, its valves glowing; it turns to the sound)
+        if (bt >= BENCH.cue && !this.crackled) { this.crackled = true; audio?.play('tvzap', { pos: this.benchPos }); }
+        if (bt > BENCH.aim && bt < BENCH.release) eye?.aim(this.benchPos);
+        if (bt > BENCH.release && !this.released) { this.released = true; eye?.aim(null); }
+        this.benchTune = bt < BENCH.tune ? 0 : bt < BENCH.fade ? Math.min(1, (bt - BENCH.tune) / 1.2) : Math.max(0, 1 - (bt - BENCH.fade) / 2.5);
+        m.benchGlow = bt < 0 ? 0 : bt < BENCH.fade ? Math.min(1, bt / 2.2) : Math.max(0.35, 1 - (bt - BENCH.fade) / 6); // its valves warm up with the crackle and stay warm (past.js)
+        if (bt > BENCH.fade) this.tuneCall = Math.min(0.55, (this.tuneCall ?? 0) + dt * 0.3);
         if (this.ending && this.zoom < 0.12) {
           film.hint(''); this.benchTune = 0; this.ending = false;
           // the view it draws back from, and a bend in the path round the robot's right if the view was in front of it
@@ -238,7 +271,7 @@ export default {
         this.interference = clamp01((this.t - L) / (CUT_S - L)) ** 1.5; // the song across the road fills with static (sound.js)
         if (this.t < 0.05) this.glitchSounded = false;
         if (!this.glitchSounded && this.t >= T0) { this.glitchSounded = true; audio?.play('glitch'); } // one sound, as the tear begins (the warnings are silent)
-        if (eye && eye.open > 0.2) this.power = Math.max(0, this.power - dt / LOOK_POWER_S);
+        if (eye && eye.open > 0.2) this.power = Math.max(ACT1_FLOOR, this.power - dt / LOOK_POWER_S);
         this.tuneCall = 0.55 + 0.12 * ease(clamp01(this.t / 1.6)); // (the song swells a little as it turns to it)
         m.power = this.power;
         break;
@@ -258,6 +291,11 @@ export default {
         this.cam.pos.copy(MATCH.pos).lerp(ACT2_POS, mv);
         this.cam.look.copy(MATCH.look).lerp(this._w.copy(ACT2_LOOK).lerp(this._v.copy(eyePos).addScaledVector(m.dir, 10), 0.05), mv);
         this.cam.fov = MATCH.fov + (ACT2_FOV - MATCH.fov) * mv;
+        // the view moves over a little after the gaze (a dolly, not a pan): looking to the ends of the street it sees past
+        // the door jambs, which hid most of the noodle shop and half the tailor's from the middle (2026-10-26)
+        const side = -0.8 * THREE.MathUtils.clamp(Math.atan2(m.dir.x, m.dir.z) / 0.6, -1, 1) * mv;
+        this.side = (this.side ?? 0) + (side - (this.side ?? 0)) * Math.min(1, dt * 0.8);
+        this.cam.pos.x += this.side; this.cam.look.x += this.side;
         this.streetTime += dt; this.tuneCall = Math.max(0, (this.tuneCall ?? 0) - dt * 0.25);
         Object.assign(m, ACT2_BEAM);
         if (this.t > MATCH.hold + MATCH.move + 0.4 && !this.moved2) film.hint(TOUCH ? tr('滑动手指，让它看看街对面', 'Slide your finger to let it look across the street') : tr('移动鼠标，让它看看街对面', 'Move the mouse to let it look across the street'));
@@ -265,7 +303,7 @@ export default {
         if (!this.moved2 && movedFrom) { this.moved2 = true; film.hint(''); } // (latched the first time: a move and back again does not bring the hint)
         // the power failing: now and then the past drops out for a moment
         if (this.power < 0.35 && (this.dipT = (this.dipT ?? 2) - dt) < 0) { this.dipT = 2.5 + Math.random() * 3.5; this.dip = 0.14; audio?.play('click'); }
-        if (eye && eye.open > 0.2) this.power = Math.max(0, this.power - dt / LOOK_POWER_S);
+        if (eye && eye.open > 0.2) this.power = Math.max(0, this.power - dt / STREET_POWER_S);
         // the shops across the road: a beam that rests on one brings its sound back (once each)
         let on = null;
         for (const s of SPOTS) {
@@ -276,12 +314,14 @@ export default {
         }
         this.sinceSeen += dt;
         // nothing found for a while: one of the shops not yet seen calls from its side of the street (a bell)
-        if (!on && this.sinceSeen > 8 && (this.callT = (this.callT ?? 5) - dt) < 0) {
+        if (!on && this.sinceSeen > 6 && (this.callT = (this.callT ?? 5) - dt) < 0) {
           const s = SPOTS.find((x) => !this.seen.has(x.key)); this.callT = 7;
           if (s) audio?.play(s.sound, { pos: s.pos }); // the shop itself calls, from its side of the street
         }
-        // enough: three shops (and a moment with the last), or the power nearly gone -- then one last look
-        if ((this.seen.size >= 3 && this.sinceSeen > 5) || this.power < 0.14 || this.streetTime > 62 || input.wasPressed('KeyD')) { film.hint(''); this.set('last'); }
+        // enough: all five shops (and a moment with the last); or three, half a minute on the street and nothing new for a
+        // while; or the power nearly gone -- then one last look (2026-10-26: three shops and 5 s ended it after 11 s)
+        const enough = this.seen.size >= SPOTS.length ? this.sinceSeen > 3.5 : this.seen.size >= 3 && this.streetTime > 30 && this.sinceSeen > 6;
+        if (enough || this.power < 0.14 || this.streetTime > 70 || input.wasPressed('KeyD')) { film.hint(''); this.set('last'); }
         this.dip = Math.max(0, (this.dip ?? 0) - dt);
         m.power = this.dip > 0 ? 0.05 : this.power;
         m.pastK = on ? 0.2 : 0.07; // a shop come back throws its evening light in at the door (atmo.js: x the beam's strength)
@@ -302,31 +342,31 @@ export default {
         eye?.aim(SPOTS.find((x) => x.key === 'tv').pos);
         m.memWide = 1 + 3.2 * ease(clamp01((this.t - 3.2) / 2.2)); // the shop alone a moment (the song), then the whole street
         this.power = Math.max(0.03, this.power - dt * 0.03);
-        m.power = this.t > 7.4 && Math.random() < 0.25 ? 0.04 : Math.max(0.2, this.power);
+        m.power = this.t > 7.4 && Math.random() < 0.25 ? 0.04 : Math.max(0.34, this.power); // (the whole street at full strength, whatever act two left: from 0.2 it lit at 0.6)
         m.pastK = 0.4 + 0.6 * ease(clamp01((this.t - 3.2) / 2.2)); // the whole street's evening floods in over it
         if (this.t > 8.4) this.set('fade');
         break;
       }
       case 'fade': {
-        // the last of the power: the beam stutters and dies, the street goes back to what it is now. Its face as the
-        // iris closes for the last time, the dusk from the street on it
+        // the last of the power: the beam stutters and dies, the street goes back to what it is now and the song stops
+        // mid-phrase (sound.js, 2.3 s); the shops it found stay a moment longer and go out one by one (below); then its
+        // face as the iris closes for the last time, the dusk from the street on it. Its power here runs on its own clock
+        // (2026-10-26: from what act two had left, 0.06, the whole street went at once)
         m.holdGaze = true;
         this.power = Math.max(0, this.power - dt / 3);
-        m.power = Math.max(0.02, this.power);
-        m.forceOpen = this.t < 2.2 ? true : this.t < 5 ? Math.random() > Math.min(0.92, (this.t - 2.2) * 0.33) : false;
-        if (this.t > 4.5) atmo?.set('out');
-        // first from where we were: the whole street flickers out and the song stops mid-phrase; then its face as the iris
-        // closes for the last time
-        m.memWide = this.t < 3.4 ? 4.2 : 1;
-        m.pastK = this.t < 3.4 ? 1 : 0; // (with the power: atmo.js)
-        if (this.t < 3.4) {
+        m.power = this.t < 2.8 ? 0.34 * (1 - 0.7 * this.t / 2.8) : 0.02;
+        m.forceOpen = this.t < 2.2 ? true : this.t < 5.4 ? Math.random() > Math.min(0.92, (this.t - 2.2) * 0.3) : false;
+        if (this.t > 4.6) atmo?.set('out');
+        m.memWide = this.t < 2.8 ? 4.2 : 1;
+        m.pastK = this.t < 2.8 ? 1 : 0; // (with the power: atmo.js)
+        if (this.t < 4.7) { // (to 4.7: the shops it remembered stay a moment and go out one by one -- below -- then its face)
           this.cam.pos.copy(SIDE.pos); this.cam.look.copy(SIDE.look); this.cam.fov = SIDE.fov - 2;
         } else {
           if (!this.faced) { this.faced = true; this.cut = true; }
           this.cam.pos.copy(EYE0).addScaledVector(FACING, 0.78).addScaledVector(LEFT, 0.18).add(this._w.set(0, 0.03, 0));
           this.cam.look.copy(EYE0).add(this._w.set(0, 0.02, 0)); this.cam.fov = 34;
         }
-        if (this.t > 9) this.set('end');
+        if (this.t > 9.2) this.set('end');
         break;
       }
       case 'end': {
@@ -344,6 +384,26 @@ export default {
         if (this.t > 14 && (input.wasPressed('Pointer') || input.wasPressed('Space'))) location.reload();
         break;
       }
+    }
+    // the shops it found in act two keep their evening (index.js REM_SHOPS): coming up over a second or two when found,
+    // breathing a little, down with the beam when the power dips, held through the last look; when the light dies they go
+    // out one by one from the far ends in, the electronics shop last, each with a flicker and a switch's click
+    const rk = ctx.api.shop?.remK;
+    if (rk) {
+      this.rem ??= SPOTS.map(() => 0); this.outDone ??= new Set();
+      let sum = 0;
+      SPOTS.forEach((s, i) => {
+        const lit = this.seen.has(s.key) && (this.phase === 'street' || this.phase === 'last' || this.phase === 'fade');
+        let want = lit ? 1 : 0, flick = 1;
+        if (this.phase === 'fade' && lit) {
+          const out = 3.0 + OUT_ORDER[s.key] * 0.3;
+          if (this.t > out) { want = 0; if (!this.outDone.has(s.key)) { this.outDone.add(s.key); audio?.play('lampoff', { pos: s.pos }); } } else if (this.t > out - 0.28) flick = Math.random() < 0.5 ? 1 : 0.15;
+        }
+        this.rem[i] += (want - this.rem[i]) * Math.min(1, dt * (want > this.rem[i] ? 0.8 : 14));
+        rk[i].value = this.rem[i] * (0.9 + 0.1 * Math.sin(time * 1.1 + i * 1.7)) * (this.phase === 'street' && this.dip > 0 ? 0.25 : 1) * flick;
+        sum += this.rem[i];
+      });
+      this.remembered = sum / SPOTS.length; // (sound.js: the past street's murmur stays with them)
     }
     if (this.phase !== 'turn' && this.glitchOut === undefined) this.glitch = this.glitchBlock = this.glitchDark = this.interference = 0;
     const PP = ctx.postfx?.params; if (PP?.glitch) { PP.glitch.value = this.glitch ?? 0; PP.glitchBlock.value = this.glitchBlock ?? 0; PP.glitchDark.value = this.glitchDark ?? 0; }

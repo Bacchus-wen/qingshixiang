@@ -12,13 +12,16 @@ import { pastHooks } from './past.js';
 import { memoryMask, mem } from '../../materials/memory.js';
 import { tr, zh } from '../../ui/i18n.js';
 import { decayScene, decayMaterial, decayK, DECAY_SKIP, addCobwebs, addDebris, TWINS, twinMask } from './decay.js';
-import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorld, positionLocal, smoothstep, vec2, vec3, mx_worley_noise_float, texture, normalWorldGeometry, abs, step, uniform, uv, vec4, cameraPosition, fract, materialColor, materialNormal, transformNormalToView, sign } from 'three/tsl';
+import { color, float, mix, mx_fractal_noise_float, mx_noise_float, positionWorld, positionLocal, smoothstep, vec2, vec3, mx_worley_noise_float, texture, normalWorldGeometry, abs, step, uniform, uv, vec4, cameraPosition, fract, materialColor, materialNormal, transformNormalToView, sign, max } from 'three/tsl';
 
 // v4: the closed-down home-appliance repair shop (docs/scene-shop.md). This phase is models + layout only:
 // a simple room shell, the Tripo models placed from /models/shop/layout.json (every item is grounded on its
 // support surface automatically), plain review lighting (desk lamp warm key, blue dusk from the street).
 // Room: x in [-3, 3], z in [-2.25, 2.25] (front/shutter at +z), floor y = 0, ceiling 3.0.
 export const ROOM = { w: 6.0, d: 4.5, h: 3.0 };
+// the five shopfronts on the far side's photographs: world x of the middle and half width (the photograph spans x 8.4 to
+// -7.6, 1 px of its 3840 = 4.17 mm): 百货面店, 金福五金, 新華理髮, 新興電器, 日月缝纫店 -- story.js SPOTS, in the same order
+export const REM_SHOPS = [[6.88, 1.33], [3.6, 1.2], [0.43, 1.22], [-3.7, 1.2], [-6.43, 1.13]];
 
 // room surfaces and printed things: photographic textures generated with the company platform (gpt-image-2.5,
 // docs/gen-log.md), shipped as KTX2 (tools/tex-ktx2.sh: ~1 byte/px on the GPU instead of 4). Tiled surfaces are mapped
@@ -519,7 +522,13 @@ export default {
       for (const t of [now, then]) { t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; t.anisotropy = 8; }
       const bd = new THREE.MeshBasicNodeMaterial(), k = memoryMask(positionWorld), far = this.farK = uniform(1); // far: dusk 1 -> night (atmo)
       const toP = positionWorld.sub(mem.origin).normalize(), core = smoothstep(mem.coreCos.sub(0.012), mem.coreCos.add(0.02), toP.dot(mem.dir));
-      bd.colorNode = mix(texture(now, uv()).rgb.mul(far.mul(0.62)), texture(then, uv()).rgb.mul(mix(float(0.36), float(0.98), core)), k); // what the beam itself touches stays brightest
+      // the shops it has found keep their evening, dimmer (story.js: remembered, 0..1 each) -- the shopfront only, so the
+      // street fills up shop by shop and the last look still brings the rest back: the windows above, the people
+      const remK = this.remK = REM_SHOPS.map(() => uniform(0)), P = positionWorld;
+      let rem = float(0);
+      REM_SHOPS.forEach(([x, hw], i) => { rem = max(rem, smoothstep(hw + 0.18, hw - 0.12, abs(P.x.sub(x))).mul(smoothstep(3.2, 2.95, P.y)).mul(remK[i])); });
+      const thenC = texture(then, uv()).rgb, nowC = texture(now, uv()).rgb.mul(far.mul(0.62));
+      bd.colorNode = mix(mix(nowC, thenC.mul(0.5), rem.mul(0.62)), thenC.mul(mix(float(0.36), float(0.98), core)), k); // what the beam itself touches stays brightest
       const BW = 16, BH = BW * 1920 / 3840;
       const plane = new THREE.Mesh(new THREE.PlaneGeometry(BW, BH), bd); plane.rotation.y = Math.PI; // faces the shop (-z)
       plane.position.set(0.4, -STEP + BH / 2 - 0.05, d / 2 + 0.25 + 8.5); root.add(plane); this.backdrop = plane;
@@ -974,7 +983,7 @@ export default {
         for (const o of objs) o.visible = false;
       }
     }
-    ctx.api.shop = { streetNow: this.streetNow, streetThen: this.streetThen, backdrop: this.backdrop, root, placed, ROOM, lod, rig, eyeGlow, lights: { hemi, dusk, lamp: this.lamp, fill, tube: this.tubeLight, tubeGlow, robotFill: this.robotFill }, farK: this.farK, robotTurn: (k) => { rig.body = -Math.PI * Math.min(1, Math.max(0, k)); rig.update(); }, review: !ctx.isShot && ctx.params.get("review") !== null };
+    ctx.api.shop = { streetNow: this.streetNow, streetThen: this.streetThen, backdrop: this.backdrop, remK: this.remK, root, placed, ROOM, lod, rig, eyeGlow, lights: { hemi, dusk, lamp: this.lamp, fill, tube: this.tubeLight, tubeGlow, robotFill: this.robotFill }, farK: this.farK, robotTurn: (k) => { rig.body = -Math.PI * Math.min(1, Math.max(0, k)); rig.update(); }, review: !ctx.isShot && ctx.params.get("review") !== null };
     ctx.postfx.memoryGrade = true; // the past inside the beam is graded per pixel (src/engine/PostFX.js)
     Object.assign(ctx.postfx.params, { bloomRadius: 0.35, bloomStrength: 0.26, bloomThreshold: 2.2 }); // a tight glow round the hottest cores only (the lamp's shade is lit point-blank: it must not flare)
     // the face light for the robot's close-ups (story: wait / waking), soft and unshadowed, off otherwise (never removed:
