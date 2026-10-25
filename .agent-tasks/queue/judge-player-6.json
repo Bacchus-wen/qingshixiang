@@ -1,0 +1,15 @@
+{
+ "id": "judge-player-6",
+ "from": "claude",
+ "to": "codex",
+ "title": "终评 玩家视角第6轮",
+ "write": false,
+ "gen": false,
+ "paths": [],
+ "status": "done",
+ "posted": "2026-10-26 03:51:59",
+ "started": "2026-10-26 03:52:01",
+ "seconds": 88.2,
+ "finished": "2026-10-26 03:53:31",
+ "reason": null
+}
