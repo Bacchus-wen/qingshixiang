@@ -1,6 +1,6 @@
 # r9-code:加时冲刺的代码检查(只读)
 
-请审查从提交 da2aafc 的父提交到 HEAD 的改动(`git diff da2aafc^ HEAD -- src tools`),重点:
+请审查从提交 312a501 的父提交到 HEAD 的改动(`git diff 312a501^ HEAD -- src tools`),重点:
 - src/engine/PostFX.js:halation / 片门抖动(aa.getTextureNode().sample)/ flicker,在 ?pfx=notraa,nodof、WebGL2 回退时是否会出错。
 - src/systems/street/passing.js:新加的远处车(无新灯光、only additive 网格),首帧预热、shot 模式确定性、合并排除。
 - src/systems/robot/index.js:flood 宽度区分(首次 0.72 / 最后一口气 1.35)、gobo 重绘条件、line 模式角度。

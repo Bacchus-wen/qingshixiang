@@ -1,6 +1,6 @@
 # 只读评审:玩家视角第 3 轮 + 代码复查
 
-背景:第 2 轮见 `.agent-tasks/judge-player-2.md` 和 `.agent-tasks/judge-player-2/result.md`(8/10)。按你的三条和新增疑点改了(提交 `2f9be04`、最新一个提交;对比 `ee6f307..HEAD`):
+背景:第 2 轮见 `.agent-tasks/judge-player-2.md` 和 `.agent-tasks/judge-player-2/result.md`(8/10)。按你的三条和新增疑点改了(提交 `58e81ba`、最新一个提交;对比 `e9d4894..HEAD`):
 
 1. 呼叫和找到分开:没找到的店"叫"时只亮它的招牌(闪三下再淡出,店面仍是现在的卷帘门);找到时整个店面先亮闪再常亮。图:`docs/judge/player-3/call-vs-found.jpg`(左边金福五金在"叫",只有招牌亮;中间新華理髮已找到;右边电器店还没找到)。
 2. 高潮结尾不再闪暗(原来最后一秒随机暗,熄灭开始又亮回来,像来电了)。

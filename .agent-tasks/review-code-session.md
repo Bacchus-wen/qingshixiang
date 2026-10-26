@@ -1,6 +1,6 @@
 # 只读代码复查:今天玩家视角改动的回归检查
 
-范围:`git diff 3449369..HEAD -- src/`(今天所有改动:落败层第 3 轮、性能、玩家视角 5 轮)。主要文件:`src/systems/shop/story.js`、`sound.js`、`index.js`、`decay.js`、`lod.js`、`eye.js`、`src/materials/memory.js`、`src/engine/Engine.js`、`src/main.js`、`src/ui/film.js`、`src/ui/style.css`。
+范围:`git diff b45d005..HEAD -- src/`(今天所有改动:落败层第 3 轮、性能、玩家视角 5 轮)。主要文件:`src/systems/shop/story.js`、`sound.js`、`index.js`、`decay.js`、`lod.js`、`eye.js`、`src/materials/memory.js`、`src/engine/Engine.js`、`src/main.js`、`src/ui/film.js`、`src/ui/style.css`。
 
 请重点找会让玩家碰到的问题:
 1. 逻辑错误、状态没重置、除零、未定义变量、变量在声明前使用(story.js 的 street/last/fade/look 段最近改动最多)。
