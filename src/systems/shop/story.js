@@ -70,7 +70,10 @@ const ARRIVE_K = [
   K(4.45, [0.6, 1.55, 6.6], [-0.4, 1.1, 0.8], 46, true),   // (cut) behind us, the one shop still half open, a light inside
   K(7.2, [0.25, 1.28, 3.1], [-0.4, 1.05, 0.6], 46),        // at the shutter: someone sits inside at a bench
   K(9.4, [-0.55, 1.5, 2.2], [-1.55, 0.9, 0.7], 44),        // in: the bench in the lamp's light
-  K(11.8, [0.99, 0.9, -0.38], [-0.55, 0.52, 1.16], 40),    // the robot whole, three-quarter (the model shown whole)
+  K(10.9, [-0.47, 1.47, 2.06], [-1.55, 0.88, 0.72], 43),   // (a slow push on it)
+  // (cut) the robot whole, three-quarter (the model shown whole). (2026-10-26: the camera swung round it from the bench,
+  // the back of its head and the lamp's glare filling the frame for most of a second -- a cut, as from the street in)
+  K(10.95, [1.05, 0.92, -0.32], [-0.55, 0.52, 1.16], 40, true),
   K(13.6, [0.84, 0.88, -0.5], [-0.55, 0.52, 1.16], 40),
   K(16.0, WAIT_POS.toArray(), WAIT_LOOK.toArray(), 38),    // its face
 ];
