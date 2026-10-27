@@ -20,7 +20,9 @@ assets/generated/shop/**/*.glb
 assets/generated/compare/**/*.glb
 assets/generated/compare/**/*.png
 assets/generated/compare/**/*.jpg
-assets/models/shop/lod/*/L*.glb
+# LOD sets: the finest level (L0, ~1 GB) stays local -- the web version never loads it; L1-L3 (~294 MB) are committed so
+# the Vercel build from this repo has them (2026-10-27: without them the deployed page stopped with "core system failed: eye")
+assets/models/shop/lod/*/L0.glb
 # raw generation downloads stay local (the shipped versions are the converted KTX2/JPG; manifests/JSON are committed)
 assets/generated/vmc/**/*.png
 assets/generated/hero2/**/*.png
