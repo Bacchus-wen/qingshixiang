@@ -12,7 +12,7 @@ export class Film {
       <div class="film-edge bottom"><span class="fe-l fe-phase">—</span><span class="fe-power"><i></i></span></div>
       <div class="film-hint"></div>
       <div class="film-black"></div>
-      <div class="film-title"><h1>${T.title}</h1><p>${T.sub}</p><small>${T.start}</small><small class="film-credit">${T.credit}</small><a class="film-lang" href="${otherLangHref()}">${tr('English', '中文')}</a></div>
+      <div class="film-title"><h1>${T.title}</h1><p>${T.sub}</p><small>${T.start}</small>${T.credit ? `<small class="film-credit">${T.credit}</small>` : ''}<a class="film-lang" href="${otherLangHref()}">${tr('English', '中文')}</a></div>
       <div class="film-card">${T.card.map((l) => `<p>${l}</p>`).join('')}<small class="film-replay">${T.replay}</small></div>`;
     this.el = root;
     this.frameEl = root.querySelector('.fe-frame');

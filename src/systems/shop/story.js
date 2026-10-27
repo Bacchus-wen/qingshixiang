@@ -81,7 +81,7 @@ const TOUCH = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)'
 // the film's words (main.js puts the title up while the page loads, with "loading" where "click to begin" will be)
 export const TITLE_TEXT = () => ({
   title: tr('青 石 巷', 'Bluestone Lane'), sub: tr('请戴上耳机', 'Best with headphones'), start: tr('点击画面开始', TOUCH ? 'Tap to begin' : 'Click to begin'),
-  credit: tr('店里的每一件旧物都由 Tripo 生成 · 素材出处与许可见 credits.html', 'Every old object in the shop was generated with Tripo · sources and licences: credits\u2011en.html'),
+  credit: '', // (2026-10-27, the user: "Remove the text at the very bottom of the loaded page" -- the Tripo and credits line; the credits pages stay at credits.html / credits-en.html)
   card: [tr('它记得这条街亮着灯的样子。', 'It remembers the street with its lights on.')],
   replay: tr('点击画面重看', TOUCH ? 'Tap to watch again' : 'Click to watch again'),
 });
