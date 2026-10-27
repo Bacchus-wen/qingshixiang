@@ -3,6 +3,24 @@
 - 源码仓库：https://github.com/Bacchus-wen/qingshixiang （私有，`main`）。2026-10-20 用户要求后第一次推送。
 - 网站由用户自己发布。免费账号的私有仓库开不了 GitHub Pages（GitHub 回 422："Your current plan does not support GitHub Pages for this repository"）。
 
+## Vercel(2026-10-27)
+
+- **怎么部署:** 用户把仓库接到了 Vercel,团队 theodore-album、项目 alley。每次推送 `main`,Vercel 就从仓库构建一次(`vite build`,即 `npm run build`),部署状态会回写到 GitHub 的提交上。
+- **查状态:** `gh api repos/Bacchus-wen/qingshixiang/commits/<sha>/status`。
+- **访问:** 部署地址有 Vercel 登录保护,外人打不开,我们也看不到实际页面。
+- **要求一:提交必须署用户的 GitHub 账号。**
+  - 提交要署 `Bacchus-wen <74724186+Bacchus-wen@users.noreply.github.com>`。
+  - 10-22、10-23、10-26 三次推送,提交署的是本机默认的 "Theodore",Vercel 认不出是谁的账号,部署被拦下("Deployment was blocked" / "GitHub couldn't verify an account for the commit")。
+  - 10-27 经用户同意,改写了全部 369 个提交的署名并强推。旧历史备份在 `~/Backups/新游戏-before-author-rewrite-2026-10-27.git`。
+  - 现在仓库本地配置里已设好这个身份。
+- **要求二:网页版用到的模型文件必须在仓库里。**
+  - Vercel 只能拿到仓库里的文件。
+  - 以前分级模型的 `L*.glb` 全部不进仓库。那时 Vercel 的构建显示"成功",但页面一打开就停在"核心系统初始化失败:eye",27 个模型文件 404。
+  - 现在 L1–L3 进仓库(81 个文件,294 MB),最细的 L0(约 1 GB)仍留在本地。正式构建从不加载 L0。
+  - 验证方法:从仓库重新克隆一份,构建后用新玩家脚本完整玩一遍,0 个缺失文件、0 个报错,五家店都找到,一直到字卡。
+  - 构建产物约 428 MB:除了 L1–L3,`assets/` 里所有已进仓库的文件都会被复制进去。
+- **流量:** 完整看一遍要下载约 260–390 MB(见下文),免费方案的每月流量用得很快。
+
 ## 构建
 
 1. 记下故事实际加载的文件：用开发服务器把完整故事跑一遍。
