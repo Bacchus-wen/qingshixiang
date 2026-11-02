@@ -442,8 +442,10 @@ export default {
     });
     // the robot (and the stool under it) never show their coarsest level: it is encoded differently (ETC1S colour, a
     // PNG normal map) and the change from it, as the camera first came close, read as the robot's material flashing
-    // (the user, 2026-10-23). L2 is loaded behind the loading screen instead (+9 MB)
-    const COARSEST = { robot: 2, stool: 2 };
+    // (the user, 2026-10-23). L2 was loaded behind the loading screen instead -- but it still changed to L1 as the camera
+    // came round it at ~11 s, and that change too read as a flash (the user, 2026-10-27, "still there"). Now L1, the
+    // finest level a production build shows, from the start: they never change level at all (+24 MB at load)
+    const COARSEST = { robot: 1, stool: 1 };
     const templates = new Map();
     for (const glb of new Set(layout.filter((i) => i.glb).map((i) => i.glb))) {
       const name = glb.replace(/\.glb$/, '');
