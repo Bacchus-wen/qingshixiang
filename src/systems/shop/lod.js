@@ -60,10 +60,9 @@ export class LodLibrary {
   hook(name, fn) { this.hooks.set(name, fn); }
   // fn(scene, name, levelIndex) for every model's every level, after its own hook (the shop's decay: ./decay.js)
   decorate(fn) { (this.decorators ??= []).push(fn); }
-  // the model's metadata and its coarsest level (what the scene starts with). coarsest: the coarsest level this model may
-  // ever show (default: its last). The robot starts at L2: its L3 -- ETC1S colour, a PNG normal map -- looked visibly
-  // different, and the change to L2 when the camera first came close read as its material flashing (the user, 10-23)
-  async prepare(name, { coarsest } = {}) {
+  // Load the metadata and initial (coarsest allowed) level. finest/coarsest bound this model's whole range;
+  // setting both to the same level keeps a hero's textures stable even when the camera comes very close.
+  async prepare(name, { finest = 0, coarsest } = {}) {
     let set = this.sets.get(name);
     if (!set) {
       set = { name, meta: null, levels: [], coarsest: 0 }; this.sets.set(name, set);
@@ -72,6 +71,7 @@ export class LodLibrary {
         set.meta = await r.json();
         set.levels = set.meta.levels.map((L) => ({ ...L, promise: null, scene: null, gpu: estimateGPU(L), users: new Set(), used: 0 }));
         set.coarsest = Math.max(0, Math.min(set.levels.length - 1, coarsest ?? set.levels.length - 1));
+        set.finest = Math.min(set.coarsest, Math.max(0, Math.trunc(finest) || 0));
         await this.load(set, set.coarsest);
       })();
     }
@@ -128,7 +128,7 @@ export class LodLibrary {
       for (let i = o.set.coarsest; i >= 0; i--) if (ok(lv[i], i > o.cur && o.cur >= 0 ? 0.5 : 1.0)) { t = i; break; }
       if (o.cur >= 0 && t > o.cur) { o.coarserSince ??= now; if (now - o.coarserSince < 2000) t = o.cur; } else o.coarserSince = null;
       if (!onScreen) t = Math.max(t, o.cur); // off screen: keep what it has, never load finer for it
-      t = Math.min(Math.max(t, Math.min(MIN_LEVEL, lv.length - 1)), o.set.coarsest); // (?lodmin= never below a model's own coarsest: Codex robot-lod-1)
+      t = Math.min(Math.max(t, Math.min(Math.max(MIN_LEVEL, o.set.finest), lv.length - 1)), o.set.coarsest);
       items.push({ o, t, pri: onScreen ? _s.radius * k / d : 0 });
     }
     // 2. GPU budget: biggest on screen first; each level costs once however many copies show it. A copy whose level

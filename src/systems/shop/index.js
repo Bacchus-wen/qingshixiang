@@ -287,6 +287,8 @@ function mergeByMaterial(group) {
 // slotted angle-iron shelving (thin repeated steel: procedural, not generated): uprights, boards, worn grey-green paint.
 // All parts of one material are merged into one mesh: steel, boards, tags = 3 draw calls per shelf unit.
 let steelMat = null, boardMat = null;
+// the desk lamp's bulb: where its light comes from, and how bright (set each frame from the lamp light)
+const lampBulb = uniform(new THREE.Vector3(-1.68, 1.26, 0.66)), lampBulbK = uniform(1);
 function shelfUnit(it) {
   const grp = new THREE.Group();
   const W = it.w || 1.8, D = it.d || 0.45, H = it.h || 2.4, n = it.levels || 5;
@@ -380,6 +382,18 @@ export default {
         mat.normalNode = mix(materialNormal, transformNormalToView(vec3(sign(positionLocal.x), 0, 0)), smoothstep(0, 0.35, k)).normalize();
       });
     });
+    // the desk lamp's bulb glows (2026-10-27, the user: "the bulb is not lit, the side of it is -- not real"): on the
+    // generated lamp the bulb is a pale cream ball under the shade. Its own surface emits, within 5 cm of the
+    // measured bulb centre, with the same on/off and dimming as the spotlight (no extra sphere outside the shade).
+    lod.decorate((scene, name) => {
+      if (name !== 'desk_lamp') return;
+      scene.traverse((m) => {
+        if (!m.isMesh || !m.material.map || !m.material.isNodeMaterial) return;
+        const c = texture(m.material.map).rgb, pale = smoothstep(0.32, 0.55, c.dot(vec3(0.299, 0.587, 0.114)));
+        const near = float(1).sub(smoothstep(0.03, 0.05, positionWorld.distance(lampBulb)));
+        m.material.emissiveNode = vec3(1.0, 0.8, 0.55).mul(pale.mul(near).mul(lampBulbK).mul(6));
+      });
+    });
     lod.decorate((scene, name) => { if (!DECAY_SKIP.has(name)) decayScene(scene, /_broken$/.test(name) ? { dust: 0.4 } : undefined); });
     // four of the sets have a broken twin standing in the same place: the broken one in the present, the whole one where
     // the beam falls, swapped per pixel (./decay.js; the twins: Tripo models of Codex's "decades later" edits of the
@@ -444,13 +458,14 @@ export default {
     // PNG normal map) and the change from it, as the camera first came close, read as the robot's material flashing
     // (the user, 2026-10-23). L2 was loaded behind the loading screen instead -- but it still changed to L1 as the camera
     // came round it at ~11 s, and that change too read as a flash (the user, 2026-10-27, "still there"). Now L1, the
-    // finest level a production build shows, from the start: they never change level at all (+24 MB at load)
-    const COARSEST = { robot: 1, stool: 1 };
+    // finest level a production build shows, from the start. Pin both ends of their range: in Vite's development
+    // mode the global minimum is L0, so setting only coarsest still allowed an 8K-texture swap up close.
+    const STABLE_LEVEL = { robot: 1, stool: 1 };
     const templates = new Map();
     for (const glb of new Set(layout.filter((i) => i.glb).map((i) => i.glb))) {
       const name = glb.replace(/\.glb$/, '');
       templates.set(glb, lodNames.has(name)
-        ? lod.prepare(name, { coarsest: COARSEST[name] }).then(() => ({ lod: name })).catch((e) => { console.warn('[shop] lod failed', name, e.message); return null; })
+        ? lod.prepare(name, { finest: STABLE_LEVEL[name], coarsest: STABLE_LEVEL[name] }).then(() => ({ lod: name })).catch((e) => { console.warn('[shop] lod failed', name, e.message); return null; })
         : loader.loadAsync(`${import.meta.env.BASE_URL}models/shop/${glb}`).catch((e) => { console.warn('[shop] model failed', glb, e.message); return null; }));
     }
     const twinSets = Object.values(TWINS).filter((b) => twinNames.has(b)).map((b) => lod.prepare(b).then(() => b).catch((e) => { console.warn('[shop] twin failed', b, e.message); return null; }));
@@ -964,7 +979,16 @@ export default {
     }
     // the desk lamp, if placed, drives the warm key light
     const lampObj = placed.desk_lamp;
-    if (lampObj) { _box.setFromObject(lampObj); this.lamp.position.set((_box.min.x + _box.max.x) / 2 + 0.1, _box.max.y - 0.12, (_box.min.z + _box.max.z) / 2); this.lamp.target.position.set(this.lamp.position.x + 0.3, 0.8, this.lamp.position.z + 0.2); } // (under the shade's rim: the shade inside is not lit point-blank)
+    // Measured on the existing bulb mesh, in the fixture's local space. Keep both emission and lighting attached to
+    // it, rather than converting a fixed world point to local and straight back (which leaves it fixed in the world).
+    if (lampObj) {
+      lampObj.updateMatrixWorld(true); _box.setFromObject(lampObj);
+      this.lampFixture = lampObj;
+      this.lampBulbLocal = new THREE.Vector3(0.18233034, 0.432294145, 0.113932642);
+      this.lampAimLocal = lampObj.worldToLocal(new THREE.Vector3((_box.min.x + _box.max.x) / 2 + 0.4, 0.8, (_box.min.z + _box.max.z) / 2 + 0.2));
+      this.lampDirection = new THREE.Vector3();
+      this.syncLamp();
+    }
     else { this.lamp.position.set(-1.6, 1.45, 0.1); this.lamp.target.position.set(-1.2, 0.8, 0.2); }
     // repeated generated models are drawn instanced: one draw per mesh per model type instead of one per copy
     // (the placed copies stay, hidden, for picking and the audit). Tints become per-instance colours. ?noinst = off
@@ -1061,8 +1085,20 @@ export default {
       }
     }
   },
+  syncLamp() {
+    const fixture = this.lampFixture; if (!fixture) return;
+    fixture.updateWorldMatrix(true, false);
+    fixture.localToWorld(lampBulb.value.copy(this.lampBulbLocal));
+    fixture.localToWorld(this.lamp.target.position.copy(this.lampAimLocal));
+    this.lampDirection.copy(this.lamp.target.position).sub(lampBulb.value).normalize();
+    // Put the light just outside the bulb surface so the bulb does not occlude its own pool on the bench.
+    this.lamp.position.copy(lampBulb.value).addScaledVector(this.lampDirection, 0.04);
+    this.lamp.target.updateMatrixWorld();
+  },
   update(dt, t, ctx) {
     this.lod?.update(ctx.camera, ctx.renderer, ctx.isShot ? 1 : 4);
+    this.syncLamp();
+    if (this.lamp) lampBulbK.value = Math.min(1.5, this.lamp.intensity / 13); // (the bulb as bright as its light; off with it)
     const oc = this.controls; if (!oc) return;
     const f = this.fly;
     if (f && f.t < 1) { f.t = Math.min(1, f.t + dt / 0.9); const k = f.t * f.t * (3 - 2 * f.t); ctx.camera.position.lerpVectors(f.p0, f.p1, k); oc.target.lerpVectors(f.q0, f.q1, k); }

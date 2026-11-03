@@ -462,7 +462,14 @@ export default {
         fl.position.set(-0.482, 1.031, 1.844).lerp(this._w.set(0.472, 1.25, 2.75), u); fl.target.position.copy(EYE0).add(this._w.set(0, -0.12 * u, 0));
       }
       else { fl.position.set(0.472, 1.25, 2.75); fl.target.position.copy(EYE0).add(this._w.set(0, -0.12, 0)); }
-      fl.target.updateMatrixWorld(); fl.angle = this.phase === 'arrive' ? 0.7 : this.phase === 'turn' ? 0.9 : this.phase === 'street' && this.glitchOut !== undefined ? 0.5 + (0.28 - 0.5) * ease(clamp01((this.glitchOut - MATCH.hold) / MATCH.move)) : this.phase === 'street' || this.phase === 'last' ? 0.28 : 0.6;
+      // (2026-10-27, the user: the robot "flashes from one texture to another" at the start -- it was this light jumping:
+      // at the end of the arrival it moved in one frame from the camera's side to the bench side, the robot lit from the
+      // other side at once. Now it glides there over a second or two, unless the view cuts)
+      const P1 = (this._flP ??= fl.position.clone()), T1 = (this._flT ??= fl.target.position.clone());
+      if (!this.cut) { const k = Math.min(1, dt * 1.6); fl.position.copy(P1.lerp(fl.position, k)); fl.target.position.copy(T1.lerp(fl.target.position, k)); }
+      else { P1.copy(fl.position); T1.copy(fl.target.position); }
+      fl.target.updateMatrixWorld(); const wantAngle = this.phase === 'arrive' ? 0.7 : this.phase === 'turn' ? 0.9 : this.phase === 'street' && this.glitchOut !== undefined ? 0.5 + (0.28 - 0.5) * ease(clamp01((this.glitchOut - MATCH.hold) / MATCH.move)) : this.phase === 'street' || this.phase === 'last' ? 0.28 : 0.6;
+      fl.angle = this.cut ? wantAngle : fl.angle + (wantAngle - fl.angle) * Math.min(1, dt * 1.6);
       fl.color.set(this.phase === 'end' ? 0xc9d6ff : 0xffe2c0); if (this.phase !== 'end') fl.distance = 3;
       const want = this.phase === 'end' ? 4.5 * clamp01((this.t - 2) / 3) : this.phase === 'wait' ? 2.6 : this.phase === 'waking' ? 2.0 : this.phase === 'fade' ? 1.4 : this.phase === 'arrive' ? 3.2 * clamp01((this.t - 9.4) / 2.6) : this.phase === 'turn' ? 0 : this.phase === 'street' && this.glitchOut !== undefined ? 3.95 + (1.6 - 3.95) * ease(clamp01((this.glitchOut - MATCH.hold) / MATCH.move)) : this.phase === 'street' || this.phase === 'last' ? 1.6 : 0;
       // (the doorway shot: off -- it is aimed where the head will be after the cut, and before the cut nothing is there;
